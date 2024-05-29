@@ -6,17 +6,15 @@
       <div class="app-name">管理运营平台</div>
       <div class="module-title">{{ $t($route.meta.title) }}</div>
       <div class="lang">
-        <el-dropdown trigger="click">
-          <span class="el-dropdown-link">
-            {{ $t('lang') }}<el-icon class="el-icon--right"><arrow-down /></el-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="changeLocale('zh-CN')">简体中文</el-dropdown-item>
-              <el-dropdown-item @click="changeLocale('en')">English</el-dropdown-item>
-            </el-dropdown-menu>
+        <a-dropdown>
+          <a @click.prevent>{{ $t('lang') }} <DownOutlined /> </a>
+          <template #overlay>
+            <a-menu @click="onChangeLocale">
+              <a-menu-item key="zh-CN">简体中文 </a-menu-item>
+              <a-menu-item key="en"> English </a-menu-item>
+            </a-menu>
           </template>
-        </el-dropdown>
+        </a-dropdown>
       </div>
     </header>
     <div class="main-wrap">
@@ -52,12 +50,15 @@ import { theme } from 'ant-design-vue'
 const { useToken } = theme
 const { token } = useToken()
 
-import { MenuFoldOutlined, MenuUnfoldOutlined, PieChartOutlined, MailOutlined, DesktopOutlined, InboxOutlined, AppstoreOutlined } from '@ant-design/icons-vue'
+import { MenuFoldOutlined, MenuUnfoldOutlined, PieChartOutlined, MailOutlined, DownOutlined, DesktopOutlined, InboxOutlined, AppstoreOutlined } from '@ant-design/icons-vue'
 
 const menuList = ref([])
 const subMenuList = ref([])
 const activeMenuName = ref(router.currentRoute.name)
 const currentMenuIndex = ref(-1)
+const onChangeLocale = ({ key }) => {
+  changeLocale(key)
+}
 const state = reactive({
   collapsed: false,
   selectedKeys: ['1'],

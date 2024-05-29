@@ -6,9 +6,8 @@ import './mocks/index'
 import { router } from './router/router'
 import './router/permission'
 import i18n from './i18n'
-import 'ant-design-vue/dist/reset.css'
-
 import './assets/main.css'
+import 'ant-design-vue/dist/reset.css'
 
 const app = createApp(App)
 // await loadLocaleMessages(i18n, i18n.global.locale.value)

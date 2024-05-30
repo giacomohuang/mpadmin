@@ -29,10 +29,13 @@ const keyToArray = (json, key) => {
 }
 // console.log(keyToArray(permissionData, 'value'))
 
-watch(checkState.checkedList, (val) => {
-  checkState.indeterminate = !!val.length && val.length < permissionData.length
-  checkState.checkAll = val.length === permissionData.length
-})
+watch(
+  () => checkState.checkedList,
+  (val) => {
+    checkState.indeterminate = !!val.length && val.length < permissionData.length
+    checkState.checkAll = val.length === permissionData.length
+  }
+)
 function getValue(checkedList) {
   userPermissionBits = {}
   // console.log(c, pList)

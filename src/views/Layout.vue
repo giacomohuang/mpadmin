@@ -50,12 +50,13 @@ import { theme } from 'ant-design-vue'
 const { useToken } = theme
 const { token } = useToken()
 
-import { MenuFoldOutlined, MenuUnfoldOutlined, PieChartOutlined, MailOutlined, DownOutlined, DesktopOutlined, InboxOutlined, AppstoreOutlined } from '@ant-design/icons-vue'
+import { PieChartOutlined, MailOutlined, DownOutlined, DesktopOutlined, InboxOutlined, AppstoreOutlined } from '@ant-design/icons-vue'
 
 const menuList = ref([])
 const subMenuList = ref([])
 const activeMenuName = ref(router.currentRoute.name)
 const currentMenuIndex = ref(-1)
+
 const onChangeLocale = ({ key }) => {
   changeLocale(key)
 }
@@ -161,7 +162,6 @@ function changeSubNav(item, index) {
   // }
   if (item.children && item.children.length > 0) {
     // document.getElementsByClassName('')
-
     currentMenuIndex.value = index
     subMenuList.value = item.children
   }
@@ -245,7 +245,9 @@ onMounted(() => {})
     font-weight: 600;
     &::before {
       transform: scaleY(1);
-      transition: cubic-bezier(0.645, 0.045, 0.355, 1), transform 0.15s;
+      transition:
+        cubic-bezier(0.645, 0.045, 0.355, 1),
+        transform 0.15s;
       background: #37f;
     }
   }
@@ -257,12 +259,16 @@ onMounted(() => {})
     padding: 8px 0 8px 8px;
     margin: 0;
     vertical-align: middle;
-    transition: cubic-bezier(0.645, 0.045, 0.355, 1), background-color 0.25s;
+    transition:
+      cubic-bezier(0.645, 0.045, 0.355, 1),
+      background-color 0.25s;
     &:hover:not(.active),
     &:active:not(.active) {
       background: #f7f7f7;
       color: #333;
-      transition: cubic-bezier(0.645, 0.045, 0.355, 1), background-color 0.25s;
+      transition:
+        cubic-bezier(0.645, 0.045, 0.355, 1),
+        background-color 0.25s;
     }
     // &:before {
     //   content: ' ';

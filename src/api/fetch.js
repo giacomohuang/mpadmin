@@ -1,9 +1,9 @@
 import axios from 'axios'
-import { ElLoading, ElMessage } from 'element-plus'
+// import { ElLoading, ElMessage } from 'element-plus'
 
-// axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
-// axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*'
-// axios.defaults.withCredentials = true // 允许携带cookie
+axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
+axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*'
+axios.defaults.withCredentials = true // 允许携带cookie
 
 let fetch = axios.create({
   baseURL: 'http://127.0.0.1:8900',
@@ -16,12 +16,13 @@ let loadingInstance
 // 拦截器的添加
 fetch.interceptors.request.use(
   (config) => {
-    loadingInstance = ElLoading.service({ lock: false, text: '加载中' })
+    // loadingInstance = ElLoading.service({ lock: false, text: '加载中' })
+    console.log('加载中')
     return config
   },
   (err) => {
     loadingInstance?.close()
-    ElMessage.error('网络异常')
+    console.log('网络异常')
     return Promise.reject(err)
   }
 )
@@ -34,7 +35,7 @@ fetch.interceptors.response.use(
   },
   (err) => {
     loadingInstance?.close()
-    ElMessage.error('数据请求失败')
+    console.log('数据请求失败')
     return Promise.reject(err)
   }
 )

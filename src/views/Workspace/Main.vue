@@ -78,30 +78,6 @@ const onCheckOne = (index) => {
   permissions.value[index].indeterminate = permissions.value[index].checkedList.length > 0 && permissions.value[index].checkedList.length < permissions.value[index].data.length
   permissions.value[index].checkAll = permissions.value[index].checkedList.length === permissions.value[index].data.length
 }
-// 获取json中指定键的值
-const keyToArray = (json, key) => {
-  return Object.keys(json).map((k) => json[k][key])
-}
-// 根据勾选计算所有权限
-const calcPermissions = () => {
-  let c = []
-  permissions.value.forEach((data) => {
-    c = [...c, ...data.checkedList]
-  })
-
-  userPermissionBits = {}
-  c.forEach((id) => {
-    const group = `p${Math.floor((id - 1) / 64) + 1}`
-    let place = ((id - 1) % 64) + 1
-    if (userPermissionBits[group]) {
-      userPermissionBits[group] = userPermissionBits[group] | (BigInt(1) << (BigInt(place) - BigInt(1)))
-    } else {
-      userPermissionBits[group] = BigInt(1) << BigInt(place - 1)
-    }
-  })
-  console.log(userPermissionBits)
-}
-
 // 获取某一组权限值对应的所有权限id
 const getPermissionValues = (userPlist) => {
   let arr = new Set()
@@ -124,6 +100,30 @@ const getPermissionValues = (userPlist) => {
   }
   console.log('arr', arr)
   return arr
+}
+// 根据勾选计算所有权限
+const calcPermissions = () => {
+  let c = []
+  permissions.value.forEach((data) => {
+    c = [...c, ...data.checkedList]
+  })
+
+  userPermissionBits = {}
+  c.forEach((id) => {
+    const group = `p${Math.floor((id - 1) / 64) + 1}`
+    let place = ((id - 1) % 64) + 1
+    if (userPermissionBits[group]) {
+      userPermissionBits[group] = userPermissionBits[group] | (BigInt(1) << (BigInt(place) - BigInt(1)))
+    } else {
+      userPermissionBits[group] = BigInt(1) << BigInt(place - 1)
+    }
+  })
+  console.log(userPermissionBits)
+}
+
+// 获取json中指定键的值
+const keyToArray = (json, key) => {
+  return Object.keys(json).map((k) => json[k][key])
 }
 </script>
 

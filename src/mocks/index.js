@@ -8,8 +8,10 @@ Mock.setup({
 const baseUrl = '/api'
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 8)
 // const Random = Mock.Random
-const userPermission = { p1: 1, p2: 1 }
-
+const userPermission = {
+  p1: '18014398509481983',
+  p16: '18446742974197923840'
+}
 const permissionData = [
   { groupId: 1, id: 1, name: '用户信息查看' },
   { groupId: 1, id: 2, name: '产品添加' },

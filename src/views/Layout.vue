@@ -303,7 +303,7 @@ onMounted(() => {})
 
 .main {
   position: relative;
-  overflow-y: hidden;
+  overflow-y: auto;
   flex-grow: 1;
   margin: 12px;
   background: #fff;

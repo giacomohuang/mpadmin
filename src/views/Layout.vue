@@ -212,6 +212,8 @@ onMounted(() => {})
   margin: 12px;
   border-radius: 12px;
 }
+
+/* <PerfectScrollbar> */
 .ps {
   height: calc(100vh - 68px - 12px - 12px);
 }

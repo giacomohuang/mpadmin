@@ -2,6 +2,9 @@ export default {
   lang: 'Language',
   route: {
     workspace: 'Workspace',
+    account: 'Account',
+    accountlist: 'Account List',
+    permission: 'Permission',
     marketing: 'Marketing',
     voucher: 'Voucher',
     voucherlist: 'Voucher',

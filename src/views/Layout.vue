@@ -1,13 +1,12 @@
 <template>
   <a-config-provider :theme="{ algorithm: theme.lightAlgorithm, token: { colorPrimary: '#61A66C' } }">
     <header class="header">
-      <a-button type="primary">Primary Button</a-button>
       <div class="logo"><img src="@/assets/logo.png" width="24" /></div>
       <div class="app-name">管理运营平台</div>
-      <div class="module-title">{{ $t($route.meta.title) }}</div>
+      <div class="title">{{ $t($route.meta.title) }}</div>
       <div class="lang">
         <a-dropdown>
-          <a @click.prevent>{{ $t('lang') }} <DownOutlined /> </a>
+          <a @click.prevent>{{ $t('lang') }} </a>
           <template #overlay>
             <a-menu @click="onChangeLocale">
               <a-menu-item key="zh-CN">简体中文 </a-menu-item>
@@ -18,7 +17,6 @@
       </div>
     </header>
     <div class="main-wrap">
-      <div><a-menu v-model:openKeys="state.openKeys" v-model:selectedKeys="state.selectedKeys" mode="inline" :inline-collapsed="state.collapsed" :items="items"></a-menu></div>
       <ul class="main-menu">
         <template v-for="(item, index) in menuList" :key="index">
           <RouterLink custom :to="item.path" v-slot="{ isActive }">
@@ -34,23 +32,24 @@
         <SubMenu :active_name="activeMenuName" :data="subMenuList"></SubMenu>
       </div>
       <div class="main">
-        <router-view />
+        <PerfectScrollbar>
+          <router-view />
+        </PerfectScrollbar>
       </div>
     </div>
   </a-config-provider>
 </template>
 
 <script setup>
-import { onMounted, ref, reactive, h } from 'vue'
+import { onMounted, ref } from 'vue'
 import { router, dynamicRoutes } from '../router/router'
 import SubMenu from './SubMenu.vue'
 import { RouterLink, RouterView } from 'vue-router'
 import { changeLocale } from '../i18n'
 import { theme } from 'ant-design-vue'
+
 const { useToken } = theme
 const { token } = useToken()
-
-import { PieChartOutlined, MailOutlined, DownOutlined, DesktopOutlined, InboxOutlined, AppstoreOutlined } from '@ant-design/icons-vue'
 
 const menuList = ref([])
 const subMenuList = ref([])
@@ -60,96 +59,6 @@ const currentMenuIndex = ref(-1)
 const onChangeLocale = ({ key }) => {
   changeLocale(key)
 }
-const state = reactive({
-  collapsed: false,
-  selectedKeys: ['1'],
-  openKeys: ['sub1'],
-  preOpenKeys: ['sub1']
-})
-
-const items = reactive([
-  {
-    key: '1',
-    icon: () => h(PieChartOutlined),
-    label: 'Option 1',
-    title: 'Option 1'
-  },
-  {
-    key: '2',
-    icon: () => h(DesktopOutlined),
-    label: 'Option 2',
-    title: 'Option 2'
-  },
-  {
-    key: '3',
-    icon: () => h(InboxOutlined),
-    label: 'Option 3',
-    title: 'Option 3'
-  },
-  {
-    key: 'sub1',
-    icon: () => h(MailOutlined),
-    label: 'Navigation One',
-    title: 'Navigation One',
-    children: [
-      {
-        key: '5',
-        label: 'Option 5',
-        title: 'Option 5'
-      },
-      {
-        key: '6',
-        label: 'Option 6',
-        title: 'Option 6'
-      },
-      {
-        key: '7',
-        label: 'Option 7',
-        title: 'Option 7'
-      },
-      {
-        key: '8',
-        label: 'Option 8',
-        title: 'Option 8'
-      }
-    ]
-  },
-  {
-    key: 'sub2',
-    icon: () => h(AppstoreOutlined),
-    label: 'Navigation Two',
-    title: 'Navigation Two',
-    children: [
-      {
-        key: '9',
-        label: 'Option 9',
-        title: 'Option 9'
-      },
-      {
-        key: '10',
-        label: 'Option 10',
-        title: 'Option 10'
-      },
-      {
-        key: 'sub3',
-        label: 'Submenu',
-        title: 'Submenu',
-        children: [
-          {
-            key: '11',
-            label: 'Option 11',
-            title: 'Option 11'
-          },
-          {
-            key: '12',
-            label: 'Option 12',
-            title: 'Option 12'
-          }
-        ]
-      }
-    ]
-  }
-])
 menuList.value = dynamicRoutes
 // 取根节点下的子菜单
 subMenuList.value = router.currentRoute.value.matched[0].children
@@ -173,12 +82,6 @@ function changeSubNav(item, index) {
 // console.log(router.currentRoute.value)
 
 onMounted(() => {})
-
-// function getNav() {
-//   for (let item of dynamicRoutes) {
-//   }
-// }
-// function getSubNav() {}
 </script>
 
 <style scoped lang="scss">
@@ -213,13 +116,14 @@ onMounted(() => {})
 }
 .app-name {
   font-size: 24px;
-  padding: 0 20px;
+  padding: 0 20px 0 16px;
   margin-right: 20px;
-  border-right: 1px solid #e9eaec;
+  border-right: 4px solid #cbc9c9;
+  // border-radius: 5px;
   color: #333;
   font-weight: 600;
 }
-.module-title {
+.title {
   font-size: 18px;
   flex-grow: 1;
 }
@@ -303,13 +207,12 @@ onMounted(() => {})
 
 .main {
   position: relative;
-  overflow-y: auto;
   flex-grow: 1;
-  margin: 12px;
   background: #fff;
+  margin: 12px;
   border-radius: 12px;
-  // min-width:
-  // display: flex;
-  // padding: 12px;
+}
+.ps {
+  height: calc(100vh - 68px - 12px - 12px);
 }
 </style>

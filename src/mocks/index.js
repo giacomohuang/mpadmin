@@ -10,7 +10,10 @@ const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 // const Random = Mock.Random
 const userPermission = {
   p1: '18014398509481983',
-  p16: '18446742974197923840'
+  p16: '9187343239835811840',
+  p17: '9223372036854775807',
+  p18: '9223372036854775807',
+  p19: '9223372036854775807'
 }
 const permissionData = [
   { groupId: 1, id: 1, name: '用户信息查看' },

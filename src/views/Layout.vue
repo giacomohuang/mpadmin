@@ -2,7 +2,7 @@
   <a-config-provider :theme="{ algorithm: theme.lightAlgorithm, token: { colorPrimary: '#61A66C' } }">
     <header class="header">
       <div class="logo"><img src="@/assets/logo.png" width="24" /></div>
-      <div class="app-name">管理运营平台</div>
+      <div class="app-name">{{ $t('appname', '管理运营平台') }}</div>
       <div class="title">{{ $t($route.meta.title) }}</div>
       <div class="lang">
         <a-dropdown>

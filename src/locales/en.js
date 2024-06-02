@@ -1,4 +1,5 @@
 export default {
+  appname: 'MPAdmin',
   lang: 'Language',
   route: {
     workspace: 'Workspace',

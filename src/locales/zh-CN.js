@@ -1,4 +1,5 @@
 export default {
+  appname: '管理运营平台',
   lang: '语言',
   route: {
     workspace: '工作台',

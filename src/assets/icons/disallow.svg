@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64px" height="64px" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>disallow</title>
+    <g id="disallow" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M32,12 C43.045695,12 52,20.954305 52,32 C52,43.045695 43.045695,52 32,52 C20.954305,52 12,43.045695 12,32 C12,20.954305 20.954305,12 32,12 Z M32,18 C24.2680135,18 18,24.2680135 18,32 C18,39.7319865 24.2680135,46 32,46 C39.7319865,46 46,39.7319865 46,32 C46,24.2680135 39.7319865,18 32,18 Z" id="椭圆形" fill="#666666" fill-rule="nonzero"></path>
+        <polygon id="路径-6" fill="#666666" fill-rule="nonzero" points="44.0208153 15.736544 48.263456 19.9791847 19.9791847 48.263456 15.736544 44.0208153"></polygon>
+    </g>
+</svg>

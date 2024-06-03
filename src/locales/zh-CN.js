@@ -10,6 +10,9 @@ export default {
     voucher: '券',
     voucherlist: '券列表',
     verification: '券核销',
-    templatelist: '券模板'
+    templatelist: '券模板',
+    my: '我的',
+    myaccount: '我的账号',
+    logout: '退出登录'
   }
 }

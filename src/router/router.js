@@ -52,5 +52,14 @@ export const dynamicRoutes = [
     meta: { title: 'route.marketing', permissionId: '0000010001' },
     icon: '#icon-marketing',
     redirect: '/voucher'
+  },
+  {
+    path: '/my',
+    component: Layout,
+    name: 'my',
+    meta: { title: 'route.my', permissionId: '000010000' },
+    icon: '#icon-my',
+    redirect: '/my/account',
+    children: [{ path: '/my/account', component: () => import('@/views/My/Account.vue'), meta: { title: 'route.myaccount', permission: '0000010001' } }]
   }
 ]

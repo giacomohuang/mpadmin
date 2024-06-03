@@ -5,7 +5,7 @@
         <ul v-if="item.children">
           <div @click.stop="toggle_children" class="text parent">
             <div :class="{ 'router-link-active': isActive }">{{ $t(item.meta.title) }}</div>
-            <Icon class="arrow" id="#icon-arrow-up"></Icon>
+            <!-- <Icon class="arrow" id="#icon-arrow-up"></Icon> -->
           </div>
           <SubMenu class="children" :class="{ 'init-s-active': isActive }" :data="item.children" :default-active="props.active_name"></SubMenu>
         </ul>
@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import Icon from '../components/Icon.vue'
+// import Icon from '../components/Icon.vue'
 import { onMounted } from 'vue'
 
 const props = defineProps(['data', 'active_name'])

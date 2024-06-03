@@ -4,13 +4,31 @@
       <div class="logo"><img src="@/assets/logo.png" width="24" /></div>
       <div class="app-name">{{ $t('appname', '管理运营平台') }}</div>
       <div class="title">{{ $t($route.meta.title) }}</div>
+      <div class="my">
+        <a-dropdown>
+          <a @click.prevent style="font-size: 16px; display: flex; align-items: center; margin-right: 20px">
+            <img width="40" height="40" src="@/assets/avatar.jpg" class="avatar" />
+            <div>UserName</div>
+          </a>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item>
+                <a @click="router.push('/my/account')">{{ $t('route.myaccount') }}</a>
+              </a-menu-item>
+              <a-menu-item>
+                <a @click="logout">{{ $t('route.logout') }}</a>
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
+      </div>
       <div class="lang">
         <a-dropdown>
-          <a @click.prevent>{{ $t('lang') }} </a>
+          <a @click.prevent> <Icon name="global" style="width: 2em; height: 2em" /></a>
           <template #overlay>
             <a-menu @click="onChangeLocale">
-              <a-menu-item key="zh-CN">简体中文 </a-menu-item>
-              <a-menu-item key="en"> English </a-menu-item>
+              <a-menu-item key="zh-CN">简体中文</a-menu-item>
+              <a-menu-item key="en"> English</a-menu-item>
             </a-menu>
           </template>
         </a-dropdown>
@@ -21,7 +39,6 @@
         <template v-for="(item, index) in menuList" :key="index">
           <RouterLink custom :to="item.path" v-slot="{ isActive }">
             <li class="item" :class="{ active: index === currentMenuIndex, 'init-active': isActive && currentMenuIndex === -1 }" v-if="!item.hidden" @click.stop="changeSubNav(item, index)">
-              <!-- <Icon :id="item.icon"></Icon> -->
               {{ $t(item.meta.title) }}
             </li>
           </RouterLink>
@@ -118,7 +135,7 @@ onMounted(() => {})
   font-size: 24px;
   padding: 0 20px 0 16px;
   margin-right: 20px;
-  border-right: 4px solid #cbc9c9;
+  border-right: 2px solid #ccc;
   // border-radius: 5px;
   color: #333;
   font-weight: 600;
@@ -127,6 +144,12 @@ onMounted(() => {})
   font-size: 18px;
   flex-grow: 1;
 }
+
+.avatar {
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
 .main-menu {
   z-index: 100;
   user-select: none;

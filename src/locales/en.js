@@ -10,6 +10,9 @@ export default {
     voucher: 'Voucher',
     voucherlist: 'Voucher',
     verification: 'Verification',
-    templatelist: 'Template'
+    templatelist: 'Template',
+    my: 'My',
+    myaccount: 'My Account',
+    logout: 'Logout'
   }
 }

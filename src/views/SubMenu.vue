@@ -62,7 +62,7 @@ li {
 
 a:link,
 a:visited {
-  color: #333;
+  color: var(--color-text);
   text-decoration: none;
 }
 
@@ -83,15 +83,11 @@ a:visited {
 }
 
 .arrow {
-  transition:
-    cubic-bezier(0.645, 0.045, 0.355, 1),
-    transform 0.15s;
+  transition: cubic-bezier(0.645, 0.045, 0.355, 1), transform 0.15s;
 }
 .expand .arrow {
   transform: rotate(180deg);
-  transition:
-    cubic-bezier(0.645, 0.045, 0.355, 1),
-    transform 0.15s;
+  transition: cubic-bezier(0.645, 0.045, 0.355, 1), transform 0.15s;
 }
 
 .parent .router-link-active {

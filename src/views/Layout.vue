@@ -1,6 +1,6 @@
 <template>
-  <a-config-provider :theme="{ algorithm: theme.lightAlgorithm, token: { colorPrimary: '#61A66C' } }">
-    <header class="header">
+  <a-config-provider :theme="{ algorithm: antTheme, token: { colorPrimary: '#61A66C' } }">
+    <header>
       <div class="logo"><img src="@/assets/logo.png" width="24" /></div>
       <div class="app-name">{{ $t('appname', '管理运营平台') }}</div>
       <div class="title">{{ $t($route.meta.title) }}</div>
@@ -24,7 +24,7 @@
       </div>
       <div class="lang">
         <a-dropdown>
-          <a @click.prevent> <Icon name="global" style="width: 2em; height: 2em" /></a>
+          <a @click.prevent> <Icon name="global" class="icon2em" /></a>
           <template #overlay>
             <a-menu @click="onChangeLocale">
               <a-menu-item key="zh-CN">简体中文</a-menu-item>
@@ -32,6 +32,11 @@
             </a-menu>
           </template>
         </a-dropdown>
+      </div>
+      <div class="theme">
+        <Icon name="theme-light" class="icon" @click="setThemeMode('light')" :class="{ active1: themeMode === 'light' }"></Icon>
+        <Icon name="theme-dark" class="icon" @click="setThemeMode('dark')" :class="{ active2: themeMode === 'dark' }"></Icon>
+        <Icon name="theme-system" class="icon" @click="setThemeMode('system')" :class="{ active3: themeMode === 'system' }"></Icon>
       </div>
     </header>
     <div class="main-wrap">
@@ -48,11 +53,11 @@
       <div v-if="subMenuList.length !== 1" class="sub-menu">
         <SubMenu :active_name="activeMenuName" :data="subMenuList"></SubMenu>
       </div>
-      <div class="main">
+      <main>
         <PerfectScrollbar>
           <router-view />
         </PerfectScrollbar>
-      </div>
+      </main>
     </div>
   </a-config-provider>
 </template>
@@ -72,10 +77,66 @@ const menuList = ref([])
 const subMenuList = ref([])
 const activeMenuName = ref(router.currentRoute.name)
 const currentMenuIndex = ref(-1)
+const themeMode = ref(getThemeMode())
+const darkMode = window.matchMedia('(prefers-color-scheme: dark)')
+const antTheme = ref('')
+
+setThemeCss(themeMode.value)
+
+darkMode.addEventListener('change', (e) => {
+  if (themeMode.value == 'system')
+    if (e.matches) {
+      setThemeCss('dark')
+    } else {
+      setThemeCss('light')
+    }
+})
 
 const onChangeLocale = ({ key }) => {
   changeLocale(key)
 }
+
+function setThemeCss(mode) {
+  if (mode == 'dark') {
+    antTheme.value = theme.darkAlgorithm
+    document.body.setAttribute('data-theme', 'dark')
+  } else {
+    antTheme.value = theme.lightAlgorithm
+    document.body.setAttribute('data-theme', 'light')
+  }
+}
+
+function getThemeMode() {
+  let mode = localStorage.getItem('themeMode')
+  // 如果缓存中没有设置模式，则优先根据系统配置设置模式
+  if (!mode) {
+    if (matchMedia('(prefers-color-scheme: dark)').matches) {
+      mode = 'dark'
+    } else if (matchMedia('(prefers-color-scheme: light)').matches) {
+      mode = 'light'
+    } else {
+      mode = 'light'
+    }
+  }
+  return mode
+}
+
+function setThemeMode(mode) {
+  themeMode.value = mode
+  localStorage.setItem('themeMode', mode)
+  if (mode == 'system') {
+    if (matchMedia('(prefers-color-scheme: dark)').matches) {
+      setThemeCss('dark')
+    } else if (matchMedia('(prefers-color-scheme: light)').matches) {
+      setThemeCss('light')
+    } else {
+      setThemeCss('light')
+    }
+  } else {
+    setThemeCss(mode)
+  }
+}
+
 menuList.value = dynamicRoutes
 // 取根节点下的子菜单
 subMenuList.value = router.currentRoute.value.matched[0].children
@@ -102,30 +163,33 @@ onMounted(() => {})
 </script>
 
 <style scoped lang="scss">
-.main-wrap {
-  background: v-bind('token.colorPrimaryBg');
+header {
   display: flex;
   flex-direction: row;
-  padding-top: 64px;
-  height: 100vh;
-  min-width: 1000px;
-}
-
-.header {
-  display: flex;
-  flex-direction: row;
-  position: absolute;
+  position: relative;
   align-items: center;
   padding: 0 12px;
   height: 64px;
   width: 100%;
   min-width: 1000px;
   font-size: 16px;
-  background-color: rgb(255 255 255 / 0.7);
-  border-bottom: 1px solid #e9eaec;
-  z-index: 101;
-  backdrop-filter: saturate(50%) blur(4px);
-  box-shadow: 0px 4px 4px 0px rgba(210, 210, 210, 0.3);
+  background-color: var(--color-background);
+  // background-image: radial-gradient(transparent 1px, #fff 1px);
+  // background-size: 4px 4px;
+  // backdrop-filter: saturate(50%) blur(4px);
+  border-bottom: 1px solid var(--color-border);
+  z-index: 12;
+  box-shadow: 0px 4px 4px 0px var(--color-border-shadow);
+}
+
+.main-wrap {
+  position: relative;
+  background: var(--color-background);
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 64px);
+  // margin-top: 68px;
+  min-width: 1000px;
 }
 
 .logo {
@@ -136,11 +200,11 @@ onMounted(() => {})
   padding: 0 20px 0 16px;
   margin-right: 20px;
   border-right: 2px solid #ccc;
-  // border-radius: 5px;
-  color: #333;
+  color: var(--color-text);
   font-weight: 600;
 }
 .title {
+  color: var(--color-text);
   font-size: 18px;
   flex-grow: 1;
 }
@@ -150,15 +214,32 @@ onMounted(() => {})
   margin-right: 8px;
 }
 
+.theme {
+  .icon {
+    width: 2em;
+    height: 2em;
+    color: var(--t-gray4);
+  }
+  .active1 {
+    color: var(--t-yellow4);
+  }
+  .active2 {
+    color: var(--t-blue3);
+  }
+  .active3 {
+    color: var(--t-black);
+  }
+}
+
 .main-menu {
-  z-index: 100;
+  z-index: 11;
   user-select: none;
   min-width: 120px;
-  padding: 12px 0;
+
   // background: #413e4c;
-  background: #fff;
+  background: var(--color-background);
   // border-right: 1px solid #eee;
-  box-shadow: 4px 0px 4px 0px rgba(210, 210, 210, 0.3);
+  box-shadow: 4px 0px 4px 0px var(--color-border-shadow);
   color: #333;
   font-size: 14px;
   // &:lang(en) {
@@ -167,35 +248,30 @@ onMounted(() => {})
 
   .active,
   .init-active {
-    background: #f7f7f7;
-    color: #333;
+    background: var(--color-background-2);
+    color: var(--color-text-active);
     font-weight: 600;
     &::before {
       transform: scaleY(1);
-      transition:
-        cubic-bezier(0.645, 0.045, 0.355, 1),
-        transform 0.15s;
+      transition: cubic-bezier(0.645, 0.045, 0.355, 1), transform 0.15s;
       background: #37f;
     }
   }
 
   .item {
+    color: var(--color-text);
     display: flex;
     align-items: center;
     cursor: pointer;
     padding: 8px 0 8px 8px;
     margin: 0;
     vertical-align: middle;
-    transition:
-      cubic-bezier(0.645, 0.045, 0.355, 1),
-      background-color 0.25s;
+    transition: cubic-bezier(0.645, 0.045, 0.355, 1), background-color 0.25s;
     &:hover:not(.active),
     &:active:not(.active) {
-      background: #f7f7f7;
-      color: #333;
-      transition:
-        cubic-bezier(0.645, 0.045, 0.355, 1),
-        background-color 0.25s;
+      background: var(--color-background-2);
+      color: var(--color-text-active);
+      transition: cubic-bezier(0.645, 0.045, 0.355, 1), background-color 0.25s;
     }
     // &:before {
     //   content: ' ';
@@ -210,34 +286,39 @@ onMounted(() => {})
   }
 }
 .router-link-active {
-  background: #fff;
+  background: var(--color-background-2);
   color: #333;
 }
 
 .sub-menu {
-  z-index: 100;
+  z-index: 11;
   // display: none;
+  color: var(--color-text);
   user-select: none;
   width: 150px;
   min-width: 150px;
-  background: #f9f9f9;
-  padding-top: 14px;
+  background: var(--color-background-2);
+  // padding-top: 80px;
   font-size: 14px;
-
   box-shadow: 4px 0px 4px 0px rgba(210, 210, 210, 0.3);
   // border-right: 1px solid #e9eaec;
 }
 
-.main {
+main {
   position: relative;
   flex-grow: 1;
-  background: #fff;
-  margin: 12px;
-  border-radius: 12px;
+  background: var(--color-background);
+
+  // padding-top: 64px;
 }
 
 /* <PerfectScrollbar> */
 .ps {
-  height: calc(100vh - 68px - 12px - 12px);
+  height: calc(100vh - 64px);
+}
+
+.icon2em {
+  width: 2em;
+  height: 2em;
 }
 </style>

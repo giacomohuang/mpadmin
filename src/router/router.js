@@ -45,14 +45,15 @@ export const dynamicRoutes = [
       { path: '/voucher/verification', component: () => import('@/views/Voucher/Verification.vue'), meta: { title: 'route.verification', permission: '0000100003' } }
     ]
   },
-  {
-    path: '/marketing',
-    component: Layout,
-    name: 'marketing',
-    meta: { title: 'route.marketing', permissionId: '0000010001' },
-    icon: '#icon-marketing',
-    redirect: '/voucher'
-  },
+  // {
+  //   path: '/marketing',
+  //   component: Layout,
+  //   name: 'marketing',
+  //   meta: { title: 'route.marketing', permissionId: '0000010001' },
+  //   icon: '#icon-marketing',
+  //   redirect: '/marketing/',
+  //   children: [{}]
+  // },
   {
     path: '/my',
     component: Layout,

@@ -1,0 +1,102 @@
+/* color palette from <https://github.com/vuejs/theme> */
+:root {
+  /* 纯黑、纯白 */
+  --t-white: #fff;
+  --t-black: #000;
+
+  /* 品牌色 */
+  --t-brand: #1677ff;
+  --t-brand1: #6da2ec;
+  --t-brand2: #337bdf;
+  --t-brand3: #074aa8;
+  --t-brand4: #11448c;
+
+  /* 灰度色 */
+  --t-gray1: #f2f2f2;
+  --t-gray2: #f7f7f7;
+  --t-gray3: #e9e9e9;
+  --t-gray4: #c7c7c7;
+  --t-gray5: #aeaeae;
+  --t-gray6: #8e8e8e;
+  --t-gray7: #4d4d4d;
+  --t-gray8: #323232;
+  --t-gray9: #303030;
+  --t-gray10: #282828;
+
+  /* 蓝绿 */
+  --t-indigo1: #aac8e4;
+  --t-indigo2: #476582;
+  --t-indigo3: #213547;
+
+  /* 绿色 */
+  --t-green1: #42b883;
+  --t-green2: #35eb9a;
+  --t-green3: #42d392;
+  --t-green4: #33a06f;
+  --t-green5: #155f3e;
+
+  /* 蓝色 */
+  --t-blue1: #edf4ff;
+  --t-blue2: #549ced;
+  --t-blue3: #3b8eed;
+  --t-blue4: #3468a3;
+  --t-blue5: #255489;
+
+  /* 黄色 */
+  --t-yellow1: #ffff17;
+  --t-yellow2: #ffe417;
+  --t-yellow3: #ffc517;
+  --t-yellow4: #e0ad15;
+  --t-yellow5: #d48806;
+
+  /* 红色 */
+  --t-red1: #ffa39e;
+  --t-red2: #ff7875;
+  --t-red3: #ff4d4f;
+  --t-red4: #d9363e;
+  --t-red5: #ab2131;
+
+  /* 紫色 */
+  --t-purple1: #f616f8;
+  --t-purple2: #e936eb;
+  --t-purple3: #de41e0;
+  --t-purple4: #823c83;
+  --t-purple5: #602960;
+
+  /* 橙色 */
+  --t-orange1: #ffdb6d;
+  --t-orange2: #ffa500;
+  --t-orange3: #ff8c00;
+  --t-orange4: #ff7e00;
+  --t-orange5: #ff6e00;
+}
+
+/* semantic color variables for this project */
+
+[data-theme='light'] {
+  --color-background: var(--t-white);
+  --color-background-1: var(--t-gray1);
+  --color-background-2: var(--t-gray2);
+
+  --color-border: var(--t-gray4);
+  --color-border-hover: var(--t-gray5);
+  --color-border-shadow: var(--t-gray3);
+
+  --color-text: var(--t-gray8);
+  --color-text-active: var(--t-gray9);
+  --color-heading: var(--t-gray10);
+}
+
+[data-theme='dark'] {
+  --color-background: var(--t-gray10);
+  --color-background-1: var(--t-gray9);
+  --color-background-2: var(--t-gray8);
+
+  --color-border: var(--t-gray7);
+  --color-border-hover: var(--t-gray6);
+  --color-border-shadow: var(--t-gray8);
+
+  --color-text: var(--t-gray2);
+  --color-text-active: var(--t-gray3);
+  --color-heading: var(--t-gray1);
+}

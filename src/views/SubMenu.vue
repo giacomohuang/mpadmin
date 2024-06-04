@@ -75,7 +75,7 @@ a:visited {
 
   &:hover,
   &:active {
-    background: #b6b6b644;
+    background: var(--color-background-active);
   }
 }
 .children {

@@ -6,9 +6,9 @@
       <div class="title">{{ $t($route.meta.title) }}</div>
       <div class="my">
         <a-dropdown>
-          <a @click.prevent style="font-size: 16px; display: flex; align-items: center; margin-right: 20px">
+          <a @click.prevent style="font-size: 16px; display: flex; align-items: center">
             <img width="40" height="40" src="@/assets/avatar.jpg" class="avatar" />
-            <div>UserName</div>
+            <div>Luciano Pavarotti</div>
           </a>
           <template #overlay>
             <a-menu>
@@ -173,7 +173,7 @@ header {
   width: 100%;
   min-width: 1000px;
   font-size: 16px;
-  background-color: var(--color-background);
+  background-color: var(--color-background-1);
   // background-image: radial-gradient(transparent 1px, #fff 1px);
   // background-size: 4px 4px;
   // backdrop-filter: saturate(50%) blur(4px);
@@ -209,6 +209,13 @@ header {
   flex-grow: 1;
 }
 
+.my,
+.lang {
+  display: block;
+  padding: 0 10px;
+  margin: 0 10px;
+}
+
 .avatar {
   border-radius: 50%;
   margin-right: 8px;
@@ -235,10 +242,10 @@ header {
   z-index: 11;
   user-select: none;
   min-width: 120px;
-
+  padding-top: 20px;
   // background: #413e4c;
   background: var(--color-background);
-  // border-right: 1px solid #eee;
+  // border-right: 1px solid var(--color-border);
   box-shadow: 4px 0px 4px 0px var(--color-border-shadow);
   color: #333;
   font-size: 14px;
@@ -253,7 +260,9 @@ header {
     font-weight: 600;
     &::before {
       transform: scaleY(1);
-      transition: cubic-bezier(0.645, 0.045, 0.355, 1), transform 0.15s;
+      // transition:
+      //   cubic-bezier(0.645, 0.045, 0.355, 1),
+      //   transform 0.15s;
       background: #37f;
     }
   }
@@ -266,12 +275,16 @@ header {
     padding: 8px 0 8px 8px;
     margin: 0;
     vertical-align: middle;
-    transition: cubic-bezier(0.645, 0.045, 0.355, 1), background-color 0.25s;
+    // transition:
+    //   cubic-bezier(0.645, 0.045, 0.355, 1),
+    //   background-color 0.25s;
     &:hover:not(.active),
     &:active:not(.active) {
       background: var(--color-background-2);
       color: var(--color-text-active);
-      transition: cubic-bezier(0.645, 0.045, 0.355, 1), background-color 0.25s;
+      // transition:
+      //   cubic-bezier(0.645, 0.045, 0.355, 1),
+      //   background-color 0.25s;
     }
     // &:before {
     //   content: ' ';
@@ -298,10 +311,10 @@ header {
   width: 150px;
   min-width: 150px;
   background: var(--color-background-2);
-  // padding-top: 80px;
+  padding-top: 20px;
   font-size: 14px;
-  box-shadow: 4px 0px 4px 0px rgba(210, 210, 210, 0.3);
-  // border-right: 1px solid #e9eaec;
+  box-shadow: 4px 0px 4px 0px var(--color-border-shadow);
+  // border-right: 1px solid var(--color-border);
 }
 
 main {

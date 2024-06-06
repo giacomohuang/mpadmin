@@ -1,8 +1,8 @@
 <template>
-  <a-config-provider :theme="{ algorithm: antTheme, token: { colorPrimary: '#61A66C' } }">
+  <a-config-provider :theme="{ algorithm: antTheme, token: { colorPrimary: antColorPrimary } }">
     <header>
       <div class="logo"><img src="@/assets/logo.png" width="24" /></div>
-      <div class="app-name">{{ $t('appname', '管理运营平台') }}</div>
+      <div class="app-name">{{ $t('appname') }}</div>
       <div class="title">{{ $t($route.meta.title) }}</div>
       <div class="my">
         <a-dropdown>
@@ -24,7 +24,7 @@
       </div>
       <div class="lang">
         <a-dropdown>
-          <a @click.prevent> <Icon name="global" class="icon2em" /></a>
+          <a @click.prevent> <Icon name="global" size="2em" /></a>
           <template #overlay>
             <a-menu @click="onChangeLocale">
               <a-menu-item key="zh-CN">简体中文</a-menu-item>
@@ -34,52 +34,51 @@
         </a-dropdown>
       </div>
       <div class="theme">
-        <Icon name="theme-light" class="icon" @click="setThemeMode('light')" :class="{ active1: themeMode === 'light' }"></Icon>
-        <Icon name="theme-dark" class="icon" @click="setThemeMode('dark')" :class="{ active2: themeMode === 'dark' }"></Icon>
-        <Icon name="theme-system" class="icon" @click="setThemeMode('system')" :class="{ active3: themeMode === 'system' }"></Icon>
+        <Icon name="theme-light" size="2em" class="icon" @click="setThemeMode('light')" :class="{ active1: themeMode === 'light' }"></Icon>
+        <Icon name="theme-dark" size="2em" class="icon" @click="setThemeMode('dark')" :class="{ active2: themeMode === 'dark' }"></Icon>
+        <Icon name="theme-system" size="2em" class="icon" @click="setThemeMode('system')" :class="{ active3: themeMode === 'system' }"></Icon>
       </div>
     </header>
     <div class="main-wrap">
-      <ul class="main-menu">
-        <template v-for="(item, index) in menuList" :key="index">
-          <RouterLink custom :to="item.path" v-slot="{ isActive }">
-            <li class="item" :class="{ active: index === currentMenuIndex, 'init-active': isActive && currentMenuIndex === -1 }" v-if="!item.hidden" @click.stop="changeSubNav(item, index)">
-              {{ $t(item.meta.title) }}
-            </li>
-          </RouterLink>
-        </template>
-      </ul>
-      <!-- v-if="subMenuList.length !== 1 && !subMenuList[0].children" -->
-      <div v-if="subMenuList.length !== 1" class="sub-menu">
-        <SubMenu :active_name="activeMenuName" :data="subMenuList"></SubMenu>
-      </div>
+      <aside class="main-menu">
+        <RouterLink custom :to="item.path" v-for="(item, index) in menu" :key="index">
+          <div v-if="!item.isHidden" @click="changeSubMenu(index)" :class="['item', { 'router-link-active': index == currentMenuIdx || (currentMenuIdx == -1 && $route.path.indexOf(item.path + '/') == 0) }]"><Icon name="carousel" size="2em"></Icon>{{ $t(item.meta.title) }}</div>
+        </RouterLink>
+      </aside>
+      <!-- v-if="" -->
+      <aside class="sub-menu" v-if="!submenu.redirect">
+        <SubMenu :data="submenu.children"></SubMenu>
+      </aside>
       <main>
-        <PerfectScrollbar>
-          <router-view />
-        </PerfectScrollbar>
+        <!-- <PerfectScrollbar> -->
+        <router-view />
+        <!-- </PerfectScrollbar> -->
       </main>
     </div>
   </a-config-provider>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, reactive } from 'vue'
 import { router, dynamicRoutes } from '../router/router'
-import SubMenu from './SubMenu.vue'
-import { RouterLink, RouterView } from 'vue-router'
 import { changeLocale } from '../i18n'
+import SubMenu from './SubMenu.vue'
 import { theme } from 'ant-design-vue'
 
 const { useToken } = theme
 const { token } = useToken()
 
-const menuList = ref([])
-const subMenuList = ref([])
-const activeMenuName = ref(router.currentRoute.name)
-const currentMenuIndex = ref(-1)
+const menu = ref(dynamicRoutes)
+const submenu = ref(router.currentRoute.value.matched[0])
+const currentMenuIdx = ref(-1)
+const rollMenuIdx = ref(-1)
+// 全局主题: [dark, light, system]
 const themeMode = ref(getThemeMode())
+// 媒体查询当前系统是否为暗黑模式
 const darkMode = window.matchMedia('(prefers-color-scheme: dark)')
+// antv组件主题
 const antTheme = ref('')
+const antColorPrimary = ref(getComputedStyle(document.documentElement).getPropertyValue('--c-brand'))
 
 setThemeCss(themeMode.value)
 
@@ -137,27 +136,16 @@ function setThemeMode(mode) {
   }
 }
 
-menuList.value = dynamicRoutes
+// menu.value =
 // 取根节点下的子菜单
-subMenuList.value = router.currentRoute.value.matched[0].children
-
-function changeSubNav(item, index) {
-  // const dom = document.getElementsByClassName('menu-init-active')
-  // if (dom && dom[0]) {
-  //   console.log(dom[0].classList)
-  //   dom[0].classList.remove('menu-init-active')
-  // }
-  if (item.children && item.children.length > 0) {
-    // document.getElementsByClassName('')
-    currentMenuIndex.value = index
-    subMenuList.value = item.children
-  }
-  if (item.children.length == 1 && !item.children[0].children) {
-    // 如果只有一个子菜单，直接跳转
-    router.push({ path: item.path })
+function changeSubMenu(index) {
+  submenu.value = menu.value[index]
+  currentMenuIdx.value = index
+  if (submenu.value.redirect) {
+    // 如果定义了redirect，直接跳转
+    router.push({ path: submenu.value.redirect })
   }
 }
-// console.log(router.currentRoute.value)
 
 onMounted(() => {})
 </script>
@@ -179,17 +167,7 @@ header {
   // backdrop-filter: saturate(50%) blur(4px);
   border-bottom: 1px solid var(--color-border);
   z-index: 12;
-  box-shadow: 0px 4px 4px 0px var(--color-border-shadow);
-}
-
-.main-wrap {
-  position: relative;
-  background: var(--color-background);
-  display: flex;
-  flex-direction: row;
-  height: calc(100vh - 64px);
-  // margin-top: 68px;
-  min-width: 1000px;
+  box-shadow: 0px 4px 4px 0px var(--color-shadow);
 }
 
 .logo {
@@ -219,23 +197,36 @@ header {
 .avatar {
   border-radius: 50%;
   margin-right: 8px;
+  // box-sizing: content-box;
+  // border: 2px solid #ffffffff;
+  // &: hover;
+  // &:active {
+  //   // border: 2px solid var(--color-background-2);
+  //   box-shadow: 0px 0px 8px 2px var(--t-gray5);
+  // }
 }
 
 .theme {
-  .icon {
-    width: 2em;
-    height: 2em;
-    color: var(--t-gray4);
-  }
+  color: var(--c-gray4);
   .active1 {
-    color: var(--t-yellow4);
+    color: var(--c-yellow4);
   }
   .active2 {
-    color: var(--t-blue3);
+    color: var(--c-blue3);
   }
   .active3 {
-    color: var(--t-black);
+    color: var(--c-black);
   }
+}
+
+.main-wrap {
+  position: relative;
+  background: var(--bg-main);
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 64px);
+  // margin-top: 68px;
+  min-width: 1000px;
 }
 
 .main-menu {
@@ -243,95 +234,76 @@ header {
   user-select: none;
   min-width: 120px;
   padding-top: 20px;
-  // background: #413e4c;
-  background: var(--color-background);
+  background: var(--bg-main);
   // border-right: 1px solid var(--color-border);
-  box-shadow: 4px 0px 4px 0px var(--color-border-shadow);
+  box-shadow: 4px 0px 4px 0px var(--color-shadow);
   color: #333;
   font-size: 14px;
   // &:lang(en) {
   //   min-width: 160px;
   // }
-
-  .active,
-  .init-active {
-    background: var(--color-background-2);
-    color: var(--color-text-active);
-    font-weight: 600;
-    &::before {
-      transform: scaleY(1);
-      // transition:
-      //   cubic-bezier(0.645, 0.045, 0.355, 1),
-      //   transform 0.15s;
-      background: #37f;
-    }
-  }
-
   .item {
     color: var(--color-text);
     display: flex;
+    position: relative;
     align-items: center;
     cursor: pointer;
-    padding: 8px 0 8px 8px;
+    padding: 8px 0 8px 4px;
     margin: 0;
-    vertical-align: middle;
+    line-height: 32px;
+    // vertical-align: middle;
     // transition:
     //   cubic-bezier(0.645, 0.045, 0.355, 1),
     //   background-color 0.25s;
-    &:hover:not(.active),
-    &:active:not(.active) {
-      background: var(--color-background-2);
-      color: var(--color-text-active);
-      // transition:
+    &:hover:not(.router-link-active),
+    &:active:not(.router-link-active) {
+      background: none;
+      color: var(--c-brand);
       //   cubic-bezier(0.645, 0.045, 0.355, 1),
       //   background-color 0.25s;
     }
-    // &:before {
-    //   content: ' ';
-    //   display: block;
-    //   width: 4px;
-    //   height: 40px;
-    // }
-  }
-
-  svg {
-    margin-right: 4px;
   }
 }
+
 .router-link-active {
-  background: var(--color-background-2);
-  color: #333;
+  background: var(--bg-layout-active);
+  color: var(--c-brand);
+  font-weight: 600;
+  // &::after {
+  //   content: ' ';
+  //   display: block;
+  //   position: absolute;
+  //   right: 0px;
+  //   width: 4px;
+  //   height: 40px;
+  //   border-radius: 5px;
+  //   background-color: var(--bg-brand);
+  // }
 }
 
 .sub-menu {
   z-index: 11;
-  // display: none;
-  color: var(--color-text);
-  user-select: none;
-  width: 150px;
-  min-width: 150px;
-  background: var(--color-background-2);
+  position: relative;
+  background: var(--bg-component);
+  box-shadow: 4px 0px 4px 0px var(--color-shadow);
+  display: flex;
+  flex-direction: column;
+  width: 140px;
   padding-top: 20px;
-  font-size: 14px;
-  box-shadow: 4px 0px 4px 0px var(--color-border-shadow);
-  // border-right: 1px solid var(--color-border);
+  height: calc(100vh - 64px);
 }
 
 main {
   position: relative;
   flex-grow: 1;
-  background: var(--color-background);
-
+  background: var(--bg-main);
+  height: calc(100vh - 64px);
+  overflow-y: auto;
   // padding-top: 64px;
 }
 
 /* <PerfectScrollbar> */
 .ps {
   height: calc(100vh - 64px);
-}
-
-.icon2em {
-  width: 2em;
-  height: 2em;
 }
 </style>

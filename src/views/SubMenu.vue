@@ -1,30 +1,21 @@
 <template>
-  <ul>
-    <li class="sub-menu-item" v-for="(item, index) in props.data" :key="index">
-      <RouterLink custom :to="item.path" v-slot="{ isActive }">
-        <ul v-if="item.children">
-          <div @click.stop="toggle_children" class="text parent">
-            <div :class="{ 'router-link-active': isActive }">{{ $t(item.meta.title) }}</div>
-            <!-- <Icon class="arrow" id="#icon-arrow-up"></Icon> -->
-          </div>
-          <SubMenu class="children" :class="{ 'init-s-active': isActive }" :data="item.children" :default-active="props.active_name"></SubMenu>
-        </ul>
-
-        <RouterLink class="parent text" v-else :to="item.path">{{ $t(item.meta.title) }}</RouterLink>
-      </RouterLink>
-    </li>
-  </ul>
+  <RouterLink custom :to="item.path" v-slot="{ isActive, isExactActive, href, navigate }" v-for="(item, index) in props.data" :key="index">
+    <template v-if="item.children">
+      <div @click="toggle_children" :class="['item', { 'router-link-active': isActive }]">{{ $t(item.meta.title) }}<Icon name="arrow-down" size="2em" class="arrow"></Icon></div>
+      <div class="sub">
+        <SubMenu :data="item.children"></SubMenu>
+      </div>
+    </template>
+    <a v-else :class="['item', { 'router-link-active': isActive }]" :href="href" @click="navigate">{{ $t(item.meta.title) }}</a>
+  </RouterLink>
 </template>
 
 <script setup>
-// import Icon from '../components/Icon.vue'
 import { onMounted } from 'vue'
-
 const props = defineProps(['data', 'active_name'])
 
 function toggle_children(ev) {
   console.log(ev.currentTarget.nextElementSibling.style)
-
   const dom = ev.currentTarget.nextElementSibling
   if (dom.style.display === '') {
     dom.style.display = 'block'
@@ -37,9 +28,10 @@ function toggle_children(ev) {
 
 onMounted(() => {
   //默认展开当前路由的子菜单
-  const dom = document.getElementsByClassName('init-s-active')
+  const dom = document.getElementsByClassName('router-link-active')
+  // console.log(dom)
   if (dom && dom[0]) {
-    dom[0].style.display = 'block'
+    dom[0].style.display = 'flex'
     // dom[0].classList.add('expand')
     dom[0].previousElementSibling.classList.add('expand')
   }
@@ -47,72 +39,48 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-ul {
-  line-height: 1.5;
-  list-style: none;
-  padding: 0;
+.item {
+  font-size: 14px;
+  display: flex;
+  width: 140px;
+  height: 35px;
+  padding: 0 0 0 12px;
+  align-items: center;
   margin: 0;
-  display: block;
-  clear: both;
-}
-
-li {
+  color: var(--color-text);
+  &:hover,
+  &:active {
+    background: var(--bg-component-active);
+  }
   cursor: pointer;
 }
 
-a:link,
-a:visited {
-  color: var(--color-text);
-  text-decoration: none;
-}
-
-.text {
-  display: flex;
-  align-items: center;
-  padding: 4px 16px;
-  // color: #333;
-  justify-content: space-between;
-
-  &:hover,
-  &:active {
-    background: var(--color-background-active);
+.sub {
+  display: none;
+  .item {
+    padding-left: 24px;
   }
 }
+
 .children {
   display: none;
 }
 
 .arrow {
-  transition: cubic-bezier(0.645, 0.045, 0.355, 1), transform 0.15s;
+  transition:
+    cubic-bezier(0.645, 0.045, 0.355, 1),
+    transform 0.15s;
 }
+
 .expand .arrow {
   transform: rotate(180deg);
-  transition: cubic-bezier(0.645, 0.045, 0.355, 1), transform 0.15s;
+  transition:
+    cubic-bezier(0.645, 0.045, 0.355, 1),
+    transform 0.15s;
 }
 
-.parent .router-link-active {
-  color: #000;
-}
-.parent.router-link-active {
-  color: var(--el-color-primary);
+.router-link-active {
   font-weight: 600;
-}
-
-.parent.router-exact-link-active {
-  color: var(--el-color-primary);
-  font-weight: 600;
-}
-
-.children .router-link-active {
-  color: #333;
-}
-
-.children .router-link-exact-active {
-  color: var(--el-color-primary);
-  font-weight: 600;
-}
-
-.children .text {
-  padding-left: 28px;
+  color: var(--color-text-active);
 }
 </style>

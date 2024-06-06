@@ -13,6 +13,7 @@ export default {
     templatelist: '券模板',
     my: '我的',
     myaccount: '我的账号',
-    logout: '退出登录'
+    logout: '退出登录',
+    page404: '404: 页面不存在'
   }
 }

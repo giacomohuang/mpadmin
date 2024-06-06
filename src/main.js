@@ -17,7 +17,7 @@ import Icon from './components/Icon.vue'
 // import svgIcon from 'virtual:svg-icon'
 
 const app = createApp(App)
-// await loadLocaleMessages(i18n, i18n.global.locale.value)
+
 if (!localStorage.getItem('localLang')) {
   localStorage.setItem('localLang', 'zh-CN')
 }

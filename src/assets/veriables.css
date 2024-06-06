@@ -1,104 +1,110 @@
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
   /* 纯黑、纯白 */
-  --t-white: #fff;
-  --t-black: #000;
+  --c-white: #fff;
+  --c-black: #000;
 
   /* 品牌色 */
-  --t-brand: #1677ff;
-  --t-brand1: #6da2ec;
-  --t-brand2: #337bdf;
-  --t-brand3: #074aa8;
-  --t-brand4: #11448c;
+  --c-brand: #1677ff;
+  --c-brand1: #6da2ec;
+  --c-brand2: #337bdf;
+  --c-brand3: #074aa8;
+  --c-brand4: #11448c;
 
   /* 灰度色 */
-  --t-gray1: #f2f2f2;
-  --t-gray2: #f7f7f7;
-  --t-gray3: #e9e9e9;
-  --t-gray4: #c7c7c7;
-  --t-gray5: #aeaeae;
-  --t-gray6: #8e8e8e;
-  --t-gray7: #4d4d4d;
-  --t-gray8: #323232;
-  --t-gray9: #303030;
-  --t-gray10: #282828;
+  --c-gray1: #f2f2f2;
+  --c-gray2: #f7f7f7;
+  --c-gray3: #e9e9e9;
+  --c-gray4: #c7c7c7;
+  --c-gray5: #aeaeae;
+  --c-gray6: #8e8e8e;
+  --c-gray7: #4d4d4d;
+  --c-gray8: #323232;
+  --c-gray9: #303030;
+  --c-gray10: #282828;
 
   /* 蓝绿 */
-  --t-indigo1: #aac8e4;
-  --t-indigo2: #476582;
-  --t-indigo3: #213547;
+  --c-indigo1: #aac8e4;
+  --c-indigo2: #476582;
+  --c-indigo3: #213547;
 
   /* 绿色 */
-  --t-green1: #42b883;
-  --t-green2: #35eb9a;
-  --t-green3: #42d392;
-  --t-green4: #33a06f;
-  --t-green5: #155f3e;
+  --c-green1: #42b883;
+  --c-green2: #35eb9a;
+  --c-green3: #42d392;
+  --c-green4: #33a06f;
+  --c-green5: #155f3e;
 
   /* 蓝色 */
-  --t-blue1: #edf4ff;
-  --t-blue2: #549ced;
-  --t-blue3: #3b8eed;
-  --t-blue4: #3468a3;
-  --t-blue5: #255489;
+  --c-blue1: #edf4ff;
+  --c-blue2: #549ced;
+  --c-blue3: #3b8eed;
+  --c-blue4: #3468a3;
+  --c-blue5: #255489;
 
   /* 黄色 */
-  --t-yellow1: #ffff17;
-  --t-yellow2: #ffe417;
-  --t-yellow3: #ffc517;
-  --t-yellow4: #e0ad15;
-  --t-yellow5: #d48806;
+  --c-yellow1: #ffff17;
+  --c-yellow2: #ffe417;
+  --c-yellow3: #ffc517;
+  --c-yellow4: #e0ad15;
+  --c-yellow5: #d48806;
 
   /* 红色 */
-  --t-red1: #ffa39e;
-  --t-red2: #ff7875;
-  --t-red3: #ff4d4f;
-  --t-red4: #d9363e;
-  --t-red5: #ab2131;
+  --c-red1: #ffa39e;
+  --c-red2: #ff7875;
+  --c-red3: #ff4d4f;
+  --c-red4: #d9363e;
+  --c-red5: #ab2131;
 
   /* 紫色 */
-  --t-purple1: #f616f8;
-  --t-purple2: #e936eb;
-  --t-purple3: #de41e0;
-  --t-purple4: #823c83;
-  --t-purple5: #602960;
+  --c-purple1: #f616f8;
+  --c-purple2: #e936eb;
+  --c-purple3: #de41e0;
+  --c-purple4: #823c83;
+  --c-purple5: #602960;
 
   /* 橙色 */
-  --t-orange1: #ffdb6d;
-  --t-orange2: #ffa500;
-  --t-orange3: #ff8c00;
-  --t-orange4: #ff7e00;
-  --t-orange5: #ff6e00;
+  --c-orange1: #ffdb6d;
+  --c-orange2: #ffa500;
+  --c-orange3: #ff8c00;
+  --c-orange4: #ff7e00;
+  --c-orange5: #ff6e00;
 }
 
 /* semantic color variables for this project */
+[data-theme='light'],
+[data-theme='dark'] {
+  --bg-brand: var(--c-brand1);
+}
 
 [data-theme='light'] {
-  --color-background: var(--t-white);
-  --color-background-1: var(--t-gray1);
-  --color-background-2: var(--t-gray2);
-  --color-background-active: var(--t-gray3);
+  --bg-main: var(--c-white);
+  --bg-layout: var(--c-gray1);
+  --bg-layout-active: var(--c-gray2);
+  --bg-component: var(--c-gray2);
+  --bg-component-active: var(--c-gray3);
 
-  --color-border: var(--t-gray4);
-  --color-border-hover: var(--t-gray5);
-  --color-border-shadow: var(--t-gray3);
+  --color-border: var(--c-gray4);
+  --color-border-hover: var(--c-gray5);
+  --color-shadow: var(--c-gray3);
 
-  --color-text: var(--t-gray8);
-  --color-text-active: var(--t-gray9);
-  --color-heading: var(--t-gray10);
+  --color-text: var(--c-gray8);
+  --color-text-active: var(--c-gray9);
+  --color-heading: var(--c-gray10);
 }
 
 [data-theme='dark'] {
-  --color-background: var(--t-gray10);
-  --color-background-1: var(--t-gray9);
-  --color-background-2: var(--t-gray8);
-  --color-background-active: var(--t-gray7);
+  --bg-main: var(--c-gray10);
+  --bg-layout: var(--c-gray9);
+  --bg-layout-active: var(--c-gray8);
+  --bg-component: var(--c-gray8);
+  --bg-component-active: var(--c-gray7);
 
-  --color-border: var(--t-gray7);
-  --color-border-hover: var(--t-gray6);
-  --color-border-shadow: #222;
+  --color-border: var(--c-gray7);
+  --color-border-hover: var(--c-gray6);
+  --color-shadow: #222;
 
-  --color-text: var(--t-gray2);
-  --color-text-active: var(--t-gray3);
-  --color-heading: var(--t-gray1);
+  --color-text: var(--c-gray2);
+  --color-text-active: var(--c-gray3);
+  --color-heading: var(--c-gray1);
 }

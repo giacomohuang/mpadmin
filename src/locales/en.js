@@ -13,6 +13,7 @@ export default {
     templatelist: 'Template',
     my: 'My',
     myaccount: 'My Account',
-    logout: 'Logout'
+    logout: 'Logout',
+    page404: '404 Not Found'
   }
 }

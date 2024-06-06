@@ -1,61 +1,59 @@
 <template>
-  <a-config-provider :theme="{ algorithm: antTheme, token: { colorPrimary: antColorPrimary } }">
-    <header>
-      <div class="logo"><img src="@/assets/logo.png" width="24" /></div>
-      <div class="app-name">{{ $t('appname') }}</div>
-      <div class="title">{{ $t($route.meta.title) }}</div>
-      <div class="my">
-        <a-dropdown>
-          <a @click.prevent style="font-size: 16px; display: flex; align-items: center">
-            <img width="40" height="40" src="@/assets/avatar.jpg" class="avatar" />
-            <div>Luciano Pavarotti</div>
-          </a>
-          <template #overlay>
-            <a-menu>
-              <a-menu-item>
-                <a @click="router.push('/my/account')">{{ $t('route.myaccount') }}</a>
-              </a-menu-item>
-              <a-menu-item>
-                <a @click="logout">{{ $t('route.logout') }}</a>
-              </a-menu-item>
-            </a-menu>
-          </template>
-        </a-dropdown>
-      </div>
-      <div class="lang">
-        <a-dropdown>
-          <a @click.prevent> <Icon name="global" size="2em" /></a>
-          <template #overlay>
-            <a-menu @click="onChangeLocale">
-              <a-menu-item key="zh-CN">简体中文</a-menu-item>
-              <a-menu-item key="en"> English</a-menu-item>
-            </a-menu>
-          </template>
-        </a-dropdown>
-      </div>
-      <div class="theme">
-        <Icon name="theme-light" size="2em" class="icon" @click="setThemeMode('light')" :class="{ active1: themeMode === 'light' }"></Icon>
-        <Icon name="theme-dark" size="2em" class="icon" @click="setThemeMode('dark')" :class="{ active2: themeMode === 'dark' }"></Icon>
-        <Icon name="theme-system" size="2em" class="icon" @click="setThemeMode('system')" :class="{ active3: themeMode === 'system' }"></Icon>
-      </div>
-    </header>
-    <div class="main-wrap">
-      <aside class="main-menu">
-        <RouterLink custom :to="item.path" v-for="(item, index) in menu" :key="index">
-          <div v-if="!item.isHidden" @click="changeSubMenu(index)" :class="['item', { 'router-link-active': index == currentMenuIdx || (currentMenuIdx == -1 && $route.path.indexOf(item.path + '/') == 0) }]"><Icon name="carousel" size="2em"></Icon>{{ $t(item.meta.title) }}</div>
-        </RouterLink>
-      </aside>
-      <!-- v-if="" -->
-      <aside class="sub-menu" v-if="!submenu.redirect">
-        <SubMenu :data="submenu.children"></SubMenu>
-      </aside>
-      <main>
-        <!-- <PerfectScrollbar> -->
-        <router-view />
-        <!-- </PerfectScrollbar> -->
-      </main>
+  <header>
+    <div class="logo"><img src="@/assets/logo.png" width="24" /></div>
+    <div class="app-name">{{ $t('appname') }}</div>
+    <div class="title">{{ $t($route.meta.title) }}</div>
+    <div class="my">
+      <a-dropdown>
+        <a @click.prevent style="font-size: 16px; display: flex; align-items: center">
+          <img width="40" height="40" src="@/assets/avatar.jpg" class="avatar" />
+          <div>Luciano Pavarotti</div>
+        </a>
+        <template #overlay>
+          <a-menu>
+            <a-menu-item>
+              <a @click="router.push('/my/account')">{{ $t('route.myaccount') }}</a>
+            </a-menu-item>
+            <a-menu-item>
+              <a @click="router.push('/login')">{{ $t('route.logout') }}</a>
+            </a-menu-item>
+          </a-menu>
+        </template>
+      </a-dropdown>
     </div>
-  </a-config-provider>
+    <div class="lang">
+      <a-dropdown>
+        <a @click.prevent> <Icon name="global" size="2em" /></a>
+        <template #overlay>
+          <a-menu @click="onChangeLocale">
+            <a-menu-item key="zh-CN">简体中文</a-menu-item>
+            <a-menu-item key="en"> English</a-menu-item>
+          </a-menu>
+        </template>
+      </a-dropdown>
+    </div>
+    <div class="theme">
+      <Icon name="theme-light" size="2em" class="icon" @click="gobalTheme.changeMode('light')" :class="{ active1: gobalTheme.mode === 'light' }"></Icon>
+      <Icon name="theme-dark" size="2em" class="icon" @click="gobalTheme.changeMode('dark')" :class="{ active2: gobalTheme.mode === 'dark' }"></Icon>
+      <Icon name="theme-system" size="2em" class="icon" @click="gobalTheme.changeMode('system')" :class="{ active3: gobalTheme.mode === 'system' }"></Icon>
+    </div>
+  </header>
+  <div class="main-wrap">
+    <aside class="main-menu">
+      <RouterLink custom :to="item.path" v-for="(item, index) in menu" :key="index">
+        <div v-if="!item.isHidden" @click="changeSubMenu(index)" :class="['item', { 'router-link-active': index == currentMenuIdx || (currentMenuIdx == -1 && $route.path.indexOf(item.path + '/') == 0) }]"><Icon name="carousel" size="2em"></Icon>{{ $t(item.meta.title) }}</div>
+      </RouterLink>
+    </aside>
+    <!-- v-if="" -->
+    <aside class="sub-menu" v-if="!submenu.redirect">
+      <SubMenu :data="submenu.children"></SubMenu>
+    </aside>
+    <main>
+      <!-- <PerfectScrollbar> -->
+      <router-view />
+      <!-- </PerfectScrollbar> -->
+    </main>
+  </div>
 </template>
 
 <script setup>
@@ -63,77 +61,19 @@ import { onMounted, ref, reactive } from 'vue'
 import { router, dynamicRoutes } from '../router/router'
 import { changeLocale } from '../i18n'
 import SubMenu from './SubMenu.vue'
-import { theme } from 'ant-design-vue'
 
-const { useToken } = theme
-const { token } = useToken()
+import { useTheme } from '../stores/theme'
+
+const gobalTheme = useTheme()
+console.log(gobalTheme.mode)
 
 const menu = ref(dynamicRoutes)
 const submenu = ref(router.currentRoute.value.matched[0])
 const currentMenuIdx = ref(-1)
 const rollMenuIdx = ref(-1)
-// 全局主题: [dark, light, system]
-const themeMode = ref(getThemeMode())
-// 媒体查询当前系统是否为暗黑模式
-const darkMode = window.matchMedia('(prefers-color-scheme: dark)')
-// antv组件主题
-const antTheme = ref('')
-const antColorPrimary = ref(getComputedStyle(document.documentElement).getPropertyValue('--c-brand'))
-
-setThemeCss(themeMode.value)
-
-darkMode.addEventListener('change', (e) => {
-  if (themeMode.value == 'system')
-    if (e.matches) {
-      setThemeCss('dark')
-    } else {
-      setThemeCss('light')
-    }
-})
 
 const onChangeLocale = ({ key }) => {
   changeLocale(key)
-}
-
-function setThemeCss(mode) {
-  if (mode == 'dark') {
-    antTheme.value = theme.darkAlgorithm
-    document.body.setAttribute('data-theme', 'dark')
-  } else {
-    antTheme.value = theme.lightAlgorithm
-    document.body.setAttribute('data-theme', 'light')
-  }
-}
-
-function getThemeMode() {
-  let mode = localStorage.getItem('themeMode')
-  // 如果缓存中没有设置模式，则优先根据系统配置设置模式
-  if (!mode) {
-    if (matchMedia('(prefers-color-scheme: dark)').matches) {
-      mode = 'dark'
-    } else if (matchMedia('(prefers-color-scheme: light)').matches) {
-      mode = 'light'
-    } else {
-      mode = 'light'
-    }
-  }
-  return mode
-}
-
-function setThemeMode(mode) {
-  themeMode.value = mode
-  localStorage.setItem('themeMode', mode)
-  if (mode == 'system') {
-    if (matchMedia('(prefers-color-scheme: dark)').matches) {
-      setThemeCss('dark')
-    } else if (matchMedia('(prefers-color-scheme: light)').matches) {
-      setThemeCss('light')
-    } else {
-      setThemeCss('light')
-    }
-  } else {
-    setThemeCss(mode)
-  }
 }
 
 // menu.value =
@@ -161,7 +101,7 @@ header {
   width: 100%;
   min-width: 1000px;
   font-size: 16px;
-  background-color: var(--color-background-1);
+  background-color: var(--bg-layout);
   // background-image: radial-gradient(transparent 1px, #fff 1px);
   // background-size: 4px 4px;
   // backdrop-filter: saturate(50%) blur(4px);
@@ -299,6 +239,7 @@ main {
   background: var(--bg-main);
   height: calc(100vh - 64px);
   overflow-y: auto;
+  padding: 20px;
   // padding-top: 64px;
 }
 

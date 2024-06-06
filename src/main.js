@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-// import { createPinia } from 'pinia'
+import { createPinia } from 'pinia'
 import App from './App.vue'
 import Antd from 'ant-design-vue'
 import './mocks/index'
@@ -23,5 +23,5 @@ if (!localStorage.getItem('localLang')) {
 }
 // app.use(createPinia())
 
-app.use(router).use(i18n).use(Antd).use(PerfectScrollbarPlugin).mount('#app')
+app.use(router).use(createPinia()).use(i18n).use(Antd).use(PerfectScrollbarPlugin).mount('#app')
 app.component('Icon', Icon)

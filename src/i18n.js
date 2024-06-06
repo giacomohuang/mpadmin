@@ -1,12 +1,12 @@
 import { nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 
-const currentLocale = localStorage.getItem('locale') || 'zh-CN'
-
-export const SUPPORT_LOCALES = ['en', 'zh-CN']
+const SUPPORT_LOCALES = ['en', 'zh-CN']
+const sysLocale = navigator.language
+const currentLocale = localStorage.getItem('locale') || SUPPORT_LOCALES.includes(sysLocale) ? sysLocale : 'zh-CN'
 
 const i18n = createI18n({
-  locale: 'zh-CN',
+  locale: currentLocale,
   legacy: false
 })
 

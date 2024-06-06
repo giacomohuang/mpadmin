@@ -117,3 +117,10 @@
 .ps {
   position: relative;
 }
+
+/* 解决antd-design-vue input自动填充背景色问题 */
+input:-internal-autofill-previewed,
+input:-internal-autofill-selected {
+  transition: background-color 5000s ease-in-out 0s !important;
+  -webkit-text-fill-color: var(--color-text) !important;
+}

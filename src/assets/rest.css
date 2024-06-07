@@ -10,7 +10,7 @@
 
 body {
   /* min-height: 0; */
-  color: var(--color-text);
+  color: var(--text-primary);
   background: var(--color-background);
   transition:
     cubic-bezier(0.645, 0.045, 0.355, 1) color 0.5s,

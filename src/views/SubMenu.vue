@@ -47,7 +47,7 @@ onMounted(() => {
   padding: 0 0 0 12px;
   align-items: center;
   margin: 0;
-  color: var(--color-text);
+  color: var(--text-primary);
   &:hover,
   &:active {
     background: var(--bg-component-active);
@@ -81,6 +81,6 @@ onMounted(() => {
 
 .router-link-active {
   font-weight: 600;
-  color: var(--color-text-active);
+  color: var(--text-primary-active);
 }
 </style>

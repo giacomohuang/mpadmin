@@ -2,6 +2,7 @@ export default {
   appname: '管理运营平台',
   lang: '语言',
   route: {
+    login: '登录',
     workspace: '工作台',
     account: '账户',
     accountlist: '账户列表',

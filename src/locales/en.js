@@ -2,6 +2,7 @@ export default {
   appname: 'MPAdmin',
   lang: 'Language',
   route: {
+    login: 'Login',
     workspace: 'Workspace',
     account: 'Account',
     accountlist: 'Account List',

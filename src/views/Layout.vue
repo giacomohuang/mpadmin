@@ -61,7 +61,6 @@ import { onMounted, ref, reactive } from 'vue'
 import { router, dynamicRoutes } from '../router/router'
 import { changeLocale } from '../i18n'
 import SubMenu from './SubMenu.vue'
-
 import { useTheme } from '../stores/theme'
 
 const gobalTheme = useTheme()
@@ -118,11 +117,11 @@ header {
   padding: 0 20px 0 16px;
   margin-right: 20px;
   border-right: 2px solid #ccc;
-  color: var(--color-text);
+  color: var(--text-primary);
   font-weight: 600;
 }
 .title {
-  color: var(--color-text);
+  color: var(--text-primary);
   font-size: 18px;
   flex-grow: 1;
 }
@@ -183,7 +182,7 @@ header {
   //   min-width: 160px;
   // }
   .item {
-    color: var(--color-text);
+    color: var(--text-primary);
     display: flex;
     position: relative;
     align-items: center;

@@ -6,8 +6,8 @@
     <div class="my">
       <a-dropdown>
         <a @click.prevent style="font-size: 16px; display: flex; align-items: center">
-          <img width="40" height="40" src="@/assets/avatar.jpg" class="avatar" />
-          <div>Luciano Pavarotti</div>
+          <img width="30" height="30" src="@/assets/avatar.jpg" class="avatar" />
+          <div>Luciano</div>
         </a>
         <template #overlay>
           <a-menu>
@@ -146,6 +146,7 @@ header {
 }
 
 .theme {
+  cursor: pointer;
   color: var(--c-gray4);
   .active1 {
     color: var(--c-yellow4);

@@ -1,5 +1,5 @@
 <template>
-  <RouterLink custom :to="item.path" v-slot="{ isActive, isExactActive, href, navigate }" v-for="(item, index) in props.data" :key="index">
+  <RouterLink custom :to="item.path" v-slot="{ isActive, href, navigate }" v-for="(item, index) in props.data" :key="index">
     <template v-if="item.children">
       <div @click="toggle_children" :class="['item', { 'router-link-active': isActive }]">{{ $t(item.meta.title) }}<Icon name="arrow-down" size="2em" class="arrow"></Icon></div>
       <div class="sub">
@@ -12,7 +12,7 @@
 
 <script setup>
 import { onMounted } from 'vue'
-const props = defineProps(['data', 'active_name'])
+const props = defineProps(['data'])
 
 function toggle_children(ev) {
   console.log(ev.currentTarget.nextElementSibling.style)
@@ -29,10 +29,9 @@ function toggle_children(ev) {
 onMounted(() => {
   //默认展开当前路由的子菜单
   const dom = document.getElementsByClassName('router-link-active')
-  // console.log(dom)
+  console.log(dom[0])
   if (dom && dom[0]) {
     dom[0].style.display = 'flex'
-    // dom[0].classList.add('expand')
     dom[0].previousElementSibling.classList.add('expand')
   }
 })
@@ -58,7 +57,7 @@ onMounted(() => {
 .sub {
   display: none;
   .item {
-    padding-left: 24px;
+    margin-left: 12px;
   }
 }
 

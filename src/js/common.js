@@ -6,3 +6,18 @@ export function getQueryString(name) {
   }
   return null
 }
+
+export function sortJSON(obj) {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj
+  }
+
+  const sortedObj = {}
+  Object.entries(obj)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .forEach(([key, value]) => {
+      sortedObj[key] = sortJSON(value)
+    })
+
+  return sortedObj
+}

@@ -21,9 +21,9 @@
       </div>
     </header>
     <a-form ref="loginForm" :model="loginData" @finish="handleLogin" @finishFailed="handleFailed" class="form" auto-complete="on" laba-width="80px" laba-position="right">
-      <h3 class="title">登录</h3>
-      <a-form-item style="align-items: center" label="账号" name="userName" :rules="[{ required: true, message: 'Please input your username!' }]">
-        <a-input size="large" large v-model:value="loginData.userName" />
+      <h3 class="title">{{ $t('route.login') }}</h3>
+      <a-form-item style="align-items: center" label="账号" name="username" :rules="[{ required: true, message: 'Please input your username!' }]">
+        <a-input size="large" large v-model:value="loginData.username" />
         <!-- placeholder="请填写用于登录的邮箱" -->
       </a-form-item>
       <a-form-item style="align-items: center" label="密码" name="password" :rules="[{ required: true, message: 'Please input your password!' }]">
@@ -42,15 +42,19 @@ import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { router } from '../router/router'
 import { changeLocale } from '../i18n'
 import { useTheme } from '../stores/theme'
+import { user as userAPI } from '../api/user'
 
 const loginData = reactive({
-  userName: '',
+  username: '',
   password: ''
 })
 
-const handleLogin = (values) => {
+const handleLogin = async (values) => {
   console.log('Success:', values)
-  router.push('/')
+  let data = await userAPI.login(values)
+  if (data.result) {
+    router.push('/')
+  }
 }
 
 const handleFailed = (errorInfo) => {
@@ -127,6 +131,7 @@ header {
 }
 
 .theme {
+  cursor: pointer;
   color: var(--text-secondary);
   .active1 {
     color: var(--c-yellow4);
@@ -140,19 +145,18 @@ header {
 }
 
 .title {
-  font-size: 26px;
+  font-size: 20px;
   font-weight: 400;
   color: var(--c-text-main);
   margin: 0px auto 20px auto;
   text-align: center;
-  font-weight: bold;
 }
 
 .form {
   display: block;
   width: 500px;
   padding: 40px;
-  margin-top: 180px;
+  margin-top: 240px;
   // background: var(--bg-layout);
   background-color: var(--bg-main-transparent); /* 半透明背景 */
   backdrop-filter: blur(10px); /* 背景模糊 */

@@ -13,11 +13,12 @@ let fetch = axios.create({
 
 let loadingInstance
 
-// 拦截器的添加
+// 服务器请求拦截器
 fetch.interceptors.request.use(
   (config) => {
     // loadingInstance = ElLoading.service({ lock: false, text: '加载中' })
     console.log('加载中')
+    config.headers['JWTToken'] = 'token'
     return config
   },
   (err) => {
@@ -27,7 +28,7 @@ fetch.interceptors.request.use(
   }
 )
 
-//响应拦截器
+//服务器响应拦截器
 fetch.interceptors.response.use(
   (res) => {
     loadingInstance?.close()

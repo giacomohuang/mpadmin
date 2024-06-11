@@ -1,12 +1,12 @@
 <template>
   <RouterLink custom :to="item.path" v-slot="{ isActive, href, navigate }" v-for="(item, index) in props.data" :key="index">
     <template v-if="item.children">
-      <div @click="toggle_children" :class="['item', { 'router-link-active': isActive }]">{{ $t(item.meta.title) }}<Icon name="arrow-down" size="2em" class="arrow"></Icon></div>
+      <div @click="toggle_children" class="item dir" :class="{ 'sub-active': isActive }">{{ $t(item.meta.title) }}<Icon name="arrow-down" size="2em" class="arrow"></Icon></div>
       <div class="sub">
         <SubMenu :data="item.children"></SubMenu>
       </div>
     </template>
-    <a v-else :class="['item', { 'router-link-active': isActive }]" :href="href" @click="navigate">{{ $t(item.meta.title) }}</a>
+    <a v-else :class="['item', { 'sub-active': isActive }]" :href="href" @click="navigate">{{ $t(item.meta.title) }}</a>
   </RouterLink>
 </template>
 
@@ -15,24 +15,25 @@ import { onMounted } from 'vue'
 const props = defineProps(['data'])
 
 function toggle_children(ev) {
-  console.log(ev.currentTarget.nextElementSibling.style)
   const dom = ev.currentTarget.nextElementSibling
+  console.log(dom)
   if (dom.style.display === '') {
     dom.style.display = 'block'
-    ev.currentTarget.classList.add('expand')
+    ev.currentTarget.children[0].classList.add('expand')
   } else {
     dom.style.display = ''
-    ev.currentTarget.classList.remove('expand')
+    ev.currentTarget.children[0].classList.remove('expand')
   }
 }
 
 onMounted(() => {
   //默认展开当前路由的子菜单
-  const dom = document.getElementsByClassName('router-link-active')
-  console.log(dom[0])
-  if (dom && dom[0]) {
-    dom[0].style.display = 'flex'
-    dom[0].previousElementSibling.classList.add('expand')
+  const dom = document.querySelector('.dir.sub-active')
+  console.log(dom)
+  if (dom) {
+    dom.style.display = 'flex'
+    dom.children[0].classList.add('expand')
+    dom.nextElementSibling.style.display = 'block'
   }
 })
 </script>
@@ -57,7 +58,7 @@ onMounted(() => {
 .sub {
   display: none;
   .item {
-    margin-left: 12px;
+    padding-left: 24px;
   }
 }
 
@@ -71,14 +72,14 @@ onMounted(() => {
     transform 0.15s;
 }
 
-.expand .arrow {
+.expand {
   transform: rotate(180deg);
   transition:
     cubic-bezier(0.645, 0.045, 0.355, 1),
     transform 0.15s;
 }
 
-.router-link-active {
+.sub-active {
   font-weight: 600;
   color: var(--text-primary-active);
 }

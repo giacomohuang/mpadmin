@@ -12,7 +12,7 @@ export const router = createRouter({
   //   }
   // },
   routes: [
-    { path: '/login', name: 'login', component: () => import('@/views/Login.vue'), meta: { title: 'route.login' } },
+    { path: '/login', name: 'login', component: () => import('@/views/My/Login.vue'), meta: { title: 'route.login' } },
     {
       path: '/404',
       name: '404',

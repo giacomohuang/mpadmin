@@ -70,7 +70,6 @@ const menu = ref(dynamicRoutes)
 const submenu = ref(router.currentRoute.value.matched[0])
 const currentMenuIdx = ref(-1)
 const rollMenuIdx = ref(-1)
-
 const onChangeLocale = ({ key }) => {
   changeLocale(key)
 }

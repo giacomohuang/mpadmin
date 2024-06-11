@@ -39,10 +39,10 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, nextTick } from 'vue'
-import { router } from '../router/router'
-import { changeLocale } from '../i18n'
-import { useTheme } from '../stores/theme'
-import { user as userAPI } from '../api/user'
+import { router } from '@/router/router'
+import { changeLocale } from '@/i18n'
+import { useTheme } from '@/stores/theme'
+import { user as userAPI } from '@/api/user'
 
 const loginData = reactive({
   username: '',
@@ -52,7 +52,8 @@ const loginData = reactive({
 const handleLogin = async (values) => {
   console.log('Success:', values)
   let data = await userAPI.login(values)
-  if (data.result) {
+  if (data.code=='200') {
+    localStorage.setItem("accessToken",data.accessToken)
     router.push('/')
   }
 }

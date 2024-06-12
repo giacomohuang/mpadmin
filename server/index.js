@@ -1,7 +1,6 @@
 const express = require('express')
 const accountRouter = require('./routes/account')
 const mongoose = require('mongoose')
-const AccountController = require('./controllers/account')
 const authToken = require('./middlewares/authtoken')
 const cors = require('cors')
 
@@ -19,7 +18,7 @@ mongoose.connect(process.env.MONGODB_URL).then(() => {
 })
 
 //Authentication route
-app.use('/account', AccountController.login)
+app.use('/account', accountRouter)
 
 //decodeDetails Route
 app.get('/decodeDetails', authToken, (req, res) => {

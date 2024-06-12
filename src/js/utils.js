@@ -3,8 +3,16 @@ const utils = {
     return JSON.parse(JSON.stringify(obj))
   },
 
-  decodeToken(token) {
-    let tokenArray = token.split('.')
+  decodeToken(type = 'access') {
+    let token, tokenArray, result
+
+    if (type === 'refresh') {
+      token = localStorage.getItem('refreshToken')
+    } else {
+      token = localStorage.getItem('accessToken')
+    }
+    if (!token) return
+    tokenArray = token.split('.')
     if (tokenArray.length != 3) {
       throw Error('invalid token')
     }

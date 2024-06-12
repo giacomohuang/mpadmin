@@ -62,15 +62,16 @@ import { router, dynamicRoutes } from '../router/router'
 import { changeLocale } from '../i18n'
 import SubMenu from './SubMenu.vue'
 import { useStore } from '../stores/stores'
+import utils from '../js/utils'
 
 const store = useStore()
-const { username } = toRefs(store)
-// console.log('store.theme', store.theme)
+const accessToken = utils.decodeToken()
+const username = accessToken.username
+store.accountid = accessToken.id
 
 const menu = ref(dynamicRoutes)
 const submenu = ref(router.currentRoute.value.matched[0])
 const currentMenuIdx = ref(-1)
-const rollMenuIdx = ref(-1)
 const onChangeLocale = ({ key }) => {
   changeLocale(key)
 }

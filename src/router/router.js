@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Layout from '@/views/Layout.vue'
 import { KeepAlive } from 'vue'
+import utils from '../js/utils'
 // import Layout1 from '@/views/Layout1.vue'
 
 export const router = createRouter({
@@ -12,31 +13,27 @@ export const router = createRouter({
   //   }
   // },
   routes: [
-    { path: '/login', name: 'login', component: () => import('@/views/My/Login.vue'), meta: { title: 'route.login' } },
-    {
-      path: '/404',
-      name: '404',
-      component: Layout,
-      redirect: '/404/page',
-      meta: { title: 'route.page404' },
-      children: [{ path: '/404/page', name: '404page', component: () => import('@/views/404.vue') }]
-    },
-    {
-      path: '/:pathMatch(.*)',
-      redirect: '/404'
-    }
+    { path: '/login', name: 'login', component: () => import('@/views/My/Login.vue'), meta: { title: 'route.login', auth: false } },
+    { path: '/404', name: '404', component: () => import('@/views/404.vue'), meta: { title: 'route.page404', auth: false } },
+    { path: '/:pathMatch(.*)', redirect: '/404' }
   ]
 })
 
 // 路由前置守卫
-// router.beforeEach((to, from, next) => {
-//   // const { meta, name } = to
-//   // const { isLogin } = meta
-//   // // token不存在时跳转非登录页，重定向到登录页
-//   // if (!getToken() && name !== 'Login' && isLogin) next({ path: '/login' })
-//   // // 其他场景
-//   // else next()
-// })
+router.beforeEach((to, from, next) => {
+  const { meta, name } = to
+  const { auth } = meta
+  // // token不存在时跳转非登录页，重定向到登录页
+
+  const token = utils.decodeToken()
+  if (!token && auth) {
+    next({ path: '/my/login' })
+  }
+  // // 其他场景
+  else {
+    next()
+  }
+})
 
 export const dynamicRoutes = [
   {

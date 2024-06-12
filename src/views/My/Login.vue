@@ -43,8 +43,6 @@ import { router } from '@/router/router'
 import { changeLocale } from '@/i18n'
 import { useStore } from '@/stores/stores'
 import { account as accountAPI } from '@/api/account'
-import utils from '@/js/utils'
-import { storeToRefs } from 'pinia'
 
 const store = useStore()
 
@@ -58,15 +56,9 @@ const handleLogin = async (values) => {
     let resp = await accountAPI.login(values)
     const { data, status } = resp
     if (status == '200') {
-      console.log(data.accessToken)
-      const accessToken = utils.decodeToken(data.accessToken)
-      console.log(accessToken.id)
       localStorage.setItem('accessToken', data.accessToken)
       localStorage.setItem('refreshToken', data.refreshToken)
       router.push('/')
-      store.accoundid = accessToken.id
-      store.username = accessToken.username
-      console.log('store:', store.theme)
     }
   } catch (err) {
     console.log(err)

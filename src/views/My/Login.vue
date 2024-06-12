@@ -42,7 +42,7 @@ import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { router } from '@/router/router'
 import { changeLocale } from '@/i18n'
 import { useStore } from '@/stores/stores'
-import { account as accountAPI } from '@/api/account'
+import { account as accountAPI } from '../../api/account'
 
 const store = useStore()
 
@@ -61,10 +61,12 @@ const handleLogin = async (values) => {
       router.push('/')
     }
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     const code = err.status
     if (code && code == 401) {
       console.log('用户名/密码不正确')
+    } else {
+      console.log('error:', err)
     }
   }
 }

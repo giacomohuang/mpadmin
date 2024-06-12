@@ -1,6 +1,6 @@
 import fetch from './fetch'
 
-export const user = {
+export const account = {
   getPermissions(uid) {
     return fetch({
       method: 'get',
@@ -12,7 +12,7 @@ export const user = {
     return fetch({
       method: 'post',
       data: params,
-      url: '/api/user/login'
+      url: '/account/login'
     })
   }
 }

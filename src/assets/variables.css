@@ -82,6 +82,7 @@
   --bg-layout-active: var(--c-gray2);
   --bg-component: var(--c-gray2);
   --bg-component-active: var(--c-gray3);
+  --bg-input: var(--c-white);
 
   --color-border: var(--c-gray4);
   --color-border-hover: var(--c-gray5);
@@ -101,6 +102,7 @@
   --bg-layout-active: var(--c-gray8);
   --bg-component: var(--c-gray8);
   --bg-component-active: var(--c-gray7);
+  --bg-input: var(--c-black);
 
   --color-border: var(--c-gray7);
   --color-border-hover: var(--c-gray6);

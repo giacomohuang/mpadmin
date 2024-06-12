@@ -23,5 +23,5 @@ if (!localStorage.getItem('localLang')) {
 }
 // app.use(createPinia())
 
-app.use(router).use(createPinia()).use(i18n).use(Antd).use(PerfectScrollbarPlugin).mount('#app')
-app.component('Icon', Icon)
+app.use(router).use(createPinia()).use(i18n).use(Antd).use(PerfectScrollbarPlugin).component('Icon', Icon).mount('#app')
+// console.log(utils.decodeToken())

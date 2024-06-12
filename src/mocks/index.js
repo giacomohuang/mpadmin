@@ -622,14 +622,3 @@ Mock.mock(RegExp(`${baseUrl}/user/getpermissions\\?uid=*`), 'get', () => {
   console.log('hit mock')
   return userPermission
 })
-
-Mock.mock(RegExp(`${baseUrl}/user/login`), 'post', (option) => {
-  console.log(option)
-  const username = JSON.parse(option.body).username
-  const password = JSON.parse(option.body).password
-  if (username == 'admin' && password == '123456') {
-    return { result: true }
-  } else {
-    return { result: false }
-  }
-})

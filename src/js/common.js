@@ -21,3 +21,18 @@ export function sortJSON(obj) {
 
   return sortedObj
 }
+
+export function decodeToken(type = 'access') {
+  const result = {}
+  if (type === 'refresh') {
+    token = localStorage.getItem('refreshToken')
+  } else {
+    token = localStorage.getItem('accessToken')
+  }
+  tokenArray = token.split('.')
+  if (tokenArray.length != 3) {
+    throw Error('invalid token')
+  }
+  result.payload = btoa(encodeURIComponent(tokenArray[1]))
+  return result
+}

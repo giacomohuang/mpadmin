@@ -7,7 +7,7 @@
       <a-dropdown>
         <a @click.prevent style="font-size: 16px; display: flex; align-items: center">
           <img width="30" height="30" src="@/assets/avatar.jpg" class="avatar" />
-          <div>Luciano</div>
+          <div>{{ username }}</div>
         </a>
         <template #overlay>
           <a-menu>
@@ -33,9 +33,9 @@
       </a-dropdown>
     </div>
     <div class="theme">
-      <Icon name="theme-light" size="2em" class="icon" @click="gobalTheme.changeMode('light')" :class="{ active1: gobalTheme.mode === 'light' }"></Icon>
-      <Icon name="theme-dark" size="2em" class="icon" @click="gobalTheme.changeMode('dark')" :class="{ active2: gobalTheme.mode === 'dark' }"></Icon>
-      <Icon name="theme-system" size="2em" class="icon" @click="gobalTheme.changeMode('system')" :class="{ active3: gobalTheme.mode === 'system' }"></Icon>
+      <Icon name="theme-light" size="2em" class="icon" @click="store.changeTheme('light')" :class="{ active1: store.theme === 'light' }"></Icon>
+      <Icon name="theme-dark" size="2em" class="icon" @click="store.changeTheme('dark')" :class="{ active2: store.theme === 'dark' }"></Icon>
+      <Icon name="theme-system" size="2em" class="icon" @click="store.changeTheme('system')" :class="{ active3: store.theme === 'system' }"></Icon>
     </div>
   </header>
   <div class="main-wrap">
@@ -57,14 +57,15 @@
 </template>
 
 <script setup>
-import { onMounted, ref, reactive } from 'vue'
+import { onMounted, ref, toRefs, reactive } from 'vue'
 import { router, dynamicRoutes } from '../router/router'
 import { changeLocale } from '../i18n'
 import SubMenu from './SubMenu.vue'
-import { useTheme } from '../stores/theme'
+import { useStore } from '../stores/stores'
 
-const gobalTheme = useTheme()
-console.log(gobalTheme.mode)
+const store = useStore()
+const { username } = toRefs(store)
+// console.log('store.theme', store.theme)
 
 const menu = ref(dynamicRoutes)
 const submenu = ref(router.currentRoute.value.matched[0])

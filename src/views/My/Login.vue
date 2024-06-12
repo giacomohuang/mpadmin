@@ -15,19 +15,19 @@
         </a-dropdown>
       </div>
       <div class="theme">
-        <Icon name="theme-light" size="2em" class="icon" @click="gobalTheme.changeMode('light')" :class="{ active1: gobalTheme.mode === 'light' }"></Icon>
-        <Icon name="theme-dark" size="2em" class="icon" @click="gobalTheme.changeMode('dark')" :class="{ active2: gobalTheme.mode === 'dark' }"></Icon>
-        <Icon name="theme-system" size="2em" class="icon" @click="gobalTheme.changeMode('system')" :class="{ active3: gobalTheme.mode === 'system' }"></Icon>
+        <Icon name="theme-light" size="2em" class="icon" @click="store.theme = 'light'" :class="{ active1: store.theme === 'light' }"></Icon>
+        <Icon name="theme-dark" size="2em" class="icon" @click="store.theme = 'dark'" :class="{ active2: store.theme === 'dark' }"></Icon>
+        <Icon name="theme-system" size="2em" class="icon" @click="store.theme = 'system'" :class="{ active3: store.theme === 'system' }"></Icon>
       </div>
     </header>
-    <a-form ref="loginForm" :model="loginData" @finish="handleLogin" @finishFailed="handleFailed" class="form" auto-complete="on" laba-width="80px" laba-position="right">
+    <a-form ref="loginForm" :model="loginData" @finish="handleLogin" @finishFailed="handleFailed" class="form" autocomplete="off" laba-width="80px" laba-position="right">
       <h3 class="title">{{ $t('route.login') }}</h3>
       <a-form-item style="align-items: center" label="账号" name="username" :rules="[{ required: true, message: 'Please input your username!' }]">
-        <a-input size="large" large v-model:value="loginData.username" />
+        <a-input autocomplete="off" size="large" large v-model:value="loginData.username" />
         <!-- placeholder="请填写用于登录的邮箱" -->
       </a-form-item>
       <a-form-item style="align-items: center" label="密码" name="password" :rules="[{ required: true, message: 'Please input your password!' }]">
-        <a-input-password size="large" v-model:value="loginData.password" />
+        <a-input-password autocomplete="off" size="large" v-model:value="loginData.password" />
         <!-- placeholder="密码" -->
       </a-form-item>
       <a-form-item>
@@ -41,8 +41,12 @@
 import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { router } from '@/router/router'
 import { changeLocale } from '@/i18n'
-import { useTheme } from '@/stores/theme'
-import { user as userAPI } from '@/api/user'
+import { useStore } from '@/stores/stores'
+import { account as accountAPI } from '@/api/account'
+import utils from '@/js/utils'
+import { storeToRefs } from 'pinia'
+
+const store = useStore()
 
 const loginData = reactive({
   username: '',
@@ -50,20 +54,32 @@ const loginData = reactive({
 })
 
 const handleLogin = async (values) => {
-  console.log('Success:', values)
-  let data = await userAPI.login(values)
-  if (data.code=='200') {
-    localStorage.setItem("accessToken",data.accessToken)
-    router.push('/')
+  try {
+    let resp = await accountAPI.login(values)
+    const { data, status } = resp
+    if (status == '200') {
+      console.log(data.accessToken)
+      const accessToken = utils.decodeToken(data.accessToken)
+      console.log(accessToken.id)
+      localStorage.setItem('accessToken', data.accessToken)
+      localStorage.setItem('refreshToken', data.refreshToken)
+      router.push('/')
+      store.accoundid = accessToken.id
+      store.username = accessToken.username
+      console.log('store:', store.theme)
+    }
+  } catch (err) {
+    console.log(err)
+    const code = err.status
+    if (code && code == 401) {
+      console.log('用户名/密码不正确')
+    }
   }
 }
 
 const handleFailed = (errorInfo) => {
   console.log(errorInfo)
 }
-
-const gobalTheme = useTheme()
-console.log(gobalTheme.mode)
 
 const onChangeLocale = ({ key }) => {
   changeLocale(key)

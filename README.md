@@ -1,41 +1,34 @@
-# approval
+# Installation
 
-This template should help get you started developing with Vue 3 in Vite.
-
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
+### MacOS 
+## MongoDB
+```
+brew tap mongodb/brew
+brew update
+brew install mongodb-community@8.0
+brew services start mongodb-community@8.0
 ```
 
-### Compile and Hot-Reload for Development
+## NodeJS
+```
+brew install node
+npm install -g nodemon
+```
 
-```sh
+## Run App
+```
+git clone https://github.com/giacomohuang/mpadmin.git
+```
+*client side*
+```
+cd mpadmin
+npm install
 npm run dev
 ```
 
-### Compile and Minify for Production
-
-```sh
-npm run build
+*server side*
 ```
-
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
+cd mpadmin/server
+npm install
+npm run dev
 ```

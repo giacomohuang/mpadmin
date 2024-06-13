@@ -2,7 +2,7 @@
   "appname": "MPAdmin",
   "lang": "Language",
   "route": {
-    "login": "Login",
+    "login": "Sign in to MpAdmin",
     "workspace": "Workspace",
     "account": "Account",
     "accountlist": "Account List",

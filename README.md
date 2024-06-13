@@ -1,6 +1,5 @@
 # Installation
 
-### MacOS 
 ## MongoDB
 **install**
 ```

@@ -33,6 +33,14 @@ class AccountController extends BaseController {
       res.status(500).json({ err, message: 'Internal server error' })
     }
   }
+  static async refreshToken(req, res) {
+    try {
+      const accessToken = jwt.sign({ id: account._id, username: account.username }, process.env.SECRET_KEY, { expiresIn: '1h' })
+      res.json({ accessToken })
+    } catch (err) {
+      res.status(500).json({ err, message: 'Internal server error' })
+    }
+  }
 }
 
 module.exports = AccountController

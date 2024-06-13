@@ -13,8 +13,10 @@ let fetch = axios.create({
 // 服务器请求拦截器
 fetch.interceptors.request.use(
   (config) => {
-    console.log('加载中')
-    config.headers['Authorization'] = 'Bearer ' + localStorage.getItem('token')
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers['Authorization'] = 'Bearer ' + localStorage.getItem('token')
+    }
     return config
   },
   (err) => {
@@ -26,7 +28,7 @@ fetch.interceptors.request.use(
 //服务器响应拦截器
 fetch.interceptors.response.use(
   (resp) => {
-    return resp
+    return resp.data
   },
   (err) => {
     const { response } = err

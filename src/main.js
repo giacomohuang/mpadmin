@@ -11,6 +11,7 @@ import { PerfectScrollbarPlugin } from 'vue3-perfect-scrollbar'
 import './assets/main.css'
 import 'virtual:svg-icons-register'
 import Icon from './components/Icon.vue'
+import utils from './js/utils'
 // import fib from 'virtual:fib'
 
 // alert(`结果: ${fib(10)}`)
@@ -23,5 +24,5 @@ if (!localStorage.getItem('localLang')) {
 }
 // app.use(createPinia())
 
-app.use(router).use(createPinia()).use(i18n).use(Antd).use(PerfectScrollbarPlugin).component('Icon', Icon).mount('#app')
+app.use(router).use(createPinia()).use(i18n).use(Antd).use(PerfectScrollbarPlugin).use(utils).component('Icon', Icon).mount('#app')
 // console.log(utils.decodeToken())

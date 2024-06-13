@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Layout from '@/views/Layout.vue'
-import { KeepAlive } from 'vue'
-import utils from '../js/utils'
+import helper from '../js/helper'
 // import Layout1 from '@/views/Layout1.vue'
 
 export const router = createRouter({
@@ -13,9 +12,9 @@ export const router = createRouter({
   //   }
   // },
   routes: [
-    { path: '/login', name: 'login', component: () => import('@/views/My/Login.vue'), meta: { title: 'route.login', noAuth: true } },
+    { path: '/login', name: 'login', component: () => import('@/views/Login.vue'), meta: { title: 'route.login', noAuth: true } },
     { path: '/404', name: '404', component: () => import('@/views/404.vue'), meta: { title: 'route.page404', noAuth: true } },
-    { path: '/:pathMatch(.*)', redirect: '/404' }
+    { path: '/:pathMatch(.*)', redirect: '/404', meta: { title: 'route.page404', noAuth: true } }
   ]
 })
 
@@ -25,7 +24,7 @@ router.beforeEach((to, from, next) => {
   const { noAuth } = meta
   // // token不存在时跳转非登录页，重定向到登录页
 
-  const token = utils.decodeToken()
+  const token = helper.decodeToken()
   if (!token && !noAuth) {
     next({ path: '/login' })
   }

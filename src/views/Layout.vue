@@ -57,15 +57,15 @@
 </template>
 
 <script setup>
-import { onMounted, ref, toRefs, reactive } from 'vue'
+import { onMounted, ref, toRefs, reactive, inject } from 'vue'
 import { router, dynamicRoutes } from '../router/router'
 import { changeLocale } from '../i18n'
 import SubMenu from './SubMenu.vue'
 import { useStore } from '../stores/stores'
-import utils from '../js/utils'
 
 const store = useStore()
-const accessToken = utils.decodeToken()
+const helper = inject('helper')
+const accessToken = helper.decodeToken()
 const username = accessToken.username
 store.accountid = accessToken.id
 

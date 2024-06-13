@@ -42,7 +42,7 @@ import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { router } from '@/router/router'
 import { changeLocale } from '@/i18n'
 import { useStore } from '@/stores/stores'
-import { account as accountAPI } from '../../api/account'
+import { account as accountAPI } from '../api/account'
 
 const store = useStore()
 
@@ -53,15 +53,13 @@ const loginData = reactive({
 
 const handleLogin = async (values) => {
   try {
-    let resp = await accountAPI.login(values)
-    const { data, status } = resp
-    if (status == '200') {
-      localStorage.setItem('accessToken', data.accessToken)
-      localStorage.setItem('refreshToken', data.refreshToken)
-      router.push('/')
-    }
+    let data = await accountAPI.login(values)
+
+    localStorage.setItem('accessToken', data.accessToken)
+    localStorage.setItem('refreshToken', data.refreshToken)
+    router.push('/')
   } catch (err) {
-    // console.log(err)
+    console.log(err)
     const code = err.status
     if (code && code == 401) {
       console.log('用户名/密码不正确')

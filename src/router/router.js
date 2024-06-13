@@ -13,8 +13,8 @@ export const router = createRouter({
   //   }
   // },
   routes: [
-    { path: '/login', name: 'login', component: () => import('@/views/My/Login.vue'), meta: { title: 'route.login', auth: false } },
-    { path: '/404', name: '404', component: () => import('@/views/404.vue'), meta: { title: 'route.page404', auth: false } },
+    { path: '/login', name: 'login', component: () => import('@/views/My/Login.vue'), meta: { title: 'route.login', noAuth: true } },
+    { path: '/404', name: '404', component: () => import('@/views/404.vue'), meta: { title: 'route.page404', noAuth: true } },
     { path: '/:pathMatch(.*)', redirect: '/404' }
   ]
 })
@@ -22,12 +22,12 @@ export const router = createRouter({
 // 路由前置守卫
 router.beforeEach((to, from, next) => {
   const { meta, name } = to
-  const { auth } = meta
+  const { noAuth } = meta
   // // token不存在时跳转非登录页，重定向到登录页
 
   const token = utils.decodeToken()
-  if (!token && auth) {
-    next({ path: '/my/login' })
+  if (!token && !noAuth) {
+    next({ path: '/login' })
   }
   // // 其他场景
   else {

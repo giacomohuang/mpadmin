@@ -32,10 +32,10 @@ fetch.interceptors.response.use(
     const { response } = err
     if (response) {
       return Promise.reject(response)
+    } else if (!window.navigator.onLine) {
+      return Promise.reject({ status: 500, msg: '网络异常' })
     } else {
-      if (!window.navigator.onLine) {
-        return Promise.reject({ status: 500, msg: '网络异常' })
-      }
+      return Promise.reject(err)
     }
   }
 )

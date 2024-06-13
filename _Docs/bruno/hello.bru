@@ -1,0 +1,27 @@
+meta {
+  name: hello
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://127.0.0.1:3000/account/hello
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  stoken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NmFmYTBmMzkzMTZmMjJjYTMxN2I3YyIsImFjY291bnRuYW1lIjoiYWRtaW4iLCJpYXQiOjE3MTgyODg2MjgsImV4cCI6MTcyMDg4MDYyOH0.P6lw8claaVM0APgk30uYlx9ai50DdUbkOLfljVdxhYE
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NmFmYTBmMzkzMTZmMjJjYTMxN2I3YyIsImFjY291bnRuYW1lIjoiYWRtaW4iLCJpYXQiOjE3MTgyODg2MjgsImV4cCI6MTcxODI5MjIyOH0.SOlfX9Iat7CDopo886oN0b3IC5gs5MEpesUNCBQrXyU
+}
+
+body:json {
+  {
+    "accountname": "admin",
+    "password": "12345612"
+  }
+}

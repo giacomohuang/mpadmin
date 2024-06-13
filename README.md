@@ -37,14 +37,14 @@ npm install -g nodemon
 ```
 git clone https://github.com/giacomohuang/mpadmin.git
 ```
-*client side*
+**client side**
 ```
 cd mpadmin
 npm install
 npm run dev
 ```
 
-*server side*
+**server side**
 ```
 cd mpadmin/server
 npm install

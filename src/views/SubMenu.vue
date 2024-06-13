@@ -16,7 +16,6 @@ const props = defineProps(['data'])
 
 function toggle_children(ev) {
   const dom = ev.currentTarget.nextElementSibling
-  console.log(dom)
   if (dom.style.display === '') {
     dom.style.display = 'block'
     ev.currentTarget.children[0].classList.add('expand')
@@ -29,7 +28,6 @@ function toggle_children(ev) {
 onMounted(() => {
   //默认展开当前路由的子菜单
   const dom = document.querySelector('.dir.sub-active')
-  console.log(dom)
   if (dom) {
     dom.style.display = 'flex'
     dom.children[0].classList.add('expand')

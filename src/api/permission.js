@@ -1,6 +1,6 @@
 import fetch from './fetch'
 
-export const permission = {
+const permission = {
   getList(group) {
     return fetch({
       params: { group: group },
@@ -15,3 +15,4 @@ export const permission = {
     })
   }
 }
+export default permission

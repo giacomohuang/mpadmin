@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Layout from '@/views/Layout.vue'
 import helper from '../js/helper'
+import i18n from '../js/i18n'
+
 // import Layout1 from '@/views/Layout1.vue'
 
 export const router = createRouter({
@@ -22,13 +24,18 @@ export const router = createRouter({
 router.beforeEach((to, from, next) => {
   const { meta, name } = to
   const { noAuth } = meta
-  // // token不存在时跳转非登录页，重定向到登录页
-
+  // console.log(i18n.global.locale.value)
+  if (to.meta.title) {
+    document.title = `${i18n.global.t('appname')} - ${i18n.global.t(to.meta.title)}`
+  } else {
+    document.title = i18n.global.t('appname')
+  }
+  // token不存在时跳转非登录页，重定向到登录页
   const token = helper.decodeToken()
   if (!token && !noAuth) {
     next({ path: '/login' })
   }
-  // // 其他场景
+  // 其他场景
   else {
     next()
   }

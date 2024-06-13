@@ -7,7 +7,7 @@
       <a-dropdown>
         <a @click.prevent style="font-size: 16px; display: flex; align-items: center">
           <img width="30" height="30" src="@/assets/avatar.jpg" class="avatar" />
-          <div>{{ username }}</div>
+          <div>{{ accountname }}</div>
         </a>
         <template #overlay>
           <a-menu>
@@ -15,7 +15,7 @@
               <a @click="router.push('/my/account')">{{ $t('route.myaccount') }}</a>
             </a-menu-item>
             <a-menu-item>
-              <a @click="router.push('/login')">{{ $t('route.logout') }}</a>
+              <a @click="logout">{{ $t('route.logout') }}</a>
             </a-menu-item>
           </a-menu>
         </template>
@@ -59,14 +59,14 @@
 <script setup>
 import { onMounted, ref, toRefs, reactive, inject } from 'vue'
 import { router, dynamicRoutes } from '../router/router'
-import { changeLocale } from '../i18n'
+import { changeLocale } from '../js/i18n'
 import SubMenu from './SubMenu.vue'
 import { useStore } from '../stores/stores'
 
 const store = useStore()
 const helper = inject('helper')
 const accessToken = helper.decodeToken()
-const username = accessToken.username
+const accountname = accessToken.accountname
 store.accountid = accessToken.id
 
 const menu = ref(dynamicRoutes)
@@ -85,6 +85,13 @@ function changeSubMenu(index) {
     // 如果定义了redirect，直接跳转
     router.push({ path: submenu.value.redirect })
   }
+}
+
+function logout() {
+  helper.removeJWT()
+  store.accountname = undefined
+  store.accountid = undefined
+  router.push('/login')
 }
 
 onMounted(() => {})

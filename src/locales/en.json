@@ -1,8 +1,12 @@
 {
+  "404": {
+    "backhome": "Back to workspace",
+    "description": "Sorry, the page you visited does not exist."
+  },
   "appname": "MPAdmin",
   "lang": "Language",
   "route": {
-    "login": "Log in to MPAdmin",
+    "login": "Sign in",
     "workspace": "Workspace",
     "account": "Account",
     "accountlist": "Account List",
@@ -14,7 +18,13 @@
     "templatelist": "Template",
     "my": "My",
     "myaccount": "My Account",
-    "logout": "Logout",
+    "logout": "Sign out",
     "page404": "404 Not Found"
+  },
+  "login": {
+    "title": "Sign in to MPAdmin",
+    "accountname": "Account",
+    "password": "Password",
+    "signin": "Sign in"
   }
 }

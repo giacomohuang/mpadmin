@@ -17,6 +17,16 @@ const helper = {
       throw Error('invalid token')
     }
     return JSON.parse(atob(encodeURIComponent(tokenArray[1])))
+  },
+
+  setJWT(data) {
+    localStorage.setItem('accessToken', data.accessToken)
+    localStorage.setItem('refreshToken', data.refreshToken)
+  },
+
+  removeJWT() {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
   }
 }
 export default helper

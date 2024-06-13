@@ -1,11 +1,11 @@
 import axios from 'axios'
+import baseUrl from './baseUrl'
 
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*'
 axios.defaults.withCredentials = true // 允许携带cookie
-
 let fetch = axios.create({
-  baseURL: 'http://127.0.0.1:3000',
+  baseURL: baseUrl.default,
   timeout: 10000,
   withCredentials: true
 })

@@ -4,8 +4,8 @@ export const useStore = defineStore('store', {
   state: () => {
     return {
       theme: '',
-      username: '',
-      accountid: ''
+      accountname: undefined,
+      accountid: undefined
     }
   },
   // 也可以这样定义

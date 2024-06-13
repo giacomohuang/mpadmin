@@ -20,12 +20,6 @@ mongoose.connect(process.env.MONGODB_URL).then(() => {
 //Authentication route
 app.use('/account', accountRouter)
 
-//decodeDetails Route
-app.get('/decodeDetails', authToken, (req, res) => {
-  const { username } = req.user
-  res.json({ username })
-})
-
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`)
 })

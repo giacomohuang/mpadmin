@@ -2,12 +2,31 @@
 
 ### MacOS 
 ## MongoDB
+**install**
 ```
 brew tap mongodb/brew
 brew update
 brew install mongodb-community@8.0
 brew services start mongodb-community@8.0
 ```
+**stop**
+brew services stop mongodb-community@8.0
+
+**cli**
+`mongosh`
+
+## redis
+**install**
+```
+brew ibstall redis
+brew services start redis
+```
+**stop**
+brew services stop redis
+
+**cli**
+`redis-cli`
+
 
 ## NodeJS
 ```

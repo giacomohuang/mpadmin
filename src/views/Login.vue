@@ -20,43 +20,41 @@
         <Icon name="theme-system" size="2em" class="icon" @click="store.theme = 'system'" :class="{ active3: store.theme === 'system' }"></Icon>
       </div>
     </header>
-    <a-form ref="loginForm" :model="loginData" @finish="handleLogin" @finishFailed="handleFailed" class="form" autocomplete="off" laba-width="80px" laba-position="right">
-      <h3 class="title">{{ $t('route.login') }}</h3>
-      <a-form-item style="align-items: center" label="账号" name="username" :rules="[{ required: true, message: 'Please input your username!' }]">
-        <a-input autocomplete="off" size="large" large v-model:value="loginData.username" />
+    <a-form ref="loginForm" :model="loginData" @finish="handleLogin" @finishFailed="handleFailed" class="form" autocomplete="off" :label-col="{ span: 5 }" :wrapper-col="{ span: 20 }">
+      <h3 class="title">{{ $t('login.title') }}</h3>
+      <a-form-item style="align-items: center" :label="$t('login.accountname')" name="accountname" :rules="[{ required: true, message: 'Please input your accountname!' }]">
+        <a-input autocomplete="off" size="large" large v-model:value="loginData.accountname" />
         <!-- placeholder="请填写用于登录的邮箱" -->
       </a-form-item>
-      <a-form-item style="align-items: center" label="密码" name="password" :rules="[{ required: true, message: 'Please input your password!' }]">
+      <a-form-item style="align-items: center" :label="$t('login.password')" name="password" :rules="[{ required: true, message: 'Please input your password!' }]">
         <a-input-password autocomplete="off" size="large" v-model:value="loginData.password" />
         <!-- placeholder="密码" -->
       </a-form-item>
       <a-form-item>
-        <a-button type="primary" html-type="submit">登录</a-button>
+        <a-button type="primary" html-type="submit">{{ $t('login.signin') }}</a-button>
       </a-form-item>
     </a-form>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, nextTick } from 'vue'
+import { ref, reactive, inject, computed, onMounted, nextTick } from 'vue'
 import { router } from '@/router/router'
-import { changeLocale } from '@/i18n'
+import { changeLocale } from '../js/i18n'
 import { useStore } from '@/stores/stores'
-import { account as accountAPI } from '../api/account'
 
 const store = useStore()
-
+const API = inject('API')
+const helper = inject('helper')
 const loginData = reactive({
-  username: '',
+  accountname: '',
   password: ''
 })
 
 const handleLogin = async (values) => {
   try {
-    let data = await accountAPI.login(values)
-
-    localStorage.setItem('accessToken', data.accessToken)
-    localStorage.setItem('refreshToken', data.refreshToken)
+    let data = await API.account.login(values)
+    helper.setJWT(data)
     router.push('/')
   } catch (err) {
     console.log(err)

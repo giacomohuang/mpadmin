@@ -7,16 +7,20 @@ meta {
 post {
   url: http://127.0.0.1:3000/account/signup
   body: json
-  auth: none
+  auth: bearer
 }
 
 headers {
   Content-Type: application/json
 }
 
+auth:bearer {
+  token: 
+}
+
 body:json {
   {
-    "username": "user",
-    "password": "123456"
+    "accountname": "admin",
+    "password": "12345612"
   }
 }

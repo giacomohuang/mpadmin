@@ -1,4 +1,5 @@
 const baseUrl = {
-  default: 'http://localhost:3000/api',
-  account: 'http://localhost:3000'
+  default: 'http://127.0.0.1:3000',
+  account: 'http://127.0.0.1:3000'
 }
+export default baseUrl

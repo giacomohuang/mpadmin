@@ -33,7 +33,7 @@ brew install node
 npm install -g nodemon
 ```
 
-## Run App
+# Run App
 ```
 git clone https://github.com/giacomohuang/mpadmin.git
 ```

@@ -13,9 +13,11 @@ let fetch = axios.create({
 // 服务器请求拦截器
 fetch.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers['Authorization'] = 'Bearer ' + localStorage.getItem('token')
+    const accesstoken = localStorage.getItem('accesstoken')
+    const refreshtoken = localStorage.getItem('refreshtoken')
+    if (accesstoken) {
+      config.headers['Authorization'] = 'Bearer ' + localStorage.getItem('accesstoken')
+      config.headers['refreshtoken'] = localStorage.getItem('refreshtoken')
     }
     return config
   },
@@ -35,7 +37,7 @@ fetch.interceptors.response.use(
     if (response) {
       return Promise.reject(response)
     } else if (!window.navigator.onLine) {
-      return Promise.reject({ status: 500, msg: '网络异常' })
+      return Promise.reject({ status: 500, message: 'Network is not connected' })
     } else {
       return Promise.reject(err)
     }

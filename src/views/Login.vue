@@ -110,8 +110,8 @@ header {
   align-items: center;
   padding: 0 12px;
   height: 64px;
-  width: 100%;
-  min-width: 1000px;
+  left: 0;
+  right: 0;
   font-size: 16px;
   z-index: 12;
   background-color: var(--bg-main-transparent); /* 半透明背景 */

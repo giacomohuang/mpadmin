@@ -30,7 +30,10 @@ class AccountController extends BaseController {
       // Generate JWT token
       const accessToken = jwt.sign({ id: account._id, accountname: account.accountname }, process.env.SECRET_KEY, { expiresIn: '30s' })
       const refreshToken = jwt.sign({ id: account._id, accountname: account.accountname }, process.env.SECRET_KEY, { expiresIn: '30d' })
-      const md5Token = crypto.createHash('md5').update(refreshToken).digest('hex')
+      const md5Token = crypto
+        .createHash('md5')
+        .update(refreshToken + process.env.SECRET_KEY)
+        .digest('hex')
       console.log(md5Token)
       const redis = new Redis()
       await redis.set(md5Token, 'true')

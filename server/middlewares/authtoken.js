@@ -29,7 +29,10 @@ function authToken(req, res, next) {
 
       try {
         decoded = jwt.verify(refreshtoken, process.env.SECRET_KEY)
-        let md5token = crypto.createHash('md5').update(refreshtoken).digest('hex')
+        let md5token = crypto
+          .createHash('md5')
+          .update(refreshtoken + process.env.SECRET_KEY)
+          .digest('hex')
         const redis = new Redis()
         const result = redis.get(md5token)
         if (result) {

@@ -54,12 +54,12 @@ const loginData = reactive({
 const handleLogin = async (values) => {
   try {
     let data = await API.account.login(values)
+    console.log(data)
     helper.setJWT(data)
     router.push('/')
   } catch (err) {
-    console.log(err)
-    const code = err.status
-    if (code && code == 401) {
+    console.log('eeeee', err)
+    if (err.status == 401) {
       console.log('用户名/密码不正确')
     } else {
       console.log('error:', err)

@@ -89,7 +89,7 @@ function changeSubMenu(index) {
 
 function logout() {
   helper.removeJWT()
-  store.accountname = undefined
+  // store.accountname = undefined
   store.accountid = undefined
   router.push('/login')
 }

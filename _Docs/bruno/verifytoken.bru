@@ -1,0 +1,22 @@
+meta {
+  name: verifytoken
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://127.0.0.1:3000/account/verifytoken
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NmVmZTU5NjE1N2RjMzZlY2ZiNjQ5YiIsImFjY291bnRuYW1lIjoiYWRtaW4iLCJpYXQiOjE3MTg2MzY4ODAsImV4cCI6MTcxODYzNjkxMH0.CRqgiz3aCj7xLViu0vM6te4PpuX_vIydP4WJKoqb-4Y",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NmVmZTU5NjE1N2RjMzZlY2ZiNjQ5YiIsImFjY291bnRuYW1lIjoiYWRtaW4iLCJpYXQiOjE3MTg2MzY4ODAsImV4cCI6MTcyMTIyODg4MH0.KOYgOjNfv_sruauGgLVpN4Lnn_52KZMlzkQuNj7pAAs"
+  }
+}

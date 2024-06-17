@@ -1,24 +1,31 @@
-const express = require('express')
+const Koa = require('koa')
+
+const { bodyParser } = require('@koa/bodyparser')
 const accountRouter = require('./routes/account')
 const mongoose = require('mongoose')
-const authToken = require('./middlewares/authtoken')
-const cors = require('cors')
+const cors = require('@koa/cors')
 
 // require('dotenv').config() //for using variables from .env file.
 
-const app = express()
+const app = new Koa()
+
 const PORT = 3000
 
-app.use(express.urlencoded({ extended: false }))
-app.use(express.json())
+app.use(bodyParser())
 app.use(cors())
 
 mongoose.connect(process.env.MONGODB_URL).then(() => {
   console.log('MongoDB is connected!')
 })
 
+console.log(accountRouter)
+app.use(accountRouter.routes())
+// app.use(accountRouter.allowedMethods())
+// app.use(router.allowedMethods())
+
 //Authentication route
-app.use('/account', accountRouter)
+// app.use(accountRouter.routes)
+// app.use(accountRouter.allowedMethods())
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`)

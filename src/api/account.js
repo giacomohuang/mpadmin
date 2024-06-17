@@ -17,6 +17,22 @@ const account = {
       data: params,
       url: '/account/login'
     })
+  },
+  hello() {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: {},
+      url: '/account/hello'
+    })
+  },
+  refreshToken(token) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: { token: token },
+      url: '/account/refreshtoken'
+    })
   }
 }
 export default account

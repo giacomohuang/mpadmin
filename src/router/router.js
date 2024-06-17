@@ -31,13 +31,17 @@ router.beforeEach((to, from, next) => {
     document.title = i18n.global.t('appname')
   }
   // token不存在时跳转非登录页，重定向到登录页
-  const token = helper.decodeToken()
-  if (!token && !noAuth) {
-    next({ path: '/login' })
-  }
-  // 其他场景
-  else {
-    next()
+  try {
+    const token = helper.decodeToken()
+    if (!token && !noAuth) {
+      next({ path: '/login' })
+    }
+    // 其他场景
+    else {
+      next()
+    }
+  } catch (e) {
+    console.log(e)
   }
 })
 

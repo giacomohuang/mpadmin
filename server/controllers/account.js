@@ -62,14 +62,15 @@ class AccountController extends BaseController {
           jwt.verify(refreshToken, process.env.SECRET_KEY_REFRESH)
           const r = await refresh(refreshToken)
           console.log('reerer', r)
-          const _newAccessToken = r.accessToken
-          const _newRefreshToken = r.refreshToken
+          const newAccessToken = r.accessToken
+          const newRefreshToken = r.refreshToken
           ctx.status = 200
-          ctx.body = { verify: true, needRefresh: true, _newAccessToken, _newRefreshToken }
+          ctx.body = { verify: true, needRefresh: true, newAccessToken, newRefreshToken }
         } catch (err) {
           ctx.throw(401, 'Auth Failed 20001')
         }
       } else {
+        console.log(err.name)
         ctx.throw(401, 'Auth Failed 20000')
       }
     }

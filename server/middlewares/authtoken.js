@@ -28,9 +28,9 @@ async function authToken(ctx, next) {
       if (err.name === 'TokenExpiredError') {
         // 开始验证refreshtoken
         const refresh = await refresh(ctx.request.headers['refreshtoken'])
-        ctx.body._needRefresh = true
-        ctx.body._newAccessToken = refresh.accessToken
-        ctx.body._newRefreshToken = refresh.refreshToken
+        ctx.body.needRefresh = true
+        ctx.body.newAccessToken = refresh.accessToken
+        ctx.body.newRefreshToken = refresh.refreshToken
         next()
       }
       // 如果accesstoken验证失败

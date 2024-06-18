@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Layout from '@/views/Layout.vue'
 import helper from '../js/helper'
 import i18n from '../js/i18n'
+import account from '../api/account'
 
 // import Layout1 from '@/views/Layout1.vue'
 
@@ -21,27 +22,36 @@ export const router = createRouter({
 })
 
 // 路由前置守卫
-router.beforeEach((to, from, next) => {
-  const { meta, name } = to
-  const { noAuth } = meta
+router.beforeEach(async (to, from, next) => {
+  const { meta } = to
+
   // console.log(i18n.global.locale.value)
-  if (to.meta.title) {
-    document.title = `${i18n.global.t('appname')} - ${i18n.global.t(to.meta.title)}`
+  if (meta.title) {
+    document.title = `${i18n.global.t('appname')} - ${i18n.global.t(meta.title)}`
   } else {
     document.title = i18n.global.t('appname')
   }
-  // token不存在时跳转非登录页，重定向到登录页
-  try {
-    const token = helper.decodeToken()
-    if (!token && !noAuth) {
+
+  // 如果当前页面不需要认证，则放行
+  if (meta.noAuth) {
+    console.log('hahahah')
+    next()
+  } else {
+    try {
+      const res = await account.verifyToken(helper.getToken())
+      console.log(res.verify)
+      if (res.verify) {
+        if (res.needRefresh) {
+          helper.setToken({ accessToken: res.newAccessToken, refreshToken: res.newRefreshToken })
+        }
+        next()
+      } else {
+        next({ path: '/login' })
+      }
+    } catch (e) {
+      console.log(e)
       next({ path: '/login' })
     }
-    // 其他场景
-    else {
-      next()
-    }
-  } catch (e) {
-    console.log(e)
   }
 })
 

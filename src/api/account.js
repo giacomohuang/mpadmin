@@ -26,12 +26,12 @@ const account = {
       url: '/account/hello'
     })
   },
-  refreshToken(token) {
+  verifyToken(token) {
     return fetch({
       baseURL: baseUrl.account,
       method: 'post',
-      data: { token: token },
-      url: '/account/refreshtoken'
+      data: token,
+      url: '/account/verifytoken'
     })
   }
 }

@@ -31,7 +31,8 @@
         <!-- placeholder="密码" -->
       </a-form-item>
       <a-form-item>
-        <a-button type="primary" html-type="submit">{{ $t('login.signin') }}</a-button>
+        <a-button type="primary" html-type="submit" style="margin-left: 90px; margin-right: 10px">{{ $t('login.signin') }}</a-button>
+        <label style="font-size: 12px">30天内没有访问将重新登录</label>
       </a-form-item>
     </a-form>
   </div>
@@ -55,7 +56,7 @@ const handleLogin = async (values) => {
   try {
     let data = await API.account.login(values)
     console.log(data)
-    helper.setJWT(data)
+    helper.setToken(data)
     router.push('/')
   } catch (err) {
     console.log('eeeee', err)

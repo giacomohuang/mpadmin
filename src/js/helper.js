@@ -42,12 +42,21 @@ const helper = {
     return JSON.parse(atob(encodeURIComponent(tokenArray[1])))
   },
 
-  setJWT(data) {
+  getToken(data) {
+    const accessToken = localStorage.getItem('accessToken')
+    const refreshToken = localStorage.getItem('refreshToken')
+    return {
+      accessToken,
+      refreshToken
+    }
+  },
+
+  setToken(data) {
     localStorage.setItem('accessToken', data.accessToken)
     localStorage.setItem('refreshToken', data.refreshToken)
   },
 
-  removeJWT() {
+  removeToken() {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
   }

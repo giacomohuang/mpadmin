@@ -12,7 +12,13 @@ const app = new Koa()
 const PORT = 3000
 
 app.use(bodyParser())
-app.use(cors())
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    maxAge: 3600,
+    allowMethods: 'GET,POST'
+  })
+)
 
 mongoose.connect(process.env.MONGODB_URL).then(() => {
   console.log('MongoDB is connected!')

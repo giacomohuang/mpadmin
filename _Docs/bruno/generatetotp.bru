@@ -1,0 +1,21 @@
+meta {
+  name: generatetotp
+  type: http
+  seq: 7
+}
+
+get {
+  url: http://127.0.0.1:3000/account/generatetotp
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "accountname": "user"
+  }
+}

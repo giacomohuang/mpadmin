@@ -1,5 +1,4 @@
 const Koa = require('koa')
-
 const { bodyParser } = require('@koa/bodyparser')
 const accountRouter = require('./routes/account')
 const mongoose = require('mongoose')

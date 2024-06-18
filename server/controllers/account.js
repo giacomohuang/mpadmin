@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const Redis = require('ioredis')
 const crypto = require('crypto')
 const { refresh } = require('../middlewares/authtoken')
+const speakeasy = require('speakeasy')
 
 class AccountController extends BaseController {
   static async signup(ctx) {
@@ -20,6 +21,7 @@ class AccountController extends BaseController {
   }
 
   static async login(ctx) {
+    // console.log('*********')
     try {
       const { accountname, password } = ctx.request.body
       const account = await Account.findOne({ accountname })
@@ -41,6 +43,7 @@ class AccountController extends BaseController {
       const redis = new Redis()
       await redis.set(md5Token, true)
       ctx.body = { accessToken, refreshToken }
+      console.log(ctx.body)
     } catch (err) {
       if (err.status == 401) {
         ctx.throw(401, 'Invalid accountname or password')
@@ -74,6 +77,27 @@ class AccountController extends BaseController {
         ctx.throw(401, 'Auth Failed 20000')
       }
     }
+  }
+
+  static async generateTotp(ctx) {
+    const { accountname } = ctx.request.body
+    const secret = speakeasy.generateSecret({
+      length: 20
+    })
+    const url = speakeasy.otpauthURL({ secret: secret.ascii, label: accountname, issuer: 'MPAdmin' })
+    ctx.body = { url, secret: secret.base32 }
+    // console.log(url, secret)
+  }
+
+  static async verifyTotp(ctx) {
+    const { secret, token } = ctx.request.body
+    console.log(secret, token)
+    var tokenValidates = speakeasy.totp.verify({
+      secret: secret,
+      encoding: 'base32',
+      token: token
+    })
+    ctx.body = tokenValidates
   }
   static async hello(ctx) {
     try {

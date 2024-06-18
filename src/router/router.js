@@ -34,7 +34,7 @@ router.beforeEach(async (to, from, next) => {
 
   // 如果当前页面不需要认证，则放行
   if (meta.noAuth) {
-    console.log('hahahah')
+    console.log('pass')
     next()
   } else {
     try {

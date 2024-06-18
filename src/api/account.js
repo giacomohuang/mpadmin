@@ -33,6 +33,22 @@ const account = {
       data: token,
       url: '/account/verifytoken'
     })
+  },
+  generateTotp(params) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: params,
+      url: '/account/generatetotp'
+    })
+  },
+  verifyTotp(token) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: token,
+      url: '/account/verifytotp'
+    })
   }
 }
 export default account

@@ -53,6 +53,7 @@ fetch.interceptors.response.use(
         return Promise.reject(response)
       case 500:
       default:
+        console.log(err)
         console.log('Internal Server Error, code:500')
         return Promise.reject(response)
     }

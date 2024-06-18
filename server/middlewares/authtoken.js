@@ -2,11 +2,11 @@ const jwt = require('jsonwebtoken')
 const Redis = require('ioredis')
 const crypto = require('crypto')
 
-async function authToken(ctx, next) {
+const authToken = async (ctx, next) => {
   try {
     const t = ctx.request.headers['authorization']
     if (!t) {
-      console.log('authToekn', t)
+      console.log('authToken', t)
       throw new Error('Access denied,code:40001')
     }
     const token = t.replace(/^bearer\s+/i, '')
@@ -22,7 +22,7 @@ async function authToken(ctx, next) {
       }
       let decoded = jwt.verify(token, process.env.SECRET_KEY_ACCESS)
       console.log('access', decoded)
-      next()
+      await next()
     } catch (err) {
       // 如果是token过期
       if (err.name === 'TokenExpiredError') {
@@ -31,7 +31,7 @@ async function authToken(ctx, next) {
         ctx.body.needRefresh = true
         ctx.body.newAccessToken = refresh.accessToken
         ctx.body.newRefreshToken = refresh.refreshToken
-        next()
+        await next()
       }
       // 如果accesstoken验证失败
       else {
@@ -43,7 +43,7 @@ async function authToken(ctx, next) {
   }
 }
 
-async function refresh(token) {
+const refresh = async (token) => {
   try {
     const refreshtoken_old = token
     const verify = jwt.verify(refreshtoken_old, process.env.SECRET_KEY_REFRESH)

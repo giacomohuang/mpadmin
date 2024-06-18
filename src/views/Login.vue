@@ -1,5 +1,6 @@
 <template>
   <div class="main-wrap radial-gradient">
+    <context-holder />
     <header>
       <div class="logo"><img src="@/assets/logo.png" width="24" /></div>
       <div class="app-name">{{ $t('appname') }}</div>
@@ -20,7 +21,7 @@
         <Icon name="theme-system" size="2em" class="icon" @click="store.theme = 'system'" :class="{ active3: store.theme === 'system' }"></Icon>
       </div>
     </header>
-    <a-form ref="loginForm" :model="loginData" @finish="handleLogin" @finishFailed="handleFailed" class="form" autocomplete="off" :label-col="{ span: 5 }" :wrapper-col="{ span: 20 }">
+    <a-form v-if="status.loginStep == 0" ref="loginForm" :model="loginData" @finish="handleLogin" @finishFailed="handleFailed" class="form" autocomplete="off" :label-col="{ span: 5 }" :wrapper-col="{ span: 20 }">
       <h3 class="title">{{ $t('login.title') }}</h3>
       <a-form-item style="align-items: center" :label="$t('login.accountname')" name="accountname" :rules="[{ required: true, message: 'Please input your accountname!' }]">
         <a-input autocomplete="off" size="large" large v-model:value="loginData.accountname" />
@@ -31,40 +32,81 @@
         <!-- placeholder="密码" -->
       </a-form-item>
       <a-form-item>
-        <a-button type="primary" html-type="submit" style="margin-left: 90px; margin-right: 10px">{{ $t('login.signin') }}</a-button>
+        <a-button type="primary" :loading="status.loading" html-type="submit" style="margin-left: 90px; margin-right: 10px">
+          {{ $t('login.signin') }}
+        </a-button>
         <label style="font-size: 12px">30天内没有访问将重新登录</label>
       </a-form-item>
     </a-form>
+    <div v-if="status.loginStep == 1" class="form">
+      <div style="margin: 20px 0; background-color: white; width: fit-content; height: fit-content"><a-qrcode :value="status.totpUrl" /></div>
+
+      <VerifyInput v-model:value="totpCode" :autofocus="true" @finish="verifyTotpCode" :digits="6" v-model:isError="isVerifyError"></VerifyInput>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, inject, computed, onMounted, nextTick } from 'vue'
+import { ref, reactive, inject } from 'vue'
 import { router } from '@/router/router'
 import { changeLocale } from '../js/i18n'
 import { useStore } from '@/stores/stores'
+import { message } from 'ant-design-vue'
+import { useI18n } from 'vue-i18n'
+import VerifyInput from '../components/VerifyInput.vue'
 
 const store = useStore()
 const API = inject('API')
 const helper = inject('helper')
+const status = reactive({ loading: false, totpUrl: '', loginStep: 0 })
+const { t } = useI18n()
 const loginData = reactive({
   accountname: '',
   password: ''
 })
+const accountId = ref(-1)
+const totpCode = ref('')
+const isVerifyError = ref(false)
+let totpSecret = ''
+
+const [messageApi, contextHolder] = message.useMessage()
 
 const handleLogin = async (values) => {
+  status.loading = true
   try {
     let data = await API.account.login(values)
     console.log(data)
     helper.setToken(data)
-    router.push('/')
+    const accountInfo = helper.decodeToken()
+    accountId.value = accountInfo.id
+    status.loading = false
+    status.loginStep = 1
+    const { url, secret } = await API.account.generateTotp({ accountname: accountInfo.accountname })
+    status.totpUrl = url
+    totpSecret = secret
+    console.log(url)
+    // router.push('/')
   } catch (err) {
-    console.log('eeeee', err)
+    status.loading = false
     if (err.status == 401) {
-      console.log('用户名/密码不正确')
+      console.log('eeeee', err)
+      messageApi.error(t('login.error'))
     } else {
       console.log('error:', err)
+      messageApi.error('unkown error')
     }
+  }
+}
+const verifyTotpCode = async () => {
+  console.log(totpSecret, totpCode.value)
+
+  const result = await API.account.verifyTotp({ secret: totpSecret, token: totpCode.value })
+
+  if (result) {
+    console.log('okokokok')
+    router.push('/')
+  } else {
+    isVerifyError.value = true
   }
 }
 

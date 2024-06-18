@@ -10,11 +10,11 @@ const accountSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  totpsecret: {
+  totp_secret: {
     type: String,
     required: true
   },
-  phonenumber: {
+  phone_number: {
     type: String,
     required: true
   }

@@ -41,7 +41,7 @@
     <div v-if="status.loginStep == 1" class="form">
       <div style="margin: 20px 0; background-color: white; width: fit-content; height: fit-content"><a-qrcode :value="status.totpUrl" /></div>
 
-      <VerifyInput v-model:value="totpCode" :autofocus="true" @finish="verifyTotpCode" :digits="6" v-model:isError="isVerifyError"></VerifyInput>
+      <VerifyInput v-model:value="totpCode" :autofocus="false" @finish="verifyTotpCode" :digits="6" v-model:isError="isVerifyError"></VerifyInput>
     </div>
   </div>
 </template>

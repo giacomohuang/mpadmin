@@ -15,7 +15,8 @@ app.use(
   cors({
     origin: 'http://localhost:5173',
     maxAge: 3600,
-    allowMethods: 'GET,POST'
+    allowMethods: 'GET,POST',
+    exposeHeaders: 'Authorization,Newaccesstoken,Newrefreshtoken,Refreshtoken'
   })
 )
 

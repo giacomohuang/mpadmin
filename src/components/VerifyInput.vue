@@ -1,6 +1,6 @@
 <template>
   <div class="verify-wrap" ref="verifyWrap">
-    <input v-for="(i, index) in digits" :value="codeArray[index]" :index="index" maxlength="1" @keydown="onKeyDown($event, index)" @animationend="removeShake" />
+    <input v-for="(i, index) in digits" :value="codeArray[index]" :index="index" maxlength="1" @keydown="onKeyDown($event, index)" @keyup="onKeyUp" @animationend="removeShake" />
   </div>
 </template>
 <script setup>
@@ -49,6 +49,7 @@ const removeShake = (e) => {
 
 const onKeyDown = async (e, index) => {
   e.preventDefault()
+  console.log('onKeyDown', e.key)
   const ctrlCmdKey = isMac ? e.metaKey : e.ctrlKey
   if (ctrlCmdKey && e.key === 'v') {
     const clipboardData = await navigator.clipboard.readText()
@@ -61,10 +62,11 @@ const onKeyDown = async (e, index) => {
     const code = codeArray.value.join('')
     value.value = code
     if (idx == digits - 1 && code.length === digits) {
-      emits('finish', code)
+      setTimeout(() => {
+        emits('finish', code)
+      }, 120)
     }
-  }
-  if (e.key >= '0' && e.key <= '9') {
+  } else if (e.key >= '0' && e.key <= '9') {
     e.target.value = e.key
     codeArray.value[index] = e.key
     if (e.target.nextElementSibling) {
@@ -74,14 +76,22 @@ const onKeyDown = async (e, index) => {
       value.value = code
       if (code.length === digits) {
         // console.log('code:', code)
-        emits('finish', code)
+        setTimeout(() => {
+          emits('finish', code)
+        }, 120)
       }
     }
   } else if (e.key === 'Backspace') {
     e.target.value = ''
     codeArray.value[index] = ''
     if (e.target.previousElementSibling) e.target.previousElementSibling.focus()
+  } else {
+    return
   }
+}
+
+const onKeyUp = (e) => {
+  e.target.value = e.target.value.replace(/\D/g, '')
 }
 </script>
 
@@ -92,11 +102,10 @@ const onKeyDown = async (e, index) => {
 
 input {
   all: unset;
-  border: 1px solid #666;
   background: var(--bg-input);
   height: 50px;
   width: 50px;
-  border: 2px solid transparent;
+  border: 3px solid #00000000;
   border-radius: 20%;
   font-size: 2em;
   font-weight: 600;
@@ -105,7 +114,7 @@ input {
 
   &:focus,
   .active {
-    border-color: var(--bg-brand);
+    border-color: var(--c-brand2);
   }
 }
 

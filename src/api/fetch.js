@@ -16,7 +16,7 @@ fetch.interceptors.request.use(
     // console.log(config)
     const accesstoken = localStorage.getItem('accessToken')
     // console.log(accesstoken, refreshtoken)
-    if (!['/account/login', '/account/verifytoken'].includes(config.url) && accesstoken) {
+    if (!['/account/login'].includes(config.url) && accesstoken) {
       config.headers['Authorization'] = 'Bearer ' + accesstoken
       config.headers['refreshtoken'] = localStorage.getItem('refreshToken')
     }
@@ -32,14 +32,15 @@ fetch.interceptors.request.use(
 fetch.interceptors.response.use(
   (resp) => {
     // if (router.currentRoute.value.meta.noAuth) return resp.data
-    // console.log(resp.data)
-    if (resp.data.needRefresh) {
-      localStorage.setItem('accessToken', resp.data.newAccessToken)
-      localStorage.setItem('refreshToken', resp.data.newRefreshToken)
-      console.log('hit token refesh', resp.data.newAccessToken, resp.data.newRefreshToken)
-      resp.data.newAccessToken = undefined
-      resp.data.newRefreshToken = undefined
-      resp.data.needRefresh = undefined
+    // console.log('new', resp.headers['newaccesstoken'], resp.headers['newrefreshtoken'])
+    if (resp.headers['newaccesstoken'] && resp.headers['newrefreshtoken']) {
+      // console.log('hit token refresh')
+      localStorage.setItem('accessToken', resp.headers['newaccesstoken'])
+      localStorage.setItem('refreshToken', resp.headers['newrefreshtoken'])
+      console.log('hit token refresh')
+      // resp.data.newAccessToken = undefined
+      // resp.headers['newRefreshToken'] = undefined
+      // resp.headers['needRefresh'] = undefined
     }
     return resp.data
   },

@@ -1,6 +1,8 @@
 <template>
   <header>
-    <div class="logo"><img src="@/assets/logo.png" width="24" /></div>
+    <div class="logo">
+      <a href="/"><img src="@/assets/logo.png" width="24" /></a>
+    </div>
     <div class="app-name">{{ $t('appname') }}</div>
     <div class="title">{{ $t($route.meta.title) }}</div>
     <div class="my">
@@ -12,7 +14,7 @@
         <template #overlay>
           <a-menu>
             <a-menu-item>
-              <a @click="router.push('/my/account')">{{ $t('route.myaccount') }}</a>
+              <a @click="router.push('/my/profile')">{{ $t('route.profile') }}</a>
             </a-menu-item>
             <a-menu-item>
               <a @click="logout">{{ $t('route.logout') }}</a>
@@ -248,7 +250,7 @@ main {
   background: var(--bg-main);
   height: calc(100vh - 64px);
   overflow-y: auto;
-  padding: 20px;
+  padding: 25px;
   // padding-top: 64px;
 }
 

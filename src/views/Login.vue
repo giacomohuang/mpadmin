@@ -39,8 +39,7 @@
       </a-form-item>
     </a-form>
     <div v-if="status.loginStep == 1" class="form">
-      <div style="margin: 20px 0; background-color: white; width: fit-content; height: fit-content"><a-qrcode :value="status.totpUrl" /></div>
-
+      <div style="border-radius: 8px; margin: 20px 0; background-color: white; width: fit-content; height: fit-content"><a-qrcode v-if="status.totpUrl" :value="status.totpUrl" /></div>
       <VerifyInput v-model:value="totpCode" :autofocus="false" @finish="verifyTotpCode" :digits="6" v-model:isError="isVerifyError"></VerifyInput>
     </div>
   </div>
@@ -98,11 +97,11 @@ const handleLogin = async (values) => {
   }
 }
 const verifyTotpCode = async () => {
-  console.log(totpSecret, totpCode.value)
+  // console.log(totpSecret, totpCode.value)
 
-  const result = await API.account.verifyTotp({ secret: totpSecret, token: totpCode.value })
+  const data = await API.account.verifyTotp({ secret: totpSecret, token: totpCode.value })
 
-  if (result) {
+  if (data.result) {
     console.log('okokokok')
     router.push('/')
   } else {

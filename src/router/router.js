@@ -39,7 +39,7 @@ router.beforeEach(async (to, from, next) => {
   } else {
     try {
       const res = await account.verifyToken(helper.getToken())
-      console.log(res.verify)
+      console.log('gaggga', res.verify)
       if (res.verify) {
         if (res.needRefresh) {
           helper.setToken({ accessToken: res.newAccessToken, refreshToken: res.newRefreshToken })
@@ -109,8 +109,10 @@ export const dynamicRoutes = [
     name: 'my',
     meta: { title: 'route.my', permissionId: '000010000' },
     icon: '#icon-my',
-    redirect: '/my/account',
-    children: [{ path: '/my/account', component: () => import('@/views/My/Account.vue'), meta: { title: 'route.myaccount', permission: '0000010001' } }]
+    children: [
+      { path: '/my/profile', component: () => import('@/views/My/Profile.vue'), meta: { title: 'route.profile', permission: '40001' } },
+      { path: '/my/authentication', component: () => import('@/views/My/Authentication.vue'), meta: { title: 'route.authentication', permission: '40002' } }
+    ]
   }
 
   // {

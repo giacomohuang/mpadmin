@@ -39,11 +39,13 @@ class AccountController extends BaseController {
         .createHash('md5')
         .update(refreshToken + process.env.SECRET_KEY_REFRESH)
         .digest('hex')
-      console.log(md5Token)
+
       const redis = new Redis()
-      await redis.set(md5Token, true)
+      await redis.set(md5Token, 'true')
       ctx.body = { accessToken, refreshToken }
-      console.log(ctx.body)
+      console.log('====login====')
+      console.log('refreshToken:', refreshToken)
+      console.log('md5:', md5Token)
     } catch (err) {
       if (err.status == 401) {
         ctx.throw(401, 'Invalid accountname or password')
@@ -85,7 +87,7 @@ class AccountController extends BaseController {
       length: 20
     })
     const url = speakeasy.otpauthURL({ secret: secret.ascii, label: accountname, issuer: 'MPAdmin' })
-    ctx.body = { url, secret: secret.base32 }
+    ctx.body = { ...ctx.body, url, secret: secret.base32 }
     // console.log(url, secret)
   }
 
@@ -97,7 +99,7 @@ class AccountController extends BaseController {
       encoding: 'base32',
       token: token
     })
-    ctx.body = tokenValidates
+    ctx.body = { result: tokenValidates }
   }
   static async hello(ctx) {
     try {
@@ -108,7 +110,7 @@ class AccountController extends BaseController {
       // const result = await redis.get(md5token)
       // res.json(result)
       // console.log('res', req.user)
-      ctx.body.data = 'asdasd'
+      ctx.body = { data: 'hello' }
       console.log('hahahahhahhaa', ctx.body)
     } catch (err) {
       console.log('err')

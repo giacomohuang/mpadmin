@@ -17,9 +17,10 @@
     "verification": "券核销",
     "templatelist": "券模板",
     "my": "我的",
-    "myaccount": "我的账号",
+    "profile": "我的档案",
     "logout": "退出登录",
-    "page404": "404: 页面不存在"
+    "page404": "404: 页面不存在",
+    "authentication": "密码和身份验证"
   },
   "login": {
     "title": "登录管理运营平台",

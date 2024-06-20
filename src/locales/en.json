@@ -31,7 +31,14 @@
   },
   "authentication": {
     "changepwd": "Change Password",
-    "hide": "Hide"
+    "hide": "Hide",
+    "confirmpwd": "Confirm password",
+    "newpwd": "New Password",
+    "pwd": "Password",
+    "oldpwd": "Old Password",
+    "pep": "Please enter the password",
+    "pepa": "Please enter password again",
+    "pnm": "Password confirmation doesn't match the password"
   },
   "common": {
     "submit": "Submit"

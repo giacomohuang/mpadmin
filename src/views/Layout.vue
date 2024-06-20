@@ -101,6 +101,46 @@ onMounted(() => {})
 </script>
 
 <style scoped lang="scss">
+// @media only screen and (max-width: 1536px) {
+//   header,
+//   .main-wrap {
+//     max-width: 1536px;
+//   }
+// }
+// @media only screen and (max-width: 1280px) {
+//   header,
+//   .main-wrap {
+//     max-width: 1280px;
+//   }
+// }
+// @media only screen and (max-width: 1024px) {
+//   header,
+//   .main-wrap {
+//     max-width: 1024px;
+//   }
+// }
+// @media only screen and (max-width: 768px) {
+//   header,
+//   .main-wrap {
+//     max-width: 768px;
+//   }
+// }
+// @media only screen and (max-width: 640px) {
+//   header,
+//   .main-wrap {
+//     min-width: 640px;
+//     width: 100vh;
+//   }
+//   .main-menu {
+//     display: none;
+//   }
+//   header {
+//     .title {
+//       font-size: 12px;
+//     }
+//   }
+// }
+
 header {
   display: flex;
   flex-direction: row;
@@ -109,8 +149,8 @@ header {
   padding: 0 12px;
   height: 64px;
   width: 100%;
-  min-width: 1000px;
-  font-size: 16px;
+  min-width: 640px;
+  // font-size: 16px;
   background-color: var(--bg-layout);
   // background-image: radial-gradient(transparent 1px, #fff 1px);
   // background-size: 4px 4px;
@@ -177,7 +217,7 @@ header {
   flex-direction: row;
   height: calc(100vh - 64px);
   // margin-top: 68px;
-  min-width: 1000px;
+  min-width: 640px;
 }
 
 .main-menu {
@@ -250,7 +290,7 @@ main {
   background: var(--bg-main);
   height: calc(100vh - 64px);
   overflow-y: auto;
-  padding: 25px;
+  // padding: 25px;
   // padding-top: 64px;
 }
 

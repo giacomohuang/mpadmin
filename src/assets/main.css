@@ -1,6 +1,20 @@
 @import './variables.css';
 @import './rest.css';
 
+:root {
+  font-size: 12px;
+}
+@media screen and (max-width: 640px) {
+}
+@media screen and (max-width: 768px) {
+}
+@media screen and (max-width: 1024px) {
+}
+@media screen and (max-width: 1280px) {
+}
+@media screen and (max-width: 1536px) {
+}
+
 /* iconfont */
 .iconfont {
   width: 1.5em;

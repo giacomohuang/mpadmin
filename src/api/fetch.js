@@ -39,8 +39,8 @@ fetch.interceptors.response.use(
       localStorage.setItem('refreshToken', resp.headers['newrefreshtoken'])
       console.log('hit token refresh')
       // resp.data.newAccessToken = undefined
-      // resp.headers['newRefreshToken'] = undefined
-      // resp.headers['needRefresh'] = undefined
+      resp.headers['newRefreshToken'] = undefined
+      resp.headers['needRefresh'] = undefined
     }
     return resp.data
   },

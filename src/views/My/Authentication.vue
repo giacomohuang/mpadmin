@@ -2,19 +2,19 @@
   <div class="main">
     <section>
       <div class="title flex flex-item-c">
-        <h2>{{ $t('authentication.pwd') }}</h2>
-        <a-button @click.stop="status.toggleChangePwd = !status.toggleChangePwd">{{ status.toggleChangePwd ? $t('authentication.hide') : $t('authentication.changepwd') }}</a-button>
+        <h2>{{ $t('my.auth.pwd') }}</h2>
+        <a-button @click.stop="status.toggleChangePwd = !status.toggleChangePwd">{{ status.toggleChangePwd ? $t('my.auth.hide') : $t('my.auth.cpwd') }}</a-button>
       </div>
       <div class="hint">Strengthen your account by ensuring your password is strong.</div>
       <div v-if="status.toggleChangePwd" class="content">
         <a-form ref="pwdFormRef" :model="pwdForm" :label-col="{ span: 6 }" :rules="pwdRules" :wrapper-col="{ span: 12 }" @validate="handlePwdValidate">
-          <a-form-item has-feedback :label="$t('authentication.oldpwd')" name="oldPassword">
+          <a-form-item has-feedback :label="$t('my.auth.oldpwd')" name="oldPassword">
             <a-input type="password" v-model:value="pwdForm.oldPassword" />
           </a-form-item>
-          <a-form-item has-feedback :label="$t('authentication.newpwd')" name="newPassword">
+          <a-form-item has-feedback :label="$t('my.auth.newpwd')" name="newPassword">
             <a-input type="password" v-model:value="pwdForm.newPassword" />
           </a-form-item>
-          <a-form-item has-feedback :label="$t('authentication.confirmpwd')" name="confirmPassword">
+          <a-form-item has-feedback :label="$t('my.auth.cfpwd')" name="confirmPassword">
             <a-input type="password" v-model:value="pwdForm.confirmPassword" />
           </a-form-item>
           <a-form-item :wrapper-col="{ offset: 6 }">
@@ -43,7 +43,7 @@ const status = reactive({
 const vPwd = async (_rule, value) => {
   console.log('aaaa')
   if (value === '') {
-    return Promise.reject(t('authentication.pep'))
+    return Promise.reject(t('my.auth.pep'))
   } else {
     if (pwdForm.confirmPassword !== '') {
       pwdFormRef.value.validateFields('confirmPassword')
@@ -54,9 +54,9 @@ const vPwd = async (_rule, value) => {
 const vConfirmPwd = async (_rule, value) => {
   console.log('bbbb')
   if (value === '') {
-    return Promise.reject(t('authentication.pepa'))
+    return Promise.reject(t('my.auth.pepa'))
   } else if (value !== pwdForm.newPassword) {
-    return Promise.reject(t('authentication.pnm'))
+    return Promise.reject(t('my.auth.pnm'))
   } else {
     return Promise.resolve()
   }

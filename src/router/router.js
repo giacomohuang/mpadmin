@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Layout from '@/views/Layout.vue'
 import helper from '../js/helper'
-import i18n from '../js/i18n'
+import i18n, { loadLocaleData } from '../js/i18n'
 import account from '../api/account'
 
 // import Layout1 from '@/views/Layout1.vue'
@@ -44,12 +44,15 @@ router.beforeEach(async (to, from, next) => {
         if (res.needRefresh) {
           helper.setToken({ accessToken: res.newAccessToken, refreshToken: res.newRefreshToken })
         }
+        await loadLocaleData(localStorage.getItem('locale'), to.path)
         next()
       } else {
+        await loadLocaleData(localStorage.getItem('locale'), '/login')
         next({ path: '/login' })
       }
     } catch (e) {
       console.log(e)
+      await loadLocaleData(localStorage.getItem('locale'), '/login')
       next({ path: '/login' })
     }
   }

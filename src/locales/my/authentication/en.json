@@ -1,3 +1,15 @@
 {
-  "my.authentication.hello": "sdasd"
+  "my": {
+    "auth": {
+      "hide": "Hide",
+      "newpwd": "New Password",
+      "pwd": "Password",
+      "oldpwd": "Old Password",
+      "pep": "Please enter the password",
+      "pepa": "Please enter password again",
+      "pnm": "Password confirmation doesn't match the password",
+      "cpwd": "Change Password",
+      "cfpwd": "Confirm password"
+    }
+  }
 }

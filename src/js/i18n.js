@@ -1,6 +1,7 @@
 import { nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { router } from '../router/router'
+import { SELECTION_NONE } from 'ant-design-vue/es/table/hooks/useSelection'
 
 const SUPPORT_LOCALES = ['en', 'zh-CN']
 const sysLocale = navigator.language
@@ -14,11 +15,12 @@ const i18n = createI18n({
 
 // 初始化时载入默认语言
 // console.log('current', currentLocale)
-await loadLocaleMessages(i18n, currentLocale)
+await loadLocaleData(currentLocale, '/login')
 
 // 切换语言
 export async function changeLocale(locale) {
-  await loadLocaleMessages(i18n, locale)
+  console.log('bbbbb', router.currentRoute.value.path)
+  await loadLocaleData(locale, router.currentRoute.value.path)
   if (i18n.mode === 'legacy') {
     i18n.global.locale = locale
   } else {
@@ -27,6 +29,7 @@ export async function changeLocale(locale) {
   localStorage.setItem('locale', locale)
   document.querySelector('html').setAttribute('lang', locale)
   const title = router.currentRoute.value.meta.title
+  console.log(title)
   if (title) {
     document.title = `${i18n.global.t('appname')} - ${i18n.global.t(title)}`
   } else {
@@ -35,11 +38,15 @@ export async function changeLocale(locale) {
 }
 
 // 懒加载语言包
-export async function loadLocaleMessages(i18n, locale) {
+export async function loadLocaleData(locale, path) {
   // load locale messages with dynamic import
-  const messages = await import(`../locales/${locale}.json`)
+  const p = `../locales${path}`
+  const [global, partial] = await Promise.all([import(/* @vite-ignore */ `../locales/root/${locale}.json`), import(/* @vite-ignore */ `${p}/${locale}.json`)])
   // set locale and locale message
-  i18n.global.setLocaleMessage(locale, messages.default)
+  i18n.global.setLocaleMessage(locale, global.default)
+  i18n.global.mergeLocaleMessage(locale, partial.default)
+
+  console.log(i18n.global.messages.value)
   return nextTick()
 }
 

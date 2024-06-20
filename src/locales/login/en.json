@@ -1,0 +1,9 @@
+{
+  "login": {
+    "title": "Sign in to MPAdmin",
+    "accountname": "Account",
+    "password": "Password",
+    "signin": "Sign in",
+    "error": "Accountname or Password is Incorrect"
+  }
+}

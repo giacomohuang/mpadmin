@@ -1,0 +1,9 @@
+{
+  "login": {
+    "title": "登录管理运营平台",
+    "accountname": "账号",
+    "password": "密码",
+    "signin": "登录",
+    "error": "用户名/密码错误"
+  }
+}

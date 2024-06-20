@@ -22,24 +22,7 @@
     "page404": "404: 页面不存在",
     "authentication": "密码和身份验证"
   },
-  "login": {
-    "title": "登录管理运营平台",
-    "accountname": "账号",
-    "password": "密码",
-    "signin": "登录",
-    "error": "用户名/密码错误"
-  },
-  "authentication": {
-    "changepwd": "修改密码",
-    "hide": "隐藏",
-    "pwd": "密码",
-    "oldpwd": "旧密码",
-    "newpwd": "新密码",
-    "confirmpwd": "确认新密码",
-    "pep": "请输入密码",
-    "pepa": "请再次输入密码",
-    "pnm": "两次输入密码不一致"
-  },
+
   "common": {
     "submit": "提交"
   }

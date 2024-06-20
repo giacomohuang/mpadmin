@@ -1,11 +1,11 @@
 <template>
   <div class="main">
     <section>
-      <div class="title flex">
+      <div class="title flex flex-item-c">
         <h2>{{ $t('authentication.pwd') }}</h2>
-        Strengthen your account by ensuring your password is strong.
         <a-button @click.stop="status.toggleChangePwd = !status.toggleChangePwd">{{ status.toggleChangePwd ? $t('authentication.hide') : $t('authentication.changepwd') }}</a-button>
       </div>
+      <div class="hint">Strengthen your account by ensuring your password is strong.</div>
       <div v-if="status.toggleChangePwd" class="content">
         <a-form ref="pwdFormRef" :model="pwdForm" :label-col="{ span: 6 }" :rules="pwdRules" :wrapper-col="{ span: 12 }" @validate="handlePwdValidate">
           <a-form-item has-feedback :label="$t('authentication.oldpwd')" name="oldPassword">

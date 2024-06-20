@@ -16,7 +16,13 @@ h2 {
   display: block;
   font-size: 24px;
   font-weight: 400;
+  margin: 0;
 }
+.hint {
+  color: var(--text-primary);
+  margin: 8px 0;
+}
+
 .flex {
   display: flex;
   justify-content: space-between;
@@ -27,9 +33,9 @@ h2 {
   flex-direction: column;
 }
 
-.flex-content-c {
+.flex-cnt-c {
   justify-content: center;
 }
-.flex-items-c {
+.flex-item-c {
   align-items: center;
 }

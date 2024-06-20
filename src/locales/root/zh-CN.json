@@ -1,0 +1,46 @@
+{
+  "404": {
+    "backhome": "返回工作台",
+    "description": "抱歉，你访问的页面不存在。"
+  },
+  "appname": "管理运营平台",
+  "lang": "语言",
+  "route": {
+    "login": "登录",
+    "workspace": "工作台",
+    "account": "账户",
+    "accountlist": "账户列表",
+    "permission": "权限",
+    "marketing": "营销",
+    "voucher": "券",
+    "voucherlist": "券列表",
+    "verification": "券核销",
+    "templatelist": "券模板",
+    "my": "我的",
+    "profile": "我的档案",
+    "logout": "退出登录",
+    "page404": "404: 页面不存在",
+    "authentication": "密码和身份验证"
+  },
+  "login": {
+    "title": "登录管理运营平台",
+    "accountname": "账号",
+    "password": "密码",
+    "signin": "登录",
+    "error": "用户名/密码错误"
+  },
+  "authentication": {
+    "changepwd": "修改密码",
+    "hide": "隐藏",
+    "pwd": "密码",
+    "oldpwd": "旧密码",
+    "newpwd": "新密码",
+    "confirmpwd": "确认新密码",
+    "pep": "请输入密码",
+    "pepa": "请再次输入密码",
+    "pnm": "两次输入密码不一致"
+  },
+  "common": {
+    "submit": "提交"
+  }
+}

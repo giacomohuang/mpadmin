@@ -3,24 +3,34 @@
   padding: 40px;
 }
 section {
-  margin-bottom: 20px;
+  margin-bottom: 60px;
   .title {
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border-muted);
     padding-bottom: 12px;
   }
   .content {
     margin: 40px 0;
   }
+  .tips {
+    color: var(--text-primary);
+    margin: 20px 0;
+  }
+  .item {
+    color: var(--text-primary);
+    margin: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    label {
+      font-weight: 500;
+    }
+  }
 }
 h2 {
   display: block;
   font-size: 24px;
-  font-weight: 400;
+  font-weight: 500;
   margin: 0;
-}
-.hint {
-  color: var(--text-primary);
-  margin: 8px 0;
 }
 
 .flex {

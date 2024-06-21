@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Layout from '@/views/Layout.vue'
 import helper from '../js/helper'
-import i18n, { loadLocaleData } from '../js/i18n'
+import i18n, { loadLocaleData, getLocale } from '../js/i18n'
 import account from '../api/account'
 
 // import Layout1 from '@/views/Layout1.vue'
@@ -16,43 +16,51 @@ export const router = createRouter({
   // },
   routes: [
     { path: '/login', name: 'login', component: () => import('@/views/Login.vue'), meta: { title: 'route.login', noAuth: true } },
-    { path: '/404', name: '404', component: () => import('@/views/404.vue'), meta: { title: 'route.page404', noAuth: true } },
-    { path: '/:pathMatch(.*)', redirect: '/404', meta: { title: 'route.page404', noAuth: true } }
+    { path: '/404', name: '404', component: () => import('@/views/404.vue'), meta: { title: 'route.404', noAuth: true } },
+    { path: '/:pathMatch(.*)', redirect: '/404', meta: { title: 'route.404', noAuth: true } }
   ]
 })
+
+const setTitle = (title) => {
+  if (title) {
+    document.title = `${i18n.global.t('appname')} - ${i18n.global.t(title)}`
+  } else {
+    document.title = i18n.global.t('appname')
+  }
+}
 
 // 路由前置守卫
 router.beforeEach(async (to, from, next) => {
   const { meta } = to
-
-  // console.log(i18n.global.locale.value)
-  if (meta.title) {
-    document.title = `${i18n.global.t('appname')} - ${i18n.global.t(meta.title)}`
-  } else {
-    document.title = i18n.global.t('appname')
-  }
-
+  // 载入路由对应的语言文件
+  // console.log(getLocale())
+  console.log(to.path)
+  await loadLocaleData(getLocale(), to.path)
   // 如果当前页面不需要认证，则放行
   if (meta.noAuth) {
     console.log('pass')
+
     next()
   } else {
     try {
       const res = await account.verifyToken(helper.getToken())
-      console.log('gaggga', res.verify)
+      setTitle(meta.title)
       if (res.verify) {
         if (res.needRefresh) {
           helper.setToken({ accessToken: res.newAccessToken, refreshToken: res.newRefreshToken })
         }
-        await loadLocaleData(localStorage.getItem('locale'), to.path)
+        // await loadLocaleData(localStorage.getItem('locale'), to.path)
+        setTitle(meta.title)
         next()
       } else {
-        await loadLocaleData(localStorage.getItem('locale'), '/login')
+        // await loadLocaleData(localStorage.getItem('locale'), '/login')
+        setTitle(meta.title)
         next({ path: '/login' })
       }
     } catch (e) {
       console.log(e)
-      await loadLocaleData(localStorage.getItem('locale'), '/login')
+      // await loadLocaleData(localStorage.getItem('locale'), '/login')
+      setTitle(meta.title)
       next({ path: '/login' })
     }
   }

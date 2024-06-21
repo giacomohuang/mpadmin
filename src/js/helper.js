@@ -59,6 +59,18 @@ const helper = {
   removeToken() {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+  },
+
+  // 混淆敏感信息
+  obfuscate(type, value) {
+    switch (type) {
+      case 'email':
+        return value.replace(/^(.)(.*)(?=@)/, (_, firstChar, middlePart) => firstChar + '*'.repeat(middlePart.length) + middlePart.slice(-1))
+      case 'phone':
+        return value.replace(/^(\d{3})(\d{6})(\d*)/, (_, firstThree, middleSix, last) => firstThree + '*'.repeat(6) + last)
+      default:
+        return value
+    }
   }
 }
 export default helper

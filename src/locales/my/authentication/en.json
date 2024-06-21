@@ -9,7 +9,19 @@
       "pepa": "Please enter password again",
       "pnm": "Password confirmation doesn't match the password",
       "cpwd": "Change Password",
-      "cfpwd": "Confirm password"
+      "cfpwd": "Confirm password",
+      "syaeyps": "Strengthen your account by ensuring your password is strong.",
+      "pst": "The password is too simple. Please use a combination of numbers, uppercase and lowercase letters, and symbols.",
+      "week": "week",
+      "fair": "fair",
+      "good": "good",
+      "strong": "strong",
+      "excellent": "excellent",
+      "auth": "Authentication",
+      "email": "Email",
+      "mobi": "Mobile Phone (SMS)",
+      "totp": "Dynamic Password (OTP)",
+      "emailad": "Email"
     }
   }
 }

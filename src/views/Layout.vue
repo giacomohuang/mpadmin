@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, toRefs, reactive, inject } from 'vue'
+import { onBeforeMount, onMounted, ref, toRefs, reactive, inject } from 'vue'
 import { router, dynamicRoutes } from '../router/router'
 import { changeLocale } from '../js/i18n'
 import SubMenu from './SubMenu.vue'
@@ -76,10 +76,9 @@ if (!accountid.value) accountid.value = accessToken.id
 const menu = ref(dynamicRoutes)
 const submenu = ref(router.currentRoute.value.matched[0])
 const currentMenuIdx = ref(-1)
-const onChangeLocale = ({ key }) => {
-  changeLocale(key)
+const onChangeLocale = async ({ key }) => {
+  await changeLocale(key)
 }
-
 // menu.value =
 // 取根节点下的子菜单
 function changeSubMenu(index) {

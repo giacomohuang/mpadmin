@@ -8,7 +8,7 @@ const aaa = ref('')
 onMounted(async () => {
   try {
     aaa.value = await API.account.hello()
-    console.log('aaa', aaa.value)
+    // console.log('aaa', aaa.value)
   } catch (err) {
     console.log(err)
   }

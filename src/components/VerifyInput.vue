@@ -1,10 +1,12 @@
 <template>
   <div class="verify-wrap" ref="verifyWrap">
-    <input v-for="(i, index) in digits" :value="codeArray[index]" :index="index" maxlength="1" @keydown="onKeyDown($event, index)" @keyup="onKeyUp" @animationend="removeShake" />
+    <input v-for="(i, index) in digits" autocomplete="off" aria-autocomplete="none" :value="codeArray[index]" :index="index" maxlength="1" @keydown="onKeyDown($event, index)" @keyup="onKeyUp" @animationend="removeShake" />
   </div>
 </template>
+
 <script setup>
 import { watch, ref, onMounted, nextTick } from 'vue'
+
 const props = defineProps({
   digits: {
     type: Number,
@@ -105,7 +107,7 @@ input {
   background: var(--bg-input);
   height: 50px;
   width: 50px;
-  border: 3px solid #00000000;
+  border: 3px solid var(--color-border-muted);
   border-radius: 20%;
   font-size: 2em;
   font-weight: 600;

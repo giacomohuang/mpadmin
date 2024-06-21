@@ -1,8 +1,4 @@
 {
-  "404": {
-    "backhome": "Back to workspace",
-    "description": "Sorry, the page you visited does not exist."
-  },
   "appname": "MPAdmin",
   "lang": "Language",
   "route": {
@@ -22,8 +18,8 @@
     "page404": "404 Not Found",
     "authentication": "Authentication"
   },
-
-  "common": {
-    "submit": "Submit"
+  "cpnt": {
+    "submit": "Submit",
+    "reset": "Reset"
   }
 }

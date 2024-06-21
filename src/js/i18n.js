@@ -10,12 +10,9 @@ const currentLocale = localStorage.getItem('locale') || (SUPPORT_LOCALES.include
 
 const i18n = createI18n({
   locale: currentLocale,
-  legacy: false
+  legacy: false,
+  fallbackLocale: 'zh-CN'
 })
-
-// 初始化时载入默认语言
-// console.log('current', currentLocale)
-await loadLocaleData(currentLocale, '/login')
 
 // 切换语言
 export async function changeLocale(locale) {
@@ -37,16 +34,26 @@ export async function changeLocale(locale) {
   }
 }
 
+export function getLocale() {
+  return i18n.global.locale.value
+}
+
 // 懒加载语言包
 export async function loadLocaleData(locale, path) {
   // load locale messages with dynamic import
   const p = `../locales${path}`
-  const [global, partial] = await Promise.all([import(/* @vite-ignore */ `../locales/root/${locale}.json`), import(/* @vite-ignore */ `${p}/${locale}.json`)])
-  // set locale and locale message
-  i18n.global.setLocaleMessage(locale, global.default)
-  i18n.global.mergeLocaleMessage(locale, partial.default)
+  console.log('local path', p)
+  try {
+    const [common, partial] = await Promise.all([import(/* @vite-ignore */ `../locales/common/${locale}.json`), import(/* @vite-ignore */ `${p}/${locale}.json`)])
+    // set locale and locale message
+    i18n.global.setLocaleMessage(locale, common.default)
+    i18n.global.mergeLocaleMessage(locale, partial.default)
 
-  console.log(i18n.global.messages.value)
+    console.log(partial.default)
+  } catch (e) {
+    // i18n.global.setLocaleMessage(locale, global.default)
+    console.log('locale load error')
+  }
   return nextTick()
 }
 

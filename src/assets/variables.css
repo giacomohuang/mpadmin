@@ -85,6 +85,7 @@
   --bg-input: var(--c-white);
 
   --color-border: var(--c-gray4);
+  --color-border-muted: #d0d7deb3;
   --color-border-hover: var(--c-gray5);
   --color-shadow: var(--c-gray3);
 
@@ -105,6 +106,7 @@
   --bg-input: var(--c-black);
 
   --color-border: var(--c-gray7);
+  --color-border-muted: #a1a8adb3;
   --color-border-hover: var(--c-gray6);
   --color-shadow: #222;
 

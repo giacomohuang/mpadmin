@@ -16,13 +16,12 @@ watch(theme, (val) => {
   setTheme(val)
 })
 
-// console.log(Theme.value)
 // 媒体查询当前系统是否为暗黑模式
 const darkMode = window.matchMedia('(prefers-color-scheme: dark)')
 // antv组件主题
 const antTheme = ref('')
+// antv主色设置为系统的品牌色
 const antColorPrimary = ref(getComputedStyle(document.documentElement).getPropertyValue('--c-brand'))
-
 setTheme(theme.value)
 
 darkMode.addEventListener('change', (e) => {

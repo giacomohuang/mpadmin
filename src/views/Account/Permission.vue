@@ -17,7 +17,7 @@
 <script setup>
 import { ref, reactive, watch, onBeforeMount, onMounted, computed } from 'vue'
 import { API } from '../../api/index'
-import { permission } from '../../api/permission'
+// import { permission } from '../../api/permission'
 
 let permissions = ref([])
 const loading = ref(true)

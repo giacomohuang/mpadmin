@@ -24,7 +24,9 @@
       "emailad": "Email",
       "svcode": "Send the verification code",
       "edit": "Edit",
-      "notset": "Not set"
+      "notset": "Not set",
+      "set": "Set",
+      "reset": "Reset"
     }
   }
 }

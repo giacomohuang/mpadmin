@@ -45,7 +45,10 @@
       <div class="title flex flex-item-c">
         <h2>{{ $t('my.authentication.email') }}</h2>
       </div>
-      <div class="item"><label>未设置</label><a-button @click="status.setEmailVisible = true">设置</a-button></div>
+      <div class="item">
+        <label>{{ $t('my.authentication.notset') }}</label>
+        <a-button @click="status.setEmailVisible = true">{{ $t('my.authentication.set') }}</a-button>
+      </div>
       <div class="item">
         <label>{{ helper.obfuscate('email', emailForm.email) }}</label>
         <a-button>{{ $t('my.authentication.edit') }}</a-button>
@@ -75,8 +78,8 @@
         <h2>{{ $t('my.authentication.mobi') }}</h2>
       </div>
       <div class="item">
-        <label>{{ $t('my.authentication') }}</label>
-        <a-button @click="">设置</a-button>
+        <label>{{ $t('my.authentication.notset') }}</label>
+        <a-button @click="">{{ $t('my.authentication.set') }}</a-button>
       </div>
       <div class="item">
         <label>{{ helper.obfuscate('phone', '15618036377') }}</label>
@@ -87,9 +90,13 @@
       <div class="title flex flex-item-c">
         <h2>{{ $t('my.authentication.totp') }}</h2>
       </div>
-      <div class="item"><label>未设置</label><a-button>设置</a-button></div>
       <div class="item">
-        <label>重新绑定</label><a-button>{{ $t('my.authentication.edit') }}</a-button>
+        <label>{{ $t('my.authentication.notset') }}</label>
+        <a-button>{{ $t('my.authentication.set') }}</a-button>
+      </div>
+      <div class="item">
+        <label>{{ $t('my.authentication.reset') }}</label>
+        <a-button>{{ $t('my.authentication.edit') }}</a-button>
       </div>
     </section>
   </div>

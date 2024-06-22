@@ -17,9 +17,9 @@
     "nanoid": "^5.0.7",
     "password-quality-calculator": "^1.0.4",
     "pinia": "^2.1.7",
-    "vue": "^3.4.27",
+    "vue": "^3.4.30",
     "vue-i18n": "^9.13.1",
-    "vue-router": "^4.3.2",
+    "vue-router": "^4.4.0",
     "vue3-perfect-scrollbar": "^2.0.0",
     "vuedraggable": "^4.1.0",
     "zxcvbn": "^4.4.2"
@@ -40,7 +40,7 @@
     "sass-loader": "^14.2.1",
     "svg-baker": "^1.7.0",
     "svgo": "^3.3.2",
-    "vite": "^5.2.12",
+    "vite": "^5.3.1",
     "vitest": "^1.6.0"
   }
 }

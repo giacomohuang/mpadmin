@@ -3,7 +3,7 @@
     <context-holder />
     <header>
       <div class="logo"><img src="@/assets/logo.png" width="24" /></div>
-      <div class="app-name">{{ $t('appname') }}</div>
+      <div class="app-name">{{ $t('common.appname') }}</div>
       <div class="lang">
         <a-dropdown>
           <a @click.prevent> <Icon name="global" size="2em" /></a>

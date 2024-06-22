@@ -28,9 +28,9 @@ export async function changeLocale(locale) {
   const title = router.currentRoute.value.meta.title
   console.log(title)
   if (title) {
-    document.title = `${i18n.global.t('appname')} - ${i18n.global.t(title)}`
+    document.title = `${i18n.global.t('common.appname')} - ${i18n.global.t(title)}`
   } else {
-    document.title = `${i18n.global.t('appname')}`
+    document.title = `${i18n.global.t('common.appname')}`
   }
 }
 

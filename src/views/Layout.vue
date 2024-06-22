@@ -3,7 +3,7 @@
     <div class="logo">
       <a href="/"><img src="@/assets/logo.png" width="24" /></a>
     </div>
-    <div class="app-name">{{ $t('appname') }}</div>
+    <div class="app-name">{{ $t('common.appname') }}</div>
     <div class="title">{{ $t($route.meta.title) }}</div>
     <div class="my">
       <a-dropdown>
@@ -14,10 +14,10 @@
         <template #overlay>
           <a-menu>
             <a-menu-item>
-              <a @click="router.push('/my/profile')">{{ $t('route.profile') }}</a>
+              <a @click="router.push('/my/profile')">{{ $t('common.route.profile') }}</a>
             </a-menu-item>
             <a-menu-item>
-              <a @click="logout">{{ $t('route.logout') }}</a>
+              <a @click="logout">{{ $t('common.route.logout') }}</a>
             </a-menu-item>
           </a-menu>
         </template>

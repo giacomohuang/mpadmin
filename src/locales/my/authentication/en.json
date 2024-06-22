@@ -1,6 +1,6 @@
 {
   "my": {
-    "auth": {
+    "authentication": {
       "hide": "Hide",
       "newpwd": "New Password",
       "pwd": "Password",
@@ -21,7 +21,9 @@
       "email": "Email",
       "mobi": "Mobile Phone (SMS)",
       "totp": "Dynamic Password (OTP)",
-      "emailad": "Email"
+      "emailad": "Email",
+      "svcode": "Send the verification code",
+      "edit": "Edit"
     }
   }
 }

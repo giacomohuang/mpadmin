@@ -2,58 +2,58 @@
   <div class="main">
     <section>
       <div class="title flex flex-item-c">
-        <h2>{{ $t('my.auth.pwd') }}</h2>
-        <a-button @click.stop="status.toggleChangePwd = !status.toggleChangePwd">{{ status.toggleChangePwd ? $t('my.auth.hide') : $t('my.auth.cpwd') }}</a-button>
+        <h2>{{ $t('my.authentication.pwd') }}</h2>
+        <a-button @click.stop="status.toggleChangePwd = !status.toggleChangePwd">{{ status.toggleChangePwd ? $t('my.authentication.hide') : $t('my.authentication.cpwd') }}</a-button>
       </div>
-      <div class="tips">{{ $t('my.auth.syaeyps') }}</div>
+      <div class="tips">{{ $t('my.authentication.syaeyps') }}</div>
       <div v-if="status.toggleChangePwd" class="content">
         <a-form ref="pwdFormRef" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 12 }" @validate="handlePwdValidate">
-          <a-form-item has-feedback :label="$t('my.auth.oldpwd')" name="oldPassword">
+          <a-form-item has-feedback :label="$t('my.authentication.oldpwd')" name="oldPassword">
             <a-input-password v-model:value="pwdForm.oldPassword" />
           </a-form-item>
-          <a-form-item has-feedback :label="$t('my.auth.newpwd')" name="newPassword">
+          <a-form-item has-feedback :label="$t('my.authentication.newpwd')" name="newPassword">
             <ul v-if="pwdForm.newPassword" class="strength">
               <li :class="{ s0: status.strength == 0 }">
-                <label v-if="status.strength == 0">{{ $t('my.auth.week') }}</label>
+                <label v-if="status.strength == 0">{{ $t('my.authentication.week') }}</label>
               </li>
               <li :class="{ s1: status.strength == 1 }">
-                <label v-show="status.strength == 1">{{ $t('my.auth.fair') }}</label>
+                <label v-show="status.strength == 1">{{ $t('my.authentication.fair') }}</label>
               </li>
               <li :class="{ s2: status.strength == 2 }">
-                <label v-show="status.strength == 2">{{ $t('my.auth.good') }}</label>
+                <label v-show="status.strength == 2">{{ $t('my.authentication.good') }}</label>
               </li>
               <li :class="{ s3: status.strength == 3 }">
-                <label v-show="status.strength == 3">{{ $t('my.auth.strong') }}</label>
+                <label v-show="status.strength == 3">{{ $t('my.authentication.strong') }}</label>
               </li>
               <li :class="{ s4: status.strength == 4 }">
-                <label v-show="status.strength == 4">{{ $t('my.auth.excellent') }}</label>
+                <label v-show="status.strength == 4">{{ $t('my.authentication.excellent') }}</label>
               </li>
             </ul>
             <a-input-password v-model:value="pwdForm.newPassword" />
           </a-form-item>
-          <a-form-item has-feedback :label="$t('my.auth.cfpwd')" name="confirmPassword">
+          <a-form-item has-feedback :label="$t('my.authentication.cfpwd')" name="confirmPassword">
             <a-input-password v-model:value="pwdForm.confirmPassword" />
           </a-form-item>
           <a-form-item :wrapper-col="{ offset: 6 }">
-            <a-button type="ghost" @click="handleResetPwdForm">{{ $t('cpnt.reset') }}</a-button>
-            <a-button type="primary" html-type="submit" style="margin-left: 10px">{{ $t('cpnt.submit') }}</a-button>
+            <a-button type="ghost" @click="handleResetPwdForm">{{ $t('common.cpnt.reset') }}</a-button>
+            <a-button type="primary" html-type="submit" style="margin-left: 10px">{{ $t('common.cpnt.submit') }}</a-button>
           </a-form-item>
         </a-form>
       </div>
     </section>
     <section>
       <div class="title flex flex-item-c">
-        <h2>{{ $t('my.auth.email') }}</h2>
+        <h2>{{ $t('my.authentication.email') }}</h2>
       </div>
       <div class="item"><label>未设置</label><a-button @click="status.setEmailVisible = true">设置</a-button></div>
       <div class="item">
         <label>{{ helper.obfuscate('email', emailForm.email) }}</label>
-        <a-button>修改</a-button>
+        <a-button>{{ $t('my.authentication.edit') }}</a-button>
       </div>
       <a-modal v-model:open="status.setEmailVisible" title="设置电子邮件" ok-text="确定" cancel-text="取消" @ok="handleSetEmail" @cancel="handleCancelSetEmail">
         <a-form ref="emailFormRef" :model="emailForm" :label-col="{ span: 6 }" :wrapper-col="{ span: 12 }">
           <a-form-item
-            :label="$t('my.auth.emailad')"
+            :label="$t('my.authentication.emailad')"
             name="email_new"
             :rules="[
               { required: true, message: '请输入电子邮件地址' },
@@ -61,8 +61,8 @@
             ]"
           >
             <a-input v-model:value="emailForm.email_new" />
-            <a @click="handleGetEmailCode" v-if="!status.isCountDown" style="margin-top: 20px">发送验证码</a>
-            <span v-else>{{ status.countDownTime }}秒后可重新发送</span>
+            <a @click="handleGetEmailCode" v-if="!status.isCountDown" style="margin-top: 20px">{{ $t('my.authentication.svcode') }}</a>
+            <span v-else>{{ status.countDownTime }}{{ $t('my.authentication.sssss') }}</span>
           </a-form-item>
         </a-form>
         <div class="flex flex-cnt-c verifycode" v-if="status.emailSended">
@@ -72,20 +72,22 @@
     </section>
     <section>
       <div class="title flex flex-item-c">
-        <h2>{{ $t('my.auth.mobi') }}</h2>
+        <h2>{{ $t('my.authentication.mobi') }}</h2>
       </div>
       <div class="item"><label>未设置</label><a-button @click="">设置</a-button></div>
       <div class="item">
         <label>{{ helper.obfuscate('phone', '15618036377') }}</label>
-        <a-button>修改</a-button>
+        <a-button>{{ $t('my.authentication.edit') }}</a-button>
       </div>
     </section>
     <section>
       <div class="title flex flex-item-c">
-        <h2>{{ $t('my.auth.totp') }}</h2>
+        <h2>{{ $t('my.authentication.totp') }}</h2>
       </div>
       <div class="item"><label>未设置</label><a-button>设置</a-button></div>
-      <div class="item"><label>重新绑定</label><a-button>修改</a-button></div>
+      <div class="item">
+        <label>重新绑定</label><a-button>{{ $t('my.authentication.edit') }}</a-button>
+      </div>
     </section>
   </div>
 </template>
@@ -127,7 +129,7 @@ const vPwd = async (_rule, value) => {
     return Promise.reject()
   }
   if (value === '') {
-    return Promise.reject(t('my.auth.pep'))
+    return Promise.reject(t('my.authentication.pep'))
   } else {
     if (pwdForm.confirmPassword !== '') {
       pwdFormRef.value.validateFields('confirmPassword')
@@ -137,16 +139,16 @@ const vPwd = async (_rule, value) => {
 }
 const vConfirmPwd = async (_rule, value) => {
   if (value === '') {
-    return Promise.reject(t('my.auth.pepa'))
+    return Promise.reject(t('my.authentication.pepa'))
   } else if (value !== pwdForm.newPassword) {
-    return Promise.reject(t('my.auth.pnm'))
+    return Promise.reject(t('my.authentication.pnm'))
   } else {
     return Promise.resolve()
   }
 }
 
 const pwdRules = {
-  oldPassword: [{ required: true, message: t('my.auth.pep') }],
+  oldPassword: [{ required: true, message: t('my.authentication.pep') }],
   newPassword: [{ required: true, validator: vPwd, trigger: 'change' }],
   confirmPassword: [{ validator: vConfirmPwd, trigger: 'change' }]
 }

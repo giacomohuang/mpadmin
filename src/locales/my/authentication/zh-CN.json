@@ -1,6 +1,6 @@
 {
   "my": {
-    "auth": {
+    "authentication": {
       "hide": "隐藏",
       "pwd": "密码",
       "oldpwd": "旧密码",
@@ -21,7 +21,9 @@
       "email": "电子邮件验证",
       "mobi": "手机短信验证 (SMS)",
       "totp": "动态口令验证 (OTP)",
-      "emailad": "电子邮件"
+      "emailad": "电子邮件",
+      "svcode": "发送验证码",
+      "edit": "修改"
     }
   }
 }

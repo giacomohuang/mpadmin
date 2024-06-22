@@ -1,25 +1,27 @@
 {
-  "appname": "MPAdmin",
-  "lang": "Language",
-  "route": {
-    "login": "Sign in",
-    "workspace": "Workspace",
-    "account": "Account",
-    "accountlist": "Account List",
-    "permission": "Permission",
-    "marketing": "Marketing",
-    "voucher": "Voucher",
-    "voucherlist": "Voucher",
-    "verification": "Verification",
-    "templatelist": "Template",
-    "my": "My",
-    "profile": "My Profile",
-    "logout": "Sign out",
-    "page404": "404 Not Found",
-    "authentication": "Authentication"
-  },
-  "cpnt": {
-    "submit": "Submit",
-    "reset": "Reset"
+  "common": {
+    "appname": "MPAdmin",
+    "lang": "Language",
+    "route": {
+      "login": "Sign in",
+      "workspace": "Workspace",
+      "account": "Account",
+      "accountlist": "Account List",
+      "permission": "Permission",
+      "marketing": "Marketing",
+      "voucher": "Voucher",
+      "voucherlist": "Voucher",
+      "verification": "Verification",
+      "templatelist": "Template",
+      "my": "My",
+      "profile": "My Profile",
+      "logout": "Sign out",
+      "page404": "404 Not Found",
+      "authentication": "Authentication"
+    },
+    "cpnt": {
+      "submit": "Submit",
+      "reset": "Reset"
+    }
   }
 }

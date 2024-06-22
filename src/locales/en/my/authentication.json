@@ -23,7 +23,8 @@
       "totp": "Dynamic Password (OTP)",
       "emailad": "Email",
       "svcode": "Send the verification code",
-      "edit": "Edit"
+      "edit": "Edit",
+      "notset": "Not set"
     }
   }
 }

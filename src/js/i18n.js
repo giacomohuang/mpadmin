@@ -41,10 +41,10 @@ export function getLocale() {
 // 懒加载语言包
 export async function loadLocaleData(locale, path) {
   // load locale messages with dynamic import
-  const p = `../locales${path}`
+  const p = `../locales/${locale}/${path}`
   console.log('local path', p)
   try {
-    const [common, partial] = await Promise.all([import(/* @vite-ignore */ `../locales/common/${locale}.json`), import(/* @vite-ignore */ `${p}/${locale}.json`)])
+    const [common, partial] = await Promise.all([import(/* @vite-ignore */ `../locales/${locale}/common.json`), import(/* @vite-ignore */ `${p}.json`)])
     // set locale and locale message
     i18n.global.setLocaleMessage(locale, common.default)
     i18n.global.mergeLocaleMessage(locale, partial.default)

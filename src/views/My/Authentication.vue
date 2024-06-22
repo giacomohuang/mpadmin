@@ -62,7 +62,7 @@
           >
             <a-input v-model:value="emailForm.email_new" />
             <a @click="handleGetEmailCode" v-if="!status.isCountDown" style="margin-top: 20px">{{ $t('my.authentication.svcode') }}</a>
-            <span v-else>{{ status.countDownTime }}{{ $t('my.authentication.sssss') }}</span>
+            <span v-else>{{ status.countDownTime }}秒后可重新发送</span>
           </a-form-item>
         </a-form>
         <div class="flex flex-cnt-c verifycode" v-if="status.emailSended">
@@ -74,7 +74,10 @@
       <div class="title flex flex-item-c">
         <h2>{{ $t('my.authentication.mobi') }}</h2>
       </div>
-      <div class="item"><label>未设置</label><a-button @click="">设置</a-button></div>
+      <div class="item">
+        <label>{{ $t('my.authentication') }}</label>
+        <a-button @click="">设置</a-button>
+      </div>
       <div class="item">
         <label>{{ helper.obfuscate('phone', '15618036377') }}</label>
         <a-button>{{ $t('my.authentication.edit') }}</a-button>

@@ -12,8 +12,9 @@ section {
     margin: 40px 0;
   }
   .tips {
-    color: var(--text-primary);
-    margin: 20px 0;
+    color: var(--text-secondary);
+    margin: 12px 0;
+    font-size: 14px;
   }
   .item {
     color: var(--text-primary);
@@ -35,12 +36,15 @@ h2 {
 
 .flex {
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
 }
-
 .flex-col {
   display: flex;
   flex-direction: column;
+}
+
+.flex-betwwen {
+  justify-content: space-between;
 }
 
 .flex-cnt-c {

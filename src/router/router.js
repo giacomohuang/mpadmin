@@ -36,31 +36,23 @@ router.beforeEach(async (to, from, next) => {
   // console.log(getLocale())
   console.log(to.path)
   await loadLocaleData(getLocale(), to.path)
+  setTitle(meta.title)
   // 如果当前页面不需要认证，则放行
   if (meta.noAuth) {
     console.log('pass')
-
     next()
   } else {
     try {
       const res = await account.verifyToken(helper.getToken())
-      setTitle(meta.title)
       if (res.verify) {
         if (res.needRefresh) {
           helper.setToken({ accessToken: res.newAccessToken, refreshToken: res.newRefreshToken })
         }
-        // await loadLocaleData(localStorage.getItem('locale'), to.path)
-        setTitle(meta.title)
         next()
       } else {
-        // await loadLocaleData(localStorage.getItem('locale'), '/login')
-        setTitle(meta.title)
         next({ path: '/login' })
       }
     } catch (e) {
-      console.log(e)
-      // await loadLocaleData(localStorage.getItem('locale'), '/login')
-      setTitle(meta.title)
       next({ path: '/login' })
     }
   }

@@ -91,8 +91,8 @@
 
   --text-primary: var(--c-gray8);
   --text-primary-active: var(--c-gray9);
-  --text-secondary: var(--c-gray6);
-  --text-secondary-active: var(--c-gray7);
+  --text-secondary: var(--c-gray7);
+  --text-secondary-active: var(--c-gray8);
   --text-tertiary: var(--c-gray4);
   --text-tertiary-active: var(--c-gray5);
 }

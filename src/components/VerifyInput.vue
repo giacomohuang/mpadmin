@@ -27,7 +27,6 @@ const value = defineModel('value')
 const isMac = navigator.userAgent.indexOf('Mac') !== -1
 
 onMounted(() => {
-  console.log('mounted')
   if (autofocus) {
     verifyWrap.value.querySelectorAll('input')[0].focus()
   }
@@ -51,7 +50,7 @@ const removeShake = (e) => {
 
 const onKeyDown = async (e, index) => {
   e.preventDefault()
-  console.log('onKeyDown', e.key)
+  // console.log('onKeyDown', e.key)
   const ctrlCmdKey = isMac ? e.metaKey : e.ctrlKey
   if (ctrlCmdKey && e.key === 'v') {
     const clipboardData = await navigator.clipboard.readText()

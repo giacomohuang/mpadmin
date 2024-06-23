@@ -614,11 +614,20 @@ Mock.mock(RegExp(`${baseUrl}/dept/get\\?id=*`), 'get', () => {
 })
 
 Mock.mock(RegExp(`${baseUrl}/permission/getlist`), 'get', () => {
-  console.log('hit mock')
   return permissionData
 })
 
 Mock.mock(RegExp(`${baseUrl}/user/getpermissions\\?uid=*`), 'get', () => {
-  console.log('hit mock')
   return userPermission
+})
+
+Mock.mock(RegExp(`${baseUrl}/my/sendcodebyemail`), 'post', () => {
+  return { result: true }
+})
+
+Mock.mock(RegExp(`${baseUrl}/my/verifycodebyemail.*`), 'post', (options) => {
+  console.log('hit mock', options)
+  let result = false
+  if (JSON.parse(options.body).code == '1234') result = true
+  return { result: result }
 })

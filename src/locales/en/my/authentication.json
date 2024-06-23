@@ -22,11 +22,19 @@
       "mobi": "Mobile Phone (SMS)",
       "totp": "Dynamic Password (OTP)",
       "emailad": "Email",
-      "svcode": "Send the verification code",
+      "svcode": "Send Code",
       "edit": "Edit",
       "notset": "Not set",
       "set": "Set",
-      "reset": "Reset"
+      "reset": "Reset",
+      "editemail": "Edit Email Address",
+      "setemail": "Set Email Address",
+      "resendin": "It's possible to resend after {count}s.",
+      "rsvemail": "You will receive a verification email. Please fill in the 4-digit verification code in the email below. DO NOT share the code to others.",
+      "editphone": "Modify Mobile Phone Number",
+      "setphone": "Set Mobile Phone Number",
+      "phonead": "Phone Number",
+      "rsvphone": "You will receive a verification text message. Please fill in the 4-digit verification code below. DO NOT share the verification code to others."
     }
   }
 }

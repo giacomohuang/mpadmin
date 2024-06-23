@@ -44,12 +44,12 @@ export async function loadLocaleData(locale, path) {
   const p = `../locales/${locale}/${path}`
   console.log('local path', p)
   try {
-    const [common, partial] = await Promise.all([import(/* @vite-ignore */ `../locales/${locale}/common.json`), import(/* @vite-ignore */ `${p}.json`)])
+    const [common, page] = await Promise.all([import(/* @vite-ignore */ `../locales/${locale}/common.json`), import(/* @vite-ignore */ `${p}.json`)])
     // set locale and locale message
     i18n.global.setLocaleMessage(locale, common.default)
-    i18n.global.mergeLocaleMessage(locale, partial.default)
+    i18n.global.mergeLocaleMessage(locale, page.default)
 
-    console.log(partial.default)
+    // console.log(page.default)
   } catch (e) {
     // i18n.global.setLocaleMessage(locale, global.default)
     console.log('locale load error')

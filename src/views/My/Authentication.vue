@@ -51,11 +51,13 @@
         <a-button @click="status.setEmailVisible = true">{{ emailForm.email ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
       </div>
       <a-modal v-model:open="status.setEmailVisible" :title="emailForm.email ? $t('my.authentication.editemail') : $t('my.authentication.setemail')" :footer="null" @cancel="handleCancelSet">
-        <a-form style="margin-top: 40px" ref="emailFormRef" :model="emailForm">
+        <a-form style="margin-top: 40px" ref="emailFormRef" :model="emailForm" layout="inline">
           <a-form-item :label="$t('my.authentication.emailad')" name="emailNew" :rules="emailRules">
             <a-input v-model:value="emailForm.emailNew" @pressEnter="handleGetEmailCode" />
+          </a-form-item>
+          <a-form-item>
             <a @click="handleGetEmailCode" v-if="!emailStatus.isCountDown" class="resend">{{ $t('my.authentication.svcode') }}</a>
-            <span class="resend resend-hint" v-else>{{ $t('my.authentication.resendin', emailStatus.countDownTime) }}</span>
+            <span class="resend resend-hint" v-if="emailStatus.isCountDown">{{ $t('my.authentication.resendin', emailStatus.countDownTime) }}</span>
           </a-form-item>
         </a-form>
         <div class="flex-col flex-item-c verifycode" v-if="emailStatus.isSend">
@@ -392,8 +394,8 @@ onUnmounted(() => {
   margin: 20px 0 50px 0;
   .hint {
     font-size: 12px;
-    text-align: center;
-    padding: 10px 20px;
+    // text-align: center;
+    padding: 10px 0;
   }
 }
 </style>

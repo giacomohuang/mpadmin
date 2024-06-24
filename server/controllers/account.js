@@ -81,6 +81,8 @@ class AccountController extends BaseController {
       }
     }
   }
+
+  // 生成动态令牌的secret和激活地址
   static async generateTotp(ctx) {
     const { accountname } = ctx.request.body
     const secret = speakeasy.generateSecret({
@@ -91,9 +93,10 @@ class AccountController extends BaseController {
     // console.log(url, secret)
   }
 
+  // 验证动态令牌，仅用于初始化
   static async verifyTotp(ctx) {
     const { secret, token } = ctx.request.body
-    console.log(secret, token)
+    // console.log(secret, token)
     var tokenValidates = speakeasy.totp.verify({
       secret: secret,
       encoding: 'base32',
@@ -105,7 +108,11 @@ class AccountController extends BaseController {
   static async getAuthInfo(ctx) {
     try {
       const accountid = ctx.request.headers['accountid']
-      const authInfo = await Account.findOne({ _id: accountid }).select('areacode phone email')
+      const authInfo = await Account.findOne({ _id: accountid }).select('areacode phone email totpSecret')
+      // 如果有totp秘钥，则置为*，不暴露给客户端
+      if (authInfo.totpSecret) {
+        authInfo.totpSecret = '*'
+      }
       ctx.body = authInfo
     } catch (err) {
       console.log(err)
@@ -113,10 +120,12 @@ class AccountController extends BaseController {
     }
   }
 
+  // 验证并更新邮箱
   static async updateEmail(ctx) {
     try {
       const accountid = ctx.request.headers['accountid']
-      const { email } = ctx.request.body
+      const { verifycode, email } = ctx.request.body
+      // TODO 验证verifycode
       const result = await Account.findOneAndUpdate({ _id: accountid }, { email })
       console.log(result)
       ctx.body = { result: true }
@@ -125,10 +134,31 @@ class AccountController extends BaseController {
       ctx.throw(500, 'Internal Server Error')
     }
   }
+
+  // 验证并更新邮箱
+  static async updatePassword(ctx) {
+    try {
+      const accountid = ctx.request.headers['accountid']
+      const { oldPassword, newPassword } = ctx.request.body
+      // TODO 验证verifycode
+      const result = await Account.findOneAndUpdate({ _id: accountid, password: oldPassword }, { password: newPassword })
+      if (result) {
+        ctx.body = { result: true }
+      } else {
+        ctx.body = { result: false }
+      }
+    } catch (err) {
+      console.log(err)
+      ctx.throw(500, 'Internal Server Error')
+    }
+  }
+
+  // 验证并更新手机号
   static async updatePhone(ctx) {
     try {
       const accountid = ctx.request.headers['accountid']
-      const { areacode, phone } = ctx.request.body
+      const { verifycode, areacode, phone } = ctx.request.body
+      // TODO 验证verifycode
       await Account.findOneAndUpdate({ _id: accountid }, { areacode, phone })
       ctx.body = { result: true }
     } catch (err) {

@@ -9,7 +9,7 @@
       </div>
       <div class="tips">{{ $t('my.authentication.syaeyps') }}</div>
       <div v-if="status.toggleChangePwd" class="content">
-        <a-form ref="pwdFormRef" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 12 }" @validate="handlePwdValidate">
+        <a-form ref="pwdFormRef" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 12 }" @validate="handlePwdValidate" @finish="handleUpdatePwd">
           <a-form-item has-feedback :label="$t('my.authentication.oldpwd')" name="oldPassword">
             <a-input-password v-model:value="pwdForm.oldPassword" />
           </a-form-item>
@@ -49,7 +49,7 @@
       </div>
       <div class="tips">使用手机短信验证码增强账户安全</div>
       <div class="item">
-        <label>+{{ phoneForm.areacode }} {{ phoneForm.phone ? helper.obfuscate('phone', phoneForm.phone) : $t('my.authentication.notset') }}</label>
+        <label>{{ phoneForm.areacode }} {{ phoneForm.phone ? helper.obfuscate('phone', phoneForm.phone) : $t('my.authentication.notset') }}</label>
         <a-button @click="status.setPhoneVisible = true">{{ phoneForm.phone ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
       </div>
       <a-modal v-model:open="status.setPhoneVisible" :title="phoneForm.phone ? $t('my.authentication.editphone') : $t('my.authentication.setphone')" :footer="null" @cancel="handleCancelSet" width="530px">
@@ -79,10 +79,12 @@
       </div>
       <div class="tips">使用动态口令增强账户安全</div>
       <div class="item">
-        <label>{{ emailForm.email ? helper.obfuscate('email', emailForm.email) : $t('my.authentication.notset') }}</label>
-        <a-button @click="status.setEmailVisible = true">{{ emailForm.email ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
+        <label>{{ totpForm.totpSecret ? $t('my.authentication.havset') : $t('my.authentication.notset') }}</label>
+        <a-button @click="status.setTotpVisible = true">{{ totpForm.totpSecret ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
       </div>
+      <a-modal v-model:open="status.setTotpVisible" :title="totpForm.totpSecret ? $t('my.authentication.edittotp') : $t('my.authentication.settotp')" :footer="null" @cancel="handleCancelSet"> </a-modal>
     </section>
+
     <section>
       <div class="title flex flex-item-c">
         <h2>{{ $t('my.authentication.email') }}</h2>
@@ -112,7 +114,7 @@
 </template>
 <script setup>
 // common
-import { inject, toRefs, onUnmounted, reactive, ref, onBeforeMount } from 'vue'
+import { inject, toRefs, onUnmounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from '@/stores/stores'
 import { message } from 'ant-design-vue'
@@ -136,6 +138,7 @@ const status = reactive({
   strength: 0,
   setEmailVisible: false,
   setPhoneVisible: false,
+  setTotpVisible: false,
   loading: false,
   dataLoading: true
 })
@@ -167,6 +170,11 @@ const phoneForm = reactive({
   areacodeNew: null,
   phoneNew: null
 })
+
+const totpForm = reactive({
+  totpSecret: ''
+})
+
 const phoneStatus = reactive({
   isCountDown: false,
   countDownTime: 0,
@@ -179,7 +187,7 @@ const otpFormRef = ref()
 
 const vPwd = async (_rule, value) => {
   status.strength = zxcvbn(value).score
-  if (status.strength < 3) {
+  if (status.strength < 2) {
     return Promise.reject()
   }
   if (value === '') {
@@ -251,6 +259,22 @@ const handleResetPwdForm = () => {
 const handleCancelSet = () => {
   console.log('cancel')
   status.verifyCode = ''
+}
+
+const handleUpdatePwd = async () => {
+  try {
+    const resp = await API.my.updatePassword(pwdForm.oldPassword, pwdForm.newPassword)
+    if (resp.result) {
+      messageApi.success('密码成功更新!')
+      pwdFormRef.value.resetFields()
+      status.toggleChangePwd = !status.toggleChangePwd
+    } else {
+      messageApi.success('旧密码输入错误，请重试')
+    }
+  } catch (err) {
+    console.log(err)
+    return
+  }
 }
 
 const handleSendEmail = async () => {

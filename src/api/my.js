@@ -10,11 +10,19 @@ const my = {
       url: '/my/sendcodebyemail'
     })
   },
+  updatePassword(oldPassword, newPassword) {
+    return fetch({
+      baseURL: baseUrl.default,
+      method: 'post',
+      data: { oldPassword, newPassword },
+      url: '/my/updatepassword'
+    })
+  },
   updateEmail(verifycode, email) {
     return fetch({
       baseURL: baseUrl.default,
       method: 'post',
-      data: { verifycode: verifycode, email: email },
+      data: { verifycode, email },
       url: '/my/updateemail'
     })
   },
@@ -22,7 +30,7 @@ const my = {
     return fetch({
       baseURL: baseUrl.default,
       method: 'post',
-      data: { areacode: areacode, phone: phone },
+      data: { areacode, phone },
       url: '/my/sendcodebysms'
     })
   },
@@ -30,7 +38,7 @@ const my = {
     return fetch({
       baseURL: baseUrl.default,
       method: 'post',
-      data: { verifycode: verifycode, areacode: areacode, phone: phone },
+      data: { verifycode, areacode, phone },
       url: '/my/updatephone'
     })
   },

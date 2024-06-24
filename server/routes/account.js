@@ -12,6 +12,7 @@ router.post('/account/hello', authSign, authToken, AccountController.hello)
 router.post('/account/generateTotp', authToken, AccountController.generateTotp)
 router.post('/account/verifyTotp', authToken, AccountController.verifyTotp)
 router.post('/my/getauthinfo', authToken, AccountController.getAuthInfo)
+router.post('/my/updatepassword', authToken, AccountController.updatePassword)
 router.post('/my/updateemail', authToken, AccountController.updateEmail)
 router.post('/my/updatephone', authToken, AccountController.updatePhone)
 

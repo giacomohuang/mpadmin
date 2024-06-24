@@ -18,7 +18,7 @@ const accountSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  totp_secret: {
+  totpSecret: {
     type: String,
     required: true
   },

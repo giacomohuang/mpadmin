@@ -72,6 +72,7 @@ class AccountController extends BaseController {
           ctx.status = 200
           ctx.body = { verify: true, needRefresh: true, newAccessToken, newRefreshToken }
         } catch (err) {
+          console.log('error here', err)
           ctx.throw(401, 'Auth Failed 20001')
         }
       } else {
@@ -80,7 +81,6 @@ class AccountController extends BaseController {
       }
     }
   }
-
   static async generateTotp(ctx) {
     const { accountname } = ctx.request.body
     const secret = speakeasy.generateSecret({
@@ -101,19 +101,47 @@ class AccountController extends BaseController {
     })
     ctx.body = { result: tokenValidates }
   }
+
+  static async getAuthInfo(ctx) {
+    try {
+      const accountid = ctx.request.headers['accountid']
+      const authInfo = await Account.findOne({ _id: accountid }).select('areacode phone email')
+      ctx.body = authInfo
+    } catch (err) {
+      console.log(err)
+      ctx.throw(500, 'Internal Server Error')
+    }
+  }
+
+  static async updateEmail(ctx) {
+    try {
+      const accountid = ctx.request.headers['accountid']
+      const { email } = ctx.request.body
+      const result = await Account.findOneAndUpdate({ _id: accountid }, { email })
+      console.log(result)
+      ctx.body = { result: true }
+    } catch (err) {
+      console.log(err)
+      ctx.throw(500, 'Internal Server Error')
+    }
+  }
+  static async updatePhone(ctx) {
+    try {
+      const accountid = ctx.request.headers['accountid']
+      const { areacode, phone } = ctx.request.body
+      await Account.findOneAndUpdate({ _id: accountid }, { areacode, phone })
+      ctx.body = { result: true }
+    } catch (err) {
+      console.log(err)
+      ctx.throw(500, 'Internal Server Error')
+    }
+  }
+
   static async hello(ctx) {
     try {
-      // const t = req.headers['stoken']
-      // const token = t.replace(/^bearer\s+/i, '')
-      // const md5token = crypto.createHash('md5').update(token).digest('hex')
-      // const redis = new Redis()
-      // const result = await redis.get(md5token)
-      // res.json(result)
-      // console.log('res', req.user)
       ctx.body = { data: 'hello' }
-      console.log('hahahahhahhaa', ctx.body)
     } catch (err) {
-      console.log('err')
+      console.log(err)
       ctx.throw(500, 'Internal Server Error')
     }
   }

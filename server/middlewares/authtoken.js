@@ -20,23 +20,25 @@ const authToken = async (ctx, next) => {
       if (!ctx.body) {
         ctx.body = {}
       }
-      // let decoded = jwt.verify(token, process.env.SECRET_KEY_ACCESS)
+      const decoded = jwt.verify(token, process.env.SECRET_KEY_ACCESS)
+      ctx.request.headers['accountid'] = decoded.id
       // console.log('access', decoded)
       await next()
     } catch (err) {
       // 如果是token过期
       if (err.name === 'TokenExpiredError') {
         // 开始验证refreshtoken]
-        console.log('start refresh')
+        console.log('start refresh token')
         const result = await refresh(ctx.request.headers['refreshtoken'])
-        console.log('res::::::::', result.accessToken, result.refreshToken)
+        // console.log('res::::::::', result.accessToken, result.refreshToken)
         ctx.set('newAccessToken', result.accessToken)
         ctx.set('newRefreshToken', result.refreshToken)
+        ctx.request.headers['accountid'] = result.id
         await next()
       }
       // 如果accesstoken验证失败
       else {
-        throw new Error('Access denied,code:40003')
+        throw new Error('Access denied,code:40003')``
       }
     }
   } catch (err) {
@@ -56,12 +58,11 @@ const refresh = async (token) => {
       .update(refreshtoken_old + process.env.SECRET_KEY_REFRESH)
       .digest('hex')
     const redis = new Redis()
-    console.log('======refresh')
-    console.log('refreshToken:', token)
-    console.log('md5', md5Token_old)
+    // console.log('======refresh')
+    // console.log('refreshToken:', token)
+    // console.log('md5', md5Token_old)
     const isExist = await redis.get(md5Token_old)
-
-    // console.log('isExist redis key:', isExist)
+    console.log('isExist redis key:', isExist, md5Token_old)
     if (!isExist) {
       throw new Error('auth denied, code 40004')
     }
@@ -75,10 +76,12 @@ const refresh = async (token) => {
       .createHash('md5')
       .update(refreshToken + process.env.SECRET_KEY_REFRESH)
       .digest('hex')
-    // console.log('md5token2:', md5Token)
-    await redis.set(md5Token, true)
-    return { accessToken, refreshToken }
+
+    await redis.set(md5Token, 'true')
+    console.log('!!!!!md5token:', md5Token)
+    return { accessToken, refreshToken, id }
   } catch (err) {
+    console.log('=======err in refresh====')
     throw err
   }
 }

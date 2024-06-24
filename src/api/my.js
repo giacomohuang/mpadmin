@@ -2,20 +2,43 @@ import fetch from './fetch'
 import baseUrl from './baseUrl'
 
 const my = {
-  sendCodeByEmail(accountid) {
+  sendCodeByEmail(email) {
     return fetch({
       baseURL: baseUrl.default,
       method: 'post',
-      data: { accountid: accountid },
-      url: '/api/my/sendcodebyemail'
+      data: { email: email },
+      url: '/my/sendcodebyemail'
     })
   },
-  verifyCodeByEmail(accountid, code) {
+  updateEmail(verifycode, email) {
     return fetch({
       baseURL: baseUrl.default,
       method: 'post',
-      data: { accounid: accountid, code: code },
-      url: '/api/my/verifycodebyemail'
+      data: { verifycode: verifycode, email: email },
+      url: '/my/updateemail'
+    })
+  },
+  sendCodeBySMS(areacode, phone) {
+    return fetch({
+      baseURL: baseUrl.default,
+      method: 'post',
+      data: { areacode: areacode, phone: phone },
+      url: '/my/sendcodebysms'
+    })
+  },
+  updatePhone(verifycode, areacode, phone) {
+    return fetch({
+      baseURL: baseUrl.default,
+      method: 'post',
+      data: { verifycode: verifycode, areacode: areacode, phone: phone },
+      url: '/my/updatephone'
+    })
+  },
+  getAuthInfo() {
+    return fetch({
+      baseURL: baseUrl.default,
+      method: 'post',
+      url: '/my/getauthinfo'
     })
   }
 }

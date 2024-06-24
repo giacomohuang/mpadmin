@@ -10,11 +10,19 @@ const accountSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  areacode: {
+    type: String,
+    required: true
+  },
+  phone: {
+    type: String,
+    required: true
+  },
   totp_secret: {
     type: String,
     required: true
   },
-  phone_number: {
+  email: {
     type: String,
     required: true
   }

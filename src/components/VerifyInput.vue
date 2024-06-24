@@ -1,6 +1,9 @@
 <template>
-  <div class="verify-wrap" ref="verifyWrap">
-    <input v-for="(i, index) in digits" autocomplete="off" aria-autocomplete="none" :value="codeArray[index]" :index="index" maxlength="1" @keydown="onKeyDown($event, index)" @keyup="onKeyUp" @animationend="removeShake" />
+  <div class="wrap">
+    <div class="verify-wrap" ref="verifyRef">
+      <input v-for="(i, index) in digits" autocomplete="off" :disabled="loading" aria-autocomplete="none" :value="codeArray[index]" :index="index" maxlength="1" @keydown="onKeyDown($event, index)" @keyup="onKeyUp" @animationend="removeShake" />
+    </div>
+    <div class="lwrap" ref="loadingRef"></div>
   </div>
 </template>
 
@@ -18,28 +21,33 @@ const props = defineProps({
   }
 })
 const emits = defineEmits(['finish'])
+const isError = defineModel('isError')
+const value = defineModel('value')
 const digits = props.digits
 const autofocus = props.autofocus
 const codeArray = ref(Array(digits).fill(''))
-const verifyWrap = ref(null)
-const isError = defineModel('isError')
-const value = defineModel('value')
+const verifyRef = ref(null)
+const loadingRef = ref(null)
+const loading = ref(false)
+
 const isMac = navigator.userAgent.indexOf('Mac') !== -1
 
 onMounted(() => {
   if (autofocus) {
-    verifyWrap.value.querySelectorAll('input')[0].focus()
+    verifyRef.value.querySelectorAll('input')[0].focus()
   }
 })
 
 watch(isError, (val) => {
+  loadingRef.value.classList.remove('loading')
+  loading.value = false
   if (val) {
     console.log('error val', val)
     codeArray.value = Array(digits).fill('')
-    verifyWrap.value.querySelectorAll('input').forEach((item) => {
+    verifyRef.value.querySelectorAll('input').forEach((item) => {
       item.classList.add('shake')
     })
-    verifyWrap.value.querySelectorAll('input')[0].focus()
+    verifyRef.value.querySelectorAll('input')[0].focus()
     isError.value = false
   }
 })
@@ -59,7 +67,7 @@ const onKeyDown = async (e, index) => {
     codeArray.value.splice(index, clippedNumbers.length, ...clippedNumbers)
     let idx = index + clippedNumbers.length
     if (idx > digits - 1) idx = digits - 1
-    verifyWrap.value.querySelectorAll('input')[idx].focus()
+    verifyRef.value.querySelectorAll('input')[idx].focus()
     const code = codeArray.value.join('')
     value.value = code
     if (idx == digits - 1 && code.length === digits) {
@@ -76,6 +84,8 @@ const onKeyDown = async (e, index) => {
       const code = codeArray.value.join('')
       value.value = code
       if (code.length === digits) {
+        loadingRef.value.classList.add('loading')
+        loading.value = true
         // console.log('code:', code)
         setTimeout(() => {
           emits('finish', code)
@@ -97,8 +107,48 @@ const onKeyUp = (e) => {
 </script>
 
 <style lang="scss" scoped>
+.wrap {
+  position: relative;
+  display: flex;
+  // display-direction: ;
+  align-items: center;
+  width: fit-content;
+}
+
 .verify-wrap :not(:first-child) {
   margin-left: 10px;
+}
+
+.lwrap {
+  position: absolute;
+  right: -30px;
+  opacity: 0;
+  transition-duration: 0.25s;
+  transition-property: right, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  // display: none;
+}
+
+.loading {
+  right: -35px;
+  opacity: 1;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--c-brand2);
+  border-top-color: rgba(0, 0, 0, 0.2);
+  border-right-color: rgba(0, 0, 0, 0.2);
+  border-bottom-color: rgba(0, 0, 0, 0.2);
+  border-radius: 100%;
+  animation: circle 1s linear infinite;
+}
+
+@keyframes circle {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 input {
@@ -116,6 +166,9 @@ input {
   &:focus,
   .active {
     border-color: var(--c-brand2);
+  }
+  &:disabled {
+    color: var(--text-tertiary);
   }
 }
 

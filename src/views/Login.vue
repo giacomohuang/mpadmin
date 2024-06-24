@@ -2,7 +2,9 @@
   <div class="main-wrap radial-gradient">
     <context-holder />
     <header>
-      <div class="logo"><img src="@/assets/logo.png" width="24" /></div>
+      <div class="logo">
+        <a href="/"><img src="@/assets/logo.png" width="24" /></a>
+      </div>
       <div class="app-name">{{ $t('common.appname') }}</div>
       <div class="lang">
         <a-dropdown>

@@ -1,5 +1,7 @@
 <template>
-  <div class="main">
+  <a-spin :spinning="status.dataLoading" style="margin: 20px"></a-spin>
+  <context-holder />
+  <div class="main" v-show="!status.dataLoading">
     <section>
       <div class="title flex flex-item-c flex-betwwen">
         <h2>{{ $t('my.authentication.pwd') }}</h2>
@@ -43,56 +45,31 @@
     </section>
     <section>
       <div class="title flex flex-item-c">
-        <h2>{{ $t('my.authentication.email') }}</h2>
-      </div>
-      <div class="tips">使用电子邮件验证码强化增强账户安全</div>
-      <div class="item">
-        <label>{{ emailForm.email ? helper.obfuscate('email', emailForm.email) : $t('my.authentication.notset') }}</label>
-        <a-button @click="status.setEmailVisible = true">{{ emailForm.email ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
-      </div>
-      <a-modal v-model:open="status.setEmailVisible" :title="emailForm.email ? $t('my.authentication.editemail') : $t('my.authentication.setemail')" :footer="null" @cancel="handleCancelSet">
-        <a-form style="margin-top: 40px" ref="emailFormRef" :model="emailForm" layout="inline">
-          <a-form-item :label="$t('my.authentication.emailad')" name="emailNew" :rules="emailRules">
-            <a-input v-model:value="emailForm.emailNew" @pressEnter="handleGetEmailCode" />
-          </a-form-item>
-          <a-form-item>
-            <a @click="handleGetEmailCode" v-if="!emailStatus.isCountDown" class="resend">{{ $t('my.authentication.svcode') }}</a>
-            <span class="resend resend-hint" v-if="emailStatus.isCountDown">{{ $t('my.authentication.resendin', emailStatus.countDownTime) }}</span>
-          </a-form-item>
-        </a-form>
-        <div class="flex-col flex-item-c verifycode" v-if="emailStatus.isSend">
-          <div class="hint">{{ $t('my.authentication.rsvemail') }}</div>
-          <VerifyInput v-model:value="status.verifyCode" v-model:isError="status.isVerifyError" :autofocus="true" :digits="4" @finish="handleVerifyEmailCode"></VerifyInput>
-        </div>
-      </a-modal>
-    </section>
-    <section>
-      <div class="title flex flex-item-c">
         <h2>{{ $t('my.authentication.mobi') }}</h2>
       </div>
       <div class="tips">使用手机短信验证码增强账户安全</div>
       <div class="item">
-        <label>{{ phoneForm.areaCode ? '+' + phoneForm.areaCode + ' ' : null }}{{ phoneForm.phone ? helper.obfuscate('phone', phoneForm.phone) : $t('my.authentication.notset') }}</label>
+        <label>+{{ phoneForm.areacode }} {{ phoneForm.phone ? helper.obfuscate('phone', phoneForm.phone) : $t('my.authentication.notset') }}</label>
         <a-button @click="status.setPhoneVisible = true">{{ phoneForm.phone ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
       </div>
-      <a-modal v-model:open="status.setPhoneVisible" :title="phoneForm.phone ? $t('my.authentication.editphone') : $t('my.authentication.setphone')" :footer="null" @cancel="handleCancelSet">
+      <a-modal v-model:open="status.setPhoneVisible" :title="phoneForm.phone ? $t('my.authentication.editphone') : $t('my.authentication.setphone')" :footer="null" @cancel="handleCancelSet" width="530px">
         <a-form style="margin-top: 40px" ref="phoneFormRef" layout="inline" :model="phoneForm">
           <a-form-item :label="$t('my.authentication.phonead')">
-            <a-select show-search v-model:value="phoneForm.areaCodeNew" style="width: 100px" placeholder="国际区号" allowClear :dropdown-match-select-width="false">
-              <a-select-option v-for="(item, index) in areaCode" :key="index" :value="item.code">+{{ item.code }}({{ item[locale] }})</a-select-option>
+            <a-select show-search v-model:value="phoneForm.areacodeNew" style="width: 100px" placeholder="国际区号" allowClear :dropdown-match-select-width="false">
+              <a-select-option v-for="(item, index) in areaCode" :key="index" :value="item.code">{{ item.code }}({{ item[locale] }})</a-select-option>
             </a-select>
           </a-form-item>
           <a-form-item has-feedback name="phoneNew" :rules="phoneRules">
-            <a-input v-model:value="phoneForm.phoneNew" @pressEnter="handleGetPhoneCode" style="width: 150px" />
+            <a-input v-model:value="phoneForm.phoneNew" style="width: 140px" />
           </a-form-item>
           <a-form-item>
-            <a @click="handleGetPhoneCode" v-if="!phoneStatus.isCountDown" class="resend">{{ $t('my.authentication.svcode') }}</a>
+            <a-button @click="handleSendSMS" v-if="!phoneStatus.isCountDown" :loading="status.loading" class="resend" type="link">{{ $t('my.authentication.svcode') }}</a-button>
+            <span class="resend resend-hint" v-if="phoneStatus.isCountDown">{{ $t('my.authentication.resendin', phoneStatus.countDownTime) }}</span>
           </a-form-item>
-          <span class="resend resend-hint" v-if="phoneStatus.isCountDown">{{ $t('my.authentication.resendin', phoneStatus.countDownTime) }}</span>
         </a-form>
         <div class="flex-col flex-item-c verifycode" v-if="phoneStatus.isSend">
           <div class="hint">{{ $t('my.authentication.rsvphone') }}</div>
-          <VerifyInput v-model:value="status.verifyCode" v-model:isError="status.isVerifyError" :autofocus="true" :digits="4" @finish="handleVerifyPhoneCode"></VerifyInput>
+          <VerifyInput v-model:value="phoneStatus.verifyCode" v-model:isError="phoneStatus.isVerifyError" :autofocus="true" :digits="4" @finish="handleUpdatePhone"></VerifyInput>
         </div>
       </a-modal>
     </section>
@@ -106,31 +83,61 @@
         <a-button @click="status.setEmailVisible = true">{{ emailForm.email ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
       </div>
     </section>
+    <section>
+      <div class="title flex flex-item-c">
+        <h2>{{ $t('my.authentication.email') }}</h2>
+      </div>
+      <div class="tips">使用电子邮件验证码强化增强账户安全</div>
+      <div class="item">
+        <label>{{ emailForm.email ? helper.obfuscate('email', emailForm.email) : $t('my.authentication.notset') }}</label>
+        <a-button @click="status.setEmailVisible = true">{{ emailForm.email ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
+      </div>
+      <a-modal v-model:open="status.setEmailVisible" :title="emailForm.email ? $t('my.authentication.editemail') : $t('my.authentication.setemail')" :footer="null" @cancel="handleCancelSet">
+        <a-form style="margin-top: 40px" ref="emailFormRef" :model="emailForm" layout="inline">
+          <a-form-item has-feedback :label="$t('my.authentication.emailad')" name="emailNew" :rules="emailRules">
+            <a-input v-model:value="emailForm.emailNew" />
+          </a-form-item>
+          <a-form-item>
+            <a-button @click="handleSendEmail" v-if="!emailStatus.isCountDown" :loading="status.loading" type="link" class="resend">{{ $t('my.authentication.svcode') }}</a-button>
+            <span class="resend resend-hint" v-if="emailStatus.isCountDown">{{ $t('my.authentication.resendin', emailStatus.countDownTime) }}</span>
+          </a-form-item>
+        </a-form>
+        <div class="flex-col flex-item-c verifycode" v-if="emailStatus.isSend">
+          <div class="hint">{{ $t('my.authentication.rsvemail') }}</div>
+          <VerifyInput v-model:value="emailStatus.verifyCode" v-model:isError="emailStatus.isVerifyError" :autofocus="true" :digits="4" @finish="handleUpdateEmail"></VerifyInput>
+        </div>
+      </a-modal>
+    </section>
   </div>
 </template>
 <script setup>
-import { inject, toRefs, onUnmounted, reactive, ref } from 'vue'
+// common
+import { inject, toRefs, onUnmounted, reactive, ref, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from '@/stores/stores'
+import { message } from 'ant-design-vue'
+import API from '../../api/API'
+
 import zxcvbn from 'zxcvbn'
 import helper from '../../js/helper'
-import API from '../../api/API'
 import VerifyInput from '../../components/VerifyInput.vue'
 import areaCode from '../../js/areacode'
-
-let emailInterval,
-  phoneInterval = undefined
 
 const { t, locale } = useI18n()
 const store = useStore()
 const { accountid } = toRefs(store)
+const [messageApi, contextHolder] = message.useMessage()
+
+let emailInterval,
+  phoneInterval = undefined
+
 const status = reactive({
   toggleChangePwd: false,
   strength: 0,
   setEmailVisible: false,
   setPhoneVisible: false,
-  verifyCode: '',
-  isVerifyError: false
+  loading: false,
+  dataLoading: true
 })
 
 const pwdFormRef = ref()
@@ -148,20 +155,24 @@ const emailForm = reactive({
 const emailStatus = reactive({
   isCountDown: false,
   countDownTime: 0,
-  isSend: false
+  isSend: false,
+  verifyCode: '',
+  isVerifyError: false
 })
 
 const phoneFormRef = ref()
 const phoneForm = reactive({
-  areaCode: '',
-  phone: '15618036377',
-  areaCodeNew: '86',
-  phoneNew: ''
+  areacode: null,
+  phone: '',
+  areacodeNew: null,
+  phoneNew: null
 })
 const phoneStatus = reactive({
   isCountDown: false,
   countDownTime: 0,
-  isSend: false
+  isSend: false,
+  verifyCode: '',
+  isVerifyError: false
 })
 
 const otpFormRef = ref()
@@ -205,7 +216,7 @@ const vPhone = async (_rule, value) => {
   // 如果手机号与之前相同
   if (!value) {
     return Promise.reject('请输入手机号码')
-  } else if (value === phoneForm.phone) {
+  } else if (phoneForm.areacodeNew + value === phoneForm.areacode + phoneForm.phone) {
     return Promise.reject('请输入与之前不同的号码')
   }
   // 验证手机号码格式
@@ -239,54 +250,126 @@ const handleResetPwdForm = () => {
 
 const handleCancelSet = () => {
   console.log('cancel')
-  // emailStatus.isSend = false
-  // emailForm.emailNew = ''
   status.verifyCode = ''
 }
 
-const handleGetEmailCode = async () => {
+const handleSendEmail = async () => {
+  // 表单验证
   try {
-    //do get email code
-    //if sccuess
-    const val = await emailFormRef.value.validateFields()
-    emailStatus.isSend = true
-    emailStatus.emailCountDown = true
-    countDown(emailStatus, emailInterval, 'email')
-  } catch {
-    emailStatus.emailSended = false
+    await emailFormRef.value.validateFields()
+  } catch (err) {
+    console.log(err)
+    emailStatus.isSend = false
     return
   }
+
+  // 向指定邮箱发送验证邮件
+  try {
+    status.loading = true
+    const resp = await API.my.sendCodeByEmail(emailForm.emailNew)
+    if (resp.result) {
+      status.loading = false
+    } else {
+      throw new Error({ message: '邮件发送失败(40001)' })
+    }
+  } catch (err) {
+    console.log(err)
+    messageApi.error('邮件发送失败(40001, 请重试', 1)
+    status.loading = true
+    emailStatus.isSend = false
+    return
+  }
+  // 启动倒计时
+  emailStatus.isSend = true
+  countDown(emailStatus, emailInterval, 'email')
 }
 
-const handleVerifyEmailCode = async () => {
+const handleUpdateEmail = async () => {
   console.log('finish')
   try {
     //do verify email code
     //if sccuess
-    const result = await API.my.verifyCodeByEmail(accountid.value, status.verifyCode)
-    if (result.result) {
+    const resp = await API.my.updateEmail(emailStatus.verifyCode, emailForm.emailNew)
+    if (resp.result) {
       emailForm.email = emailForm.emailNew
       emailForm.emailNew = ''
       localStorage.removeItem('emailCDT')
       localStorage.removeItem('cur_email')
-      status.verifyCode = ''
       status.setEmailVisible = false
-      status.isVerifyError = false
+      emailStatus.verifyCode = ''
+      emailStatus.isVerifyError = false
       emailStatus.isSend = false
       emailStatus.countDownTime = 60
       emailStatus.isCountDown = false
       if (emailStatus) clearInterval(emailInterval)
     } else {
-      status.isVerifyError = true
+      emailStatus.isVerifyError = true
     }
   } catch (e) {
     console.log(e)
-    status.isVerifyError = true
+    emailStatus.isVerifyError = true
     return
   }
 }
 
-const handleGetPhoneCode = async () => {}
+const handleSendSMS = async () => {
+  // 表单验证
+  console.log('send')
+  try {
+    await phoneFormRef.value.validateFields()
+  } catch (err) {
+    console.log(err)
+    phoneStatus.isSend = false
+    return
+  }
+
+  // 向指定手机发送验证短信
+  try {
+    status.loading = true
+    const resp = await API.my.updatePhone(phoneForm.areacode, phoneForm.phoneNew)
+    if (resp.result) {
+      status.loading = false
+    } else {
+      throw new Error({ message: '短信发送失败(50001)' })
+    }
+  } catch (err) {
+    console.log(err)
+    messageApi.error('短信发送失败(40001, 请重试', 1)
+    status.loading = true
+    phoneStatus.isSend = false
+    return
+  }
+  // 启动倒计时
+  phoneStatus.isSend = true
+  countDown(phoneStatus, phoneInterval, 'phone')
+}
+
+const handleUpdatePhone = async () => {
+  try {
+    const resp = await API.my.updatePhone(phoneStatus.verifyCode, phoneForm.areacodeNew, phoneForm.phoneNew)
+    if (resp.result) {
+      phoneForm.phone = phoneForm.phoneNew
+      phoneForm.areacode = phoneForm.areacodeNew
+      phoneForm.phoneNew = ''
+      phoneForm.areacodeNew = ''
+      localStorage.removeItem('phoneCDT')
+      localStorage.removeItem('cur_phone')
+      status.setPhoneVisible = false
+      phoneStatus.verifyCode = ''
+      phoneStatus.isVerifyError = false
+      phoneStatus.isSend = false
+      phoneStatus.countDownTime = 60
+      phoneStatus.isCountDown = false
+      if (phoneStatus) clearInterval(phoneInterval)
+    } else {
+      phoneStatus.isVerifyError = true
+    }
+  } catch (e) {
+    console.log(e)
+    phoneStatus.isVerifyError = true
+    return
+  }
+}
 
 const countDown = (obj, intv, type) => {
   let startTime = localStorage.getItem(type + 'CDT')
@@ -319,6 +402,19 @@ if (localStorage.getItem('emailCDT')) {
   emailStatus.isSend = true
   countDown(emailStatus, emailInterval, 'email')
 }
+
+// 本页面初始数据准备
+async function getMyAuthInfo() {
+  status.dataLoading = true
+  const resp = await API.my.getAuthInfo()
+  console.log(resp)
+  emailForm.email = resp.email
+  phoneForm.areacode = resp.areacode
+  phoneForm.phone = resp.phone
+  status.dataLoading = false
+}
+
+getMyAuthInfo()
 
 onUnmounted(() => {
   if (emailInterval) clearInterval(emailInterval)
@@ -391,11 +487,11 @@ onUnmounted(() => {
 }
 
 .verifycode {
-  margin: 20px 0 50px 0;
+  margin: 20px 0 20px 0;
   .hint {
     font-size: 12px;
     // text-align: center;
-    padding: 10px 0;
+    padding: 12px;
   }
 }
 </style>

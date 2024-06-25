@@ -24,7 +24,7 @@ mongoose.connect(process.env.MONGODB_URL).then(() => {
   console.log('MongoDB is connected!')
 })
 
-console.log(accountRouter)
+// console.log(accountRouter)
 app.use(accountRouter.routes())
 // app.use(accountRouter.allowedMethods())
 // app.use(router.allowedMethods())

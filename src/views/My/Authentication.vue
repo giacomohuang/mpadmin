@@ -1,7 +1,6 @@
 <template>
-  <a-spin :spinning="status.dataLoading" style="margin: 20px"></a-spin>
   <context-holder />
-  <div class="main" v-show="!status.dataLoading">
+  <div class="main" v-show="!globalLoading">
     <section>
       <div class="title flex flex-item-c flex-betwwen">
         <h2>{{ $t('my.authentication.pwd') }}</h2>
@@ -129,6 +128,7 @@ const { t, locale } = useI18n()
 const store = useStore()
 const { accountid } = toRefs(store)
 const [messageApi, contextHolder] = message.useMessage()
+const globalLoading = inject('globalLoading')
 
 let emailInterval,
   phoneInterval = undefined
@@ -139,8 +139,7 @@ const status = reactive({
   setEmailVisible: false,
   setPhoneVisible: false,
   setTotpVisible: false,
-  loading: false,
-  dataLoading: true
+  loading: false
 })
 
 const pwdFormRef = ref()
@@ -429,13 +428,13 @@ if (localStorage.getItem('emailCDT')) {
 
 // 本页面初始数据准备
 async function getMyAuthInfo() {
-  status.dataLoading = true
+  globalLoading.value = true
   const resp = await API.my.getAuthInfo()
   console.log(resp)
   emailForm.email = resp.email
   phoneForm.areacode = resp.areacode
   phoneForm.phone = resp.phone
-  status.dataLoading = false
+  globalLoading.value = false
 }
 
 getMyAuthInfo()

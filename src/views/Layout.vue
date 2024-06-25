@@ -51,23 +51,25 @@
       <SubMenu :data="submenu.children"></SubMenu>
     </aside>
     <main>
-      <!-- <PerfectScrollbar> -->
+      <a-spin :spinning="globalLoading" style="margin: 20px"></a-spin>
       <router-view />
-      <!-- </PerfectScrollbar> -->
     </main>
   </div>
 </template>
 
 <script setup>
-import { onBeforeMount, onMounted, ref, toRefs, reactive, inject } from 'vue'
+import { onBeforeMount, onMounted, ref, toRefs, reactive, provide } from 'vue'
 import { router, dynamicRoutes } from '../router/router'
 import { changeLocale } from '../js/i18n'
 import SubMenu from './SubMenu.vue'
 import { useStore } from '../stores/stores'
+import helper from '../js/helper'
 
+const globalLoading = ref(false)
+provide('globalLoading', globalLoading)
 const store = useStore()
 const { accountname, accountid } = toRefs(store)
-const helper = inject('helper')
+
 const accessToken = helper.decodeToken()
 // const accountname = accessToken.accountname
 if (!accountname.value) accountname.value = accessToken.accountname

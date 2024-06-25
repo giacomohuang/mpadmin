@@ -49,7 +49,7 @@ fetch.interceptors.response.use(
       case 401:
         console.log(response)
         console.log(err)
-        // router.push('/login')
+        router.push('/login')
         return Promise.reject(response)
       case 500:
       default:

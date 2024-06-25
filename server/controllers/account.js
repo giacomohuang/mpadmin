@@ -5,6 +5,7 @@ const Redis = require('ioredis')
 const crypto = require('crypto')
 const { refresh } = require('../middlewares/authtoken')
 const speakeasy = require('speakeasy')
+const CustomError = require('../CustomError')
 
 class AccountController extends BaseController {
   static async signup(ctx) {
@@ -168,9 +169,13 @@ class AccountController extends BaseController {
 
   static async hello(ctx) {
     // console.log('hello')
-    // aaa = sss
-
-    ctx.body = { data: 'hello' }
+    try {
+      // aaa = sss
+      ctx.body = { data: 'hello' }
+    } catch (err) {
+      ctx.status = 500
+      ctx.body = new CustomError('internal error', 500)
+    }
   }
 }
 module.exports = AccountController

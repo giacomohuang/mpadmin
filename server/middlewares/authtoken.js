@@ -5,22 +5,21 @@ const CustomError = require('../CustomError')
 
 const authToken = async (ctx, next) => {
   // console.log('=======ctx', ctx)
-  const t = ctx.request.headers['authorization']
-  if (!t) {
-    // console.log('authToken', t)
-    throw new Error('Access denied,code:40001')
-  }
-  const token = t.replace(/^bearer\s+/i, '')
-
-  if (!token) {
-    throw new Error('Access denied,code:40002')
+  let token = ''
+  let t = ctx.request.headers['authorization']
+  if (t) {
+    token = t.replace(/^bearer\s+/i, '')
+  } else {
+    ctx.status = 401
+    ctx.body = new CustomError('Authentication Failed', 40101)
+    return
   }
 
   try {
     // 如果accesstoken验证通过，放行
-    if (!ctx.body) {
-      ctx.body = {}
-    }
+    // if (!ctx.body) {
+    //   ctx.body = {}
+    // }
     const decoded = jwt.verify(token, process.env.SECRET_KEY_ACCESS)
     ctx.request.headers['accountid'] = decoded.id
     console.log('access', decoded)
@@ -41,13 +40,18 @@ const authToken = async (ctx, next) => {
         console.log('----------------------------')
         await next()
       } catch (err) {
-        throw new Error('refresh failed 40006')
+        // refresh()返回的错误
+        ctx.status = 401
+        ctx.body = new CustomError(err.message, err.code || 40102)
+        return
         // ctx.throw(401,new CustomError('refresh failed 40006'm40)
       }
     }
     // 如果accesstoken验证失败
     else {
-      throw new CustomError('Access denied', 40003)
+      ctx.status = 401
+      ctx.body = new CustomError('Authentication Failed', 40103)
+      return
     }
   }
 }
@@ -70,7 +74,7 @@ const refresh = async (token) => {
     const isExist = await redis.get(md5Token_old)
     console.log('isExist redis key:', isExist, md5Token_old)
     if (!isExist) {
-      throw new CustomError('Access denied', 40004)
+      throw new CustomError('Authentication Failed', 40111)
     }
     redis.del(md5Token_old)
     // console.log('-----', id, accountname)
@@ -87,8 +91,7 @@ const refresh = async (token) => {
     console.log('!!!!!new md5token:', md5Token)
     return { accessToken, refreshToken, id }
   } catch (err) {
-    console.log('=======err in refresh====')
-    throw new CustomError('refresh failed', 40005)
+    throw new CustomError('Authentication Failed', 40112)
   }
 }
 

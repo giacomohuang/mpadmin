@@ -65,10 +65,9 @@ class AccountController extends BaseController {
         try {
           console.log('refreshToken', refreshToken)
           jwt.verify(refreshToken, process.env.SECRET_KEY_REFRESH)
-          const r = await refresh(refreshToken)
-          console.log('reerer', r)
-          const newAccessToken = r.accessToken
-          const newRefreshToken = r.refreshToken
+          const resp = await refresh(refreshToken)
+          const newAccessToken = resp.accessToken
+          const newRefreshToken = resp.refreshToken
           ctx.status = 200
           ctx.body = { verify: true, needRefresh: true, newAccessToken, newRefreshToken }
         } catch (err) {
@@ -115,8 +114,8 @@ class AccountController extends BaseController {
       }
       ctx.body = authInfo
     } catch (err) {
-      console.log(err)
-      ctx.throw(500, 'Internal Server Error')
+      ctx.status = 500
+      ctx.body = { message: 'Internal Server Error' }
     }
   }
 
@@ -130,8 +129,8 @@ class AccountController extends BaseController {
       console.log(result)
       ctx.body = { result: true }
     } catch (err) {
-      console.log(err)
-      ctx.throw(500, 'Internal Server Error')
+      ctx.status = 500
+      ctx.body = { message: 'Internal Server Error' }
     }
   }
 
@@ -148,8 +147,8 @@ class AccountController extends BaseController {
         ctx.body = { result: false }
       }
     } catch (err) {
-      console.log(err)
-      ctx.throw(500, 'Internal Server Error')
+      ctx.status = 500
+      ctx.body = { message: 'Internal Server Error' }
     }
   }
 
@@ -162,19 +161,16 @@ class AccountController extends BaseController {
       await Account.findOneAndUpdate({ _id: accountid }, { areacode, phone })
       ctx.body = { result: true }
     } catch (err) {
-      console.log(err)
-      ctx.throw(500, 'Internal Server Error')
+      ctx.status = 500
+      ctx.body = { message: 'Internal Server Error' }
     }
   }
 
   static async hello(ctx) {
-    try {
-      ctx.body = { data: 'hello' }
-    } catch (err) {
-      console.log(err)
-      ctx.throw(500, 'Internal Server Error')
-    }
+    // console.log('hello')
+    // aaa = sss
+
+    ctx.body = { data: 'hello' }
   }
 }
-
 module.exports = AccountController

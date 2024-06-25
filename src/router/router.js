@@ -43,10 +43,10 @@ router.beforeEach(async (to, from, next) => {
     next()
   } else {
     try {
-      const res = await account.verifyToken(helper.getToken())
-      if (res.verify) {
-        if (res.needRefresh) {
-          helper.setToken({ accessToken: res.newAccessToken, refreshToken: res.newRefreshToken })
+      const resp = await account.verifyToken(helper.getToken())
+      if (resp.verify) {
+        if (resp.needRefresh) {
+          helper.setToken({ accessToken: resp.newAccessToken, refreshToken: resp.newRefreshToken })
         }
         next()
       } else {

@@ -31,31 +31,30 @@ fetch.interceptors.request.use(
 //服务器响应拦截器
 fetch.interceptors.response.use(
   (resp) => {
-    // if (router.currentRoute.value.meta.noAuth) return resp.data
-    // console.log('new', resp.headers['newaccesstoken'], resp.headers['newrefreshtoken'])
     if (resp.headers['newaccesstoken'] && resp.headers['newrefreshtoken']) {
       // console.log('hit token refresh')
       localStorage.setItem('accessToken', resp.headers['newaccesstoken'])
       localStorage.setItem('refreshToken', resp.headers['newrefreshtoken'])
-      console.log('hit token refresh')
-      // resp.data.newAccessToken = undefined
-      resp.headers['newRefreshToken'] = undefined
-      resp.headers['needRefresh'] = undefined
     }
     return resp.data
   },
   (err) => {
     const { response } = err
-    console.log(err)
+    if (response.headers['newaccesstoken'] && response.headers['newrefreshtoken']) {
+      // console.log('hit token refresh')
+      localStorage.setItem('accessToken', response.headers['newaccesstoken'])
+      localStorage.setItem('refreshToken', response.headers['newrefreshtoken'])
+    }
     switch (response.status) {
       case 401:
-        console.log('Auth Denied, code:401')
-        router.push('/login')
+        console.log(response)
+        console.log(err)
+        // router.push('/login')
         return Promise.reject(response)
       case 500:
       default:
-        console.log(err)
-        console.log('Internal Server Error, code:500')
+        console.log(response)
+        // console.log('Internal Server Error, code:500')
         return Promise.reject(response)
     }
 

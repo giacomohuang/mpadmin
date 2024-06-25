@@ -170,7 +170,7 @@ class AccountController extends BaseController {
   static async hello(ctx) {
     // console.log('hello')
     try {
-      // aaa = sss
+      aaa = sss
       ctx.body = { data: 'hello' }
     } catch (err) {
       ctx.status = 500

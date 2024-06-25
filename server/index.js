@@ -3,6 +3,7 @@ const { bodyParser } = require('@koa/bodyparser')
 const accountRouter = require('./routes/account')
 const mongoose = require('mongoose')
 const cors = require('@koa/cors')
+const { errorHandler } = require('./middlewares/errorHandler')
 
 // require('dotenv').config() //for using variables from .env file.
 

@@ -1,4 +1,3 @@
-// ssss
 class CustomError extends Error {
   constructor(httpStatus, message, code) {
     const err = super()

@@ -1,9 +1,7 @@
 const BaseController = require('./base')
 const Account = require('../models/account')
 const jwt = require('jsonwebtoken')
-const Redis = require('ioredis')
 const crypto = require('crypto')
-const { refresh } = require('../middlewares/authtoken')
 const speakeasy = require('speakeasy')
 const CustomError = require('../CustomError')
 
@@ -41,45 +39,47 @@ class AccountController extends BaseController {
         .update(refreshToken + process.env.SECRET_KEY_REFRESH)
         .digest('hex')
 
-      const redis = new Redis()
-      await redis.set(md5Token, 'true')
+      await ctx.redis.set(md5Token, 'true')
       ctx.body = { accessToken, refreshToken }
       console.log('====login====')
       console.log('refreshToken:', refreshToken)
       console.log('md5:', md5Token)
     } catch (err) {
       if (err.status == 401) {
-        ctx.throw(401, 'Invalid accountname or password')
+        ctx.status = 200
+        ctx.body = { message: 'Invalid accountname or password', code: 401001 }
       } else {
         ctx.throw(500, 'Internal Server Error')
       }
     }
   }
   static async verifyToken(ctx) {
-    const { accessToken, refreshToken } = ctx.request.body
-    try {
-      jwt.verify(accessToken, process.env.SECRET_KEY_ACCESS)
-      ctx.status = 200
-      ctx.body = { verify: true, needRefresh: false }
-    } catch (err) {
-      if (err.name === 'TokenExpiredError') {
-        try {
-          console.log('refreshToken', refreshToken)
-          jwt.verify(refreshToken, process.env.SECRET_KEY_REFRESH)
-          const resp = await refresh(refreshToken)
-          const newAccessToken = resp.accessToken
-          const newRefreshToken = resp.refreshToken
-          ctx.status = 200
-          ctx.body = { verify: true, needRefresh: true, newAccessToken, newRefreshToken }
-        } catch (err) {
-          console.log('error here', err)
-          ctx.throw(401, 'Auth Failed 20001')
-        }
-      } else {
-        console.log(err.name)
-        ctx.throw(401, 'Auth Failed 20000')
-      }
-    }
+    ctx.status = 200
+    ctx.body = { verify: true }
+    // const { accessToken, refreshToken } = ctx.request.body
+    // try {
+    //   jwt.verify(accessToken, process.env.SECRET_KEY_ACCESS)
+    //   ctx.status = 200
+    //   ctx.body = { verify: true }
+    // } catch (err) {
+    //   if (err.name === 'TokenExpiredError') {
+    //     try {
+    //       console.log('refreshToken', refreshToken)
+    //       jwt.verify(refreshToken, process.env.SECRET_KEY_REFRESH)
+    //       const resp = await refresh(refreshToken, ctx)
+    //       const newAccessToken = resp.accessToken
+    //       const newRefreshToken = resp.refreshToken
+    //       ctx.status = 200
+    //       ctx.body = { verify: true, newAccessToken, newRefreshToken }
+    //     } catch (err) {
+    //       console.log('error here', err)
+    //       ctx.throw(401, 'Auth Failed 20001')
+    //     }
+    //   } else {
+    //     console.log(err.name)
+    //     ctx.throw(401, 'Auth Failed 20000')
+    //   }
+    // }
   }
 
   // 生成动态令牌的secret和激活地址
@@ -108,13 +108,16 @@ class AccountController extends BaseController {
   static async getAuthInfo(ctx) {
     try {
       const accountid = ctx.request.headers['accountid']
+      console.log('accountId:', accountid)
       const authInfo = await Account.findOne({ _id: accountid }).select('areacode phone email totpSecret')
       // 如果有totp秘钥，则置为*，不暴露给客户端
+      console.log(authInfo)
       if (authInfo.totpSecret) {
         authInfo.totpSecret = '*'
       }
       ctx.body = authInfo
     } catch (err) {
+      console.log(err)
       ctx.status = 500
       ctx.body = { message: 'Internal Server Error' }
     }
@@ -169,13 +172,8 @@ class AccountController extends BaseController {
 
   static async hello(ctx) {
     // console.log('hello')
-    try {
-      aaa = sss
-      ctx.body = { data: 'hello' }
-    } catch (err) {
-      ctx.status = 500
-      ctx.body = new CustomError('internal error', 500)
-    }
+    // aaa = sss
+    ctx.body = { data: 'hello' }
   }
 }
 module.exports = AccountController

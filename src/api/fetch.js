@@ -30,27 +30,22 @@ fetch.interceptors.request.use(
 
 //服务器响应拦截器
 fetch.interceptors.response.use(
-  (resp) => {
-    if (resp.headers['newaccesstoken'] && resp.headers['newrefreshtoken']) {
-      // console.log('hit token refresh')
-      localStorage.setItem('accessToken', resp.headers['newaccesstoken'])
-      localStorage.setItem('refreshToken', resp.headers['newrefreshtoken'])
-    }
-    return resp.data
+  (response) => {
+    // 如果header中携带refreshToken，更新本地存储
+    refreshToken(response)
+    console.log(response.headers)
+    return response.data
   },
   (err) => {
     const { response } = err
-    if (response.headers['newaccesstoken'] && response.headers['newrefreshtoken']) {
-      // console.log('hit token refresh')
-      localStorage.setItem('accessToken', response.headers['newaccesstoken'])
-      localStorage.setItem('refreshToken', response.headers['newrefreshtoken'])
-    }
+    // 如果header中携带refreshToken，更新本地存储
+    refreshToken(response)
     switch (response.status) {
       case 401:
         console.log(response)
         console.log(err)
         router.push('/login')
-        return Promise.reject(response)
+      // return Promise.reject(response)
       case 500:
       default:
         console.log(response)
@@ -67,4 +62,13 @@ fetch.interceptors.response.use(
     // }
   }
 )
+
+function refreshToken(resp) {
+  if (resp.headers['newaccesstoken'] && resp.headers['newrefreshtoken']) {
+    localStorage.setItem('accessToken', resp.headers['newaccesstoken'])
+    localStorage.setItem('refreshToken', resp.headers['newrefreshtoken'])
+    delete resp.headers['newaccesstoken']
+    delete resp.headers['newrefreshtoken']
+  }
+}
 export default fetch

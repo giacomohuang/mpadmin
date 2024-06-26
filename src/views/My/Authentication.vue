@@ -4,30 +4,30 @@
     <section>
       <div class="title flex flex-item-c flex-betwwen">
         <h2>{{ $t('my.authentication.pwd') }}</h2>
-        <a-button @click.stop="status.toggleChangePwd = !status.toggleChangePwd">{{ status.toggleChangePwd ? $t('my.authentication.hide') : $t('my.authentication.cpwd') }}</a-button>
+        <a-button @click.stop="state.toggleChangePwd = !state.toggleChangePwd">{{ state.toggleChangePwd ? $t('my.authentication.hide') : $t('my.authentication.cpwd') }}</a-button>
       </div>
       <div class="tips">{{ $t('my.authentication.syaeyps') }}</div>
-      <div v-if="status.toggleChangePwd" class="content">
+      <div v-if="state.toggleChangePwd" class="content">
         <a-form ref="pwdFormRef" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 12 }" @validate="handlePwdValidate" @finish="handleUpdatePwd">
           <a-form-item has-feedback :label="$t('my.authentication.oldpwd')" name="oldPassword">
             <a-input-password v-model:value="pwdForm.oldPassword" />
           </a-form-item>
           <a-form-item has-feedback :label="$t('my.authentication.newpwd')" name="newPassword">
             <ul v-if="pwdForm.newPassword" class="strength">
-              <li :class="{ s0: status.strength == 0 }">
-                <label v-if="status.strength == 0">{{ $t('my.authentication.week') }}</label>
+              <li :class="{ s0: state.strength == 0 }">
+                <label v-if="state.strength == 0">{{ $t('my.authentication.week') }}</label>
               </li>
-              <li :class="{ s1: status.strength == 1 }">
-                <label v-show="status.strength == 1">{{ $t('my.authentication.fair') }}</label>
+              <li :class="{ s1: state.strength == 1 }">
+                <label v-show="state.strength == 1">{{ $t('my.authentication.fair') }}</label>
               </li>
-              <li :class="{ s2: status.strength == 2 }">
-                <label v-show="status.strength == 2">{{ $t('my.authentication.good') }}</label>
+              <li :class="{ s2: state.strength == 2 }">
+                <label v-show="state.strength == 2">{{ $t('my.authentication.good') }}</label>
               </li>
-              <li :class="{ s3: status.strength == 3 }">
-                <label v-show="status.strength == 3">{{ $t('my.authentication.strong') }}</label>
+              <li :class="{ s3: state.strength == 3 }">
+                <label v-show="state.strength == 3">{{ $t('my.authentication.strong') }}</label>
               </li>
-              <li :class="{ s4: status.strength == 4 }">
-                <label v-show="status.strength == 4">{{ $t('my.authentication.excellent') }}</label>
+              <li :class="{ s4: state.strength == 4 }">
+                <label v-show="state.strength == 4">{{ $t('my.authentication.excellent') }}</label>
               </li>
             </ul>
             <a-input-password v-model:value="pwdForm.newPassword" />
@@ -46,15 +46,15 @@
       <div class="title flex flex-item-c">
         <h2>{{ $t('my.authentication.mobi') }}</h2>
       </div>
-      <div class="tips">使用手机短信验证码增强账户安全</div>
+      <div class="tips">{{ $t('my.authentication.enhphone') }}</div>
       <div class="item">
         <label>{{ phoneForm.areacode }} {{ phoneForm.phone ? helper.obfuscate('phone', phoneForm.phone) : $t('my.authentication.notset') }}</label>
-        <a-button @click="status.setPhoneVisible = true">{{ phoneForm.phone ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
+        <a-button @click="state.setPhoneVisible = true">{{ phoneForm.phone ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
       </div>
-      <a-modal v-model:open="status.setPhoneVisible" :title="phoneForm.phone ? $t('my.authentication.editphone') : $t('my.authentication.setphone')" :footer="null" @cancel="handleCancelSet" width="530px">
+      <a-modal v-model:open="state.setPhoneVisible" :title="phoneForm.phone ? $t('my.authentication.editphone') : $t('my.authentication.setphone')" :footer="null" @cancel="handleCancelSet" width="530px">
         <a-form style="margin-top: 40px" ref="phoneFormRef" layout="inline" :model="phoneForm">
           <a-form-item :label="$t('my.authentication.phonead')">
-            <a-select show-search v-model:value="phoneForm.areacodeNew" style="width: 100px" placeholder="国际区号" allowClear :dropdown-match-select-width="false">
+            <a-select show-search v-model:value="phoneForm.areacodeNew" style="width: 100px" :placeholder="$t('my.authentication.areacode')" allowClear :dropdown-match-select-width="false">
               <a-select-option v-for="(item, index) in areaCode" :key="index" :value="item.code">{{ item.code }}({{ item[locale] }})</a-select-option>
             </a-select>
           </a-form-item>
@@ -62,13 +62,13 @@
             <a-input v-model:value="phoneForm.phoneNew" style="width: 140px" />
           </a-form-item>
           <a-form-item>
-            <a-button @click="handleSendSMS" v-if="!phoneStatus.isCountDown" :loading="status.loading" class="resend" type="link">{{ $t('my.authentication.svcode') }}</a-button>
-            <span class="resend resend-hint" v-if="phoneStatus.isCountDown">{{ $t('my.authentication.resendin', phoneStatus.countDownTime) }}</span>
+            <a-button @click="handleSendSMS" v-if="!phoneState.isCountDown" :loading="state.loading" class="resend" type="link">{{ $t('my.authentication.svcode') }}</a-button>
+            <span class="resend resend-hint" v-if="phoneState.isCountDown">{{ $t('my.authentication.resendin', phoneState.countDownTime) }}</span>
           </a-form-item>
         </a-form>
-        <div class="flex-col flex-item-c verifycode" v-if="phoneStatus.isSend">
+        <div class="flex-col flex-item-c verifycode" v-if="phoneState.isSend">
           <div class="hint">{{ $t('my.authentication.rsvphone') }}</div>
-          <VerifyInput v-model:value="phoneStatus.verifyCode" v-model:isError="phoneStatus.isVerifyError" :autofocus="true" :digits="4" @finish="handleUpdatePhone"></VerifyInput>
+          <VerifyInput v-model:value="phoneState.verifyCode" v-model:isError="phoneState.isVerifyError" :autofocus="true" :digits="4" @finish="handleUpdatePhone"></VerifyInput>
         </div>
       </a-modal>
     </section>
@@ -76,36 +76,36 @@
       <div class="title flex flex-item-c">
         <h2>{{ $t('my.authentication.totp') }}</h2>
       </div>
-      <div class="tips">使用动态口令增强账户安全</div>
+      <div class="tips">{{ $t('my.authentication.enhtotp') }}</div>
       <div class="item">
         <label>{{ totpForm.totpSecret ? $t('my.authentication.havset') : $t('my.authentication.notset') }}</label>
-        <a-button @click="status.setTotpVisible = true">{{ totpForm.totpSecret ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
+        <a-button @click="state.setTotpVisible = true">{{ totpForm.totpSecret ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
       </div>
-      <a-modal v-model:open="status.setTotpVisible" :title="totpForm.totpSecret ? $t('my.authentication.edittotp') : $t('my.authentication.settotp')" :footer="null" @cancel="handleCancelSet"> </a-modal>
+      <a-modal v-model:open="state.setTotpVisible" :title="totpForm.totpSecret ? $t('my.authentication.edittotp') : $t('my.authentication.settotp')" :footer="null" @cancel="handleCancelSet"> </a-modal>
     </section>
 
     <section>
       <div class="title flex flex-item-c">
         <h2>{{ $t('my.authentication.email') }}</h2>
       </div>
-      <div class="tips">使用电子邮件验证码强化增强账户安全</div>
+      <div class="tips">{{ $t('my.authentication.enhemail') }}</div>
       <div class="item">
         <label>{{ emailForm.email ? helper.obfuscate('email', emailForm.email) : $t('my.authentication.notset') }}</label>
-        <a-button @click="status.setEmailVisible = true">{{ emailForm.email ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
+        <a-button @click="state.setEmailVisible = true">{{ emailForm.email ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
       </div>
-      <a-modal v-model:open="status.setEmailVisible" :title="emailForm.email ? $t('my.authentication.editemail') : $t('my.authentication.setemail')" :footer="null" @cancel="handleCancelSet">
+      <a-modal v-model:open="state.setEmailVisible" :title="emailForm.email ? $t('my.authentication.editemail') : $t('my.authentication.setemail')" :footer="null" @cancel="handleCancelSet">
         <a-form style="margin-top: 40px" ref="emailFormRef" :model="emailForm" layout="inline">
           <a-form-item has-feedback :label="$t('my.authentication.emailad')" name="emailNew" :rules="emailRules">
             <a-input v-model:value="emailForm.emailNew" />
           </a-form-item>
           <a-form-item>
-            <a-button @click="handleSendEmail" v-if="!emailStatus.isCountDown" :loading="status.loading" type="link" class="resend">{{ $t('my.authentication.svcode') }}</a-button>
-            <span class="resend resend-hint" v-if="emailStatus.isCountDown">{{ $t('my.authentication.resendin', emailStatus.countDownTime) }}</span>
+            <a-button @click="handleSendEmail" v-if="!emailState.isCountDown" :loading="state.loading" type="link" class="resend">{{ $t('my.authentication.svcode') }}</a-button>
+            <span class="resend resend-hint" v-if="emailState.isCountDown">{{ $t('my.authentication.resendin', emailState.countDownTime) }}</span>
           </a-form-item>
         </a-form>
-        <div class="flex-col flex-item-c verifycode" v-if="emailStatus.isSend">
+        <div class="flex-col flex-item-c verifycode" v-if="emailState.isSend">
           <div class="hint">{{ $t('my.authentication.rsvemail') }}</div>
-          <VerifyInput v-model:value="emailStatus.verifyCode" v-model:isError="emailStatus.isVerifyError" :autofocus="true" :digits="4" @finish="handleUpdateEmail"></VerifyInput>
+          <VerifyInput v-model:value="emailState.verifyCode" v-model:isError="emailState.isVerifyError" :autofocus="true" :digits="4" @finish="handleUpdateEmail"></VerifyInput>
         </div>
       </a-modal>
     </section>
@@ -133,7 +133,7 @@ const globalLoading = inject('globalLoading')
 let emailInterval,
   phoneInterval = undefined
 
-const status = reactive({
+const state = reactive({
   toggleChangePwd: false,
   strength: 0,
   setEmailVisible: false,
@@ -143,26 +143,21 @@ const status = reactive({
 })
 
 const pwdFormRef = ref()
+const emailFormRef = ref()
+const phoneFormRef = ref()
+const otpFormRef = ref()
+
 const pwdForm = reactive({
   oldPassword: '',
   newPassword: '',
   confirmPassword: ''
 })
-const emailFormRef = ref()
 
 const emailForm = reactive({
   email: '',
   emailNew: ''
 })
-const emailStatus = reactive({
-  isCountDown: false,
-  countDownTime: 0,
-  isSend: false,
-  verifyCode: '',
-  isVerifyError: false
-})
 
-const phoneFormRef = ref()
 const phoneForm = reactive({
   areacode: null,
   phone: '',
@@ -174,7 +169,7 @@ const totpForm = reactive({
   totpSecret: ''
 })
 
-const phoneStatus = reactive({
+const emailState = reactive({
   isCountDown: false,
   countDownTime: 0,
   isSend: false,
@@ -182,21 +177,26 @@ const phoneStatus = reactive({
   isVerifyError: false
 })
 
-const otpFormRef = ref()
+const phoneState = reactive({
+  isCountDown: false,
+  countDownTime: 0,
+  isSend: false,
+  verifyCode: '',
+  isVerifyError: false
+})
 
 const vPwd = async (_rule, value) => {
-  status.strength = zxcvbn(value).score
-  if (status.strength < 2) {
-    return Promise.reject()
-  }
-  if (value === '') {
+  state.strength = zxcvbn(value).score
+  if (value === pwdForm.oldPassword) {
+    return Promise.reject(t('my.authentication.samepwd'))
+  } else if (value === '') {
     return Promise.reject(t('my.authentication.pep'))
-  } else {
-    if (pwdForm.confirmPassword !== '') {
-      pwdFormRef.value.validateFields('confirmPassword')
-    }
-    return Promise.resolve()
+  } else if (state.strength < 2) {
+    return Promise.reject()
+  } else if (pwdForm.confirmPassword !== '') {
+    pwdFormRef.value.validateFields('confirmPassword')
   }
+  return Promise.resolve()
 }
 const vConfirmPwd = async (_rule, value) => {
   if (value === '') {
@@ -222,13 +222,13 @@ const vPhone = async (_rule, value) => {
   const internationalPhoneRegex = /^\+\d{1,3}\d{5,14}$/
   // 如果手机号与之前相同
   if (!value) {
-    return Promise.reject('请输入手机号码')
+    return Promise.reject(t('my.authentication.pephone'))
   } else if (phoneForm.areacodeNew + value === phoneForm.areacode + phoneForm.phone) {
-    return Promise.reject('请输入与之前不同的号码')
+    return Promise.reject(t('my.authentication.pedphone'))
   }
   // 验证手机号码格式
   if (!cnPhoneRegex.test(value) && !internationalPhoneRegex.test(value)) {
-    return Promise.reject('请输入正确的手机号码')
+    return Promise.reject(t('my.authentication.pecphone'))
   } else {
     return Promise.resolve()
   }
@@ -236,14 +236,14 @@ const vPhone = async (_rule, value) => {
 
 const pwdRules = {
   oldPassword: [{ required: true, message: t('my.authentication.pep') }],
-  newPassword: [{ required: true, validator: vPwd, trigger: 'change' }],
+  newPassword: [{ validator: vPwd, trigger: 'change' }],
   confirmPassword: [{ validator: vConfirmPwd, trigger: 'change' }]
 }
 
 const emailRules = [
-  { required: true, message: '请输入电子邮件地址', trigger: 'blur' },
-  { type: 'email', message: '请输入正确的电子邮件地址', trigger: 'blur' },
-  { validator: vEmail, message: '请输入与之前不同的电子邮件地址', trigger: 'blur' }
+  { required: true, message: t('my.authentication.peemail'), trigger: 'blur' },
+  { type: 'email', message: t('my.authentication.pecemail'), trigger: 'blur' },
+  { validator: vEmail, message: t('my.authentication.pedemail'), trigger: 'blur' }
 ]
 
 const phoneRules = [{ validator: vPhone, trigger: 'blur' }]
@@ -257,7 +257,7 @@ const handleResetPwdForm = () => {
 
 const handleCancelSet = () => {
   console.log('cancel')
-  status.verifyCode = ''
+  state.verifyCode = ''
 }
 
 const handleUpdatePwd = async () => {
@@ -266,7 +266,7 @@ const handleUpdatePwd = async () => {
     if (resp.result) {
       messageApi.success('密码成功更新!')
       pwdFormRef.value.resetFields()
-      status.toggleChangePwd = !status.toggleChangePwd
+      state.toggleChangePwd = !state.toggleChangePwd
     } else {
       messageApi.success('旧密码输入错误，请重试')
     }
@@ -282,29 +282,29 @@ const handleSendEmail = async () => {
     await emailFormRef.value.validateFields()
   } catch (err) {
     console.log(err)
-    emailStatus.isSend = false
+    emailState.isSend = false
     return
   }
 
   // 向指定邮箱发送验证邮件
   try {
-    status.loading = true
+    state.loading = true
     const resp = await API.my.sendCodeByEmail(emailForm.emailNew)
     if (resp.result) {
-      status.loading = false
+      state.loading = false
     } else {
-      throw new Error({ message: '邮件发送失败(40001)' })
+      throw new Error({ message: '邮件发送失败' })
     }
   } catch (err) {
     console.log(err)
-    messageApi.error('邮件发送失败(40001, 请重试', 1)
-    status.loading = true
-    emailStatus.isSend = false
+    messageApi.error('邮件发送失败, 请重试', 1)
+    state.loading = true
+    emailState.isSend = false
     return
   }
   // 启动倒计时
-  emailStatus.isSend = true
-  countDown(emailStatus, emailInterval, 'email')
+  emailState.isSend = true
+  countDown(emailState, emailInterval, 'email')
 }
 
 const handleUpdateEmail = async () => {
@@ -312,25 +312,25 @@ const handleUpdateEmail = async () => {
   try {
     //do verify email code
     //if sccuess
-    const resp = await API.my.updateEmail(emailStatus.verifyCode, emailForm.emailNew)
+    const resp = await API.my.updateEmail(emailState.verifyCode, emailForm.emailNew)
     if (resp.result) {
       emailForm.email = emailForm.emailNew
       emailForm.emailNew = ''
       localStorage.removeItem('emailCDT')
       localStorage.removeItem('cur_email')
-      status.setEmailVisible = false
-      emailStatus.verifyCode = ''
-      emailStatus.isVerifyError = false
-      emailStatus.isSend = false
-      emailStatus.countDownTime = 60
-      emailStatus.isCountDown = false
-      if (emailStatus) clearInterval(emailInterval)
+      state.setEmailVisible = false
+      emailState.verifyCode = ''
+      emailState.isVerifyError = false
+      emailState.isSend = false
+      emailState.countDownTime = 60
+      emailState.isCountDown = false
+      if (emailState) clearInterval(emailInterval)
     } else {
-      emailStatus.isVerifyError = true
+      emailState.isVerifyError = true
     }
   } catch (e) {
     console.log(e)
-    emailStatus.isVerifyError = true
+    emailState.isVerifyError = true
     return
   }
 }
@@ -342,34 +342,34 @@ const handleSendSMS = async () => {
     await phoneFormRef.value.validateFields()
   } catch (err) {
     console.log(err)
-    phoneStatus.isSend = false
+    phoneState.isSend = false
     return
   }
 
   // 向指定手机发送验证短信
   try {
-    status.loading = true
+    state.loading = true
     const resp = await API.my.updatePhone(phoneForm.areacode, phoneForm.phoneNew)
     if (resp.result) {
-      status.loading = false
+      state.loading = false
     } else {
       throw new Error({ message: '短信发送失败(50001)' })
     }
   } catch (err) {
     console.log(err)
     messageApi.error('短信发送失败(40001, 请重试', 1)
-    status.loading = true
-    phoneStatus.isSend = false
+    state.loading = true
+    phoneState.isSend = false
     return
   }
   // 启动倒计时
-  phoneStatus.isSend = true
-  countDown(phoneStatus, phoneInterval, 'phone')
+  phoneState.isSend = true
+  countDown(phoneState, phoneInterval, 'phone')
 }
 
 const handleUpdatePhone = async () => {
   try {
-    const resp = await API.my.updatePhone(phoneStatus.verifyCode, phoneForm.areacodeNew, phoneForm.phoneNew)
+    const resp = await API.my.updatePhone(phoneState.verifyCode, phoneForm.areacodeNew, phoneForm.phoneNew)
     if (resp.result) {
       phoneForm.phone = phoneForm.phoneNew
       phoneForm.areacode = phoneForm.areacodeNew
@@ -377,19 +377,19 @@ const handleUpdatePhone = async () => {
       phoneForm.areacodeNew = ''
       localStorage.removeItem('phoneCDT')
       localStorage.removeItem('cur_phone')
-      status.setPhoneVisible = false
-      phoneStatus.verifyCode = ''
-      phoneStatus.isVerifyError = false
-      phoneStatus.isSend = false
-      phoneStatus.countDownTime = 60
-      phoneStatus.isCountDown = false
-      if (phoneStatus) clearInterval(phoneInterval)
+      state.setPhoneVisible = false
+      phoneState.verifyCode = ''
+      phoneState.isVerifyError = false
+      phoneState.isSend = false
+      phoneState.countDownTime = 60
+      phoneState.isCountDown = false
+      if (phoneState) clearInterval(phoneInterval)
     } else {
-      phoneStatus.isVerifyError = true
+      phoneState.isVerifyError = true
     }
   } catch (e) {
     console.log(e)
-    phoneStatus.isVerifyError = true
+    phoneState.isVerifyError = true
     return
   }
 }
@@ -400,7 +400,7 @@ const countDown = (obj, intv, type) => {
   if (startTime) {
     let surplus = 60 - parseInt((nowTime - startTime) / 1000, 10)
     obj.countDownTime = surplus <= 0 ? 0 : surplus
-    // console.log(status.countDownTime, status.countDownTime)
+    // console.log(state.countDownTime, state.countDownTime)
   } else {
     obj.countDownTime = 60
     localStorage.setItem(type + 'CDT', nowTime)
@@ -422,8 +422,8 @@ const countDown = (obj, intv, type) => {
 
 emailForm.emailNew = localStorage.getItem('cur_email')
 if (localStorage.getItem('emailCDT')) {
-  emailStatus.isSend = true
-  countDown(emailStatus, emailInterval, 'email')
+  emailState.isSend = true
+  countDown(emailState, emailInterval, 'email')
 }
 
 // 本页面初始数据准备

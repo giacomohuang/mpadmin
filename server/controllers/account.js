@@ -25,7 +25,7 @@ class AccountController extends BaseController {
     try {
       const { accountname, password } = ctx.request.body
       console.log(accountname, password)
-      const account = await Account.findOne({ password: '123456' })
+      const account = await Account.findOne({ accountname, password })
       console.log(account)
       // console.log(account)
       if (!account) {

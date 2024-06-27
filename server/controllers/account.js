@@ -10,6 +10,7 @@ class AccountController extends BaseController {
     try {
       const { accountname, password } = ctx.request.body
       const account = new Account({ accountname, password })
+
       await account.save()
       ctx.status = 201
       // ctx.body = { message: 'New user registered successfully' }
@@ -23,13 +24,12 @@ class AccountController extends BaseController {
     // console.log('*********')
     try {
       const { accountname, password } = ctx.request.body
-      const account = await Account.findOne({ accountname })
-
+      console.log(accountname, password)
+      const account = await Account.findOne({ password: '123456' })
+      console.log(account)
+      // console.log(account)
       if (!account) {
-        ctx.throw(401)
-      }
-      if (account.password !== password) {
-        ctx.throw(401)
+        throw new CustomError(400, 'Invalid accountname or password', '400001')
       }
       // Generate JWT token
       const accessToken = jwt.sign({ id: account._id, accountname: account.accountname }, process.env.SECRET_KEY_ACCESS, { expiresIn: '30s' })
@@ -45,12 +45,7 @@ class AccountController extends BaseController {
       console.log('refreshToken:', refreshToken)
       console.log('md5:', md5Token)
     } catch (err) {
-      if (err.status == 401) {
-        ctx.status = 200
-        ctx.body = { message: 'Invalid accountname or password', code: 401001 }
-      } else {
-        ctx.throw(500, 'Internal Server Error')
-      }
+      throw err
     }
   }
   static async verifyToken(ctx) {

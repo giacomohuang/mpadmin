@@ -20,9 +20,10 @@ app.use(
     origin: 'http://localhost:5173',
     maxAge: 3600,
     allowMethods: 'GET,POST',
-    exposeHeaders: 'Authorization,Newaccesstoken,Newrefreshtoken,Refreshtoken'
-  })
+    exposeHeaders: 'Authorization,Newaccesstoken,Newrefreshtoken,Refreshtoken',
+  }),
 )
+// 统一异常处理中间件
 app.use(errorHandler)
 
 // 将ioredis绑定到Koa的context上，以便在上下文中使用

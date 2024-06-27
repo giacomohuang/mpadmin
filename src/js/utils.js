@@ -7,5 +7,5 @@ export default {
     // app.config.globalProperties.$helper = helper
     app.provide('helper', helper)
     app.provide('API', API)
-  }
+  },
 }

@@ -8,23 +8,24 @@ const accountSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
+    required: true,
+    encrypted: true
   },
   areacode: {
     type: String,
-    required: true
+    required: false
   },
   phone: {
     type: String,
-    required: true
+    required: false
   },
   totpSecret: {
     type: String,
-    required: true
+    required: false
   },
   email: {
     type: String,
-    required: true
+    required: false
   }
 })
 

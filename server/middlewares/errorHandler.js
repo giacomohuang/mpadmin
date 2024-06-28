@@ -1,5 +1,3 @@
-const CustomError = require('../CustomError')
-
 const errorHandler = async (ctx, next) => {
   try {
     await next()
@@ -14,4 +12,4 @@ const errorHandler = async (ctx, next) => {
     console.log(err)
   }
 }
-module.exports = { errorHandler }
+export default errorHandler

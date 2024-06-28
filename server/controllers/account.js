@@ -1,9 +1,12 @@
-const BaseController = require('./base')
-const Account = require('../models/account')
-const jwt = require('jsonwebtoken')
-const crypto = require('crypto')
-const speakeasy = require('speakeasy')
-const CustomError = require('../CustomError')
+import BaseController from './base.js'
+import Account from '../models/account.js'
+import jwt from 'jsonwebtoken'
+import crypto from 'crypto'
+import speakeasy from 'speakeasy'
+import CustomError from '../CustomError.js'
+import OpenAIService from '../services/openai.js'
+// import { OpenAIClient, AzureKeyCredential } from '@azure/openai'
+import { PassThrough } from 'stream'
 
 class AccountController extends BaseController {
   static async signup(ctx) {
@@ -166,9 +169,17 @@ class AccountController extends BaseController {
   }
 
   static async hello(ctx) {
-    // console.log('hello')
-    // aaa = sss
-    ctx.body = { data: 'hello' }
+    ctx.set({
+      Connection: 'keep-alive',
+      'Cache-Control': 'no-cache',
+      'Content-Type': 'text/event-stream' // 表示返回数据是个 stream
+    })
+    const stream = new PassThrough()
+    ctx.status = 200
+    ctx.body = stream
+    OpenAIService.sendMessage(stream)
+    console.log('finish')
   }
 }
-module.exports = AccountController
+
+export default AccountController

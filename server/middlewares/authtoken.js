@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken')
-const crypto = require('crypto')
-const CustomError = require('../CustomError')
+import jwt from 'jsonwebtoken'
+import crypto from 'crypto'
+import CustomError from '../CustomError.js'
 
 const authToken = async (ctx, next) => {
   console.log('authToken')
@@ -70,4 +70,4 @@ const refresh = async (token, ctx) => {
   }
 }
 
-module.exports = { authToken }
+export { authToken }

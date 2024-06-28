@@ -179,6 +179,9 @@ class AccountController extends BaseController {
     ctx.body = stream
     OpenAIService.sendMessage(stream)
     console.log('finish')
+    ctx.req.on('close', () => {
+      console.log('client closed')
+    })
   }
 }
 

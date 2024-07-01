@@ -8,7 +8,7 @@ import { ref, inject, onMounted } from 'vue'
 const API = inject('API')
 const aaa = ref('')
 
-// SSE​ Server-Sent Events
+// SSE Server-Sent Events
 const handleClick = async () => {
   aaa.value = ''
   const source = new EventSource('http://127.0.0.1:3000/account/hello')

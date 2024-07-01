@@ -1,6 +1,7 @@
 import Koa from 'koa'
 import { bodyParser } from '@koa/bodyparser'
 import accountRouter from './routes/accountRouter.js'
+import verificationRouter from './routes/verificationRouter.js'
 import mongoose from 'mongoose'
 import cors from '@koa/cors'
 import errorHandler from './middlewares/errorHandler.js'
@@ -35,6 +36,7 @@ mongoose.connect(process.env.MONGODB_URL).then(() => {
 
 // console.log(accountRouter)
 app.use(accountRouter.routes())
+app.use(verificationRouter.routes())
 // app.use(accountRouter.allowedMethods())
 // app.use(router.allowedMethods())
 

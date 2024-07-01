@@ -13,7 +13,7 @@ class OpenAIService {
         { role: 'user', content: "What's the best way to train a parrot?" }
       ]
 
-      console.log(`Messages: ${messages.map((m) => m.content).join('\n')}`)
+      // console.log(`Messages: ${messages.map((m) => m.content).join('\n')}`)
 
       const events = await client.streamChatCompletions(deploymentId, messages, { maxTokens: 2000 })
       let str = ''

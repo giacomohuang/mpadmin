@@ -5,7 +5,6 @@ import crypto from 'crypto'
 import speakeasy from 'speakeasy'
 import CustomError from '../CustomError.js'
 import OpenAIService from '../services/openai.js'
-// import { OpenAIClient, AzureKeyCredential } from '@azure/openai'
 import { PassThrough } from 'stream'
 
 class AccountController extends BaseController {
@@ -159,6 +158,7 @@ class AccountController extends BaseController {
     try {
       const accountid = ctx.request.headers['accountid']
       const { verifycode, areacode, phone } = ctx.request.body
+
       // TODO 验证verifycode
       await Account.findOneAndUpdate({ _id: accountid }, { areacode, phone })
       ctx.body = { result: true }

@@ -7,7 +7,7 @@ const account = {
       baseURL: baseUrl.account,
       method: 'get',
       params: { uid: uid },
-      url: '/api/user/getpermissions'
+      url: '/user/getpermissions'
     })
   },
   login(params) {

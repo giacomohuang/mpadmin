@@ -8,6 +8,7 @@ import { ref, inject, onMounted } from 'vue'
 const API = inject('API')
 const aaa = ref('')
 
+// OpenAI test
 // SSE Server-Sent Events
 const handleClick = async () => {
   aaa.value = ''
@@ -23,9 +24,9 @@ const handleClick = async () => {
 
   source.addEventListener('message', (event) => {
     // 结束则关闭链接
-    console.log(event.data)
+    // console.log(event.data)
     if (event.data.trim() === '[DONE]') {
-      source.close()
+      // source.close()
     } else {
       aaa.value += event.data.replace('\\x0A', '\n')
     }

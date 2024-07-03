@@ -48,7 +48,7 @@
       </div>
       <div class="tips">{{ $t('my.authentication.enhphone') }}</div>
       <div class="item">
-        <label>{{ phoneForm.areacode }} {{ phoneForm.phone ? helper.obfuscate('phone', phoneForm.phone) : $t('my.authentication.notset') }}</label>
+        <label>{{ phoneForm.phone ? phoneForm.areacode + ' ' + helper.obfuscate('phone', phoneForm.phone) : $t('my.authentication.notset') }}</label>
         <a-button @click="state.setPhoneVisible = true">{{ phoneForm.phone ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
       </div>
       <a-modal v-model:open="state.setPhoneVisible" :title="phoneForm.phone ? $t('my.authentication.editphone') : $t('my.authentication.setphone')" :footer="null" @cancel="handleCancelSet" width="530px">
@@ -69,30 +69,6 @@
         <div class="flex-col flex-item-c verifycode" v-if="phoneState.isSend">
           <div class="hint">{{ $t('my.authentication.rsvphone') }}</div>
           <VerifyInput v-model="phoneState.verifyCode" :autofocus="true" :digits="6" @finish="handleUpdatePhone"></VerifyInput>
-        </div>
-      </a-modal>
-    </section>
-    <section>
-      <div class="title flex flex-item-c">
-        <h2>{{ $t('my.authentication.totp') }}</h2>
-      </div>
-      <div class="tips">{{ $t('my.authentication.enhtotp') }}</div>
-      <div class="item">
-        <label>{{ totpForm.totpSecret ? $t('my.authentication.havset') : $t('my.authentication.notset') }}</label>
-        <a-button @click="handleGenerateTotpSecret">{{ totpForm.totpSecret ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
-      </div>
-      <a-modal v-model:open="state.setTotpVisible" :title="totpForm.totpSecret ? $t('my.authentication.edittotp') : $t('my.authentication.settotp')" :footer="null" @cancel="handleCancelSet" width="500px">
-        <div class="step">
-          <div class="title"><span class="badage">1</span>使用验证APP扫描二维码</div>
-          <div class="hint">扫描验证码后，将得到一组6位数字验证码。还没有安装验证APP？ <a href="/downauthapp" target="_blank">点击这里下载</a></div>
-          <div style="margin-top: 20px" class="flex-col flex-item-c">
-            <div style="border-radius: 8px; background-color: white; width: fit-content; height: fit-content"><a-qrcode v-if="totpState.activationUrl" :value="totpState.activationUrl" /></div>
-          </div>
-        </div>
-        <div class="step">
-          <div class="title"><span class="badage">2</span>输入6位验证码</div>
-          <div class="hint">在下面的框中输入APP中显示的6位验证码来激活你的动态口令验证服务。</div>
-          <VerifyInput style="margin: 10px 0 30px 30px" v-model:value="totpState.verifyCode" :autofocus="true" @finish="handleUpdateTotpSecret" :digits="6"></VerifyInput>
         </div>
       </a-modal>
     </section>
@@ -124,6 +100,31 @@
     </section>
 
     <section>
+      <div class="title flex flex-item-c">
+        <h2>{{ $t('my.authentication.totp') }}</h2>
+      </div>
+      <div class="tips">{{ $t('my.authentication.enhtotp') }}</div>
+      <div class="item">
+        <label>{{ totpForm.totpSecret ? $t('my.authentication.havset') : $t('my.authentication.notset') }}</label>
+        <a-button @click="handleGenerateTotpSecret">{{ totpForm.totpSecret ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
+      </div>
+      <a-modal v-model:open="state.setTotpVisible" :title="totpForm.totpSecret ? $t('my.authentication.edittotp') : $t('my.authentication.settotp')" :footer="null" @cancel="handleCancelSet" width="500px">
+        <div class="step">
+          <div class="title"><span class="badage">1</span>使用验证APP扫描二维码</div>
+          <div class="hint">扫描验证码后，将得到一组6位数字验证码。还没有安装验证APP？ <a href="/downauthapp" target="_blank">点击这里下载</a></div>
+          <div style="margin-top: 20px" class="flex-col flex-item-c">
+            <div style="border-radius: 8px; background-color: white; width: fit-content; height: fit-content"><a-qrcode v-if="totpState.activationUrl" :value="totpState.activationUrl" /></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="title"><span class="badage">2</span>输入6位验证码</div>
+          <div class="hint">在下面的框中输入APP中显示的6位验证码来激活你的动态口令验证服务。</div>
+          <VerifyInput style="margin: 10px 0 30px 30px" v-model:value="totpState.verifyCode" :autofocus="true" @finish="handleUpdateTotpSecret" :digits="6"></VerifyInput>
+        </div>
+      </a-modal>
+    </section>
+
+    <section>
       <div class="title flex flex-item-c flex-between">
         <h2>{{ $t('my.authentication.2fa') }}</h2>
       </div>
@@ -131,6 +132,9 @@
       <div class="item">
         <label>{{ state.enable2FA ? $t('common.enabled') : $t('common.disabled') }}</label>
         <a-switch v-model:checked="state.enable2FA" @change="handleToggle2FA" />
+      </div>
+      <div class="item">
+        <a-alert message="要使两步验证生效，请先设置手机号码、电子邮件或动态口令" type="warning" show-icon v-if="!(emailForm.email || phoneForm.phone || totpForm.totpSecret)" />
       </div>
     </section>
   </div>

@@ -57,12 +57,68 @@ const account = {
       url: '/account/verifytotp'
     })
   },
+
+  sendCodeByEmail(email) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: { email: email },
+      url: '/account/sendcodebyemail'
+    })
+  },
+  updatePassword(oldPassword, newPassword) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: { oldPassword, newPassword },
+      url: '/account/updatepassword'
+    })
+  },
+  updateEmail(verifycode, email) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: { verifycode, email },
+      url: '/account/updateemail'
+    })
+  },
+  sendCodeBySMS(areacode, phone) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: { areacode, phone },
+      url: '/account/sendcodebysms'
+    })
+  },
+  updatePhone(verifycode, areacode, phone) {
+    return fetch({
+      baseURL: baseUrl.default,
+      method: 'post',
+      data: { verifycode, areacode, phone },
+      url: '/account/updatephone'
+    })
+  },
   updateTotpSecret(totpSecret) {
     return fetch({
       baseURL: baseUrl.account,
       method: 'post',
       data: totpSecret,
       url: '/account/updatetotpsecret'
+    })
+  },
+  update2FA(enable2FA) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: enable2FA,
+      url: '/account/update2fa'
+    })
+  },
+  getAuthInfo() {
+    return fetch({
+      baseURL: baseUrl.default,
+      method: 'post',
+      url: '/account/getauthinfo'
     })
   }
 }

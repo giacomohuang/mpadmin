@@ -18,9 +18,10 @@ accountRouter.post('/account/verifytotp', ...ts, AccountController.verifyTotp)
 accountRouter.post('/account/updatetotpsecret', ...ts, AccountController.updateTotpSecret)
 accountRouter.get('/account/hello', AccountController.hello)
 
-accountRouter.post('/my/getauthinfo', ...ts, AccountController.getAuthInfo)
-accountRouter.post('/my/updatepassword', ...ts, AccountController.updatePassword)
-accountRouter.post('/my/updateemail', ...ts, AccountController.updateEmail)
-accountRouter.post('/my/updatephone', ...ts, AccountController.updatePhone)
+accountRouter.post('/account/getauthinfo', ...ts, AccountController.getAuthInfo)
+accountRouter.post('/account/updatepassword', ...ts, AccountController.updatePassword)
+accountRouter.post('/account/updateemail', ...ts, AccountController.updateEmail)
+accountRouter.post('/account/updatephone', ...ts, AccountController.updatePhone)
+accountRouter.post('/account/update2fa', ...ts, AccountController.update2FA)
 
 module.exports = accountRouter

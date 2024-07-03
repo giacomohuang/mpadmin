@@ -26,6 +26,10 @@ const accountSchema = new mongoose.Schema({
   email: {
     type: String,
     required: false
+  },
+  enable2FA: {
+    type: Boolean,
+    required: false
   }
 })
 

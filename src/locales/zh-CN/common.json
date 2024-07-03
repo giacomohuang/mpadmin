@@ -2,6 +2,8 @@
   "common": {
     "appname": "管理运营平台",
     "lang": "语言",
+    "enabled": "启用",
+    "disabled": "禁用",
     "route": {
       "signin": "登录",
       "workspace": "工作台",

@@ -2,7 +2,7 @@
   <context-holder />
   <div class="main" v-show="!globalLoading">
     <section>
-      <div class="title flex flex-item-c flex-betwwen">
+      <div class="title flex flex-item-c flex-between">
         <h2>{{ $t('my.authentication.pwd') }}</h2>
         <a-button @click.stop="state.toggleChangePwd = !state.toggleChangePwd">{{ state.toggleChangePwd ? $t('my.authentication.hide') : $t('my.authentication.cpwd') }}</a-button>
       </div>
@@ -68,7 +68,7 @@
         </a-form>
         <div class="flex-col flex-item-c verifycode" v-if="phoneState.isSend">
           <div class="hint">{{ $t('my.authentication.rsvphone') }}</div>
-          <VerifyInput v-model="phoneState.verifyCode" :autofocus="true" :digits="4" @finish="handleUpdatePhone"></VerifyInput>
+          <VerifyInput v-model="phoneState.verifyCode" :autofocus="true" :digits="6" @finish="handleUpdatePhone"></VerifyInput>
         </div>
       </a-modal>
     </section>
@@ -109,7 +109,7 @@
       <a-modal v-model:open="state.setEmailVisible" :title="emailForm.email ? $t('my.authentication.editemail') : $t('my.authentication.setemail')" :footer="null" @cancel="handleCancelSet">
         <a-form style="margin-top: 40px" ref="emailFormRef" :model="emailForm" layout="inline">
           <a-form-item has-feedback :label="$t('my.authentication.emailad')" name="emailNew" :rules="emailRules">
-            <a-input v-model="emailForm.emailNew" />
+            <a-input v-model:value="emailForm.emailNew" />
           </a-form-item>
           <a-form-item>
             <a-button @click="handleSendEmail" v-if="!emailState.isCountDown" :loading="state.loading" type="link" class="resend">{{ $t('my.authentication.svcode') }}</a-button>
@@ -118,9 +118,20 @@
         </a-form>
         <div class="flex-col flex-item-c verifycode" v-if="emailState.isSend">
           <div class="hint">{{ $t('my.authentication.rsvemail') }}</div>
-          <VerifyInput v-model="emailState.verifyCode" :autofocus="true" :digits="4" @finish="handleUpdateEmail"></VerifyInput>
+          <VerifyInput v-model="emailState.verifyCode" :autofocus="true" :digits="6" @finish="handleUpdateEmail"></VerifyInput>
         </div>
       </a-modal>
+    </section>
+
+    <section>
+      <div class="title flex flex-item-c flex-between">
+        <h2>{{ $t('my.authentication.2fa') }}</h2>
+      </div>
+      <div class="tips">{{ $t('my.authentication.enh2fa') }}</div>
+      <div class="item">
+        <label>{{ state.enable2FA ? $t('common.enabled') : $t('common.disabled') }}</label>
+        <a-switch v-model:checked="state.enable2FA" @change="handleToggle2FA" />
+      </div>
     </section>
   </div>
 </template>
@@ -152,7 +163,9 @@ const state = reactive({
   setEmailVisible: false,
   setPhoneVisible: false,
   setTotpVisible: false,
-  loading: false
+  loading: false,
+  enable2FA: undefined,
+  twoFALoading: false
 })
 
 const pwdFormRef = ref()
@@ -235,6 +248,7 @@ const vEmail = async (_rule, value) => {
 }
 
 const vPhone = async (_rule, value) => {
+  console.log(value)
   const cnPhoneRegex = /^1[3-9]\d{9}$/
   const internationalPhoneRegex = /^\+\d{1,3}\d{5,14}$/
   // 如果手机号与之前相同
@@ -279,7 +293,7 @@ const handleCancelSet = () => {
 
 const handleUpdatePwd = async () => {
   try {
-    const resp = await API.my.updatePassword(pwdForm.oldPassword, pwdForm.newPassword)
+    const resp = await API.account.updatePassword(pwdForm.oldPassword, pwdForm.newPassword)
     if (resp.result) {
       messageApi.success('密码成功更新!')
       pwdFormRef.value.resetFields()
@@ -306,7 +320,7 @@ const handleSendEmail = async () => {
   // 向指定邮箱发送验证邮件
   try {
     state.loading = true
-    const resp = await API.my.sendCodeByEmail(emailForm.emailNew)
+    const resp = await API.account.sendCodeByEmail(emailForm.emailNew)
     if (resp.result) {
       state.loading = false
     } else {
@@ -329,7 +343,7 @@ const handleUpdateEmail = async (callback) => {
   try {
     //do verify email code
     //if sccuess
-    const resp = await API.my.updateEmail(emailState.verifyCode, emailForm.emailNew)
+    const resp = await API.account.updateEmail(emailState.verifyCode, emailForm.emailNew)
     if (resp.result) {
       callback(true)
       emailForm.email = emailForm.emailNew
@@ -337,11 +351,10 @@ const handleUpdateEmail = async (callback) => {
       localStorage.removeItem('emailCDT')
       localStorage.removeItem('cur_email')
       state.setEmailVisible = false
-      emailState.verifyCode = ''
       emailState.isSend = false
       emailState.countDownTime = 60
       emailState.isCountDown = false
-      if (emailState) clearInterval(emailInterval)
+      clearInterval(emailInterval)
     } else {
       callback(false)
     }
@@ -365,7 +378,7 @@ const handleSendSMS = async () => {
   // 向指定手机发送验证短信
   try {
     state.loading = true
-    const resp = await API.my.updatePhone(phoneForm.areacode, phoneForm.phoneNew)
+    const resp = await API.account.updatePhone(phoneForm.areacode, phoneForm.phoneNew)
     if (resp.result) {
       state.loading = false
     } else {
@@ -385,7 +398,7 @@ const handleSendSMS = async () => {
 
 const handleUpdatePhone = async (callback) => {
   try {
-    const resp = await API.my.updatePhone(phoneState.verifyCode, phoneForm.areacodeNew, phoneForm.phoneNew)
+    const resp = await API.account.updatePhone(phoneState.verifyCode, phoneForm.areacodeNew, phoneForm.phoneNew)
     if (resp.result) {
       callback(true)
       phoneForm.phone = phoneForm.phoneNew
@@ -395,11 +408,10 @@ const handleUpdatePhone = async (callback) => {
       localStorage.removeItem('phoneCDT')
       localStorage.removeItem('cur_phone')
       state.setPhoneVisible = false
-      phoneState.verifyCode = ''
       phoneState.isSend = false
       phoneState.countDownTime = 60
       phoneState.isCountDown = false
-      if (phoneState) clearInterval(phoneInterval)
+      clearInterval(phoneInterval)
     } else {
       callback(false)
     }
@@ -425,10 +437,8 @@ const handleUpdateTotpSecret = async (callback) => {
     if (data.result) {
       const resp = await API.account.updateTotpSecret({ totpSecret: totpState.secret })
       if (resp.result) {
-        console.log('asdasdasdasdasdasdasdasdasdasd')
         state.setTotpVisible = false
         totpState.activationUrl = ''
-        totpState.verifyCode = ''
         totpState.secret = ''
         totpForm.totpSecret = '*'
         callback(true)
@@ -439,6 +449,15 @@ const handleUpdateTotpSecret = async (callback) => {
   } catch (err) {
     callback(false)
   }
+}
+const handleToggle2FA = async () => {
+  try {
+    const resp = await API.account.update2FA({ enable2FA: state.enable2FA })
+    if (!resp.result) {
+      messageApi('error', '2FA更新失败')
+      state.enable2FA = !state.enable2FA
+    }
+  } catch (err) {}
 }
 
 const countDown = (obj, intv, type) => {
@@ -476,19 +495,21 @@ if (localStorage.getItem('emailCDT')) {
 // 本页面初始数据准备
 async function getMyAuthInfo() {
   globalLoading.value = true
-  const resp = await API.my.getAuthInfo()
+  const resp = await API.account.getAuthInfo()
   console.log(resp)
   emailForm.email = resp.email
   phoneForm.areacode = resp.areacode
   phoneForm.phone = resp.phone
   totpForm.totpSecret = resp.totpSecret
   globalLoading.value = false
+  state.enable2FA = resp.enable2FA
 }
 
 getMyAuthInfo()
 
 onUnmounted(() => {
-  if (emailInterval) clearInterval(emailInterval)
+  clearInterval(phoneInterval)
+  clearInterval(emailInterval)
 })
 </script>
 <style lang="scss" scoped>

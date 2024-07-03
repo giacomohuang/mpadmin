@@ -67,6 +67,7 @@ const check = () => {
     codeArray.value = Array(digits).fill('')
     loadingRef.value.classList.remove('loading')
     loading.value = false
+    value.value = ''
   }, 120)
 }
 

@@ -19,7 +19,7 @@
       "excellent": "excellent",
       "auth": "Authentication",
       "email": "Email",
-      "mobi": "Mobile Phone (SMS)",
+      "mobi": "Mobile Phone",
       "totp": "Dynamic Password (OTP)",
       "emailad": "Email",
       "svcode": "Send Code",
@@ -39,16 +39,18 @@
       "edittotp": "Rebind Dynamic Password",
       "settotp": "Set Dynamic Password",
       "samepwd": "The new password cannot be the same as the old password.",
-      "enhphone": "Enhance account security with SMS verification.",
+      "enhphone": "Set a mobile phone number to receive verification codes, system messages, etc.",
       "enhtotp": "Enhance account security with dynamic password.",
-      "enhemail": "Enhance account security with email verification.",
+      "enhemail": "Set an email account to receive verification codes, system messages, etc.",
       "areacode": "Areacode",
       "pephone": "Please enter the phone number.",
       "pedphone": "Please enter a different phone number.",
       "pecphone": "Please enter the correct phone number",
       "peemail": "Please enter email.",
       "pecemail": "Please enter correct email.",
-      "pedemail": "Please enter a different email."
+      "pedemail": "Please enter a different email.",
+      "2fa": "Two-Factor Authentication",
+      "enh2fa": "Enhance account security with Two-Factor Authentication(2FA)."
     }
   }
 }

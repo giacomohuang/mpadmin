@@ -27,7 +27,9 @@ class AccountController extends BaseController {
     try {
       const { accountname, password } = ctx.request.body
       console.log(accountname, password)
-      const account = await Account.findOne({ accountname, password })
+      const cryptoPwd = crypto.createHmac('sha256', process.env.PWD_KEY).update(password).digest('hex')
+      console.log(cryptoPwd)
+      const account = await Account.findOne({ accountname, password: cryptoPwd })
       console.log(account)
       // console.log(account)
       if (!account) {
@@ -121,7 +123,7 @@ class AccountController extends BaseController {
     try {
       const accountid = ctx.request.headers['accountid']
       console.log('accountId:', accountid)
-      const authInfo = await Account.findOne({ _id: accountid }).select('areacode phone email totpSecret')
+      const authInfo = await Account.findOne({ _id: accountid }).select('areacode phone email totpSecret enable2FA')
       // 如果有totp秘钥，则置为*，不暴露给客户端
       console.log(authInfo)
       if (authInfo.totpSecret) {
@@ -156,7 +158,9 @@ class AccountController extends BaseController {
       const accountid = ctx.request.headers['accountid']
       const { oldPassword, newPassword } = ctx.request.body
       // TODO 验证verifycode
-      const result = await Account.findOneAndUpdate({ _id: accountid, password: oldPassword }, { password: newPassword })
+      const cryptoOldPwd = crypto.createHmac('sha256', process.env.PWD_KEY).update(oldPassword).digest('hex')
+      const cryptoNewPwd = crypto.createHmac('sha256', process.env.PWD_KEY).update(newPassword).digest('hex')
+      const result = await Account.findOneAndUpdate({ _id: accountid, password: cryptoOldPwd }, { password: cryptoNewPwd })
       if (result) {
         ctx.body = { result: true }
       } else {
@@ -192,6 +196,21 @@ class AccountController extends BaseController {
       //
 
       await Account.findOneAndUpdate({ _id: accountid }, { areacode, phone })
+      ctx.body = { result: true }
+    } catch (err) {
+      ctx.status = 500
+      ctx.body = { message: 'Internal Server Error' }
+    }
+  }
+
+  // 开启/关闭两步验证
+  static async update2FA(ctx) {
+    try {
+      const accountid = ctx.request.headers['accountid']
+      const { enable2FA } = ctx.request.body
+      // TODO 验证verifycode
+      const result = await Account.findOneAndUpdate({ _id: accountid }, { enable2FA })
+      console.log(result)
       ctx.body = { result: true }
     } catch (err) {
       ctx.status = 500

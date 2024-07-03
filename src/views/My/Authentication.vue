@@ -134,7 +134,7 @@
         <a-switch v-model:checked="state.enable2FA" @change="handleToggle2FA" />
       </div>
       <div class="item">
-        <a-alert message="要使两步验证生效，请先设置手机号码、电子邮件或动态口令" type="warning" show-icon v-if="!(emailForm.email || phoneForm.phone || totpForm.totpSecret)" />
+        <a-alert message="要使两步验证生效，请先设置手机号码、电子邮件或动态口令其中一项" type="warning" show-icon v-if="!(emailForm.email || phoneForm.phone || totpForm.totpSecret)" />
       </div>
     </section>
   </div>

@@ -50,7 +50,7 @@
       "pecemail": "Please enter correct email.",
       "pedemail": "Please enter a different email.",
       "2fa": "Two-Factor Authentication",
-      "enh2fa": "Enhance account security with Two-Factor Authentication(2FA)."
+      "enh2fa": "Use two-step verification (2FA) to enhance account security, include SMS verification, email verification and dynamic password verification."
     }
   }
 }

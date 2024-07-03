@@ -457,7 +457,9 @@ const handleToggle2FA = async () => {
       messageApi('error', '2FA更新失败')
       state.enable2FA = !state.enable2FA
     }
-  } catch (err) {}
+  } catch (err) {
+    state.enable2FA = !state.enable2FA
+  }
 }
 
 const countDown = (obj, intv, type) => {

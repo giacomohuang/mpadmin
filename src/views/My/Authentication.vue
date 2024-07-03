@@ -68,7 +68,7 @@
         </a-form>
         <div class="flex-col flex-item-c verifycode" v-if="phoneState.isSend">
           <div class="hint">{{ $t('my.authentication.rsvphone') }}</div>
-          <VerifyInput v-model:value="phoneState.verifyCode" v-model:isError="phoneState.isVerifyError" :autofocus="true" :digits="4" @finish="handleUpdatePhone"></VerifyInput>
+          <VerifyInput v-model="phoneState.verifyCode" :autofocus="true" :digits="4" @finish="handleUpdatePhone"></VerifyInput>
         </div>
       </a-modal>
     </section>
@@ -79,9 +79,22 @@
       <div class="tips">{{ $t('my.authentication.enhtotp') }}</div>
       <div class="item">
         <label>{{ totpForm.totpSecret ? $t('my.authentication.havset') : $t('my.authentication.notset') }}</label>
-        <a-button @click="state.setTotpVisible = true">{{ totpForm.totpSecret ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
+        <a-button @click="handleGenerateTotpSecret">{{ totpForm.totpSecret ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
       </div>
-      <a-modal v-model:open="state.setTotpVisible" :title="totpForm.totpSecret ? $t('my.authentication.edittotp') : $t('my.authentication.settotp')" :footer="null" @cancel="handleCancelSet"> </a-modal>
+      <a-modal v-model:open="state.setTotpVisible" :title="totpForm.totpSecret ? $t('my.authentication.edittotp') : $t('my.authentication.settotp')" :footer="null" @cancel="handleCancelSet" width="500px">
+        <div class="step">
+          <div class="title"><span class="badage">1</span>使用验证APP扫描二维码</div>
+          <div class="hint">扫描验证码后，将得到一组6位数字验证码。还没有安装验证APP？ <a href="/downauthapp" target="_blank">点击这里下载</a></div>
+          <div style="margin-top: 20px" class="flex-col flex-item-c">
+            <div style="border-radius: 8px; background-color: white; width: fit-content; height: fit-content"><a-qrcode v-if="totpState.activationUrl" :value="totpState.activationUrl" /></div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="title"><span class="badage">2</span>输入6位验证码</div>
+          <div class="hint">在下面的框中输入APP中显示的6位验证码来激活你的动态口令验证服务。</div>
+          <VerifyInput style="margin: 10px 0 30px 30px" v-model:value="totpState.verifyCode" :autofocus="true" @finish="handleUpdateTotpSecret" :digits="6"></VerifyInput>
+        </div>
+      </a-modal>
     </section>
 
     <section>
@@ -96,7 +109,7 @@
       <a-modal v-model:open="state.setEmailVisible" :title="emailForm.email ? $t('my.authentication.editemail') : $t('my.authentication.setemail')" :footer="null" @cancel="handleCancelSet">
         <a-form style="margin-top: 40px" ref="emailFormRef" :model="emailForm" layout="inline">
           <a-form-item has-feedback :label="$t('my.authentication.emailad')" name="emailNew" :rules="emailRules">
-            <a-input v-model:value="emailForm.emailNew" />
+            <a-input v-model="emailForm.emailNew" />
           </a-form-item>
           <a-form-item>
             <a-button @click="handleSendEmail" v-if="!emailState.isCountDown" :loading="state.loading" type="link" class="resend">{{ $t('my.authentication.svcode') }}</a-button>
@@ -105,7 +118,7 @@
         </a-form>
         <div class="flex-col flex-item-c verifycode" v-if="emailState.isSend">
           <div class="hint">{{ $t('my.authentication.rsvemail') }}</div>
-          <VerifyInput v-model:value="emailState.verifyCode" v-model:isError="emailState.isVerifyError" :autofocus="true" :digits="4" @finish="handleUpdateEmail"></VerifyInput>
+          <VerifyInput v-model="emailState.verifyCode" :autofocus="true" :digits="4" @finish="handleUpdateEmail"></VerifyInput>
         </div>
       </a-modal>
     </section>
@@ -126,7 +139,7 @@ import areaCode from '../../js/areacode'
 
 const { t, locale } = useI18n()
 const store = useStore()
-const { accountid } = toRefs(store)
+const { accountname } = toRefs(store)
 const [messageApi, contextHolder] = message.useMessage()
 const globalLoading = inject('globalLoading')
 
@@ -145,7 +158,7 @@ const state = reactive({
 const pwdFormRef = ref()
 const emailFormRef = ref()
 const phoneFormRef = ref()
-const otpFormRef = ref()
+const totpFormRef = ref()
 
 const pwdForm = reactive({
   oldPassword: '',
@@ -173,16 +186,20 @@ const emailState = reactive({
   isCountDown: false,
   countDownTime: 0,
   isSend: false,
-  verifyCode: '',
-  isVerifyError: false
+  verifyCode: ''
 })
 
 const phoneState = reactive({
   isCountDown: false,
   countDownTime: 0,
   isSend: false,
-  verifyCode: '',
-  isVerifyError: false
+  verifyCode: ''
+})
+
+const totpState = reactive({
+  activationUrl: '',
+  secret: '',
+  verifyCode: ''
 })
 
 const vPwd = async (_rule, value) => {
@@ -307,30 +324,29 @@ const handleSendEmail = async () => {
   countDown(emailState, emailInterval, 'email')
 }
 
-const handleUpdateEmail = async () => {
+const handleUpdateEmail = async (callback) => {
   console.log('finish')
   try {
     //do verify email code
     //if sccuess
     const resp = await API.my.updateEmail(emailState.verifyCode, emailForm.emailNew)
     if (resp.result) {
+      callback(true)
       emailForm.email = emailForm.emailNew
       emailForm.emailNew = ''
       localStorage.removeItem('emailCDT')
       localStorage.removeItem('cur_email')
       state.setEmailVisible = false
       emailState.verifyCode = ''
-      emailState.isVerifyError = false
       emailState.isSend = false
       emailState.countDownTime = 60
       emailState.isCountDown = false
       if (emailState) clearInterval(emailInterval)
     } else {
-      emailState.isVerifyError = true
+      callback(false)
     }
   } catch (e) {
     console.log(e)
-    emailState.isVerifyError = true
     return
   }
 }
@@ -367,10 +383,11 @@ const handleSendSMS = async () => {
   countDown(phoneState, phoneInterval, 'phone')
 }
 
-const handleUpdatePhone = async () => {
+const handleUpdatePhone = async (callback) => {
   try {
     const resp = await API.my.updatePhone(phoneState.verifyCode, phoneForm.areacodeNew, phoneForm.phoneNew)
     if (resp.result) {
+      callback(true)
       phoneForm.phone = phoneForm.phoneNew
       phoneForm.areacode = phoneForm.areacodeNew
       phoneForm.phoneNew = ''
@@ -379,18 +396,48 @@ const handleUpdatePhone = async () => {
       localStorage.removeItem('cur_phone')
       state.setPhoneVisible = false
       phoneState.verifyCode = ''
-      phoneState.isVerifyError = false
       phoneState.isSend = false
       phoneState.countDownTime = 60
       phoneState.isCountDown = false
       if (phoneState) clearInterval(phoneInterval)
     } else {
-      phoneState.isVerifyError = true
+      callback(false)
     }
   } catch (e) {
+    callback(false)
     console.log(e)
-    phoneState.isVerifyError = true
     return
+  }
+}
+
+const handleGenerateTotpSecret = async () => {
+  state.setTotpVisible = true
+  // console.log(accountname.value)
+  const { url, secret } = await API.account.generateTotpSecret({ accountname: accountname.value })
+  totpState.activationUrl = url
+  totpState.secret = secret
+}
+
+const handleUpdateTotpSecret = async (callback) => {
+  try {
+    const data = await API.account.verifyTotp({ secret: totpState.secret, token: totpState.verifyCode })
+    console.log(data.result)
+    if (data.result) {
+      const resp = await API.account.updateTotpSecret({ totpSecret: totpState.secret })
+      if (resp.result) {
+        console.log('asdasdasdasdasdasdasdasdasdasd')
+        state.setTotpVisible = false
+        totpState.activationUrl = ''
+        totpState.verifyCode = ''
+        totpState.secret = ''
+        totpForm.totpSecret = '*'
+        callback(true)
+      }
+    } else {
+      callback(false)
+    }
+  } catch (err) {
+    callback(false)
   }
 }
 
@@ -434,6 +481,7 @@ async function getMyAuthInfo() {
   emailForm.email = resp.email
   phoneForm.areacode = resp.areacode
   phoneForm.phone = resp.phone
+  totpForm.totpSecret = resp.totpSecret
   globalLoading.value = false
 }
 
@@ -515,6 +563,38 @@ onUnmounted(() => {
     font-size: 12px;
     // text-align: center;
     padding: 12px;
+  }
+}
+
+.badage {
+  margin-right: 10px;
+  border-radius: 100%;
+  display: inline-block;
+  height: 24px;
+  width: 24px;
+  line-height: 24px;
+  vertical-align: middle;
+  font-size: 14px;
+  text-align: center;
+  background-color: var(--c-brand2);
+  color: var(--c-white);
+  font-weight: 600;
+}
+
+.step {
+  margin: 40px 0 0 0;
+  .title {
+    display: flex;
+    align-items: center;
+    font-weight: 20px;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 800;
+    margin: 5px 0;
+  }
+  .hint {
+    color: var(--text-secondary);
+    margin-left: 35px;
   }
 }
 </style>

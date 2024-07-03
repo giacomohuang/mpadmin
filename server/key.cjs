@@ -9,8 +9,9 @@ const keyVaultNamespace = `${keyVaultDatabaseName}.${keyVaultCollectionName}`
 const encryptedDatabaseName = 'mpadmin'
 const encryptedCollectionName = 'accounts'
 const kmsProviderName = 'local'
+const VerificationContoller = require('./controllers/verificaiton')
 //
-
+VerificationContoller.sendEmail()
 // try {
 //   fs.writeFileSync('customer-master-key.txt', crypto.randomBytes(96))
 // } catch (err) {

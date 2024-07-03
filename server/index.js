@@ -1,11 +1,11 @@
-import Koa from 'koa'
-import { bodyParser } from '@koa/bodyparser'
-import accountRouter from './routes/accountRouter.js'
-import verificationRouter from './routes/verificationRouter.js'
-import mongoose from 'mongoose'
-import cors from '@koa/cors'
-import errorHandler from './middlewares/errorHandler.js'
-import Redis from 'ioredis'
+const Koa = require('koa')
+const { bodyParser } = require('@koa/bodyparser')
+const accountRouter = require('./routes/accountRouter')
+const verificationRouter = require('./routes/verificationRouter')
+const mongoose = require('mongoose')
+const cors = require('@koa/cors')
+const errorHandler = require('./middlewares/errorHandler')
+const Redis = require('ioredis')
 // const logger = require('koa-logger')
 
 // require('dotenv').config() //for using variables from .env file.

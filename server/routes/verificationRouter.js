@@ -1,7 +1,6 @@
-import Router from '@koa/router'
-import { authSign } from '../middlewares/authsign.js'
-import VerificationController from '../controllers/verificaiton.js'
-
+const Router = require('@koa/router')
+const authSign = require('../middlewares/authsign')
+const VerificationController = require('../controllers/verification')
 // const router = new Router({ prefix: '/api' });
 const verificationRouter = new Router()
 
@@ -9,4 +8,4 @@ const verificationRouter = new Router()
 verificationRouter.post('/verification/sendemail', authSign, VerificationController.sendEmail)
 verificationRouter.post('/verification/sendsms', authSign, VerificationController.sendSMS)
 
-export default verificationRouter
+module.exports = verificationRouter

@@ -10,12 +10,19 @@ const account = {
       url: '/user/getpermissions'
     })
   },
-  login(params) {
+  signin(params) {
     return fetch({
       baseURL: baseUrl.account,
       method: 'post',
       data: params,
-      url: '/account/login'
+      url: '/account/signin'
+    })
+  },
+  signout() {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      url: '/account/signout'
     })
   },
   hello() {
@@ -34,12 +41,12 @@ const account = {
       url: '/account/verifytoken'
     })
   },
-  generateTotp(params) {
+  generateTotpSecret(params) {
     return fetch({
       baseURL: baseUrl.account,
       method: 'post',
       data: params,
-      url: '/account/generatetotp'
+      url: '/account/generatetotpsecret'
     })
   },
   verifyTotp(token) {
@@ -48,6 +55,14 @@ const account = {
       method: 'post',
       data: token,
       url: '/account/verifytotp'
+    })
+  },
+  updateTotpSecret(totpSecret) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: totpSecret,
+      url: '/account/updatetotpsecret'
     })
   }
 }

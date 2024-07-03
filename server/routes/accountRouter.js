@@ -1,7 +1,7 @@
-import Router from '@koa/router'
-import { authToken } from '../middlewares/authtoken.js'
-import { authSign } from '../middlewares/authsign.js'
-import AccountController from '../controllers/account.js'
+const Router = require('@koa/router')
+const authToken = require('../middlewares/authtoken')
+const authSign = require('../middlewares/authsign')
+const AccountController = require('../controllers/account')
 
 // const router = new Router({ prefix: '/api' });
 const accountRouter = new Router()
@@ -9,11 +9,13 @@ const accountRouter = new Router()
 // Account & My
 const ts = [authSign, authToken]
 
-accountRouter.post('/account/signup', AccountController.signup)
-accountRouter.post('/account/login', AccountController.login)
+accountRouter.post('/account/signup', authSign, AccountController.signup)
+accountRouter.post('/account/signin', authSign, AccountController.signin)
+accountRouter.post('/account/signout', authSign, AccountController.signout)
 accountRouter.post('/account/verifytoken', ...ts, AccountController.verifyToken)
-accountRouter.post('/account/generateTotp', ...ts, AccountController.generateTotp)
-accountRouter.post('/account/verifyTotp', ...ts, AccountController.verifyTotp)
+accountRouter.post('/account/generatetotpsecret', ...ts, AccountController.generateTotpSecret)
+accountRouter.post('/account/verifytotp', ...ts, AccountController.verifyTotp)
+accountRouter.post('/account/updatetotpsecret', ...ts, AccountController.updateTotpSecret)
 accountRouter.get('/account/hello', AccountController.hello)
 
 accountRouter.post('/my/getauthinfo', ...ts, AccountController.getAuthInfo)
@@ -21,4 +23,4 @@ accountRouter.post('/my/updatepassword', ...ts, AccountController.updatePassword
 accountRouter.post('/my/updateemail', ...ts, AccountController.updateEmail)
 accountRouter.post('/my/updatephone', ...ts, AccountController.updatePhone)
 
-export default accountRouter
+module.exports = accountRouter

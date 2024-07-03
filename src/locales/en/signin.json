@@ -1,5 +1,5 @@
 {
-  "login": {
+  "signin": {
     "title": "Sign in to MPAdmin",
     "accountname": "Account",
     "password": "Password",

@@ -16,7 +16,7 @@ fetch.interceptors.request.use(
     // console.log(config)
     const accesstoken = localStorage.getItem('accessToken')
     // console.log(accesstoken, refreshtoken)
-    if (!['/account/login'].includes(config.url) && accesstoken) {
+    if (!['/account/signin'].includes(config.url) && accesstoken) {
       config.headers['Authorization'] = 'Bearer ' + accesstoken
       config.headers['refreshtoken'] = localStorage.getItem('refreshToken')
     }
@@ -44,7 +44,7 @@ fetch.interceptors.response.use(
       case 401:
         console.log(response)
         console.log(err)
-        router.push('/login')
+        router.push('/signin')
       // return Promise.reject(response)
       case 500:
       default:

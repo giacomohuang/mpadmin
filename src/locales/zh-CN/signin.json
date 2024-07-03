@@ -1,5 +1,5 @@
 {
-  "login": {
+  "signin": {
     "title": "登录管理运营平台",
     "accountname": "账号",
     "password": "密码",

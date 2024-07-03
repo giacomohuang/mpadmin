@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken'
-import crypto from 'crypto'
-import CustomError from '../CustomError.js'
+const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
+const CustomError = require('../CustomError')
 
 const authToken = async (ctx, next) => {
   console.log('authToken')
@@ -51,23 +51,23 @@ const refresh = async (token, ctx) => {
       .update(refreshtoken_old + process.env.SECRET_KEY_REFRESH)
       .digest('hex')
 
-    const isExist = await ctx.redis.get(md5Token_old)
+    const isExist = await ctx.redis.get(`auth:${md5Token_old}`)
     if (!isExist) {
       throw new CustomError(401, 'Authentication Failed', 401011)
     }
-    ctx.redis.del(md5Token_old)
+
     const accessToken = jwt.sign({ id: id, accountname: accountname }, process.env.SECRET_KEY_ACCESS, { expiresIn: '30s' })
     const refreshToken = jwt.sign({ id: id, accountname: accountname }, process.env.SECRET_KEY_REFRESH, { expiresIn: '30d' })
     const md5Token = crypto
       .createHash('md5')
       .update(refreshToken + process.env.SECRET_KEY_REFRESH)
       .digest('hex')
-
-    await ctx.redis.set(md5Token, true)
+    await ctx.redis.del(`auth:${md5Token_old}`)
+    await ctx.redis.set(`auth:${md5Token}`, 't')
     return { accessToken, refreshToken, id }
   } catch (err) {
     throw new CustomError(401, 'Authentication Failed', 401012)
   }
 }
 
-export { authToken }
+module.exports = authToken

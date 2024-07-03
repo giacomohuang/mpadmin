@@ -21,7 +21,6 @@ const props = defineProps({
   }
 })
 const emits = defineEmits(['finish'])
-const isError = defineModel('isError')
 const value = defineModel('value')
 const digits = props.digits
 const autofocus = props.autofocus
@@ -38,19 +37,38 @@ onMounted(() => {
   }
 })
 
-watch(isError, (val) => {
-  loadingRef.value.classList.remove('loading')
-  loading.value = false
-  if (val) {
-    console.log('error val', val)
-    codeArray.value = Array(digits).fill('')
-    verifyRef.value.querySelectorAll('input').forEach((item) => {
-      item.classList.add('shake')
+// watch(isError, (val) => {
+//   loadingRef.value.classList.remove('loading')
+//   loading.value = false
+//   console.log('changed')
+//   if (val) {
+//     console.log('error val', val)
+//     codeArray.value = Array(digits).fill('')
+//     verifyRef.value.querySelectorAll('input').forEach((item) => {
+//       item.classList.add('shake')
+//     })
+//     verifyRef.value.querySelectorAll('input')[0].focus()
+//     isError.value = false
+//   } else {
+//     codeArray.value = Array(digits).fill('')
+//   }
+// })
+
+const check = () => {
+  setTimeout(() => {
+    emits('finish', (res) => {
+      if (!res) {
+        verifyRef.value.querySelectorAll('input').forEach((item) => {
+          item.classList.add('shake')
+        })
+        verifyRef.value.querySelectorAll('input')[0].focus()
+      }
     })
-    verifyRef.value.querySelectorAll('input')[0].focus()
-    isError.value = false
-  }
-})
+    codeArray.value = Array(digits).fill('')
+    loadingRef.value.classList.remove('loading')
+    loading.value = false
+  }, 120)
+}
 
 const removeShake = (e) => {
   e.target.classList.remove('shake')
@@ -60,6 +78,7 @@ const onKeyDown = async (e, index) => {
   e.preventDefault()
   // console.log('onKeyDown', e.key)
   const ctrlCmdKey = isMac ? e.metaKey : e.ctrlKey
+
   if (ctrlCmdKey && e.key === 'v') {
     const clipboardData = await navigator.clipboard.readText()
     const pastedNumbers = clipboardData.match(/\d/g) || []
@@ -71,9 +90,7 @@ const onKeyDown = async (e, index) => {
     const code = codeArray.value.join('')
     value.value = code
     if (idx == digits - 1 && code.length === digits) {
-      setTimeout(() => {
-        emits('finish', code)
-      }, 120)
+      check()
     }
   } else if (e.key >= '0' && e.key <= '9') {
     e.target.value = e.key
@@ -86,10 +103,7 @@ const onKeyDown = async (e, index) => {
       if (code.length === digits) {
         loadingRef.value.classList.add('loading')
         loading.value = true
-        // console.log('code:', code)
-        setTimeout(() => {
-          emits('finish', code)
-        }, 120)
+        check()
       }
     }
   } else if (e.key === 'Backspace') {

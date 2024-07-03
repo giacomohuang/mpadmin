@@ -17,7 +17,7 @@
               <a @click="router.push('/my/profile')">{{ $t('common.route.profile') }}</a>
             </a-menu-item>
             <a-menu-item>
-              <a @click="logout">{{ $t('common.route.logout') }}</a>
+              <a @click="signout">{{ $t('common.route.signout') }}</a>
             </a-menu-item>
           </a-menu>
         </template>
@@ -64,6 +64,7 @@ import { changeLocale } from '../js/i18n'
 import SubMenu from './SubMenu.vue'
 import { useStore } from '../stores/stores'
 import helper from '../js/helper'
+import API from '../api/API'
 
 const globalLoading = ref(false)
 provide('globalLoading', globalLoading)
@@ -92,10 +93,11 @@ function changeSubMenu(index) {
   }
 }
 
-function logout() {
-  helper.removeToken()
+async function signout() {
+  const resp = await API.account.signout()
   store.accountid = undefined
-  router.push('/login')
+  helper.removeToken()
+  router.push('/signin')
 }
 
 onMounted(() => {})

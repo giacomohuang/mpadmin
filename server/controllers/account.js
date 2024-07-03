@@ -1,11 +1,11 @@
-import BaseController from './base.js'
-import Account from '../models/account.js'
-import jwt from 'jsonwebtoken'
-import crypto from 'crypto'
-import speakeasy from 'speakeasy'
-import CustomError from '../CustomError.js'
-import OpenAIService from '../services/openai.js'
-import { PassThrough } from 'stream'
+const BaseController = require('./base')
+const Account = require('../models/account')
+const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
+const speakeasy = require('speakeasy')
+const CustomError = require('../CustomError')
+const OpenAIService = require('../services/openai')
+const { PassThrough } = require('stream')
 
 class AccountController extends BaseController {
   static async signup(ctx) {
@@ -22,7 +22,7 @@ class AccountController extends BaseController {
     }
   }
 
-  static async login(ctx) {
+  static async signin(ctx) {
     // console.log('*********')
     try {
       const { accountname, password } = ctx.request.body
@@ -41,15 +41,29 @@ class AccountController extends BaseController {
         .update(refreshToken + process.env.SECRET_KEY_REFRESH)
         .digest('hex')
 
-      await ctx.redis.set(md5Token, 'true')
+      await ctx.redis.set(`auth:${md5Token}`, 't')
       ctx.body = { accessToken, refreshToken }
-      console.log('====login====')
+      console.log('====signin====')
       console.log('refreshToken:', refreshToken)
       console.log('md5:', md5Token)
     } catch (err) {
       throw err
     }
   }
+
+  static async signout(ctx) {
+    const refreshToken = ctx.request.headers['refreshtoken']
+    console.log(refreshToken)
+    const md5Token = crypto
+      .createHash('md5')
+      .update(refreshToken + process.env.SECRET_KEY_REFRESH)
+      .digest('hex')
+    console.log(md5Token)
+    await ctx.redis.del(`auth:${md5Token}`)
+    ctx.body = { result: true }
+    //TODO：signout log
+  }
+
   static async verifyToken(ctx) {
     ctx.status = 200
     ctx.body = { verify: true }
@@ -80,13 +94,14 @@ class AccountController extends BaseController {
   }
 
   // 生成动态令牌的secret和激活地址
-  static async generateTotp(ctx) {
+  static async generateTotpSecret(ctx) {
     const { accountname } = ctx.request.body
+    console.log('accountname', accountname)
     const secret = speakeasy.generateSecret({
       length: 20
     })
     const url = speakeasy.otpauthURL({ secret: secret.ascii, label: accountname, issuer: 'MPAdmin' })
-    ctx.body = { ...ctx.body, url, secret: secret.base32 }
+    ctx.body = { url, secret: secret.base32 }
     // console.log(url, secret)
   }
 
@@ -153,6 +168,19 @@ class AccountController extends BaseController {
     }
   }
 
+  // 更新动态口令秘钥
+  static async updateTotpSecret(ctx) {
+    try {
+      const accountid = ctx.request.headers['accountid']
+      const { totpSecret } = ctx.request.body
+      await Account.findOneAndUpdate({ _id: accountid }, { totpSecret })
+      ctx.body = { result: true }
+    } catch (err) {
+      ctx.status = 500
+      ctx.body = { message: 'Internal Server Error' }
+    }
+  }
+
   // 验证并更新手机号
   static async updatePhone(ctx) {
     try {
@@ -160,6 +188,9 @@ class AccountController extends BaseController {
       const { verifycode, areacode, phone } = ctx.request.body
 
       // TODO 验证verifycode
+      //
+      //
+
       await Account.findOneAndUpdate({ _id: accountid }, { areacode, phone })
       ctx.body = { result: true }
     } catch (err) {
@@ -185,4 +216,4 @@ class AccountController extends BaseController {
   }
 }
 
-export default AccountController
+module.exports = AccountController

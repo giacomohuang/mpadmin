@@ -1,9 +1,9 @@
-import Redis from 'ioredis'
-import crypto from 'crypto'
+const Redis = require('ioredis')
+const crypto = require('crypto')
 
 const authSign = async (ctx, next) => {
   // console.log('authSign')
   await next()
 }
 
-export { authSign }
+module.exports = authSign

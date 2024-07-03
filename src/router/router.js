@@ -15,7 +15,7 @@ export const router = createRouter({
   //   }
   // },
   routes: [
-    { path: '/login', name: 'login', component: () => import('@/views/Login.vue'), meta: { title: 'common.route.login', noAuth: true } },
+    { path: '/signin', name: 'signin', component: () => import('@/views/Signin.vue'), meta: { title: 'common.route.signin', noAuth: true } },
     { path: '/404', name: '404', component: () => import('@/views/404.vue'), meta: { title: 'common.route.404', noAuth: true } },
     { path: '/:pathMatch(.*)', redirect: '/404', meta: { title: 'common.route.404', noAuth: true } }
   ]
@@ -50,10 +50,10 @@ router.beforeEach(async (to, from, next) => {
         }
         next()
       } else {
-        next({ path: '/login' })
+        next({ path: '/signin' })
       }
     } catch (e) {
-      next({ path: '/login' })
+      next({ path: '/signin' })
     }
   }
 })

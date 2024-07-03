@@ -23,27 +23,23 @@
         <Icon name="theme-system" size="2em" class="icon" @click="store.theme = 'system'" :class="{ active3: store.theme === 'system' }"></Icon>
       </div>
     </header>
-    <a-form v-if="state.loginStep == 0" :model="loginForm" @finish="handleLogin" @finishFailed="handleFailed" class="form" autocomplete="off" :label-col="{ span: 5 }" :wrapper-col="{ span: 20 }">
-      <h3 class="title">{{ $t('login.title') }}</h3>
-      <a-form-item style="align-items: center" :label="$t('login.accountname')" name="accountname" :rules="[{ required: true, message: 'Please input your accountname!' }]">
-        <a-input autocomplete="off" size="large" large v-model:value="loginForm.accountname" />
+    <a-form :model="signinForm" @finish="handlesignin" @finishFailed="handleFailed" class="form" autocomplete="off" :label-col="{ span: 5 }" :wrapper-col="{ span: 20 }">
+      <h3 class="title">{{ $t('signin.title') }}</h3>
+      <a-form-item style="align-items: center" :label="$t('signin.accountname')" name="accountname" :rules="[{ required: true, message: 'Please input your accountname!' }]">
+        <a-input autocomplete="off" size="large" large v-model:value="signinForm.accountname" />
         <!-- placeholder="请填写用于登录的邮箱" -->
       </a-form-item>
-      <a-form-item style="align-items: center" :label="$t('login.password')" name="password" :rules="[{ required: true, message: 'Please input your password!' }]">
-        <a-input-password autocomplete="off" size="large" v-model:value="loginForm.password" />
+      <a-form-item style="align-items: center" :label="$t('signin.password')" name="password" :rules="[{ required: true, message: 'Please input your password!' }]">
+        <a-input-password autocomplete="off" size="large" v-model:value="signinForm.password" />
         <!-- placeholder="密码" -->
       </a-form-item>
       <a-form-item>
         <a-button type="primary" :loading="state.loading" html-type="submit" style="margin-left: 90px; margin-right: 10px">
-          {{ $t('login.signin') }}
+          {{ $t('signin.signin') }}
         </a-button>
         <label style="font-size: 12px">30天内没有访问将重新登录</label>
       </a-form-item>
     </a-form>
-    <div v-if="state.loginStep == 1" class="form">
-      <div style="border-radius: 8px; margin: 20px 0; background-color: white; width: fit-content; height: fit-content"><a-qrcode v-if="state.totpUrl" :value="state.totpUrl" /></div>
-      <VerifyInput v-model:value="totpCode" :autofocus="true" @finish="verifyTotpCode" :digits="6" v-model:isError="isVerifyError"></VerifyInput>
-    </div>
   </div>
 </template>
 
@@ -59,9 +55,9 @@ import VerifyInput from '../components/VerifyInput.vue'
 const store = useStore()
 const API = inject('API')
 const helper = inject('helper')
-const state = reactive({ loading: false, totpUrl: '', loginStep: 0 })
+const state = reactive({ loading: false, totpUrl: '' })
 const { t } = useI18n()
-const loginForm = reactive({
+const signinForm = reactive({
   accountname: '',
   password: ''
 })
@@ -72,40 +68,24 @@ let totpSecret = ''
 
 const [messageApi, contextHolder] = message.useMessage()
 
-const handleLogin = async (values) => {
+const handlesignin = async (values) => {
   state.loading = true
   try {
-    let data = await API.account.login(values)
+    let data = await API.account.signin(values)
     helper.setToken(data)
     const accountInfo = helper.decodeToken()
     state.loading = false
-    state.loginStep = 1
-    const { url, secret } = await API.account.generateTotp({ accountname: accountInfo.accountname })
-    state.totpUrl = url
-    totpSecret = secret
-    console.log(url)
-    // router.push('/')
+
+    router.replace('/')
   } catch (err) {
     state.loading = false
     if (err.status == 401) {
       console.log('eeeee', err)
-      messageApi.error(t('login.error'))
+      messageApi.error(t('signin.error'))
     } else {
       console.log('error:', err)
       messageApi.error('unkown error')
     }
-  }
-}
-const verifyTotpCode = async () => {
-  // console.log(totpSecret, totpCode.value)
-
-  const data = await API.account.verifyTotp({ secret: totpSecret, token: totpCode.value })
-
-  if (data.result) {
-    console.log('okokokok')
-    router.push('/')
-  } else {
-    isVerifyError.value = true
   }
 }
 

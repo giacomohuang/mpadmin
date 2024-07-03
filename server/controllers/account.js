@@ -29,12 +29,12 @@ class AccountController extends BaseController {
       console.log(accountname, password)
       const cryptoPwd = crypto.createHmac('sha256', process.env.PWD_KEY).update(password).digest('hex')
       console.log(cryptoPwd)
-      const account = await Account.findOne({ accountname, password: cryptoPwd })
-      console.log(account)
-      // console.log(account)
-      if (!account) {
-        throw new CustomError(400, 'Invalid accountname or password', '400001')
+      const account = await Account.findOne({ accountname })
+      if (!account || account.password !== cryptoPwd) {
+        throw new CustomError(401, 'Invalid accountname or password', '401001')
       }
+      // console.log(account)
+
       // Generate JWT token
       const accessToken = jwt.sign({ id: account._id, accountname: account.accountname }, process.env.SECRET_KEY_ACCESS, { expiresIn: '30s' })
       const refreshToken = jwt.sign({ id: account._id, accountname: account.accountname }, process.env.SECRET_KEY_REFRESH, { expiresIn: '30d' })

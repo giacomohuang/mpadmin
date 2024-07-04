@@ -48,7 +48,7 @@
       </div>
       <div class="tips">{{ $t('my.authentication.enhphone') }}</div>
       <div class="item">
-        <label>{{ phoneForm.phone ? phoneForm.areacode + ' ' + helper.obfuscate('phone', phoneForm.phone) : $t('my.authentication.notset') }}</label>
+        <label>{{ phoneForm.phone ? (phoneForm.areacode ? phoneForm.areacode + ' ' : '') + helper.obfuscate('phone', phoneForm.phone) : $t('my.authentication.notset') }}</label>
         <a-button @click="state.setPhoneVisible = true">{{ phoneForm.phone ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
       </div>
       <a-modal v-model:open="state.setPhoneVisible" :title="phoneForm.phone ? $t('my.authentication.editphone') : $t('my.authentication.setphone')" :footer="null" @cancel="handleCancelSet" width="530px">
@@ -328,12 +328,12 @@ const handleSendEmail = async () => {
     console.log(resp)
     // 启动倒计时
     emailState.isSend = true
-    countDown(emailState, emailInterval, 'email')
+    countDown(emailState, emailForm.emailNew, emailInterval, 'email')
   } catch (err) {
     if (err?.data?.code === 102) {
       messageApi.warning('发送过于频繁，请稍后再试')
     } else {
-      messageApi.error('邮件发送失败, 请重试')
+      messageApi.error('发送失败, 请重试')
     }
   } finally {
     state.loading = false
@@ -366,36 +366,51 @@ const handleUpdateEmail = async (callback) => {
   }
 }
 
+//   // 向指定邮箱发送验证邮件
+//   try {
+//     state.loading = true
+//     const resp = await API.verification.sendCodeByEmail(emailForm.emailNew)
+//     console.log(resp)
+//     // 启动倒计时
+//     emailState.isSend = true
+//     countDown(emailState, emailInterval, 'email')
+//   } catch (err) {
+//     if (err?.data?.code === 102) {
+//       messageApi.warning('发送过于频繁，请稍后再试')
+//     } else {
+//       messageApi.error('邮件发送失败, 请重试')
+//     }
+//   } finally {
+//     state.loading = false
+//   }
+// }
+
 const handleSendSMS = async () => {
-  // 表单验证
-  console.log('send')
+  phoneState.isSend = false
   try {
     await phoneFormRef.value.validateFields()
   } catch (err) {
     console.log(err)
-    phoneState.isSend = false
     return
   }
 
   // 向指定手机发送验证短信
   try {
     state.loading = true
-    const resp = await API.account.updatePhone(phoneForm.areacode, phoneForm.phoneNew)
-    if (resp.result) {
-      state.loading = false
-    } else {
-      throw new Error({ message: '短信发送失败(50001)' })
-    }
+    const resp = await API.verification.sendCodeBySMS(phoneForm.areacode, phoneForm.phoneNew)
+    console.log(resp)
+    // 启动倒计时
+    phoneState.isSend = true
+    countDown(phoneState, `${phoneForm.areacode}~${phoneForm.phoneNew}`, phoneInterval, 'phone')
   } catch (err) {
-    console.log(err)
-    messageApi.error('短信发送失败(40001, 请重试')
-    state.loading = true
-    phoneState.isSend = false
-    return
+    if (err?.data?.code === 104) {
+      messageApi.warning('发送过于频繁，请稍后再试')
+    } else {
+      messageApi.error('发送失败, 请重试')
+    }
+  } finally {
+    state.loading = false
   }
-  // 启动倒计时
-  phoneState.isSend = true
-  countDown(phoneState, phoneInterval, 'phone')
 }
 
 const handleUpdatePhone = async (callback) => {
@@ -464,28 +479,27 @@ const handleToggle2FA = async () => {
   }
 }
 
-const countDown = (obj, intv, type) => {
+const countDown = (state, data, intv, type) => {
   let startTime = localStorage.getItem(type + 'CDT')
   let nowTime = new Date().getTime()
   if (startTime) {
     let surplus = 60 - parseInt((nowTime - startTime) / 1000, 10)
-    obj.countDownTime = surplus <= 0 ? 0 : surplus
-    // console.log(state.countDownTime, state.countDownTime)
+    state.countDownTime = surplus <= 0 ? 0 : surplus
   } else {
-    obj.countDownTime = 60
+    state.countDownTime = 60
     localStorage.setItem(type + 'CDT', nowTime)
-    localStorage.setItem('cur_' + type, emailForm.emailNew)
+    localStorage.setItem('cur_' + type, data)
   }
-  obj.isCountDown = true
+  state.isCountDown = true
   intv = setInterval(() => {
-    obj.countDownTime--
-    if (obj.countDownTime <= 0) {
+    state.countDownTime--
+    if (state.countDownTime <= 0) {
       localStorage.removeItem(type + 'CDT')
       localStorage.removeItem('cur_' + type)
       clearInterval(intv)
       intv = undefined
-      obj.countDownTime = 60
-      obj.isCountDown = false
+      state.countDownTime = 60
+      state.isCountDown = false
     }
   }, 1000)
 }
@@ -494,6 +508,13 @@ emailForm.emailNew = localStorage.getItem('cur_email')
 if (localStorage.getItem('emailCDT')) {
   emailState.isSend = true
   countDown(emailState, emailInterval, 'email')
+}
+
+const fullPhone = localStorage.getItem('cur_phone')
+if (fullPhone) [phoneForm.areacode, phoneForm.phoneNew] = fullPhone.split('~')
+if (localStorage.getItem('phoneCDT')) {
+  phoneState.isSend = true
+  countDown(phoneState, fullPhone, emailInterval, 'phone')
 }
 
 // 本页面初始数据准备

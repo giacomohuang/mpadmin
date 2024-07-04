@@ -8,6 +8,10 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        chunkFileNames: (chunkInfo) => {
+          console.log(chunkInfo)
+          return 'assets/[name]-[hash].js'
+        },
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (id.includes('ant-design-vue')) {

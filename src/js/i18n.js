@@ -1,11 +1,9 @@
 import { nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { router } from '../router/router'
-import { SELECTION_NONE } from 'ant-design-vue/es/table/hooks/useSelection'
-
 const SUPPORT_LOCALES = ['en', 'zh-CN']
 const sysLocale = navigator.language
-
+const localeFiles = import.meta.glob('../locales/**/*.json')
 const currentLocale = localStorage.getItem('locale') || (SUPPORT_LOCALES.includes(sysLocale) ? sysLocale : 'en')
 
 const i18n = createI18n({
@@ -41,13 +39,20 @@ export function getLocale() {
 // 懒加载语言包
 export async function loadLocaleData(locale, path) {
   // load locale messages with dynamic import
-  const p = `../locales/${locale}/${path}`
-  // console.log('local path', p)
+
+  const p = `../locales/${locale}${path}.json`
+  console.log('local path', p)
   try {
-    const [common, page] = await Promise.all([import(/* @vite-ignore */ `../locales/${locale}/common.json`), import(/* @vite-ignore */ `${p}.json`)])
-    // set locale and locale message
+    // const [common, page] = await Promise.all([import(/* @vite-ignore */ `../locales/${locale}/common.json`), import(/* @vite-ignore */ `${p}.json`)])
+    const common = await import(`../locales/${locale}/common.json`)
+    const localeFile = Object.keys(localeFiles).find((path) => {
+      return path === p
+    })
+    const page = await localeFiles[localeFile]()
     i18n.global.setLocaleMessage(locale, common.default)
     i18n.global.mergeLocaleMessage(locale, page.default)
+
+    // set locale and locale message
 
     // console.log(page.default)
   } catch (e) {

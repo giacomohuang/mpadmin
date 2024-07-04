@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 import { createSvgIconsPlugin } from './plugins/index'
-import nonStaticDirectoryPlugin from './plugins/includeLocalesPlugin'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -23,7 +22,6 @@ export default defineConfig({
   },
   plugins: [
     vue(),
-    nonStaticDirectoryPlugin(),
     createSvgIconsPlugin({
       // Specify the icon folder to be cached
       iconDirs: [path.resolve(process.cwd(), 'src/assets/icons')],

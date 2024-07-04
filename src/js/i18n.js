@@ -26,7 +26,7 @@ export async function changeLocale(locale) {
   localStorage.setItem('locale', locale)
   document.querySelector('html').setAttribute('lang', locale)
   const title = router.currentRoute.value.meta.title
-  console.log(title)
+  // console.log(title)
   if (title) {
     document.title = `${i18n.global.t('common.appname')} - ${i18n.global.t(title)}`
   } else {
@@ -42,7 +42,7 @@ export function getLocale() {
 export async function loadLocaleData(locale, path) {
   // load locale messages with dynamic import
   const p = `../locales/${locale}/${path}`
-  console.log('local path', p)
+  // console.log('local path', p)
   try {
     const [common, page] = await Promise.all([import(/* @vite-ignore */ `../locales/${locale}/common.json`), import(/* @vite-ignore */ `${p}.json`)])
     // set locale and locale message
@@ -52,7 +52,7 @@ export async function loadLocaleData(locale, path) {
     // console.log(page.default)
   } catch (e) {
     // i18n.global.setLocaleMessage(locale, global.default)
-    console.log('locale load error')
+    console.log('locale file load error', e)
   }
   return nextTick()
 }

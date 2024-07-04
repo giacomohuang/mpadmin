@@ -11,7 +11,7 @@ const authToken = async (ctx, next) => {
   if (t) {
     token = t.replace(/^bearer\s+/i, '')
   } else {
-    throw new CustomError(401, 'Authentication Failed', 401001)
+    throw new CustomError(401, 'Authentication Failed', 401901)
   }
   jwt.verify(token, process.env.SECRET_KEY_ACCESS, (error, d) => {
     decoded = d
@@ -36,7 +36,7 @@ const authToken = async (ctx, next) => {
   }
   // 如果accesstoken内容验证失败
   else {
-    throw new CustomError(401, 'Authentication Failed', 401002)
+    throw new CustomError(401, 'Authentication Failed', 401902)
   }
 }
 
@@ -51,9 +51,10 @@ const refresh = async (token, ctx) => {
       .update(refreshtoken_old + process.env.SECRET_KEY_REFRESH)
       .digest('hex')
 
-    const isExist = await ctx.redis.get(`auth:${md5Token_old}`)
+    const isExist = await ctx.redis.del(`auth:${md5Token_old}`)
+    console.log('isExist', isExist)
     if (!isExist) {
-      throw new CustomError(401, 'Authentication Failed', 401011)
+      throw new CustomError(401, 'Authentication Failed', 401903)
     }
 
     const accessToken = jwt.sign({ id: id, accountname: accountname }, process.env.SECRET_KEY_ACCESS, { expiresIn: '30s' })
@@ -62,11 +63,11 @@ const refresh = async (token, ctx) => {
       .createHash('md5')
       .update(refreshToken + process.env.SECRET_KEY_REFRESH)
       .digest('hex')
-    await ctx.redis.del(`auth:${md5Token_old}`)
-    await ctx.redis.set(`auth:${md5Token}`, 't')
+    // await ctx.redis.del(`auth:${md5Token_old}`)
+    await ctx.redis.set(`auth:${md5Token}`, 't', 'EX', 2592000)
     return { accessToken, refreshToken, id }
   } catch (err) {
-    throw new CustomError(401, 'Authentication Failed', 401012)
+    throw new CustomError(401, 'Authentication Failed', 401904)
   }
 }
 

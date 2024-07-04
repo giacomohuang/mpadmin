@@ -158,9 +158,6 @@ const { accountname } = toRefs(store)
 const [messageApi, contextHolder] = message.useMessage()
 const globalLoading = inject('globalLoading')
 
-let emailInterval,
-  phoneInterval = undefined
-
 const state = reactive({
   toggleChangePwd: false,
   strength: 0,
@@ -219,6 +216,10 @@ const totpState = reactive({
   verifyCode: ''
 })
 
+// 倒计时
+let emailInterval,
+  phoneInterval = undefined
+
 const vPwd = async (_rule, value) => {
   state.strength = zxcvbn(value).score
   if (value === pwdForm.oldPassword) {
@@ -243,7 +244,6 @@ const vConfirmPwd = async (_rule, value) => {
 }
 
 const vEmail = async (_rule, value) => {
-  console.log(value, emailForm.email)
   if (value && value === emailForm.email) {
     return Promise.reject()
   } else {
@@ -312,34 +312,32 @@ const handleUpdatePwd = async () => {
 }
 
 const handleSendEmail = async () => {
+  emailState.isSend = false
   // 表单验证
   try {
     await emailFormRef.value.validateFields()
   } catch (err) {
     console.log(err)
-    emailState.isSend = false
     return
   }
 
   // 向指定邮箱发送验证邮件
   try {
     state.loading = true
-    const resp = await API.account.sendCodeByEmail(emailForm.emailNew)
-    if (resp.result) {
-      state.loading = false
-    } else {
-      throw new Error({ message: '邮件发送失败' })
-    }
+    const resp = await API.verification.sendCodeByEmail(emailForm.emailNew)
+    console.log(resp)
+    // 启动倒计时
+    emailState.isSend = true
+    countDown(emailState, emailInterval, 'email')
   } catch (err) {
-    console.log(err)
-    messageApi.error('邮件发送失败, 请重试', 1)
-    state.loading = true
-    emailState.isSend = false
-    return
+    if (err?.data?.code === 102) {
+      messageApi.warning('发送过于频繁，请稍后再试')
+    } else {
+      messageApi.error('邮件发送失败, 请重试')
+    }
+  } finally {
+    state.loading = false
   }
-  // 启动倒计时
-  emailState.isSend = true
-  countDown(emailState, emailInterval, 'email')
 }
 
 const handleUpdateEmail = async (callback) => {
@@ -390,7 +388,7 @@ const handleSendSMS = async () => {
     }
   } catch (err) {
     console.log(err)
-    messageApi.error('短信发送失败(40001, 请重试', 1)
+    messageApi.error('短信发送失败(40001, 请重试')
     state.loading = true
     phoneState.isSend = false
     return
@@ -499,10 +497,10 @@ if (localStorage.getItem('emailCDT')) {
 }
 
 // 本页面初始数据准备
-async function getMyAuthInfo() {
+const getMyAuthInfo = async () => {
   globalLoading.value = true
   const resp = await API.account.getAuthInfo()
-  console.log(resp)
+  // console.log(resp)
   emailForm.email = resp.email
   phoneForm.areacode = resp.areacode
   phoneForm.phone = resp.phone

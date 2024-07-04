@@ -16,7 +16,7 @@ fetch.interceptors.request.use(
     // console.log(config)
     const accesstoken = localStorage.getItem('accessToken')
     // console.log(accesstoken, refreshtoken)
-    if (!['/account/signin'].includes(config.url) && accesstoken) {
+    if (accesstoken) {
       config.headers['Authorization'] = 'Bearer ' + accesstoken
       config.headers['refreshtoken'] = localStorage.getItem('refreshToken')
     }
@@ -32,14 +32,16 @@ fetch.interceptors.request.use(
 fetch.interceptors.response.use(
   (response) => {
     // 如果header中携带refreshToken，更新本地存储
-    refreshToken(response)
-    console.log(response.headers)
+    storeRefreshToken(response)
+    // console.log(response.headers)
     return response.data
   },
   (err) => {
     const { response } = err
+    console.log(response)
+    if (!response) return Promise.reject({ status: 500, message: 'Internal Server Error' })
     // 如果header中携带refreshToken，更新本地存储
-    refreshToken(response)
+    storeRefreshToken(response)
     switch (response.status) {
       case 401:
         console.log(response)
@@ -52,18 +54,13 @@ fetch.interceptors.response.use(
         // console.log('Internal Server Error, code:500')
         return Promise.reject(response)
     }
-
-    // if (response) {
-    //   return Promise.reject(response)
-    // } else if (!window.navigator.onLine) {
-    //   return Promise.reject({ status: 500, message: 'Network is not connected' })
-    // } else {
-    //   return Promise.reject(err)
-    // }
   }
 )
 
-function refreshToken(resp) {
+function storeRefreshToken(resp) {
+  if (!resp || !resp.headers) {
+    return
+  }
   if (resp.headers['newaccesstoken'] && resp.headers['newrefreshtoken']) {
     localStorage.setItem('accessToken', resp.headers['newaccesstoken'])
     localStorage.setItem('refreshToken', resp.headers['newrefreshtoken'])

@@ -57,15 +57,6 @@ const account = {
       url: '/account/verifytotp'
     })
   },
-
-  sendCodeByEmail(email) {
-    return fetch({
-      baseURL: baseUrl.account,
-      method: 'post',
-      data: { email: email },
-      url: '/account/sendcodebyemail'
-    })
-  },
   updatePassword(oldPassword, newPassword) {
     return fetch({
       baseURL: baseUrl.account,
@@ -80,14 +71,6 @@ const account = {
       method: 'post',
       data: { verifycode, email },
       url: '/account/updateemail'
-    })
-  },
-  sendCodeBySMS(areacode, phone) {
-    return fetch({
-      baseURL: baseUrl.account,
-      method: 'post',
-      data: { areacode, phone },
-      url: '/account/sendcodebysms'
     })
   },
   updatePhone(verifycode, areacode, phone) {

@@ -398,27 +398,3 @@ Mock.mock(RegExp(`${baseUrl}/permission/getlist`), 'get', () => {
 Mock.mock(RegExp(`${baseUrl}/user/getpermissions\\?uid=*`), 'get', () => {
   return userPermission
 })
-
-Mock.mock(RegExp(`${baseUrl}/account/sendcodebyemail.*`), 'post', () => {
-  return { result: true }
-})
-
-Mock.mock(RegExp(`${baseUrl}/account/verifycodebyemail.*`), 'post', (options) => {
-  let result = false
-  if (JSON.parse(options.body).code == '1234') result = true
-  return { result: result }
-})
-
-Mock.mock(RegExp(`${baseUrl}/account/sendcodebysms.*`), 'post', () => {
-  return { result: true }
-})
-
-Mock.mock(RegExp(`${baseUrl}/account/verifycodebysms.*`), 'post', (options) => {
-  let result = false
-  if (JSON.parse(options.body).code == '1234') result = true
-  return { result: result }
-})
-
-// Mock.mock(RegExp(`${baseUrl}/my/getauthinfo.*`), 'post', (options) => {
-//   return { email: 'tcomc@msn.com', phone: '15618036377' }
-// })

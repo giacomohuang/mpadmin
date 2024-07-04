@@ -7,13 +7,14 @@ import account from '../api/account'
 // import Layout1 from '@/views/Layout1.vue'
 
 export const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(import.meta.env.BASE_URL || '/'),
   // scrollBehavior(to, from, savedPosition) {
   //   return {
   //     el: 'main',
   //     top: 0
   //   }
   // },
+  // 静态加载的公共页面，不需要认证token
   routes: [
     { path: '/signin', name: 'signin', component: () => import('@/views/Signin.vue'), meta: { title: 'common.route.signin', noAuth: true } },
     { path: '/404', name: '404', component: () => import('@/views/404.vue'), meta: { title: 'common.route.404', noAuth: true } },
@@ -34,26 +35,33 @@ router.beforeEach(async (to, from, next) => {
   const { meta } = to
   // 载入路由对应的语言文件
   // console.log(getLocale())
-  console.log(to.path)
+  // console.log(to.path)
   await loadLocaleData(getLocale(), to.path)
   setTitle(meta.title)
-  // 如果当前页面不需要认证，则放行
+  // 如果当前页面不需要认证token，直接放行
   if (meta.noAuth) {
-    console.log('pass')
     next()
-  } else {
+  }
+  // 如果需要认证token
+  else {
     try {
       const resp = await account.verifyToken(helper.getToken())
-      if (resp.verify) {
-        if (resp.newAccessToken && resp.newRefreshToken) {
-          helper.setToken({ accessToken: resp.newAccessToken, refreshToken: resp.newRefreshToken })
-        }
-        next()
-      } else {
-        next({ path: '/signin' })
+      // 验证通过，放行
+      // 如果响应头中有token刷新请求，刷新token
+      if (resp.newAccessToken && resp.newRefreshToken) {
+        helper.setToken({ accessToken: resp.newAccessToken, refreshToken: resp.newRefreshToken })
       }
+      next()
     } catch (e) {
-      next({ path: '/signin' })
+      // 验证不通过，跳登录页
+      if (e.status && e.status === 401) {
+        next({ path: '/signin' })
+        console.log('e', e)
+      }
+      // 如果是服务器内部错误或者未知错误，放行并传递异常给业务
+      else {
+        next()
+      }
     }
   }
 })

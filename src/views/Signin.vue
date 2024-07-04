@@ -72,20 +72,25 @@ const handlesignin = async (values) => {
   state.loading = true
   try {
     let data = await API.account.signin(values)
-    helper.setToken(data)
-    const accountInfo = helper.decodeToken()
-    state.loading = false
-
-    router.replace('/')
+    // 如果不需要两步验证
+    if (!data.enable2FA) {
+      // console.log(data)
+      helper.setToken(data)
+      const accountInfo = helper.decodeToken()
+      router.replace('/')
+    }
+    // 如果需要两步验证
+    else {
+      console.log('需要两步验证')
+    }
   } catch (err) {
-    state.loading = false
     if (err.status == 401) {
-      console.log('eeeee', err)
       messageApi.error(t('signin.error'))
     } else {
-      console.log('error:', err)
-      messageApi.error('unkown error')
+      messageApi.error('系统内部错误')
     }
+  } finally {
+    state.loading = false
   }
 }
 

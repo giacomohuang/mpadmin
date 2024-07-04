@@ -16,7 +16,7 @@
 
 <script setup>
 import { ref, reactive, watch, onBeforeMount, onMounted, computed } from 'vue'
-import { API } from '../../api/index'
+import API from '../../api/API'
 // import { permission } from '../../api/permission'
 
 let permissions = ref([])
@@ -28,7 +28,7 @@ onMounted(async () => {
   // 获取用户拥有的所有权限，
   // 返回格式：{p1: '12123,p2:'1231231'}
   const uid = 1
-  const userPData = await API.user.getPermissions(uid)
+  const userPData = await API.account.getPermissions(uid)
   const userPlist = getPermissionValues(userPData)
   console.log(userPlist)
 

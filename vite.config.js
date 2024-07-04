@@ -5,6 +5,22 @@ import { createSvgIconsPlugin } from './plugins/index'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    assetsInclude: ['src/locales/**/*'],
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('ant-design-vue')) {
+              return id.toString().split('node_modules/')[1].split('/')[0].toString()
+            } else if (id.includes('zxcvbn')) {
+              return id.toString().split('node_modules/')[1].split('/')[0].toString()
+            } else return 'node-modules'
+          }
+        }
+      }
+    }
+  },
   plugins: [
     vue(),
     createSvgIconsPlugin({

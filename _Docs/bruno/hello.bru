@@ -4,15 +4,10 @@ meta {
   seq: 5
 }
 
-post {
+get {
   url: http://127.0.0.1:3000/account/hello
   body: json
   auth: bearer
-}
-
-headers {
-  Content-Type: application/json
-  refreshtoken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NmVmZTU5NjE1N2RjMzZlY2ZiNjQ5YiIsImFjY291bnRuYW1lIjoiYWRtaW4iLCJpYXQiOjE3MTg2MTczNzQsImV4cCI6MTcyMTIwOTM3NH0.4DFMw05gUXNgtXq-AIDrjxodx5T56I_4lJgjqrInhnU
 }
 
 auth:bearer {

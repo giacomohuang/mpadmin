@@ -7,7 +7,7 @@ import account from '../api/account'
 // import Layout1 from '@/views/Layout1.vue'
 
 export const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL || '/'),
+  history: createWebHistory('/'),
   // scrollBehavior(to, from, savedPosition) {
   //   return {
   //     el: 'main',

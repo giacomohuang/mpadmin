@@ -1,11 +1,13 @@
 {
-  "name": "approval",
-  "version": "0.0.0",
+  "name": "mpadmin",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --port 4173",
+    "serve": "nginx -c /Users/huangjia285/projects/mpadmin/serve/nginx.conf",
+    "stopserve": "nginx -s quit",
     "test:unit": "vitest --environment jsdom",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
@@ -32,15 +34,19 @@
     "@vue/test-utils": "^2.4.6",
     "cors": "^2.8.5",
     "eslint": "^9.5.0",
+    "rollup-obfuscator": "^4.1.1",
     "eslint-plugin-vue": "^9.26.0",
+    "javascript-obfuscator": "^4.1.1",
     "jsdom": "^24.1.0",
     "mockjs": "^1.1.0",
     "prettier": "^3.3.2",
+    "rollup-plugin-obfuscator": "^1.1.0",
     "sass": "^1.77.6",
     "sass-loader": "^14.2.1",
     "svg-baker": "^1.7.0",
     "svgo": "^3.3.2",
     "vite": "^5.3.1",
+    "vite-plugin-obfuscator": "^1.0.5",
     "vitest": "^1.6.0"
   }
 }

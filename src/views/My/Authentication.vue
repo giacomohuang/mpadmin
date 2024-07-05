@@ -113,7 +113,7 @@
           <div class="title"><span class="badage">1</span>使用验证APP扫描二维码</div>
           <div class="hint">扫描验证码后，将得到一组6位数字验证码。还没有安装验证APP？ <a href="/downauthapp" target="_blank">点击这里下载</a></div>
           <div style="margin-top: 20px" class="flex-col flex-item-c">
-            <div style="border-radius: 8px; background-color: white; width: fit-content; height: fit-content"><a-qrcode v-if="totpState.activationUrl" :value="totpState.activationUrl" /></div>
+            <div style="border-radius: 8px; width: fit-content; height: fit-content"><a-qrcode v-if="totpState.activationUrl" :value="totpState.activationUrl" /></div>
           </div>
         </div>
         <div class="step">

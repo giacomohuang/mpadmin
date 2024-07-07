@@ -23,23 +23,30 @@
         <Icon name="theme-system" size="2em" class="icon" @click="store.theme = 'system'" :class="{ active3: store.theme === 'system' }"></Icon>
       </div>
     </header>
-    <a-form :model="signinForm" @finish="handlesignin" @finishFailed="handleFailed" class="form" autocomplete="off" :label-col="{ span: 5 }" :wrapper-col="{ span: 20 }">
-      <h3 class="title">{{ $t('signin.title') }}</h3>
-      <a-form-item style="align-items: center" :label="$t('signin.accountname')" name="accountname" :rules="[{ required: true, message: 'Please input your accountname!' }]">
-        <a-input autocomplete="off" size="large" large v-model:value="signinForm.accountname" />
-        <!-- placeholder="请填写用于登录的邮箱" -->
-      </a-form-item>
-      <a-form-item style="align-items: center" :label="$t('signin.password')" name="password" :rules="[{ required: true, message: 'Please input your password!' }]">
-        <a-input-password autocomplete="off" size="large" v-model:value="signinForm.password" />
-        <!-- placeholder="密码" -->
-      </a-form-item>
-      <a-form-item>
-        <a-button type="primary" :loading="state.loading" html-type="submit" style="margin-left: 90px; margin-right: 10px">
-          {{ $t('signin.signin') }}
-        </a-button>
-        <label style="font-size: 12px">30天内没有访问将重新登录</label>
-      </a-form-item>
-    </a-form>
+    <section v-if="state.method === 'pwd'">
+      <a-form :model="signinForm" @finish="handleSignin" @finishFailed="handleFailed" autocomplete="off" :label-col="{ span: 5 }" :wrapper-col="{ span: 20 }">
+        <h3 class="title">{{ $t('signin.title') }}</h3>
+        <a-form-item style="align-items: center" :label="$t('signin.accountname')" name="accountname" :rules="[{ required: true, message: 'Please input your accountname!' }]">
+          <a-input autocomplete="off" size="large" large v-model:value="signinForm.accountname" />
+          <!-- placeholder="请填写用于登录的邮箱" -->
+        </a-form-item>
+        <a-form-item style="align-items: center" :label="$t('signin.password')" name="password" :rules="[{ required: true, message: 'Please input your password!' }]">
+          <a-input-password autocomplete="off" size="large" v-model:value="signinForm.password" />
+          <!-- placeholder="密码" -->
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" :loading="state.loading" html-type="submit" style="margin-left: 90px; margin-right: 10px">
+            {{ $t('signin.signin') }}
+          </a-button>
+          <label style="font-size: 12px">30天内没有访问将重新登录</label>
+        </a-form-item>
+      </a-form>
+    </section>
+    <section v-if="state.method == 'totp'">
+      <h3 class="title">两步验证：动态口令</h3>
+      <div class="tips">请查看动态口令APP中的6位动态数字口令，并在下面的的框中输入</div>
+      <VerifyInput v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
+    </section>
   </div>
 </template>
 
@@ -51,11 +58,16 @@ import { useStore } from '@/stores/stores'
 import { message } from 'ant-design-vue'
 import { useI18n } from 'vue-i18n'
 import VerifyInput from '../components/VerifyInput.vue'
+import API from '../api/API'
 
 const store = useStore()
-const API = inject('API')
 const helper = inject('helper')
-const state = reactive({ loading: false, totpUrl: '' })
+const state = reactive({
+  loading: false,
+  totpUrl: '',
+  code: '',
+  method: 'pwd'
+})
 const { t } = useI18n()
 const signinForm = reactive({
   accountname: '',
@@ -68,7 +80,7 @@ let totpSecret = ''
 
 const [messageApi, contextHolder] = message.useMessage()
 
-const handlesignin = async (values) => {
+const handleSignin = async (values) => {
   state.loading = true
   try {
     let data = await API.account.signin(values)
@@ -81,16 +93,36 @@ const handlesignin = async (values) => {
     }
     // 如果需要两步验证
     else {
+      state.method = 'totp'
       console.log('需要两步验证')
     }
   } catch (err) {
-    if (err.status == 401) {
+    if (err.status == 400) {
       messageApi.error(t('signin.error'))
     } else {
       messageApi.error('系统内部错误')
     }
   } finally {
     state.loading = false
+  }
+}
+
+const handleSignin2FA = async (callback) => {
+  try {
+    console.log('code', state.code)
+    let data = await API.account.signin2FA({ accountname: signinForm.accountname, password: signinForm.password, authMethod: state.method, code: state.code })
+    helper.setToken(data)
+    const accountInfo = helper.decodeToken()
+    callback(true)
+    router.replace('/')
+  } catch (err) {
+    if (err.status == 400) {
+      messageApi.error('动态口令输入错误')
+      callback(false)
+    } else {
+      messageApi.error('系统内部错误')
+      callback(false)
+    }
   }
 }
 
@@ -155,7 +187,7 @@ header {
 
 .theme {
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--c-gray5);
   .active1 {
     color: var(--c-yellow4);
   }
@@ -175,7 +207,13 @@ header {
   text-align: center;
 }
 
-.form {
+.tips {
+  color: var(--text-secondary);
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+section {
   display: block;
   width: 500px;
   padding: 40px;

@@ -57,6 +57,7 @@ onMounted(() => {
 const check = () => {
   setTimeout(() => {
     emits('finish', (res) => {
+      console.log('finish', res)
       if (!res) {
         verifyRef.value.querySelectorAll('input').forEach((item) => {
           item.classList.add('shake')

@@ -38,15 +38,16 @@ fetch.interceptors.response.use(
   },
   (err) => {
     const { response } = err
-    console.log(response)
+    // console.log(response)
     if (!response) return Promise.reject({ status: 500, message: 'Internal Server Error' })
     // 如果header中携带refreshToken，更新本地存储
     storeRefreshToken(response)
     switch (response.status) {
       case 401:
         console.log(response)
-        console.log(err)
+        // console.log(err)
         router.push('/signin')
+        break
       // return Promise.reject(response)
       case 500:
       default:

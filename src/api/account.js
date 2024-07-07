@@ -18,6 +18,14 @@ const account = {
       url: '/account/signin'
     })
   },
+  signin2FA(params) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: params,
+      url: '/account/signin2FA'
+    })
+  },
   signout() {
     return fetch({
       baseURL: baseUrl.account,

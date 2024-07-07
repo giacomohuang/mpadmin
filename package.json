@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --port 4173",
-    "serve": "nginx -c /Users/huangjia285/projects/mpadmin/serve/nginx.conf",
+    "serve": "nginx -c /Users/giacomohuang/projects/mpadmin/serve/nginx.conf",
     "stopserve": "nginx -s quit",
     "test:unit": "vitest --environment jsdom",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
@@ -40,14 +40,12 @@
     "mockjs": "^1.1.0",
     "prettier": "^3.3.2",
     "rollup-obfuscator": "^4.1.1",
-    "rollup-plugin-obfuscator": "^1.1.0",
     "sass": "^1.77.6",
     "sass-loader": "^14.2.1",
     "svg-baker": "^1.7.0",
     "svgo": "^3.3.2",
     "unplugin-vue-components": "^0.27.2",
     "vite": "^5.3.1",
-    "vite-plugin-obfuscator": "^1.0.5",
     "vitest": "^1.6.0"
   }
 }

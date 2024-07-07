@@ -46,11 +46,11 @@ router.beforeEach(async (to, from, next) => {
   else {
     try {
       const resp = await account.verifyToken(helper.getToken())
-      // 验证通过，放行
       // 如果响应头中有token刷新请求，刷新token
       if (resp.newAccessToken && resp.newRefreshToken) {
         helper.setToken({ accessToken: resp.newAccessToken, refreshToken: resp.newRefreshToken })
       }
+      // 验证通过，放行
       next()
     } catch (e) {
       // 验证不通过，跳登录页

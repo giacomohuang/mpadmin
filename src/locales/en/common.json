@@ -18,7 +18,7 @@
       "my": "My",
       "profile": "My Profile",
       "signout": "Sign out",
-      "page404": "404 Not Found",
+      "404": "404 Not Found",
       "authentication": "Authentication"
     },
     "cpnt": {

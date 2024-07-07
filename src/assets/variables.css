@@ -87,6 +87,7 @@
   --color-border: var(--c-gray4);
   --color-border-muted: #d0d7deb3;
   --color-border-hover: var(--c-gray5);
+  --color-border-strong: var(--c-gray4);
   --color-shadow: var(--c-gray3);
 
   --text-primary: var(--c-gray8);
@@ -108,6 +109,7 @@
   --color-border: var(--c-gray7);
   --color-border-muted: #a1a8adb3;
   --color-border-hover: var(--c-gray6);
+  --color-border-strong: var(--c-gray7);
   --color-shadow: #222;
 
   --text-primary: var(--c-gray2);

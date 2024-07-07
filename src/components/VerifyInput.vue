@@ -172,7 +172,7 @@ input {
   background: var(--bg-input);
   height: 50px;
   width: 50px;
-  border: 3px solid var(--color-border-muted);
+  border: 1px solid var(--color-border-hover);
   border-radius: 20%;
   font-size: 2em;
   font-weight: 600;
@@ -182,6 +182,7 @@ input {
   &:focus,
   .active {
     border-color: var(--c-brand2);
+    box-shadow: 0px 0px 0px 2px var(--c-brand2);
   }
   &:disabled {
     color: var(--text-tertiary);

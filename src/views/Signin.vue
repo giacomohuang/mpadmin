@@ -45,7 +45,11 @@
     <section v-if="state.method == 'totp'">
       <h3 class="title">两步验证：动态口令</h3>
       <div class="tips">请查看动态口令APP中的6位动态数字口令，并在下面的的框中输入</div>
-      <VerifyInput v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
+      <VerifyInput style="margin: 20px 0" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
+      <div class="tips">
+        更换手机或未安装动态口令APP？<a href="####">重新绑定</a><br />
+        <a href="####">使用短信验证</a>&nbsp&nbsp<a href="####">使用邮箱验证</a>
+      </div>
     </section>
   </div>
 </template>
@@ -211,6 +215,7 @@ header {
   color: var(--text-secondary);
   margin: 12px 0;
   font-size: 14px;
+  line-height: 160%;
 }
 
 section {
@@ -233,7 +238,7 @@ section {
 
 [data-theme='light'] {
   .radial-gradient {
-    --bg-main-transparent: rgba(255, 255, 255, 0.3);
+    --bg-main-transparent: rgba(255, 255, 255, 0.5);
     --bg-shadow: #00000012;
     background-color: #fafafa;
     background-image: radial-gradient(closest-side, rgb(192, 233, 255), rgba(235, 105, 78, 0)), radial-gradient(closest-side, rgb(7, 62, 92), rgba(243, 11, 164, 0)), radial-gradient(closest-side, rgb(30, 5, 82), rgba(102, 8, 126, 0)), radial-gradient(closest-side, rgb(195, 111, 0), rgba(170, 142, 245, 0));

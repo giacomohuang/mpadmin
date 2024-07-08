@@ -78,6 +78,13 @@
       </div>
       <div class="tips" style="margin-top: 40px">使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令APP验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">邮件验证</a></div>
     </section>
+
+    <section v-if="state.method == 'activate'">
+      <h3 class="title">账户激活</h3>
+      <a-steps :currentStep="0" size="small" :items="activateSteps"></a-steps>
+
+      <div class="tips">首次登录系统时需要激活的账户</div>
+    </section>
   </div>
 </template>
 
@@ -101,8 +108,21 @@ const state = reactive({
   email: '',
   phone: '',
   areacode: '',
-  accountid: ''
+  accountid: '',
+  currentStep: 0
 })
+
+const activateSteps = ref([
+  {
+    title: '修改密码'
+  },
+  {
+    title: '激活手机'
+  },
+  {
+    title: '绑定验证App'
+  }
+])
 
 const emailState = reactive({
   isSent: false,
@@ -141,8 +161,12 @@ const handleSignin = async (values) => {
   try {
     let data = await API.account.signin(values)
     console.log(data)
+    // 未激活，跳转去激活
+    if (!data.isActivate) {
+      state.method = 'activate'
+    }
     // 如果不需要两步验证
-    if (!data.enable2FA) {
+    else if (!data.enable2FA) {
       helper.setToken(data)
       router.replace('/')
     }
@@ -373,8 +397,8 @@ section {
   .radial-gradient {
     --bg-main-transparent: rgba(255, 255, 255, 0.5);
     --bg-shadow: #00000012;
-    background-color: #fafafa;
-    background-image: radial-gradient(closest-side, rgb(192, 233, 255), rgba(235, 105, 78, 0)), radial-gradient(closest-side, rgb(7, 62, 92), rgba(243, 11, 164, 0)), radial-gradient(closest-side, rgb(30, 5, 82), rgba(102, 8, 126, 0)), radial-gradient(closest-side, rgb(195, 111, 0), rgba(170, 142, 245, 0));
+    background-color: #a0a4a8;
+    background-image: radial-gradient(closest-side, rgb(135, 208, 221), rgba(235, 105, 78, 0)), radial-gradient(closest-side, rgb(7, 62, 92), rgba(243, 11, 164, 0)), radial-gradient(closest-side, rgb(30, 5, 82), rgba(102, 8, 126, 0)), radial-gradient(closest-side, rgb(195, 111, 0), rgba(170, 142, 245, 0));
     background-size:
       130vw 130vh,
       120vw 120vh,

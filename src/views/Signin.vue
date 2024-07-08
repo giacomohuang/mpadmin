@@ -144,7 +144,6 @@ const handleSignin = async (values) => {
     // 如果不需要两步验证
     if (!data.enable2FA) {
       helper.setToken(data)
-      const accountInfo = helper.decodeToken()
       router.replace('/')
     }
     // 如果需要两步验证
@@ -172,7 +171,6 @@ const handleSignin2FA = async (callback) => {
     console.log('code', state.code)
     let data = await API.account.signin2FA({ accountname: signinForm.accountname, password: signinForm.password, authMethod: state.method, code: state.code })
     helper.setToken(data)
-    const accountInfo = helper.decodeToken()
     callback(true)
     emailState.isSent = false
     emailState.isCountDown = false

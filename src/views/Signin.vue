@@ -92,7 +92,8 @@ const state = reactive({
   phone: '',
   smsIsSent: false,
   smsCountDown: 0,
-  areacode: ''
+  areacode: '',
+  accountid: ''
 })
 const { t } = useI18n()
 const signinForm = reactive({

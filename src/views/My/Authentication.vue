@@ -507,14 +507,14 @@ const countDown = (state, data, intv, type) => {
 emailForm.emailNew = localStorage.getItem('cur_email')
 if (localStorage.getItem('emailCDT')) {
   emailState.isSend = true
-  countDown(emailState, emailInterval, 'email')
+  countDown(emailState, emailForm.emailNew, emailInterval, 'email')
 }
 
 const fullPhone = localStorage.getItem('cur_phone')
 if (fullPhone) [phoneForm.areacode, phoneForm.phoneNew] = fullPhone.split('~')
 if (localStorage.getItem('phoneCDT')) {
   phoneState.isSend = true
-  countDown(phoneState, fullPhone, emailInterval, 'phone')
+  countDown(phoneState, fullPhone, phoneInterval, 'phone')
 }
 
 // 本页面初始数据准备

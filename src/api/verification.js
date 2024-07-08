@@ -1,20 +1,20 @@
 import fetch from './fetch'
 import baseUrl from './baseUrl'
 const verification = {
-  sendCodeBySMS(areacode, phone) {
+  sendCodeBySMS(areacode, phone, accountid) {
     return fetch({
       baseURL: baseUrl.default,
       url: '/verification/sendcodebysms',
       method: 'post',
-      data: { areacode, phone }
+      data: { areacode, phone, accountid }
     })
   },
-  sendCodeByEmail(email) {
+  sendCodeByEmail(email, accountid) {
     return fetch({
       baseURL: baseUrl.default,
       url: '/verification/sendcodebyemail',
       method: 'post',
-      data: { email }
+      data: { email, accountid }
     })
   }
 }

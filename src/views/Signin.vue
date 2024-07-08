@@ -24,7 +24,7 @@
       </div>
     </header>
     <section v-if="state.method === 'pwd'">
-      <a-form :model="signinForm" @finish="handleSignin" @finishFailed="handleFailed" autocomplete="off" :label-col="{ span: 5 }" :wrapper-col="{ span: 20 }">
+      <a-form :model="signinForm" @finish="handleSignin" autocomplete="off" :label-col="{ span: 5 }" :wrapper-col="{ span: 20 }">
         <h3 class="title">{{ $t('signin.title') }}</h3>
         <a-form-item style="align-items: center" :label="$t('signin.accountname')" name="accountname" :rules="[{ required: true, message: 'Please input your accountname!' }]">
           <a-input autocomplete="off" size="large" large v-model:value="signinForm.accountname" />
@@ -44,27 +44,41 @@
     </section>
 
     <section v-if="state.method == 'totp'">
-      <h3 class="title">两步验证：动态口令APP</h3>
-      <div class="tips">请查看动态口令APP中的6位动态数字口令，并在下面的的框中输入</div>
-      <VerifyInput style="margin: 20px 0" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
-      <div class="tips">
+      <h3 class="title">使用动态口令APP进行两步验证</h3>
+      <div class="tips" style="margin-top: 40px">请查看动态口令APP中的6位动态数字口令，并在下面的的框中输入</div>
+      <VerifyInput style="width: 100%" class="flex-rc" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
+      <div class="tips" style="margin-top: 40px">
         更换手机或未安装动态口令APP？<a href="####">重新绑定</a><br />
-        使用其他验证方式：<a href="####" @click="handleChangeMethod('sms')">手机短信验证</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">邮箱验证</a>
+        使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">邮箱验证</a>
       </div>
     </section>
 
     <section v-if="state.method == 'email'">
-      <h3 class="title">两步验证：邮件</h3>
-      <div class="flex-rc send">
+      <h3 class="title">使用电子邮件进行两步验证</h3>
+      <div class="flex-rc send" style="margin-top: 40px">
         <h4>{{ helper.obfuscate('email', state.email) }}</h4>
-        <a-button type="primary" @click="handleSendEmail">发送验证码</a-button>
-        <div>秒后可重新发送</div>
+        <div v-if="emailState.isCountDown">{{ emailState.countDownTime }}秒后可重新发送</div>
+        <a-button type="primary" v-else="!emailState.isCountDown" @click="handleSendEmail">发送验证码</a-button>
       </div>
-      <VerifyInput style="margin: 20px 0" v-if="state.emailIsSent" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
-      <div class="tips">
-        更换手机或未安装动态口令APP？<a href="####">重新绑定</a><br />
-        使用其他验证方式：<a href="####" @click="handleChangeMethod('totp')">动态口令APP验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('sms')">手机短信验证</a>
+      <div v-if="emailState.isSent" style="margin: 30px 0">
+        <div class="tips">一封验证邮件已经发送到你的邮箱，请查看邮件中的6位数字验证码，并在下面的的框中输入</div>
+        <VerifyInput style="width: 100%" class="flex-rc" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
       </div>
+      <div class="tips" style="margin-top: 40px">使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令APP验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a></div>
+    </section>
+
+    <section v-if="state.method == 'phone'">
+      <h3 class="title">使用手机短信进行两步验证</h3>
+      <div class="flex-rc send" style="margin-top: 40px">
+        <h4>{{ helper.obfuscate('phone', state.phone) }}</h4>
+        <div v-if="phoneState.isCountDown">{{ phoneState.countDownTime }}秒后可重新发送</div>
+        <a-button type="primary" v-else="!phoneState.isCountDown" @click="handleSendPhone">发送验证码</a-button>
+      </div>
+      <div v-if="phoneState.isSent" style="margin: 30px 0">
+        <div class="tips">已向你的手机发送了一条验证短信，请查看手机短信中的6位数字验证码，并在下面的的框中输入</div>
+        <VerifyInput style="width: 100%" class="flex-rc" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
+      </div>
+      <div class="tips" style="margin-top: 40px">使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令APP验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">邮件验证</a></div>
     </section>
   </div>
 </template>
@@ -87,14 +101,23 @@ const state = reactive({
   code: '',
   method: 'pwd',
   email: '',
-  emailIsSent: false,
-  emailCountDown: 0,
   phone: '',
-  smsIsSent: false,
-  smsCountDown: 0,
   areacode: '',
   accountid: ''
 })
+
+const emailState = reactive({
+  isSent: false,
+  isCountDown: false,
+  countDownTime: 0
+})
+
+const phoneState = reactive({
+  isSent: false,
+  isCountDown: false,
+  countDownTime: 0
+})
+
 const { t } = useI18n()
 const signinForm = reactive({
   accountname: '',
@@ -107,19 +130,28 @@ let totpSecret = ''
 
 const [messageApi, contextHolder] = message.useMessage()
 
+const handleChangeMethod = (method) => {
+  state.method = method
+}
+
+const onChangeLocale = ({ key }) => {
+  changeLocale(key)
+}
+
 const handleSignin = async (values) => {
   state.loading = true
   try {
     let data = await API.account.signin(values)
+    console.log(data)
     // 如果不需要两步验证
     if (!data.enable2FA) {
-      // console.log(data)
       helper.setToken(data)
       const accountInfo = helper.decodeToken()
       router.replace('/')
     }
     // 如果需要两步验证
     else {
+      state.accountid = data._id
       state.email = data.email
       state.areacode = data.areacode
       state.phone = data.phone
@@ -144,6 +176,14 @@ const handleSignin2FA = async (callback) => {
     helper.setToken(data)
     const accountInfo = helper.decodeToken()
     callback(true)
+    emailState.isSent = false
+    emailState.isCountDown = false
+    phoneState.isSent = false
+    phoneState.isCountDown = false
+    localStorage.removeItem('phoneCDT')
+    localStorage.removeItem('emailCDT')
+    clearInterval(emailInterval)
+    clearInterval(phoneInterval)
     router.replace('/')
   } catch (err) {
     if (err.status == 400) {
@@ -158,12 +198,13 @@ const handleSignin2FA = async (callback) => {
 
 const handleSendEmail = async () => {
   try {
-    let result = await API.verification.sendCodeByEmail(state.email)
+    let result = await API.verification.sendCodeByEmail(state.email, state.accountid)
     if (result) {
-      state.emailIsSent = true
+      emailState.isSent = true
+      countDown(emailState, emailInterval, 'email')
     }
   } catch (err) {
-    if (err.code === '102') {
+    if (err.data.code === 102) {
       messageApi.warning('发送太频繁，请稍后再试')
     } else {
       messageApi.error('系统内部错误')
@@ -171,16 +212,57 @@ const handleSendEmail = async () => {
   }
 }
 
-const handleFailed = (errorInfo) => {
-  console.log(errorInfo)
+const handleSendPhone = async () => {
+  try {
+    let result = await API.verification.sendCodeBySMS(state.areacode, state.phone, state.accountid)
+    if (result) {
+      phoneState.isSent = true
+      countDown(phoneState, phoneInterval, 'phone')
+    }
+  } catch (err) {
+    if (err.data.code === 104) {
+      messageApi.warning('发送太频繁，请稍后再试')
+    } else {
+      messageApi.error('系统内部错误')
+    }
+  }
 }
 
-const handleChangeMethod = (method) => {
-  state.method = method
+// 倒计时
+let emailInterval,
+  phoneInterval = undefined
+
+const countDown = (state, intv, type) => {
+  let startTime = localStorage.getItem(type + 'CDT')
+  let nowTime = new Date().getTime()
+  if (startTime) {
+    let surplus = 60 - parseInt((nowTime - startTime) / 1000, 10)
+    state.countDownTime = surplus <= 0 ? 0 : surplus
+  } else {
+    state.countDownTime = 60
+    localStorage.setItem(type + 'CDT', nowTime)
+  }
+  state.isCountDown = true
+  intv = setInterval(() => {
+    state.countDownTime--
+    if (state.countDownTime <= 0) {
+      localStorage.removeItem(type + 'CDT')
+      clearInterval(intv)
+      intv = undefined
+      state.countDownTime = 60
+      state.isCountDown = false
+    }
+  }, 1000)
 }
 
-const onChangeLocale = ({ key }) => {
-  changeLocale(key)
+if (localStorage.getItem('emailCDT')) {
+  emailState.isSent = true
+  countDown(emailState, emailInterval, 'email')
+}
+
+if (localStorage.getItem('phoneCDT')) {
+  phoneState.isSent = true
+  countDown(phoneState, phoneInterval, 'phone')
 }
 </script>
 
@@ -282,7 +364,6 @@ section {
 }
 
 .send {
-  margin-top: 50px;
   h4 {
     font-size: 18px;
     line-height: 100%;

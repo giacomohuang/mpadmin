@@ -71,11 +71,11 @@ provide('globalLoading', globalLoading)
 const store = useStore()
 const { accountname, accountid, realname } = toRefs(store)
 
-const accessToken = helper.decodeToken()
+const accountInfo = helper.decodeToken()
 // const accountname = accessToken.accountname
-accountname.value = accessToken.accountname
-accountid.value = accessToken.id
-realname.value = accessToken.realname
+accountname.value = accountInfo.accountname
+accountid.value = accountInfo.id
+realname.value = accountInfo.realname
 
 const menu = ref(dynamicRoutes)
 const submenu = ref(router.currentRoute.value.matched[0])

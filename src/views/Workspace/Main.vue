@@ -5,7 +5,6 @@
 
 <script setup>
 import { ref, inject, onMounted } from 'vue'
-const API = inject('API')
 const aaa = ref('')
 
 // OpenAI test

@@ -125,24 +125,4 @@ export const dynamicRoutes = [
       { path: '/my/authentication', component: () => import('@/views/My/Authentication.vue'), meta: { title: 'common.route.authentication', permission: '40002' } }
     ]
   }
-
-  // {
-  //   path: '/marketing',
-  //   component: Layout,
-  //   name: 'marketing',
-  //   meta: { title: 'common.route.marketing', permissionId: '0000010001' },
-  //   icon: '#icon-marketing',
-  //   children: [
-  //     {
-  //       path: '/marketing/groupon',
-  //       component: Layout,
-  //       name: 'groupon',
-  //       meta: { title: 'common.route.groupon', permissionId: '0000020001' },
-  //       children: [
-  //         { path: '/groupon/voucherlist', component: () => import('@/views/Voucher/VoucherList.vue'), meta: { title: 'common.route.voucherlist', permission: '000010001' } },
-  //         { path: '/groupon/templatelist', component: () => import('@/views/Voucher/TemplateList.vue'), meta: { title: 'common.route.templatelist', permission: '000010002' } }
-  //       ]
-  //     }
-  //   ]
-  // },
 ]

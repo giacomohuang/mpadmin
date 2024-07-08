@@ -5,7 +5,8 @@ export const useStore = defineStore('store', {
     return {
       theme: '',
       accountname: undefined,
-      accountid: undefined
+      accountid: undefined,
+      realname: undefined
     }
   },
   // 也可以这样定义

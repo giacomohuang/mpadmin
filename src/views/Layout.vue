@@ -9,7 +9,7 @@
       <a-dropdown>
         <a @click.prevent style="font-size: 16px; display: flex; align-items: center">
           <img width="30" height="30" src="@/assets/avatar.jpg" class="avatar" />
-          <div>{{ store.accountname }}</div>
+          <div>{{ store.realname }}({{ store.accountname }})</div>
         </a>
         <template #overlay>
           <a-menu>
@@ -69,12 +69,13 @@ import API from '../api/API'
 const globalLoading = ref(false)
 provide('globalLoading', globalLoading)
 const store = useStore()
-const { accountname, accountid } = toRefs(store)
+const { accountname, accountid, realname } = toRefs(store)
 
 const accessToken = helper.decodeToken()
 // const accountname = accessToken.accountname
-if (!accountname.value) accountname.value = accessToken.accountname
-if (!accountid.value) accountid.value = accessToken.id
+accountname.value = accessToken.accountname
+accountid.value = accessToken.id
+realname.value = accessToken.realname
 
 const menu = ref(dynamicRoutes)
 const submenu = ref(router.currentRoute.value.matched[0])

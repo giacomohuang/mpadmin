@@ -42,13 +42,28 @@
         </a-form-item>
       </a-form>
     </section>
+
     <section v-if="state.method == 'totp'">
-      <h3 class="title">两步验证：动态口令</h3>
+      <h3 class="title">两步验证：动态口令APP</h3>
       <div class="tips">请查看动态口令APP中的6位动态数字口令，并在下面的的框中输入</div>
       <VerifyInput style="margin: 20px 0" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
       <div class="tips">
         更换手机或未安装动态口令APP？<a href="####">重新绑定</a><br />
-        <a href="####">使用短信验证</a>&nbsp&nbsp<a href="####">使用邮箱验证</a>
+        使用其他验证方式：<a href="####" @click="handleChangeMethod('sms')">手机短信验证</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">邮箱验证</a>
+      </div>
+    </section>
+
+    <section v-if="state.method == 'email'">
+      <h3 class="title">两步验证：邮件</h3>
+      <div class="flex-rc send">
+        <h4>{{ helper.obfuscate('email', state.email) }}</h4>
+        <a-button type="primary" @click="handleSendEmail">发送验证码</a-button>
+        <div>秒后可重新发送</div>
+      </div>
+      <VerifyInput style="margin: 20px 0" v-if="state.emailIsSent" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
+      <div class="tips">
+        更换手机或未安装动态口令APP？<a href="####">重新绑定</a><br />
+        使用其他验证方式：<a href="####" @click="handleChangeMethod('totp')">动态口令APP验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('sms')">手机短信验证</a>
       </div>
     </section>
   </div>
@@ -61,16 +76,23 @@ import { changeLocale } from '../js/i18n'
 import { useStore } from '@/stores/stores'
 import { message } from 'ant-design-vue'
 import { useI18n } from 'vue-i18n'
+import helper from '../js/helper'
 import VerifyInput from '../components/VerifyInput.vue'
 import API from '../api/API'
 
 const store = useStore()
-const helper = inject('helper')
 const state = reactive({
   loading: false,
   totpUrl: '',
   code: '',
-  method: 'pwd'
+  method: 'pwd',
+  email: '',
+  emailIsSent: false,
+  emailCountDown: 0,
+  phone: '',
+  smsIsSent: false,
+  smsCountDown: 0,
+  areacode: ''
 })
 const { t } = useI18n()
 const signinForm = reactive({
@@ -97,6 +119,9 @@ const handleSignin = async (values) => {
     }
     // 如果需要两步验证
     else {
+      state.email = data.email
+      state.areacode = data.areacode
+      state.phone = data.phone
       state.method = 'totp'
       console.log('需要两步验证')
     }
@@ -130,8 +155,27 @@ const handleSignin2FA = async (callback) => {
   }
 }
 
+const handleSendEmail = async () => {
+  try {
+    let result = await API.verification.sendCodeByEmail(state.email)
+    if (result) {
+      state.emailIsSent = true
+    }
+  } catch (err) {
+    if (err.code === '102') {
+      messageApi.warning('发送太频繁，请稍后再试')
+    } else {
+      messageApi.error('系统内部错误')
+    }
+  }
+}
+
 const handleFailed = (errorInfo) => {
   console.log(errorInfo)
+}
+
+const handleChangeMethod = (method) => {
+  state.method = method
 }
 
 const onChangeLocale = ({ key }) => {
@@ -233,6 +277,17 @@ section {
   transition: 0.2s;
   &:hover {
     box-shadow: 0 0 25px 12px var(--bg-shadow);
+  }
+}
+
+.send {
+  margin-top: 50px;
+  h4 {
+    font-size: 18px;
+    line-height: 100%;
+    margin: 0 20px 0 0;
+
+    padding: 0;
   }
 }
 

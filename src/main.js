@@ -10,7 +10,6 @@ import 'ant-design-vue/dist/reset.css'
 import './assets/main.css'
 import 'virtual:svg-icons-register'
 import Icon from './components/Icon.vue'
-import utils from './js/utils'
 
 const app = createApp(App)
 
@@ -18,4 +17,4 @@ if (!localStorage.getItem('localLang')) {
   localStorage.setItem('localLang', 'zh-CN')
 }
 
-app.use(router).use(createPinia()).use(i18n).use(Antd).use(utils).component('Icon', Icon).mount('#app')
+app.use(router).use(createPinia()).use(i18n).use(Antd).component('Icon', Icon).mount('#app')

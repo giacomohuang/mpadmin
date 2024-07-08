@@ -328,7 +328,7 @@ const handleSendEmail = async () => {
     console.log(resp)
     // 启动倒计时
     emailState.isSend = true
-    countDown(emailState, emailForm.emailNew, emailInterval, 'email')
+    countDown(emailState, emailForm.emailNew, emailInterval, 'email', store.accountid.value)
   } catch (err) {
     if (err?.data?.code === 102) {
       messageApi.warning('发送过于频繁，请稍后再试')
@@ -397,7 +397,7 @@ const handleSendSMS = async () => {
   // 向指定手机发送验证短信
   try {
     state.loading = true
-    const resp = await API.verification.sendCodeBySMS(phoneForm.areacode, phoneForm.phoneNew)
+    const resp = await API.verification.sendCodeBySMS(phoneForm.areacode, phoneForm.phoneNew, store.accountid.value)
     console.log(resp)
     // 启动倒计时
     phoneState.isSend = true

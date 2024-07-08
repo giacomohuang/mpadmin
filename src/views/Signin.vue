@@ -35,12 +35,10 @@
           <!-- placeholder="密码" -->
         </a-form-item>
         <a-form-item>
-          <a-button type="primary" :loading="state.loading" html-type="submit" style="margin-left: 90px; margin-right: 10px">
-            {{ $t('signin.signin') }}
-          </a-button>
-          <label style="font-size: 12px">30天内没有访问将重新登录</label>
+          <a-button type="primary" :loading="state.loading" html-type="submit" style="margin: 0 20px 0 90px"> {{ $t('signin.signin') }} </a-button> <a href="####">找回密码</a>
         </a-form-item>
       </a-form>
+      <!-- <div style="margin: 0 0 0 90px; font-size: 12px">30天内没有访问将重新登录</div> -->
     </section>
 
     <section v-if="state.method == 'totp'">
@@ -49,7 +47,7 @@
       <VerifyInput style="width: 100%" class="flex-rc" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
       <div class="tips" style="margin-top: 40px">
         更换手机或未安装动态口令APP？<a href="####">重新绑定</a><br />
-        使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">邮箱验证</a>
+        使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a>
       </div>
     </section>
 

@@ -92,7 +92,7 @@
         <label>{{ totpForm.totpSecret ? $t('my.authentication.havset') : $t('my.authentication.notset') }}</label>
         <a-button @click="handleGenerateTotpSecret">{{ totpForm.totpSecret ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
       </div>
-      <a-modal v-model:open="state.setTotpVisible" :title="totpForm.totpSecret ? $t('my.authentication.edittotp') : $t('my.authentication.settotp')" :footer="null" @cancel="handleCancelSet" width="500px">
+      <a-modal v-model:open="state.setTotpVisible" :title="$t('my.authentication.settotp')" :footer="null" @cancel="handleCancelSet" width="500px">
         <div class="step">
           <div class="title"><span class="badage">1</span>使用验证APP扫描二维码</div>
           <div class="hint">扫描验证码后，将得到一组6位数字验证码。还没有安装验证APP？ <a href="/downauthapp" target="_blank">点击这里下载</a></div>

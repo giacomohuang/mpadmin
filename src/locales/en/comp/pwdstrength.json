@@ -1,0 +1,11 @@
+{
+  "comp": {
+    "pwdstrength": {
+      "weak": "weak",
+      "fair": "fair",
+      "good": "good",
+      "strong": "strong",
+      "excellent": "excellent"
+    }
+  }
+}

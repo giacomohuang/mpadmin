@@ -4,6 +4,13 @@
     "accountname": "Account",
     "password": "Password",
     "signin": "Sign in",
-    "error": "Accountname or Password is Incorrect"
+    "error": "Accountname or Password is Incorrect",
+    "newpwd": "New Password",
+    "pep": "Please enter the password.",
+    "pepa": "Please enter password again.",
+    "pnm": "Password confirmation doesn't match the password.",
+    "cpwd": "Change Password",
+    "cfpwd": "Confirm password",
+    "pst": "The password is too simple. Please use a combination of numbers, uppercase and lowercase letters, and symbols."
   }
 }

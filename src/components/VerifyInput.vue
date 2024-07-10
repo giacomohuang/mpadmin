@@ -37,23 +37,6 @@ onMounted(() => {
   }
 })
 
-// watch(isError, (val) => {
-//   loadingRef.value.classList.remove('loading')
-//   loading.value = false
-//   console.log('changed')
-//   if (val) {
-//     console.log('error val', val)
-//     codeArray.value = Array(digits).fill('')
-//     verifyRef.value.querySelectorAll('input').forEach((item) => {
-//       item.classList.add('shake')
-//     })
-//     verifyRef.value.querySelectorAll('input')[0].focus()
-//     isError.value = false
-//   } else {
-//     codeArray.value = Array(digits).fill('')
-//   }
-// })
-
 const check = () => {
   setTimeout(() => {
     emits('finish', (res) => {

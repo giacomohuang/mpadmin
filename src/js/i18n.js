@@ -9,7 +9,11 @@ const currentLocale = localStorage.getItem('locale') || (SUPPORT_LOCALES.include
 const i18n = createI18n({
   locale: currentLocale,
   legacy: false,
-  fallbackLocale: 'zh-CN'
+  fallbackLocale: 'zh-CN',
+  silentFallbackWarn: true,
+  missingWarn: false,
+  silentTranslationWarn: true,
+  fallbackWarn: false
 })
 
 // 切换语言
@@ -60,6 +64,15 @@ export async function loadLocaleData(locale, path) {
     console.log('locale file load error', e)
   }
   return nextTick()
+}
+
+// 加载组件中的语言包
+export async function mergeCompData(locale, compName) {
+  const localeFile = Object.keys(localeFiles).find((path) => {
+    return path === p
+  })
+  const page = await localeFiles[localeFile]()
+  i18n.global.mergeLocaleMessage(locale, page.default)
 }
 
 export default i18n

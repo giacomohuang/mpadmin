@@ -42,11 +42,11 @@
     </section>
 
     <section v-if="state.method == 'totp'">
-      <h3 class="title">使用动态口令APP进行两步验证</h3>
-      <div class="tips" style="margin-top: 40px">请查看动态口令APP中的6位动态数字口令，并在下面的的框中输入</div>
+      <h3 class="title">使用动态口令App进行两步验证</h3>
+      <div class="tips" style="margin-top: 40px">请查看动态口令App中的6位动态数字口令，并在下面的的框中输入</div>
       <VerifyInput style="width: 100%" class="flex-rc" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
       <div class="tips" style="margin-top: 40px">
-        更换手机或未安装动态口令APP？<a href="####">重新绑定</a><br />
+        更换手机或未安装动态口令App？<a href="####">重新绑定</a><br />
         使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a>
       </div>
     </section>
@@ -62,7 +62,7 @@
         <div class="tips">一封验证邮件已经发送到你的邮箱，请查看邮件中的6位数字验证码，并在下面的的框中输入</div>
         <VerifyInput style="width: 100%" class="flex-rc" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
       </div>
-      <div class="tips" style="margin-top: 40px">使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令APP验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a></div>
+      <div class="tips" style="margin-top: 40px">使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a></div>
     </section>
 
     <section v-if="state.method == 'phone'">
@@ -76,14 +76,27 @@
         <div class="tips">已向你的手机发送了一条验证短信，请查看手机短信中的6位数字验证码，并在下面的的框中输入</div>
         <VerifyInput style="width: 100%" class="flex-rc" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
       </div>
-      <div class="tips" style="margin-top: 40px">使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令APP验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">邮件验证</a></div>
+      <div class="tips" style="margin-top: 40px">使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">邮件验证</a></div>
     </section>
 
     <section v-if="state.method == 'activate'">
-      <h3 class="title">账户激活</h3>
-      <a-steps :currentStep="0" size="small" :items="activateSteps"></a-steps>
+      <h3 class="title">修改初始密码</h3>
 
-      <div class="tips">首次登录系统时需要激活的账户</div>
+      <div v-if="state.currentStep === 0">
+        <a-form ref="pwdFormRef" style="margin-top: 30px" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" @finish="handleUpdatePwd">
+          <a-form-item has-feedback :label="$t('signin.newpwd')" name="newPassword">
+            <PasswordStrength v-if="pwdForm.newPassword" v-model:value="state.strength" :password="pwdForm.newPassword" style="position: absolute; top: -20px"></PasswordStrength>
+            <a-input-password autocomplete="new-password" v-model:value="pwdForm.newPassword" />
+          </a-form-item>
+          <a-form-item has-feedback :label="$t('signin.cfpwd')" name="confirm">
+            <a-input-password autocomplete="new-password" v-model:value="pwdForm.confirm" />
+          </a-form-item>
+          <a-form-item :wrapper-col="{ offset: 6 }">
+            <a-button type="ghost" @click="handleResetPwdForm">{{ $t('common.cpnt.reset') }}</a-button>
+            <a-button type="primary" html-type="submit" style="margin-left: 10px">{{ $t('common.cpnt.submit') }}</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
     </section>
   </div>
 </template>
@@ -98,6 +111,7 @@ import { useI18n } from 'vue-i18n'
 import helper from '../js/helper'
 import VerifyInput from '../components/VerifyInput.vue'
 import API from '../api/API'
+import PasswordStrength from '../components/PasswordStrength.vue'
 
 const store = useStore()
 const state = reactive({
@@ -109,20 +123,43 @@ const state = reactive({
   phone: '',
   areacode: '',
   accountid: '',
-  currentStep: 0
+  currentStep: 0,
+  strength: 0
+})
+const pwdFormRef = ref(null)
+
+const vPwd = async (_rule, value) => {
+  if (value === pwdForm.oldPassword) {
+    return Promise.reject(t('signin.samepwd'))
+  } else if (value === '') {
+    return Promise.reject(t('signin.pep'))
+  } else if (state.strength < 2) {
+    return Promise.reject()
+  } else if (pwdForm.confirm !== '') {
+    pwdFormRef.value.validateFields('confirm')
+  }
+  return Promise.resolve()
+}
+
+const vConfirmPwd = async (_rule, value) => {
+  if (value === '') {
+    return Promise.reject(t('signin.pepa'))
+  } else if (value !== pwdForm.newPassword) {
+    return Promise.reject(t('signin.pnm'))
+  } else {
+    return Promise.resolve()
+  }
+}
+
+const pwdForm = reactive({
+  newPassword: '',
+  confirm: ''
 })
 
-const activateSteps = ref([
-  {
-    title: '修改密码'
-  },
-  {
-    title: '激活手机'
-  },
-  {
-    title: '绑定验证App'
-  }
-])
+const pwdRules = {
+  newPassword: [{ validator: vPwd, trigger: 'change' }],
+  confirm: [{ validator: vConfirmPwd, trigger: 'change' }]
+}
 
 const emailState = reactive({
   isSent: false,
@@ -245,6 +282,25 @@ const handleSendPhone = async () => {
     } else {
       messageApi.error('系统内部错误')
     }
+  }
+}
+
+const handleResetPwdForm = () => {
+  pwdFormRef.value.resetFields()
+}
+
+const handleUpdatePwd = async () => {
+  try {
+    const resp = await API.account.updatePassword(state.password, pwdForm.password)
+    if (resp.result) {
+      messageApi.success('密码成功更新!')
+      pwdFormRef.value.resetFields()
+    } else {
+      messageApi.success('旧密码输入错误，请重试')
+    }
+  } catch (err) {
+    console.log(err)
+    return
   }
 }
 

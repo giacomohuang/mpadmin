@@ -13,23 +13,7 @@
             <a-input-password v-model:value="pwdForm.oldPassword" />
           </a-form-item>
           <a-form-item has-feedback :label="$t('my.authentication.newpwd')" name="newPassword">
-            <ul v-if="pwdForm.newPassword" class="strength">
-              <li :class="{ s0: state.strength == 0 }">
-                <label v-if="state.strength == 0">{{ $t('my.authentication.week') }}</label>
-              </li>
-              <li :class="{ s1: state.strength == 1 }">
-                <label v-show="state.strength == 1">{{ $t('my.authentication.fair') }}</label>
-              </li>
-              <li :class="{ s2: state.strength == 2 }">
-                <label v-show="state.strength == 2">{{ $t('my.authentication.good') }}</label>
-              </li>
-              <li :class="{ s3: state.strength == 3 }">
-                <label v-show="state.strength == 3">{{ $t('my.authentication.strong') }}</label>
-              </li>
-              <li :class="{ s4: state.strength == 4 }">
-                <label v-show="state.strength == 4">{{ $t('my.authentication.excellent') }}</label>
-              </li>
-            </ul>
+            <PasswordStrength v-show="pwdForm.newPassword" v-model:value="state.strength" :password="pwdForm.newPassword"></PasswordStrength>
             <a-input-password v-model:value="pwdForm.newPassword" />
           </a-form-item>
           <a-form-item has-feedback :label="$t('my.authentication.cfpwd')" name="confirmPassword">
@@ -147,10 +131,10 @@ import { useStore } from '@/stores/stores'
 import { message } from 'ant-design-vue'
 import API from '../../api/API'
 
-import zxcvbn from 'zxcvbn'
 import helper from '../../js/helper'
 import VerifyInput from '../../components/VerifyInput.vue'
 import areaCode from '../../js/areacode'
+import PasswordStrength from '../../components/PasswordStrength.vue'
 
 const { t, locale } = useI18n()
 const store = useStore()
@@ -221,7 +205,7 @@ let emailInterval,
   phoneInterval = undefined
 
 const vPwd = async (_rule, value) => {
-  state.strength = zxcvbn(value).score
+  // state.strength
   if (value === pwdForm.oldPassword) {
     return Promise.reject(t('my.authentication.samepwd'))
   } else if (value === '') {
@@ -243,6 +227,12 @@ const vConfirmPwd = async (_rule, value) => {
   }
 }
 
+const pwdRules = {
+  oldPassword: [{ required: true, message: t('my.authentication.pep') }],
+  newPassword: [{ validator: vPwd, trigger: 'change' }],
+  confirmPassword: [{ validator: vConfirmPwd, trigger: 'change' }]
+}
+
 const vEmail = async (_rule, value) => {
   if (value && value === emailForm.email) {
     return Promise.reject()
@@ -250,6 +240,11 @@ const vEmail = async (_rule, value) => {
     return Promise.resolve()
   }
 }
+const emailRules = [
+  { required: true, message: t('my.authentication.peemail'), trigger: 'blur' },
+  { type: 'email', message: t('my.authentication.pecemail'), trigger: 'blur' },
+  { validator: vEmail, message: t('my.authentication.pedemail'), trigger: 'blur' }
+]
 
 const vPhone = async (_rule, value) => {
   console.log(value)
@@ -268,18 +263,6 @@ const vPhone = async (_rule, value) => {
     return Promise.resolve()
   }
 }
-
-const pwdRules = {
-  oldPassword: [{ required: true, message: t('my.authentication.pep') }],
-  newPassword: [{ validator: vPwd, trigger: 'change' }],
-  confirmPassword: [{ validator: vConfirmPwd, trigger: 'change' }]
-}
-
-const emailRules = [
-  { required: true, message: t('my.authentication.peemail'), trigger: 'blur' },
-  { type: 'email', message: t('my.authentication.pecemail'), trigger: 'blur' },
-  { validator: vEmail, message: t('my.authentication.pedemail'), trigger: 'blur' }
-]
 
 const phoneRules = [{ validator: vPhone, trigger: 'blur' }]
 
@@ -546,61 +529,6 @@ onUnmounted(() => {
 }
 .resend-hint {
   color: var(--text-secondary);
-}
-
-.strength {
-  display: flex;
-  list-style-type: none;
-  border: 1px solid var(--color-border);
-  background: var(--bg-main);
-  border-radius: 5px;
-  width: 100%;
-  margin-top: 12px;
-  margin-bottom: 24px;
-  li {
-    flex-grow: 0.5;
-    box-shadow: inset 0 0 0px 4px var(--bg-main);
-    text-align: center;
-    height: 12px;
-    transition: all linear 0.15s;
-    &:not(:first-child) {
-      border-left: 1px solid var(--color-border);
-    }
-    &:first-child {
-      border-radius: 5px 0 0 5px;
-    }
-    &:last-child {
-      border-radius: 0 5px 5px 0;
-    }
-    label {
-      font-size: 12px;
-      position: relative;
-      top: 12px;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-  }
-
-  .s0 {
-    flex-grow: 1;
-    background-color: var(--c-gray5);
-  }
-  .s1 {
-    flex-grow: 1;
-    background-color: var(--c-red1);
-  }
-  .s2 {
-    flex-grow: 1;
-    background-color: var(--c-blue3);
-  }
-  .s3 {
-    flex-grow: 1;
-    background-color: var(--c-green1);
-  }
-  .s4 {
-    flex-grow: 1;
-    background-color: var(--c-green4);
-  }
 }
 
 .verifycode {

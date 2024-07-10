@@ -6,15 +6,13 @@ export const useStore = defineStore('store', {
       theme: '',
       accountname: undefined,
       accountid: undefined,
-      realname: undefined
-    }
-  },
-  // 也可以这样定义
-  // state: () => ({ count: 0 })
-  actions: {
-    changeTheme(value) {
-      this.theme = value
-      // console.log(this.mode)
+      realname: undefined,
+      locale: undefined
     }
   }
+  // actions: {
+  //   changeTheme(value) {
+  //     this.theme = value
+  //   }
+  // }
 })

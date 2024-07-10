@@ -58,7 +58,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, onMounted, ref, toRefs, reactive, provide } from 'vue'
+import { onMounted, ref, toRefs, provide } from 'vue'
 import { router, dynamicRoutes } from '../router/router'
 import { changeLocale } from '../js/i18n'
 import SubMenu from './SubMenu.vue'
@@ -69,7 +69,7 @@ import API from '../api/API'
 const globalLoading = ref(false)
 provide('globalLoading', globalLoading)
 const store = useStore()
-const { accountname, accountid, realname } = toRefs(store)
+const { accountname, accountid, realname, locale } = toRefs(store)
 
 const accountInfo = helper.decodeToken()
 // const accountname = accessToken.accountname
@@ -82,6 +82,7 @@ const submenu = ref(router.currentRoute.value.matched[0])
 const currentMenuIdx = ref(-1)
 const onChangeLocale = async ({ key }) => {
   await changeLocale(key)
+  locale.value = key
 }
 // menu.value =
 // 取根节点下的子菜单

@@ -68,6 +68,8 @@ export async function loadLocaleData(locale, path) {
 
 // 加载组件中的语言包
 export async function mergeCompData(locale, compName) {
+  const p = `../locales/${locale}/comp/${compName}.json`
+  console.log(p)
   const localeFile = Object.keys(localeFiles).find((path) => {
     return path === p
   })

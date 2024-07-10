@@ -13,16 +13,20 @@
 <script setup>
 import { onBeforeMount, onMounted, ref, watch } from 'vue'
 import zxcvbn from 'zxcvbn'
-import i18n from '../js/i18n'
+import { mergeCompData } from '../js/i18n'
+import { useI18n } from 'vue-i18n'
 const value = defineModel('value')
 const data = defineProps(['password'])
 const loading = ref(false)
 
+// 载入语言包
+const { locale } = useI18n()
+watch(locale, async () => {
+  await mergeCompData(locale.value, 'pwdstrength')
+})
 onBeforeMount(async () => {
   loading.value = true
-  const locale = localStorage.getItem('locale')
-  const page = await import(`../locales/${locale}/comp/pwdstrength.json`)
-  i18n.global.mergeLocaleMessage(locale, page.default)
+  await mergeCompData(locale.value, 'pwdstrength')
   loading.value = false
 })
 
@@ -50,7 +54,8 @@ watch(
 .strength {
   display: flex;
   flex-direction: row;
-  height: 14px;
+  align-items: center;
+
   width: 100%;
 
   ul {
@@ -64,8 +69,8 @@ watch(
   }
   li {
     flex-grow: 1;
-
-    box-shadow: inset 0 0 0px 4px var(--bg-main);
+    height: 10px;
+    box-shadow: inset 0 0 0px 2px var(--bg-main);
     // text-align: center;
 
     transition: all linear 0.15s;
@@ -86,6 +91,7 @@ watch(
     font-weight: 500;
     margin-left: 12px;
     color: var(--text-secondary);
+    width: 60px;
   }
 
   .s0 {

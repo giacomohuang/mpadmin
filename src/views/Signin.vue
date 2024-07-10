@@ -102,7 +102,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, inject } from 'vue'
+import { ref, reactive } from 'vue'
 import { router } from '@/router/router'
 import { changeLocale } from '../js/i18n'
 import { useStore } from '@/stores/stores'
@@ -114,6 +114,7 @@ import API from '../api/API'
 import PasswordStrength from '../components/PasswordStrength.vue'
 
 const store = useStore()
+
 const state = reactive({
   loading: false,
   totpUrl: '',

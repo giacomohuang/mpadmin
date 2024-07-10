@@ -22,7 +22,9 @@ const loading = ref(false)
 // 载入语言包
 const { locale } = useI18n()
 watch(locale, async () => {
+  loading.value = true
   await mergeCompData(locale.value, 'pwdstrength')
+  loading.value = false
 })
 onBeforeMount(async () => {
   loading.value = true

@@ -15,7 +15,7 @@
       "auth": "Authentication",
       "email": "Email",
       "mobi": "Mobile Phone",
-      "totp": "Dynamic Password (OTP)",
+      "totp": "Dynamic Password App",
       "emailad": "Email",
       "svcode": "Send Code",
       "edit": "Edit",

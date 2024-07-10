@@ -31,7 +31,7 @@
           <!-- placeholder="请填写用于登录的邮箱" -->
         </a-form-item>
         <a-form-item style="align-items: center" :label="$t('signin.password')" name="password" :rules="[{ required: true, message: 'Please input your password!' }]">
-          <a-input-password autocomplete="off" size="large" v-model:value="signinForm.password" />
+          <a-input-password autocomplete="new-password" size="large" v-model:value="signinForm.password" />
           <!-- placeholder="密码" -->
         </a-form-item>
         <a-form-item>
@@ -79,24 +79,22 @@
       <div class="tips" style="margin-top: 40px">使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">邮件验证</a></div>
     </section>
 
-    <section v-if="state.method == 'activate'">
+    <section v-if="state.method == 'initPwd'">
       <h3 class="title">修改初始密码</h3>
 
-      <div v-if="state.currentStep === 0">
-        <a-form ref="pwdFormRef" style="margin-top: 30px" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" @finish="handleUpdatePwd">
-          <a-form-item has-feedback :label="$t('signin.newpwd')" name="newPassword">
-            <PasswordStrength v-if="pwdForm.newPassword" v-model:value="state.strength" :password="pwdForm.newPassword" style="position: absolute; top: -20px"></PasswordStrength>
-            <a-input-password autocomplete="new-password" v-model:value="pwdForm.newPassword" />
-          </a-form-item>
-          <a-form-item has-feedback :label="$t('signin.cfpwd')" name="confirm">
-            <a-input-password autocomplete="new-password" v-model:value="pwdForm.confirm" />
-          </a-form-item>
-          <a-form-item :wrapper-col="{ offset: 6 }">
-            <a-button type="ghost" @click="handleResetPwdForm">{{ $t('common.cpnt.reset') }}</a-button>
-            <a-button type="primary" html-type="submit" style="margin-left: 10px">{{ $t('common.cpnt.submit') }}</a-button>
-          </a-form-item>
-        </a-form>
-      </div>
+      <a-form ref="pwdFormRef" style="margin-top: 30px" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" @finish="handleInitPwd">
+        <a-form-item has-feedback :label="$t('signin.newpwd')" name="newPassword">
+          <PasswordStrength v-if="pwdForm.newPassword" v-model:value="state.strength" :password="pwdForm.newPassword" style="position: absolute; top: -20px"></PasswordStrength>
+          <a-input-password autocomplete="new-password" v-model:value="pwdForm.newPassword" />
+        </a-form-item>
+        <a-form-item has-feedback :label="$t('signin.cfpwd')" name="confirm">
+          <a-input-password autocomplete="new-password" v-model:value="pwdForm.confirm" />
+        </a-form-item>
+        <a-form-item :wrapper-col="{ offset: 6 }">
+          <a-button type="ghost" @click="handleResetPwdForm">{{ $t('common.cpnt.reset') }}</a-button>
+          <a-button type="primary" html-type="submit" style="margin-left: 10px">{{ $t('common.cpnt.submit') }}</a-button>
+        </a-form-item>
+      </a-form>
     </section>
   </div>
 </template>
@@ -124,13 +122,12 @@ const state = reactive({
   phone: '',
   areacode: '',
   accountid: '',
-  currentStep: 0,
   strength: 0
 })
 const pwdFormRef = ref(null)
 
 const vPwd = async (_rule, value) => {
-  if (value === pwdForm.oldPassword) {
+  if (value === signinForm.password) {
     return Promise.reject(t('signin.samepwd'))
   } else if (value === '') {
     return Promise.reject(t('signin.pep'))
@@ -199,9 +196,13 @@ const handleSignin = async (values) => {
   try {
     let data = await API.account.signin(values)
     console.log(data)
+    state.accountid = data._id
+    state.email = data.email
+    state.areacode = data.areacode
+    state.phone = data.phone
     // 未激活，跳转去激活
-    if (!data.isActivate) {
-      state.method = 'activate'
+    if (!data.initPwd) {
+      state.method = 'initPwd'
     }
     // 如果不需要两步验证
     else if (!data.enable2FA) {
@@ -210,10 +211,6 @@ const handleSignin = async (values) => {
     }
     // 如果需要两步验证
     else {
-      state.accountid = data._id
-      state.email = data.email
-      state.areacode = data.areacode
-      state.phone = data.phone
       state.method = 'totp'
       console.log('需要两步验证')
     }
@@ -290,14 +287,14 @@ const handleResetPwdForm = () => {
   pwdFormRef.value.resetFields()
 }
 
-const handleUpdatePwd = async () => {
+const handleInitPwd = async () => {
   try {
-    const resp = await API.account.updatePassword(state.password, pwdForm.password)
+    const resp = await API.account.initPassword(signinForm.password, pwdForm.newPassword, state.accountid)
     if (resp.result) {
       messageApi.success('密码成功更新!')
       pwdFormRef.value.resetFields()
     } else {
-      messageApi.success('旧密码输入错误，请重试')
+      messageApi.error('初始密码错误，请重试')
     }
   } catch (err) {
     console.log(err)

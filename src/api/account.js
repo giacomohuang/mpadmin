@@ -73,6 +73,15 @@ const account = {
       url: '/account/updatepassword'
     })
   },
+
+  initPassword(oldPassword, newPassword, accountid) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: { accountid, oldPassword, newPassword },
+      url: '/account/initpassword'
+    })
+  },
   updateEmail(verifycode, email) {
     return fetch({
       baseURL: baseUrl.account,

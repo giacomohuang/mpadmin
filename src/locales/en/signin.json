@@ -11,6 +11,7 @@
     "pnm": "Password confirmation doesn't match the password.",
     "cpwd": "Change Password",
     "cfpwd": "Confirm password",
-    "pst": "The password is too simple. Please use a combination of numbers, uppercase and lowercase letters, and symbols."
+    "pst": "The password is too simple. Please use a combination of numbers, uppercase and lowercase letters, and symbols.",
+    "samepwd": "The new password cannot be the same as the initial password."
   }
 }

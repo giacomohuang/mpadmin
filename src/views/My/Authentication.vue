@@ -10,14 +10,14 @@
       <div v-if="state.toggleChangePwd" class="content">
         <a-form ref="pwdFormRef" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 12 }" @validate="handlePwdValidate" @finish="handleUpdatePwd">
           <a-form-item has-feedback :label="$t('my.authentication.oldpwd')" name="oldPassword">
-            <a-input-password v-model:value="pwdForm.oldPassword" />
+            <a-input-password v-model:value="pwdForm.oldPassword" autocomplete="new-password" />
           </a-form-item>
           <a-form-item has-feedback :label="$t('my.authentication.newpwd')" name="newPassword">
             <PasswordStrength v-show="pwdForm.newPassword" v-model:value="state.strength" :password="pwdForm.newPassword"></PasswordStrength>
-            <a-input-password v-model:value="pwdForm.newPassword" />
+            <a-input-password v-model:value="pwdForm.newPassword" autocomplete="new-password" />
           </a-form-item>
           <a-form-item has-feedback :label="$t('my.authentication.cfpwd')" name="confirmPassword">
-            <a-input-password v-model:value="pwdForm.confirmPassword" />
+            <a-input-password v-model:value="pwdForm.confirmPassword" autocomplete="new-password" />
           </a-form-item>
           <a-form-item :wrapper-col="{ offset: 6 }">
             <a-button type="ghost" @click="handleResetPwdForm">{{ $t('common.cpnt.reset') }}</a-button>
@@ -311,7 +311,7 @@ const handleSendEmail = async () => {
     console.log(resp)
     // 启动倒计时
     emailState.isSend = true
-    countDown(emailState, emailForm.emailNew, emailInterval, 'email', store.accountid.value)
+    countDown(emailState, emailForm.emailNew, emailInterval, 'email', store.accountid)
   } catch (err) {
     if (err?.data?.code === 102) {
       messageApi.warning('发送过于频繁，请稍后再试')
@@ -380,7 +380,7 @@ const handleSendSMS = async () => {
   // 向指定手机发送验证短信
   try {
     state.loading = true
-    const resp = await API.verification.sendCodeBySMS(phoneForm.areacode, phoneForm.phoneNew, store.accountid.value)
+    const resp = await API.verification.sendCodeBySMS(phoneForm.areacode, phoneForm.phoneNew, store.accountid)
     console.log(resp)
     // 启动倒计时
     phoneState.isSend = true

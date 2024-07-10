@@ -9,10 +9,10 @@ export const useStore = defineStore('store', {
       realname: undefined,
       locale: undefined
     }
+  },
+  actions: {
+    changeTheme(value) {
+      this.theme = value
+    }
   }
-  // actions: {
-  //   changeTheme(value) {
-  //     this.theme = value
-  //   }
-  // }
 })

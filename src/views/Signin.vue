@@ -35,7 +35,7 @@
           <!-- placeholder="密码" -->
         </a-form-item>
         <a-form-item>
-          <a-button type="primary" :loading="state.loading" html-type="submit" style="margin: 0 20px 0 90px"> {{ $t('signin.signin') }} </a-button> <a href="####">{{ $t('signin.forgotpwd') }}</a>
+          <a-button type="primary" :loading="state.loading" html-type="submit" style="margin: 0 20px 0 90px"> {{ $t('signin.signin') }} </a-button> <a href="####" @click="state.method = 'resetPwd'">{{ $t('signin.forgotpwd') }}</a>
         </a-form-item>
       </a-form>
       <!-- <div style="margin: 0 0 0 90px; font-size: 12px">30天内没有访问将重新登录</div> -->
@@ -104,6 +104,24 @@
           <a-button type="primary" html-type="submit" style="margin-left: 10px">{{ $t('common.cpnt.submit') }}</a-button>
         </a-form-item>
       </a-form>
+    </section>
+
+    <section v-if="state.method == 'resetPwd'">
+      <h3 class="title">重置密码</h3>
+      <div class="tips">请选择接收临时密码的方式:</div>
+      <a-form-item>
+        <a-radio-group v-model:value="state.resetPwdMethod">
+          <a-radio value="email">{{ $t('signin.email') }}</a-radio>
+          <a-radio value="phone">{{ $t('signin.phone') }}</a-radio>
+        </a-radio-group>
+      </a-form-item>
+      <a-form-item v-if="state.resetPwdMethod">
+        <a-input placeholder="请输入完整的电子邮件地址" v-if="state.resetPwdMethod === 'email'"></a-input>
+        <a-input placeholder="请输入完整的手机号" v-if="state.resetPwdMethod === 'phone'"></a-input>
+      </a-form-item>
+      <a-form-item>
+        <a-button type="primary" @click="handleSendTempPwd">{{ $t('common.cpnt.send') }}</a-button>
+      </a-form-item>
     </section>
   </div>
 </template>

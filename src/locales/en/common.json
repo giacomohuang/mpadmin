@@ -5,6 +5,7 @@
     "enabled": "Enabled",
     "disabled": "Disabled",
     "route": {
+      "404": "404 Not Found",
       "signin": "Sign in",
       "workspace": "Workspace",
       "account": "Account",
@@ -18,12 +19,12 @@
       "my": "My",
       "profile": "My Profile",
       "signout": "Sign out",
-      "404": "404 Not Found",
       "authentication": "Authentication"
     },
     "cpnt": {
       "submit": "Submit",
-      "reset": "Reset"
+      "reset": "Reset",
+      "send": "Send"
     }
   }
 }

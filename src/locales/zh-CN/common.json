@@ -5,6 +5,7 @@
     "enabled": "启用",
     "disabled": "禁用",
     "route": {
+      "404": "404 页面不存在",
       "signin": "登录",
       "workspace": "工作台",
       "account": "账户",
@@ -18,12 +19,12 @@
       "my": "我的",
       "profile": "我的个人资料",
       "signout": "退出登录",
-      "404": "404 页面不存在",
       "authentication": "密码和身份验证"
     },
     "cpnt": {
       "submit": "提交",
-      "reset": "重置"
+      "reset": "重置",
+      "send": "发送"
     }
   }
 }

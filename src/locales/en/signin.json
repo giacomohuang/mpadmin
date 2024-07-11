@@ -13,6 +13,8 @@
     "samepwd": "The new password cannot be the same as the initial password.",
     "peya": "Please input your accountname",
     "peypwd": "Please input your password",
-    "forgotpwd": "Forgot Password"
+    "forgotpwd": "Forgot Password",
+    "email": "By Email",
+    "phone": "By Phone"
   }
 }

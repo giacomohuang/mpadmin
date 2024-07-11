@@ -46,5 +46,8 @@
       "2fa": "Two-Factor Authentication",
       "enh2fa": "Use two-step verification (2FA) to enhance account security, include SMS verification, email verification and dynamic password verification."
     }
+  },
+  "signin": {
+    "cfpwd": "Confirm"
   }
 }

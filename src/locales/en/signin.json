@@ -9,9 +9,10 @@
     "pep": "Please enter the password.",
     "pepa": "Please enter password again.",
     "pnm": "Password confirmation doesn't match the password.",
-    "cpwd": "Change Password",
     "cfpwd": "Confirm password",
-    "pst": "The password is too simple. Please use a combination of numbers, uppercase and lowercase letters, and symbols.",
-    "samepwd": "The new password cannot be the same as the initial password."
+    "samepwd": "The new password cannot be the same as the initial password.",
+    "peya": "Please input your accountname",
+    "peypwd": "Please input your password",
+    "forgotpwd": "Forgot Password"
   }
 }

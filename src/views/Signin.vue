@@ -24,18 +24,18 @@
       </div>
     </header>
     <section v-if="state.method === 'pwd'">
-      <a-form :model="signinForm" @finish="handleSignin" autocomplete="off" :label-col="{ span: 5 }" :wrapper-col="{ span: 20 }">
+      <a-form :model="signinForm" @finish="handleSignin" autocomplete="off" :label-col="{ span: 6 }">
         <h3 class="title">{{ $t('signin.title') }}</h3>
-        <a-form-item style="align-items: center" :label="$t('signin.accountname')" name="accountname" :rules="[{ required: true, message: 'Please input your accountname!' }]">
+        <a-form-item :label="$t('signin.accountname')" name="accountname" :rules="[{ required: true, message: $t('signin.peya') }]">
           <a-input autocomplete="off" size="large" large v-model:value="signinForm.accountname" />
           <!-- placeholder="请填写用于登录的邮箱" -->
         </a-form-item>
-        <a-form-item style="align-items: center" :label="$t('signin.password')" name="password" :rules="[{ required: true, message: 'Please input your password!' }]">
+        <a-form-item :label="$t('signin.password')" name="password" :rules="[{ required: true, message: $t('signin.peypwd') }]">
           <a-input-password autocomplete="new-password" size="large" v-model:value="signinForm.password" />
           <!-- placeholder="密码" -->
         </a-form-item>
         <a-form-item>
-          <a-button type="primary" :loading="state.loading" html-type="submit" style="margin: 0 20px 0 90px"> {{ $t('signin.signin') }} </a-button> <a href="####">找回密码</a>
+          <a-button type="primary" :loading="state.loading" html-type="submit" style="margin: 0 20px 0 90px"> {{ $t('signin.signin') }} </a-button> <a href="####">{{ $t('signin.forgotpwd') }}</a>
         </a-form-item>
       </a-form>
       <!-- <div style="margin: 0 0 0 90px; font-size: 12px">30天内没有访问将重新登录</div> -->
@@ -46,8 +46,9 @@
       <div class="tips" style="margin-top: 40px">请查看动态口令App中的6位动态数字口令，并在下面的的框中输入</div>
       <VerifyInput style="width: 100%" class="flex-rc" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
       <div class="tips" style="margin-top: 40px">
-        更换手机或未安装动态口令App？<a href="####">重新绑定</a><br />
-        使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a>
+        <template v-if="state.methodBit == 7"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a> </template>
+        <template v-if="state.methodBit == 5"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a></template>
+        <template v-if="state.methodBit == 6"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a></template>
       </div>
     </section>
 
@@ -62,7 +63,11 @@
         <div class="tips">一封验证邮件已经发送到你的邮箱，请查看邮件中的6位数字验证码，并在下面的的框中输入</div>
         <VerifyInput style="width: 100%" class="flex-rc" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
       </div>
-      <div class="tips" style="margin-top: 40px">使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a></div>
+      <div class="tips" style="margin-top: 40px">
+        <template v-if="state.methodBit == 7"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a> </template>
+        <template v-else-if="state.methodBit == 6"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a> </template>
+        <template v-else-if="state.methodBit == 3"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a> </template>
+      </div>
     </section>
 
     <section v-if="state.method == 'phone'">
@@ -76,19 +81,23 @@
         <div class="tips">已向你的手机发送了一条验证短信，请查看手机短信中的6位数字验证码，并在下面的的框中输入</div>
         <VerifyInput style="width: 100%" class="flex-rc" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
       </div>
-      <div class="tips" style="margin-top: 40px">使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">邮件验证</a></div>
+      <div class="tips" style="margin-top: 40px">
+        <template v-if="state.methodBit == 7"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a> </template>
+        <template v-else-if="state.methodBit == 5"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a> </template>
+        <template v-else-if="state.methodBit == 3"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a> </template>
+      </div>
     </section>
 
     <section v-if="state.method == 'initPwd'">
-      <h3 class="title">修改初始密码</h3>
-
+      <h3 class="title">需要更新密码</h3>
+      <div class="tips">首次登录或长时间没有修改密码，需要重新设置密码</div>
       <a-form ref="pwdFormRef" style="margin-top: 30px" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" @finish="handleInitPwd">
         <a-form-item has-feedback :label="$t('signin.newpwd')" name="newPassword">
           <PasswordStrength v-if="pwdForm.newPassword" v-model:value="state.strength" :password="pwdForm.newPassword" style="position: absolute; top: -20px"></PasswordStrength>
-          <a-input-password autocomplete="new-password" v-model:value="pwdForm.newPassword" />
+          <a-input-password autocomplete="new-password" size="large" v-model:value="pwdForm.newPassword" />
         </a-form-item>
         <a-form-item has-feedback :label="$t('signin.cfpwd')" name="confirm">
-          <a-input-password autocomplete="new-password" v-model:value="pwdForm.confirm" />
+          <a-input-password autocomplete="new-password" size="large" v-model:value="pwdForm.confirm" />
         </a-form-item>
         <a-form-item :wrapper-col="{ offset: 6 }">
           <a-button type="ghost" @click="handleResetPwdForm">{{ $t('common.cpnt.reset') }}</a-button>
@@ -115,14 +124,16 @@ const store = useStore()
 
 const state = reactive({
   loading: false,
-  totpUrl: '',
+  activationUrl: '',
   code: '',
   method: 'pwd',
   email: '',
   phone: '',
   areacode: '',
   accountid: '',
-  strength: 0
+  strength: 0,
+  enable2FA: true,
+  methodBit: 0
 })
 const pwdFormRef = ref(null)
 
@@ -195,11 +206,14 @@ const handleSignin = async (values) => {
   state.loading = true
   try {
     let data = await API.account.signin(values)
-    console.log(data)
     state.accountid = data._id
     state.email = data.email
     state.areacode = data.areacode
     state.phone = data.phone
+    state.enable2FA = data.enable2FA
+    state.totpSecret = data.totpSecret
+    state.methodBit = state.methodBit | (data.phone ? 1 : 0) | (data.email ? 2 : 0) | (data.totpSecret ? 4 : 0)
+    console.log(data)
     // 未激活，跳转去激活
     if (!data.initPwd) {
       state.method = 'initPwd'
@@ -211,8 +225,14 @@ const handleSignin = async (values) => {
     }
     // 如果需要两步验证
     else {
-      state.method = 'totp'
-      console.log('需要两步验证')
+      //TODO 根据已有的验证方式跳转：优先级：totp > phone > email
+      if (state.methodBit & 4) {
+        state.method = 'totp'
+      } else if (state.methodBit & 1) {
+        state.method = 'phone'
+      } else if (state.methodBit & 2) {
+        state.method = 'email'
+      }
     }
   } catch (err) {
     if (err.status == 400) {
@@ -291,8 +311,9 @@ const handleInitPwd = async () => {
   try {
     const resp = await API.account.initPassword(signinForm.password, pwdForm.newPassword, state.accountid)
     if (resp.result) {
-      messageApi.success('密码成功更新!')
+      messageApi.success('密码更新成功，请重新登录!')
       pwdFormRef.value.resetFields()
+      state.method = 'pwd'
     } else {
       messageApi.error('初始密码错误，请重试')
     }
@@ -444,6 +465,23 @@ section {
     margin: 0 20px 0 0;
 
     padding: 0;
+  }
+}
+
+.step {
+  margin: 40px 0 0 0;
+  .title {
+    display: flex;
+    align-items: center;
+    font-weight: 20px;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 800;
+    margin: 5px 0;
+  }
+  .hint {
+    color: var(--text-secondary);
+    margin-left: 35px;
   }
 }
 

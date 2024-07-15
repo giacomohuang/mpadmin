@@ -108,7 +108,7 @@
 
     <section v-if="state.method == 'resetPwd'">
       <h3 class="title">重置密码</h3>
-      <div class="tips">请选择接收临时密码的方式:</div>
+      使用以下方式接收临时密码，使用临时密码登录后，再设置新的密码。
       <a-form-item>
         <a-radio-group v-model:value="state.resetPwdMethod">
           <a-radio value="email">{{ $t('signin.email') }}</a-radio>
@@ -116,8 +116,8 @@
         </a-radio-group>
       </a-form-item>
       <a-form-item v-if="state.resetPwdMethod">
-        <a-input placeholder="请输入完整的电子邮件地址" v-if="state.resetPwdMethod === 'email'"></a-input>
-        <a-input placeholder="请输入完整的手机号" v-if="state.resetPwdMethod === 'phone'"></a-input>
+        <a-input size="large" placeholder="请输入与账号绑定的电子邮件地址" v-if="state.resetPwdMethod === 'email'"></a-input>
+        <a-input size="large" placeholder="请输入与账号绑定的手机号" v-if="state.resetPwdMethod === 'phone'"></a-input>
       </a-form-item>
       <a-form-item>
         <a-button type="primary" @click="handleSendTempPwd">{{ $t('common.cpnt.send') }}</a-button>
@@ -151,7 +151,8 @@ const state = reactive({
   accountid: '',
   strength: 0,
   enable2FA: true,
-  methodBit: 0
+  methodBit: 0,
+  resetPwdMethod: ''
 })
 const pwdFormRef = ref(null)
 

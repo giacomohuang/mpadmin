@@ -307,7 +307,7 @@ const handleSendEmail = async () => {
   // 向指定邮箱发送验证邮件
   try {
     state.loading = true
-    const resp = await API.verification.sendCodeByEmail(emailForm.emailNew)
+    const resp = await API.verification.sendCodeByEmail(emailForm.emailNew, store.accountid)
     console.log(resp)
     // 启动倒计时
     emailState.isSend = true

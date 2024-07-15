@@ -16,11 +16,15 @@ const helper = {
       return obj
     }
 
+    if (Array.isArray(obj)) {
+      return obj.map(sortObjectKeys)
+    }
+
     const sortedObj = {}
-    Object.entries(obj)
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .forEach(([key, value]) => {
-        sortedObj[key] = sortJSON(value)
+    Object.keys(obj)
+      .sort()
+      .forEach((key) => {
+        sortedObj[key] = this.sortJSON(obj[key])
       })
 
     return sortedObj

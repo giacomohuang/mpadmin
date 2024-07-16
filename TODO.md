@@ -1,13 +1,21 @@
 安全相关
 
 - [x] JWT，双token自动续签
-- [ ] 验签
+- [x] 验签
 - [ ] 非常用设备登录
 - [ ] 异地登录
-      _双因素认证（2FA)_
-- [ ] TOTP(Time-based One-time Password)(RFC6238)
-- [ ] 短信认证
-- [ ] 邮件认证
+- [x] TOTP(Time-based One-time Password)(RFC6238)
+- [x] 短信认证
+- [x] 邮件认证
+- [x] 密码加密
+- [x] 密码重置
+
+账号相关
+
+- [ ] 账号锁定
+- [x] 账号绑定
+- [ ] 账号注销
+- [ ] 账号合并
 
 日志
 

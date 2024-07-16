@@ -2,7 +2,10 @@ import axios from 'axios'
 import baseUrl from './baseUrl'
 import { router } from '../router/router'
 import CryptoJS from 'crypto-js'
+import { customAlphabet } from 'nanoid'
 import helper from '../js/helper'
+
+const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 10)
 
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 axios.defaults.withCredentials = true // 允许携带cookie
@@ -23,12 +26,15 @@ fetch.interceptors.request.use(
       config.headers['refreshtoken'] = localStorage.getItem('refreshToken')
     }
     const params = config.data ? config.data : {}
-    const sortedParams = JSON.stringify(helper.sortJSON(params))
-
+    const nonce = nanoid()
+    const timestamp = Date.now()
+    const sortedParams = JSON.stringify(helper.sortJSON(params)) + nonce + timestamp
     const cipher = CryptoJS.HmacSHA256(sortedParams, 'emDmpsE2Ad4wLLYwD66xjzY1eZhVHyEqSPrAxIcaC66xR9mkgzJJ9GswVyUyiWRb8MXfY9fKZlRuvEURySHMY8X6D5GqjMYKLUiIDs6Zq6uH9LJn4nArFje5SY0C1Yfk')
     const cipherText = CryptoJS.enc.Hex.stringify(cipher)
     console.log(sortedParams, cipherText)
     config.headers['sign'] = cipherText
+    config.headers['nonce'] = nonce
+    config.headers['timestamp'] = timestamp
     return config
   },
   (err) => {

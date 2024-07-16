@@ -33,14 +33,6 @@ const account = {
       url: '/account/signout'
     })
   },
-  hello() {
-    return fetch({
-      baseURL: baseUrl.account,
-      method: 'post',
-      data: {},
-      url: '/account/hello'
-    })
-  },
   verifyToken(token) {
     return fetch({
       baseURL: baseUrl.account,
@@ -119,6 +111,13 @@ const account = {
       baseURL: baseUrl.default,
       method: 'post',
       url: '/account/getauthinfo'
+    })
+  },
+  hello() {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'get',
+      url: '/account/hello'
     })
   }
 }

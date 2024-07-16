@@ -133,6 +133,7 @@ import { changeLocale } from '../js/i18n'
 import { useStore } from '@/stores/stores'
 import { message } from 'ant-design-vue'
 import { useI18n } from 'vue-i18n'
+
 import helper from '../js/helper'
 import VerifyInput from '../components/VerifyInput.vue'
 import API from '../api/API'
@@ -239,6 +240,7 @@ const handleSignin = async (values) => {
     }
     // 如果不需要两步验证
     else if (!data.enable2FA) {
+      console.log('no 2da', data)
       helper.setToken(data)
       router.replace('/')
     }

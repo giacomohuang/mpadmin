@@ -6,8 +6,13 @@
 | middlewares/authtoken/authToken          | 401    | Authentication Failed           | 902  | accessToken验证失败                      |
 | middlewares/authtoken/refresh            | 401    | Authentication Failed           | 903  | refreshToken的redis缓存不存在            |
 | middlewares/authtoken/refresh            | 401    | Authentication Failed           | 904  | refreshToken验证失败                     |
-| Middlewares/authsign                     | 401    | Authentication Failed           | 910  | API参数签名验证失败                      |
+| middlewares/authsign                     | 401    | Authentication Failed           | 910  | API参数签名验证失败                      |
+| middlewares/authsign                     | 401    | Authentication Failed           | 911  | headers中没有包含timestamp或nonce        |
 | controllers/verification/sendCodeByEmail | 401    | Authentication Failed           | 101  | request headers 中没有 accountid字段     |
 | controllers/verification/sendCodeByEmail | 400    | Too Frequently                  | 102  | 邮件发送太频繁                           |
 | controllers/verification/sendCodeBySMS   | 401    | Authentication Failed           | 103  | request headers 中没有 accountid字段     |
 | controllers/verification/sendCodeBySMS   | 400    | Too Frequently                  | 104  | 短信发送太频繁                           |
+
+400：普通业务错误
+
+401：存在安全风险的调用

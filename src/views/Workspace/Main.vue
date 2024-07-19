@@ -134,7 +134,7 @@ const uploadPart = async (chunks, filename, uploadId, oldTags) => {
     formData.append('uploadId', uploadId)
     formData.append('partNumber', i + 1)
     formData.append('hash', chunks[i].hash)
-    formData.append('oldTags', oldTags)
+    formData.append('oldTags', JSON.stringify(oldTags))
     const etag = await API.oss.uploadPart(formData)
     etags.push(etag)
   }

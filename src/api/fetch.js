@@ -31,7 +31,7 @@ fetch.interceptors.request.use(
     const sortedParams = JSON.stringify(helper.sortJSON(params)) + nonce + timestamp
     const cipher = CryptoJS.HmacSHA256(sortedParams, 'emDmpsE2Ad4wLLYwD66xjzY1eZhVHyEqSPrAxIcaC66xR9mkgzJJ9GswVyUyiWRb8MXfY9fKZlRuvEURySHMY8X6D5GqjMYKLUiIDs6Zq6uH9LJn4nArFje5SY0C1Yfk')
     const cipherText = CryptoJS.enc.Hex.stringify(cipher)
-    console.log(sortedParams, cipherText)
+    // console.log(sortedParams, cipherText)
     config.headers['sign'] = cipherText
     config.headers['nonce'] = nonce
     config.headers['timestamp'] = timestamp

@@ -78,6 +78,7 @@
 
 [data-theme='light'] {
   --bg-main: var(--c-white);
+  --bg-main-striped: var(--c-gray2);
   --bg-layout: var(--c-gray1);
   --bg-layout-active: var(--c-gray2);
   --bg-component: var(--c-gray2);
@@ -100,6 +101,7 @@
 
 [data-theme='dark'] {
   --bg-main: var(--c-gray10);
+  --bg-main-striped: var(--c-gray8);
   --bg-layout: var(--c-gray9);
   --bg-layout-active: var(--c-gray8);
   --bg-component: var(--c-gray8);

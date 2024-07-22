@@ -21,7 +21,7 @@
 <script setup>
 import { ref, inject, onMounted, reactive } from 'vue'
 import CryptoJS from 'crypto-js'
-import SparkMD5 from 'spark-md5'
+// import SparkMD5 from 'spark-md5'
 import API from '../../api/API'
 import FetchEventSource from '../../api/fetcheventsource'
 const aaa = ref('')
@@ -144,12 +144,48 @@ const uploadFiles = async (handles) => {
     files.value.push({ name: file.name, totalSize: file.size, index: index, percent: 0 })
     let chunkSize = calculatePartSize(file.size)
     console.log('ChunkSize:', chunkSize)
+    const sha256 = await checksumSHA1(file, (loaded, total) => {
+      console.log(`Progress: ${Math.round((loaded / total) * 100)}%`)
+    })
+    console.log('sha256:', sha256)
     const chunks = await chunkFile(file, chunkSize)
     const result = await API.oss.initNewMultipartUpload(file.name)
     const { uploadId, oldTags } = result
     enqueue(async () => {
       await uploadByParts(chunks, index, uploadId, oldTags)
     })
+  })
+}
+
+const checksumSHA1 = async (file, onProgress, chunkSize = 5 * 1024 * 1024) => {
+  const chunks = []
+  let loaded = 0
+  let sha256 = CryptoJS.algo.SHA1.create()
+  const total = file.size
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    let partNumber = 0
+    // 使用requestIdleCallback来确保UI线程不会被阻塞
+    const processNextChunk = () => {
+      if (loaded >= total) {
+        resolve(sha256.finalize().toString())
+        return
+      }
+      const start = loaded
+      const end = Math.min(start + chunkSize, total)
+      const chunk = file.slice(start, end)
+      reader.onloadend = () => {
+        const wordArray = CryptoJS.lib.WordArray.create(reader.result)
+        sha256.update(wordArray)
+        partNumber++
+        loaded = end
+        onProgress(loaded, total)
+        requestIdleCallback(processNextChunk)
+      }
+      reader.onerror = reject
+      reader.readAsArrayBuffer(chunk)
+    }
+    requestIdleCallback(processNextChunk)
   })
 }
 
@@ -193,7 +229,7 @@ const uploadByParts = async (chunks, index, uploadId, oldTags) => {
       const etag = await API.oss.uploadPart(formData, (progress) => {
         // console.log(files.value[index].totalSize, uploaded, progress)
         chunkUploaded = progress
-        files.value[index].percent = parseFloat((((uploaded + chunkUploaded) / files.value[index].totalSize) * 100).toFixed(1))
+        files.value[index].percent = parseFloat((((uploaded + chunkUploaded) / files.value[index].totalSize) * 100).toFixed())
       })
       etags.push(etag)
     }
@@ -221,11 +257,9 @@ function hexToBase64(hexStr) {
 //   const spark = new SparkMD5.ArrayBuffer()
 //   let loaded = 0
 //   const total = file.size
-
 //   return new Promise((resolve, reject) => {
 //     const reader = new FileReader()
 //     let partNumber = 0
-
 //     // 使用requestIdleCallback来确保UI线程不会被阻塞
 //     const processNextChunk = () => {
 //       if (loaded >= total) {
@@ -250,7 +284,6 @@ function hexToBase64(hexStr) {
 //       reader.onerror = reject
 //       reader.readAsArrayBuffer(chunk)
 //     }
-
 //     requestIdleCallback(processNextChunk)
 //   })
 // }

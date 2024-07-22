@@ -2,7 +2,7 @@ import fetch from './fetch'
 import baseUrl from './baseUrl'
 
 const oss = {
-  uploadPart(formData) {
+  uploadPart(formData, onProgress) {
     // console.log(partNumber, filename, uploadId, hash)
     return fetch({
       timeout: 30 * 60 * 1000,
@@ -12,6 +12,10 @@ const oss = {
       url: '/oss/uploadPart',
       headers: {
         'Content-Type': 'multipart/form-data'
+      },
+      onUploadProgress: (progress) => {
+        // 格式化成百分数
+        onProgress(progress.loaded)
       }
     })
   },

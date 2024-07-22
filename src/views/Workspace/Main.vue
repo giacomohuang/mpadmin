@@ -15,6 +15,7 @@
 
 <script setup>
 import { ref, inject, onMounted, reactive } from 'vue'
+import CryptoJS from 'crypto-js'
 import SparkMD5 from 'spark-md5'
 import API from '../../api/API'
 import FetchEventSource from '../../api/fetcheventsource'
@@ -23,9 +24,47 @@ const state = reactive({
   dragover: false
 })
 
+const MAX_OBJECT_SIZE = 5 * 1024 * 1024 * 1024 * 1024
+const DEF_PART_SIZE = 64 * 1024 * 1024
+const calculatePartSize = (size) => {
+  if (typeof size !== 'number') {
+    throw new TypeError('size should be of type "number"')
+  }
+  if (size > MAX_OBJECT_SIZE) {
+    throw new TypeError(`size should not be more than ${MAX_OBJECT_SIZE}`)
+  }
+  let partSize = DEF_PART_SIZE
+  for (;;) {
+    // while(true) {...} throws linting error.
+    // If partSize is big enough to accomodate the object size, then use it.
+    if (partSize * 10000 > size) {
+      return partSize
+    }
+    // Try part sizes as 64MB, 80MB, 96MB etc.
+    partSize += 16 * 1024 * 1024
+  }
+}
+
 // OpenAI test
 // SSE Server-Sent Events
 const handleClick = async () => {
+  var encryptedData = '3k3tbrBUdf4Gpkqhj4eIUIfngJnzqcleA8IX+jjqqc0xJoA3wMsGY7msQoHUom4jMmxXsGb5N/uUreqdzhnLj45Li4fC3Z52ndN714dyaYEiIXR9H51mDXKWv5oM7ZOs'
+  var key = CryptoJS.enc.Utf8.parse('8Co5CsG5yrH0VT7M')
+  var iv = CryptoJS.enc.Hex.parse('00000000000000000000000000000000')
+
+  // 解密
+  var decrypted = CryptoJS.AES.decrypt(encryptedData, key, {
+    iv: iv,
+    padding: CryptoJS.pad.Pkcs7,
+    mode: CryptoJS.mode.CBC
+  })
+
+  // 解析解密后的数据，转换为JSON对象
+  var decryptedJson = JSON.parse(decrypted.toString(CryptoJS.enc.Utf8))
+
+  // 现在你可以使用 `decryptedJson` 对象
+  console.log(decryptedJson)
+
   const baseUrl = 'http://127.0.0.1:3000/account/hello'
   const eventFetch = new FetchEventSource()
 
@@ -57,24 +96,31 @@ const handleDropFiles = async (e) => {
   }
 }
 const handleSelectFiles = async () => {
-  const handles = await window.showOpenFilePicker({
-    description: '图片类型',
-    accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg'] },
-    multiple: true
-  })
+  let handles
+  try {
+    handles = await window.showOpenFilePicker({
+      description: '图片类型',
+      accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg'] },
+      multiple: true
+    })
+  } catch (err) {
+    console.log('cancel')
+    return
+  }
+
   handles.forEach(async (handle) => {
     const file = await handle.getFile()
 
     const onProgress = (progress) => {
       console.log(`Progress: ${(progress * 100).toFixed(2)}%`)
     }
-    const CHUNKSIZE = 5 * 1024 * 1024
-
-    const chunks = await chunkFile(file, CHUNKSIZE, onProgress)
+    let chunkSize = calculatePartSize(file.size)
+    console.log('ChunkSize:', chunkSize)
+    const chunks = await chunkFile(file, chunkSize, onProgress)
     // console.log(chunks)
     const result = await API.oss.initNewMultipartUpload(file.name)
     const { uploadId, oldTags } = result
-    await uploadPart(chunks, file.name, uploadId, oldTags)
+    await upload(chunks, file.name, file.size, uploadId, oldTags)
   })
 }
 
@@ -85,59 +131,94 @@ function hexToBase64(hexStr) {
   }
   return btoa(String.fromCharCode.apply(null, bytes))
 }
-
-async function chunkFile(file, chunkSize = 5 * 1024 * 1024, updateProgress) {
+const chunkFile = async (file, chunkSize = 5 * 1024 * 1024) => {
   const chunks = []
-  const spark = new SparkMD5.ArrayBuffer()
+  let partNumber = 0
   let loaded = 0
   const total = file.size
 
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    let partNumber = 0
-
-    // 使用requestIdleCallback来确保UI线程不会被阻塞
-    const processNextChunk = () => {
-      if (loaded >= total) {
-        resolve(chunks)
-        return
-      }
-
-      const start = loaded
-      const end = Math.min(start + chunkSize, total)
-      const chunk = file.slice(start, end)
-
-      reader.onloadend = () => {
-        spark.append(reader.result)
-        const hash = hexToBase64(spark.end())
-        chunks.push({ file: chunk, hash, partNumber })
-        partNumber++
-        loaded = end
-        updateProgress(loaded / total)
-        requestIdleCallback(processNextChunk)
-      }
-
-      reader.onerror = reject
-      reader.readAsArrayBuffer(chunk)
+  while (true) {
+    const start = loaded
+    const end = Math.min(start + chunkSize, total)
+    const chunk = file.slice(start, end)
+    chunks.push({ file: chunk, partNumber })
+    partNumber++
+    loaded = end
+    if (loaded >= total) {
+      return chunks
     }
-
-    requestIdleCallback(processNextChunk)
-  })
+  }
 }
 
-const uploadPart = async (chunks, filename, uploadId, oldTags) => {
+// async function chunkFileMD5(file, chunkSize = 5 * 1024 * 1024, updateProgress) {
+//   const chunks = []
+//   const spark = new SparkMD5.ArrayBuffer()
+//   let loaded = 0
+//   const total = file.size
+
+//   return new Promise((resolve, reject) => {
+//     const reader = new FileReader()
+//     let partNumber = 0
+
+//     // 使用requestIdleCallback来确保UI线程不会被阻塞
+//     const processNextChunk = () => {
+//       if (loaded >= total) {
+//         resolve(chunks)
+//         return
+//       }
+
+//       const start = loaded
+//       const end = Math.min(start + chunkSize, total)
+//       const chunk = file.slice(start, end)
+
+//       reader.onloadend = () => {
+//         spark.append(reader.result)
+//         const hash = hexToBase64(spark.end())
+//         chunks.push({ file: chunk, hash, partNumber })
+//         partNumber++
+//         loaded = end
+//         updateProgress(loaded / total)
+//         requestIdleCallback(processNextChunk)
+//       }
+
+//       reader.onerror = reject
+//       reader.readAsArrayBuffer(chunk)
+//     }
+
+//     requestIdleCallback(processNextChunk)
+//   })
+// }
+
+const upload = async (chunks, filename, totalSize, uploadId, oldTags) => {
   let etags = []
+  let percent = 0
+  let uploaded = 0
   for (let i = 0; i < chunks.length; i++) {
+    let chunkUploaded = 0
     const formData = new FormData()
-    formData.append('file', chunks[i].file)
-    formData.append('filename', encodeURIComponent(filename))
-    formData.append('uploadId', uploadId)
-    formData.append('partNumber', i + 1)
-    formData.append('hash', chunks[i].hash)
-    formData.append('oldTags', JSON.stringify(oldTags))
-    const etag = await API.oss.uploadPart(formData)
-    etags.push(etag)
+    const partNumber = i + 1
+    const matchingTag = oldTags?.find((tag) => tag.part === partNumber)
+    if (matchingTag) {
+      etags.push(matchingTag)
+    } else {
+      formData.append('file', chunks[i].file)
+      formData.append('filename', encodeURIComponent(filename))
+      formData.append('uploadId', uploadId)
+      formData.append('partNumber', partNumber)
+      // formData.append('hash', chunks[i].hash)
+      formData.append('oldTags', JSON.stringify(oldTags))
+      const etag = await API.oss.uploadPart(formData, (progress) => {
+        console.log(totalSize, uploaded, progress)
+        chunkUploaded = progress
+        percent = ((uploaded + chunkUploaded) / totalSize).toFixed(2) * 100
+        console.log(percent + '%')
+      })
+      etags.push(etag)
+    }
+    uploaded += chunks[i].file.size
+    console.log((uploaded / totalSize).toFixed(2) * 100 + '%')
   }
+
   // console.log('&&&etags', JSON.stringify(etags))
   const resp = await API.oss.completeMultipartUpload(filename, uploadId, etags)
   console.log(resp)

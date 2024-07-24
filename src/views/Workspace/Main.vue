@@ -29,6 +29,7 @@ import CryptoJS from 'crypto-js'
 // import SparkMD5 from 'spark-md5'
 import API from '../../api/API'
 import FetchEventSource from '../../api/fetcheventsource'
+import ConcurrentTaskQueue from '../../js/ConcurrentTaskQueue'
 const aaa = ref('')
 const state = reactive({
   dragover: false
@@ -117,61 +118,43 @@ const handleDropFiles = async (e) => {
 const handleSelectFiles = async () => {
   try {
     const handles = await window.showOpenFilePicker({
-      description: '图片类型',
-      accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg'] },
+      // types: [
+      //   {
+      //     description: 'Images',
+      //     accept: {
+      //       'image/*': ['.png', '.gif', '.jpeg', '.jpg']
+      //     }
+      //   }
+      // ],
+      // excludeAcceptAllOption: true,
       multiple: true
     })
     await uploadFiles(handles)
   } catch (err) {
-    console.log('cancel')
-    return
+    console.log(err)
   }
 }
 
 const uploadFiles = async (handles) => {
-  const MAX_CONCURRENT_REQUESTS = 3 // 设定最大并发数
-  // 创建一个队列
-  const queue = []
-  let runningTasksCount = 0
-  // 函数用于处理队列中的下一个任务
-  const processNextTask = async () => {
-    if (queue.length > 0 && runningTasksCount < MAX_CONCURRENT_REQUESTS) {
-      const task = queue.shift() // 取出队列中的第一个任务
-      runningTasksCount++
-      await task() // 执行任务
-      runningTasksCount--
-      processNextTask() // 继续处理下一个任务
-    }
-  }
-
-  // 用于添加任务到队列并控制并发数的函数
-  const enqueue = (task) => {
-    queue.push(task)
-    processNextTask() // 开始处理队列中的任务
-  }
+  // 同时3个并发
+  const taskQueue = new ConcurrentTaskQueue(3)
   files.value = new Array(handles.length).fill({})
-
-  handles.forEach(async (handle, index) => {
+  for (const [index, handle] of handles.entries()) {
     const file = await handle.getFile()
-    files.value[index] = { originalName: file.name, name: '', totalSize: file.size, percent: 0 }
-    console.log(files.value)
-    let chunkSize = calculatePartSize(file.size)
-    console.log('ChunkSize:', chunkSize)
-
-    const chunks = await chunkFile(file, chunkSize)
     const result = await API.oss.initNewMultipartUpload(file.name)
     const { uploadId, newFilename, oldTags } = result
-    files.value[index].name = newFilename
-
-    enqueue(async () => {
+    files.value[index] = { originalName: file.name, name: newFilename, totalSize: file.size, percent: 0 }
+    let chunkSize = calculatePartSize(file.size)
+    const chunks = await chunkFile(file, chunkSize)
+    taskQueue.enqueue(async () => {
       const checksum = await checksumSHA1(file, (loaded, total) => {
-        // console.log(`Progress: ${Math.round((loaded / total) * 100)}%`)
         files.value[index].checksumPercent = Math.round((loaded / total) * 100)
       })
-      console.log('checksum:', checksum)
-      await uploadByParts(chunks, index, uploadId, oldTags)
+      await uploadParts(chunks, index, uploadId, oldTags)
     })
-  })
+  }
+  await taskQueue.waitForAll()
+  console.log('all uploaded')
 }
 
 const checksumSHA1 = async (file, onProgress, chunkSize = 5 * 1024 * 1024) => {
@@ -225,49 +208,59 @@ const chunkFile = async (file, chunkSize = 5 * 1024 * 1024) => {
   }
 }
 
-const uploadByParts = async (chunks, index, uploadId, oldTags) => {
-  let etags = []
-  let percent = 0
+const uploadParts = async (chunks, fileIndex, uploadId, oldTags) => {
+  let etags = new Array(chunks.length).fill(null)
   let uploaded = 0
-  for (let i = 0; i < chunks.length; i++) {
-    let chunkUploaded = 0
-    const formData = new FormData()
-    const partNumber = i + 1
-    const matchingTag = oldTags?.find((tag) => tag.part === partNumber)
-    if (matchingTag) {
-      etags.push(matchingTag)
-    } else {
-      formData.append('file', chunks[i].file)
-      formData.append('filename', encodeURIComponent(files.value[index].name))
-      formData.append('uploadId', uploadId)
-      formData.append('partNumber', partNumber)
-      // formData.append('hash', chunks[i].hash)
-      formData.append('oldTags', JSON.stringify(oldTags))
-      const etag = await API.oss.uploadPart(formData, (progress) => {
-        // console.log(files.value[index].totalSize, uploaded, progress)
-        chunkUploaded = progress
-        files.value[index].percent = parseFloat((((uploaded + chunkUploaded) / files.value[index].totalSize) * 100).toFixed())
-      })
-      etags.push(etag)
-    }
-    uploaded += chunks[i].file.size
+  let chunksProgress = new Array(chunks.length).fill(0)
+  const taskQueue = new ConcurrentTaskQueue(3)
+
+  for (const [i, chunk] of chunks.entries()) {
+    taskQueue.enqueue(async () => {
+      const formData = new FormData()
+      const partNumber = i + 1
+
+      if (i <= oldTags?.length) {
+        etags[i] = matchingTag[i]
+      } else {
+        formData.append('file', chunk.file)
+        formData.append('filename', encodeURIComponent(files.value[fileIndex].name))
+        formData.append('uploadId', uploadId)
+        formData.append('partNumber', partNumber)
+        // formData.append('hash', chunks[i].hash);
+        formData.append('oldTags', JSON.stringify(oldTags))
+        const etag = await API.oss.uploadPart(formData, (progress) => {
+          chunksProgress[i] = progress
+          uploaded = calcProgress(chunksProgress)
+          if (uploaded > files.value[fileIndex].totalSize) uploaded = files.value[fileIndex].totalSize
+          files.value[fileIndex].percent = parseFloat(((uploaded / files.value[fileIndex].totalSize) * 100).toFixed())
+          console.log('fileidx', fileIndex, 'chunk idx:', i, 'loaded:', uploaded, 'total:', files.value[fileIndex].totalSize, 'percent:', files.value[fileIndex].percent)
+        })
+        etags[i] = etag
+      }
+      // await taskQueue.waitForAll()
+    })
   }
-  uploaded = files.value[index].totalSize
-  files.value[index].percent = 100
-  console.log('100%')
-  // console.log('&&&etags', JSON.stringify(etags))
-  const resp = await API.oss.completeMultipartUpload(files.value[index].name, uploadId, etags)
-  console.log(resp)
+  await taskQueue.waitForAll()
+  uploaded = files.value[fileIndex].totalSize
+  files.value[fileIndex].percent = 100
+  console.log('100%', etags)
+  // console.log('&&&etags', JSON.stringify(etags));
+  const resp = await API.oss.completeMultipartUpload(files.value[fileIndex].name, uploadId, etags)
+  // console.log(resp);
   return resp
 }
 
-function hexToBase64(hexStr) {
-  const bytes = new Uint8Array(hexStr.length / 2)
-  for (let i = 0; i < hexStr.length; i += 2) {
-    bytes[i / 2] = parseInt(hexStr.substr(i, 2), 16)
-  }
-  return btoa(String.fromCharCode.apply(null, bytes))
+const calcProgress = (chunksProgress) => {
+  return chunksProgress.reduce((accumulator, currentValue) => accumulator + currentValue, 0)
 }
+
+// function hexToBase64(hexStr) {
+//   const bytes = new Uint8Array(hexStr.length / 2)
+//   for (let i = 0; i < hexStr.length; i += 2) {
+//     bytes[i / 2] = parseInt(hexStr.substr(i, 2), 16)
+//   }
+//   return btoa(String.fromCharCode.apply(null, bytes))
+// }
 
 // async function chunkFileMD5(file, chunkSize = 5 * 1024 * 1024, updateProgress) {
 //   const chunks = []

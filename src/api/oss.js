@@ -16,7 +16,6 @@ const oss = {
       onUploadProgress: (progress) => {
         // 格式化成百分数
         onProgress(progress.loaded)
-        // console.log(progress.loaded)
       }
     })
   },

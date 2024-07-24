@@ -37,7 +37,9 @@ const state = reactive({
 const files = ref([])
 
 const calculatePartSize = (size) => {
+  // 最大单个文件5TB
   const MAX_OBJECT_SIZE = 5 * 1024 * 1024 * 1024 * 1024
+  // 默认分片64MB
   const DEFAULT_PARTSIZE = 64 * 1024 * 1024
   if (typeof size !== 'number') {
     throw new TypeError('size should be of type "number"')

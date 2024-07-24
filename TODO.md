@@ -45,3 +45,7 @@ excel相关
 数据同步和ETL
 
 - [ ] flink
+
+基础
+
+- [ ] 并发任务控制 ConcurrentTaskQueue

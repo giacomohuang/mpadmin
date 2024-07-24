@@ -4,8 +4,11 @@ import { router } from '../router/router'
 import CryptoJS from 'crypto-js'
 import { customAlphabet } from 'nanoid'
 import helper from '../js/helper'
+import API from '../api/API'
 
 const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 10)
+let isRefreshing = false
+let requests = []
 
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 axios.defaults.withCredentials = true // 允许携带cookie
@@ -47,17 +50,44 @@ fetch.interceptors.request.use(
 fetch.interceptors.response.use(
   (response) => {
     // 如果header中携带refreshToken，更新本地存储
-    storeRefreshToken(response)
-    // console.log(response.headers)
+    // storeRefreshToken(response)
+
     return response.data
   },
-  (err) => {
+  async (err) => {
     const { response } = err
     // console.log(response)
     if (!response) return Promise.reject({ status: 500, message: 'Internal Server Error' })
     // 如果header中携带refreshToken，更新本地存储
-    storeRefreshToken(response)
     switch (response.status) {
+      case 409:
+        // need refresh
+        try {
+          // 使用isRefreshing解决并发问题
+          if (!isRefreshing) {
+            isRefreshing = true
+            const { newAccessToken, newRefreshToken } = await API.account.refreshToken(localStorage.getItem('refreshToken'))
+            localStorage.setItem('accessToken', newAccessToken)
+            localStorage.setItem('refreshToken', newRefreshToken)
+            isRefreshing = false
+            // 重新执行队列中的请求
+            requests.forEach((cb) => cb())
+            // 清空队列
+            requests = []
+            return response.data
+          }
+          // 暂时将并发的请求挂起，暂存到requests中
+          else {
+            return new Promise((resolve) => {
+              requests.push(() => resolve(fetch(response.config)))
+            })
+          }
+        } catch (err) {
+          console.log(err)
+          isRefreshing = false
+          router.push('/signin')
+        }
+        break
       case 401:
         console.log(response)
         // console.log(err)
@@ -73,15 +103,4 @@ fetch.interceptors.response.use(
   }
 )
 
-function storeRefreshToken(resp) {
-  if (!resp || !resp.headers) {
-    return
-  }
-  if (resp.headers['newaccesstoken'] && resp.headers['newrefreshtoken']) {
-    localStorage.setItem('accessToken', resp.headers['newaccesstoken'])
-    localStorage.setItem('refreshToken', resp.headers['newrefreshtoken'])
-    delete resp.headers['newaccesstoken']
-    delete resp.headers['newrefreshtoken']
-  }
-}
 export default fetch

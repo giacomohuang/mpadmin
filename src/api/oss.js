@@ -37,7 +37,7 @@ const oss = {
     return fetch({
       baseURL: baseUrl.default,
       method: 'post',
-      data: { filename },
+      data: { filename: filename },
       url: '/oss/initNewMultipartUpload'
     })
   }

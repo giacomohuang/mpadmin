@@ -1,6 +1,7 @@
 <template>
   <div class="main-wrap">
     <div>
+      <a-button @click="handleConcurrentClick">并发测试</a-button>
       <a-button @click="handleClick">TEST</a-button>
       <div style="white-space: pre-line">{{ aaa }}</div>
     </div>
@@ -9,8 +10,12 @@
         <div class="dd" v-if="files.length === 0">Drag & Drops files here.</div>
         <ul class="uploadlist">
           <li v-for="file in files" key="file.name">
-            <div class="filename">{{ file.name }}</div>
-            <div class="progress"><a-progress :percent="file.percent" size="small" /></div>
+            <div class="filename">{{ file.originalName }}</div>
+            <div style="display: flex; flex-direction: row; align-items: center">
+              <div style="font-size: 12px; padding-right: 8px">校验:</div>
+              <div class="progress"><a-progress :percent="file.checksumPercent" size="small" :steps="10" /></div>
+              <div class="progress" style="width: 60%"><a-progress :percent="file.percent" size="small" /></div>
+            </div>
           </li>
         </ul>
       </div>
@@ -30,16 +35,16 @@ const state = reactive({
 })
 const files = ref([])
 
-const MAX_OBJECT_SIZE = 5 * 1024 * 1024 * 1024 * 1024
-const DEF_PART_SIZE = 64 * 1024 * 1024
 const calculatePartSize = (size) => {
+  const MAX_OBJECT_SIZE = 5 * 1024 * 1024 * 1024 * 1024
+  const DEFAULT_PARTSIZE = 64 * 1024 * 1024
   if (typeof size !== 'number') {
     throw new TypeError('size should be of type "number"')
   }
   if (size > MAX_OBJECT_SIZE) {
     throw new TypeError(`size should not be more than ${MAX_OBJECT_SIZE}`)
   }
-  let partSize = DEF_PART_SIZE
+  let partSize = DEFAULT_PARTSIZE
   for (;;) {
     // while(true) {...} throws linting error.
     // If partSize is big enough to accomodate the object size, then use it.
@@ -89,6 +94,14 @@ const handleClick = async () => {
   )
 }
 
+const handleConcurrentClick = async (e) => {
+  const num = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+  num.forEach(async (item) => {
+    const result = await API.account.hello1(item)
+    console.log(result)
+  })
+}
+
 const handleDropFiles = async (e) => {
   e.preventDefault()
   state.dragover = false
@@ -102,10 +115,8 @@ const handleDropFiles = async (e) => {
   }
 }
 const handleSelectFiles = async () => {
-  let handles
-
   try {
-    handles = await window.showOpenFilePicker({
+    const handles = await window.showOpenFilePicker({
       description: '图片类型',
       accept: { 'image/*': ['.png', '.gif', '.jpeg', '.jpg'] },
       multiple: true
@@ -138,20 +149,26 @@ const uploadFiles = async (handles) => {
     queue.push(task)
     processNextTask() // 开始处理队列中的任务
   }
-  files.value = []
+  files.value = new Array(handles.length).fill({})
+
   handles.forEach(async (handle, index) => {
     const file = await handle.getFile()
-    files.value.push({ name: file.name, totalSize: file.size, index: index, percent: 0 })
+    files.value[index] = { originalName: file.name, name: '', totalSize: file.size, percent: 0 }
+    console.log(files.value)
     let chunkSize = calculatePartSize(file.size)
     console.log('ChunkSize:', chunkSize)
-    const sha256 = await checksumSHA1(file, (loaded, total) => {
-      console.log(`Progress: ${Math.round((loaded / total) * 100)}%`)
-    })
-    console.log('sha256:', sha256)
+
     const chunks = await chunkFile(file, chunkSize)
     const result = await API.oss.initNewMultipartUpload(file.name)
-    const { uploadId, oldTags } = result
+    const { uploadId, newFilename, oldTags } = result
+    files.value[index].name = newFilename
+
     enqueue(async () => {
+      const checksum = await checksumSHA1(file, (loaded, total) => {
+        // console.log(`Progress: ${Math.round((loaded / total) * 100)}%`)
+        files.value[index].checksumPercent = Math.round((loaded / total) * 100)
+      })
+      console.log('checksum:', checksum)
       await uploadByParts(chunks, index, uploadId, oldTags)
     })
   })

@@ -7,7 +7,16 @@ const account = {
       baseURL: baseUrl.account,
       method: 'get',
       params: { uid: uid },
-      url: '/user/getpermissions'
+      url: '/account/getpermissions'
+    })
+  },
+  refreshToken(refreshToken) {
+    console.log(refreshToken)
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: { refreshToken },
+      url: '/account/refreshtoken'
     })
   },
   signin(params) {
@@ -118,6 +127,14 @@ const account = {
       baseURL: baseUrl.account,
       method: 'get',
       url: '/account/hello'
+    })
+  },
+  hello1(num) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: { num },
+      url: '/account/hello1'
     })
   }
 }

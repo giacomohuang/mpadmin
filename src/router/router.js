@@ -46,10 +46,11 @@ router.beforeEach(async (to, from, next) => {
   else {
     try {
       const resp = await account.verifyToken(helper.getToken())
+
       // 如果响应头中有token刷新请求，刷新token
-      if (resp.newAccessToken && resp.newRefreshToken) {
-        helper.setToken({ accessToken: resp.newAccessToken, refreshToken: resp.newRefreshToken })
-      }
+      // if (resp.newAccessToken && resp.newRefreshToken) {
+      //   helper.setToken({ accessToken: resp.newAccessToken, refreshToken: resp.newRefreshToken })
+      // }
       // 验证通过，放行
       next()
     } catch (e) {
@@ -57,6 +58,9 @@ router.beforeEach(async (to, from, next) => {
       if (e.status && e.status === 401) {
         next({ path: '/signin' })
         console.log('e', e)
+      } else if (e.status && e.status === 409) {
+        const { newAccessToken, newRefreshToken } = await API.account.refreshToken(localStorage.getItem('refreshToken'))
+        helper.setToken({ accessToken: newAccessToken, refreshToken: newRefreshToken })
       }
       // 如果是服务器内部错误或者未知错误，放行并传递异常给业务
       else {

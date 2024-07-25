@@ -243,7 +243,7 @@ const uploadParts = async (chunks, fileIndex, uploadId, oldTags) => {
     })
   }
   await taskQueue.waitForAll()
-  uploaded = files.value[fileIndex].totalSize
+  // uploaded = files.value[fileIndex].totalSize
   files.value[fileIndex].percent = 100
   console.log('100%', etags)
   // console.log('&&&etags', JSON.stringify(etags));
@@ -253,7 +253,7 @@ const uploadParts = async (chunks, fileIndex, uploadId, oldTags) => {
 }
 
 const calcProgress = (chunksProgress) => {
-  return chunksProgress.reduce((accumulator, currentValue) => accumulator + currentValue, 0)
+  return chunksProgress.reduce((acc, val) => acc + val, 0)
 }
 
 // function hexToBase64(hexStr) {

@@ -30,6 +30,7 @@ import CryptoJS from 'crypto-js'
 import API from '../../api/API'
 import FetchEventSource from '../../api/fetcheventsource'
 import ConcurrentTaskQueue from '../../js/ConcurrentTaskQueue'
+import pLimit from 'p-limit'
 const aaa = ref('')
 const state = reactive({
   dragover: false
@@ -131,6 +132,7 @@ const handleSelectFiles = async () => {
       // excludeAcceptAllOption: true,
       multiple: true
     })
+    // files.value = new Array(handles.length).fill({})
     await uploadFiles(handles)
   } catch (err) {
     console.log(err)
@@ -138,24 +140,24 @@ const handleSelectFiles = async () => {
 }
 
 const uploadFiles = async (handles) => {
-  // 同时3个并发
-  const taskQueue = new ConcurrentTaskQueue(3)
-  files.value = new Array(handles.length).fill({})
+  files.value = []
+  const tasks = []
+  const limit = pLimit(3)
   for (const [index, handle] of handles.entries()) {
     const file = await handle.getFile()
-    const result = await API.oss.initNewMultipartUpload(file.name)
-    const { uploadId, newFilename, oldTags } = result
-    files.value[index] = { originalName: file.name, name: newFilename, totalSize: file.size, percent: 0 }
+    const upload = await API.oss.initNewMultipartUpload(file.name)
+    const { uploadId, newFilename, oldTags } = upload
+    files.value.push({ originalName: file.name, name: newFilename, totalSize: file.size, percent: 0, status: 0 })
+
     let chunkSize = calculatePartSize(file.size)
     const chunks = await chunkFile(file, chunkSize)
-    taskQueue.enqueue(async () => {
-      const checksum = await checksumSHA1(file, (loaded, total) => {
-        files.value[index].checksumPercent = Math.round((loaded / total) * 100)
-      })
+    const task = limit(async () => {
+      await checksumSHA1(file, (loaded, total) => (files.value[index].checksumPercent = Math.round((loaded / total) * 100)))
       await uploadParts(chunks, index, uploadId, oldTags)
     })
+    tasks.push(task)
   }
-  await taskQueue.waitForAll()
+  await Promise.all(tasks)
   console.log('all uploaded')
 }
 
@@ -193,7 +195,7 @@ const checksumSHA1 = async (file, onProgress, chunkSize = 5 * 1024 * 1024) => {
 
 const chunkFile = async (file, chunkSize = 5 * 1024 * 1024) => {
   const chunks = []
-  let partNumber = 0
+  let partNumber = 1
   let loaded = 0
   const total = file.size
 
@@ -211,38 +213,37 @@ const chunkFile = async (file, chunkSize = 5 * 1024 * 1024) => {
 }
 
 const uploadParts = async (chunks, fileIndex, uploadId, oldTags) => {
+  console.log(chunks, fileIndex, uploadId, oldTags)
   let etags = new Array(chunks.length).fill(null)
   let uploaded = 0
   let chunksProgress = new Array(chunks.length).fill(0)
-  const taskQueue = new ConcurrentTaskQueue(3)
 
+  const tasks = []
+  const limit = pLimit(3)
   for (const [i, chunk] of chunks.entries()) {
-    taskQueue.enqueue(async () => {
-      const formData = new FormData()
-      const partNumber = i + 1
-
-      if (i <= oldTags?.length) {
-        etags[i] = matchingTag[i]
-      } else {
-        formData.append('file', chunk.file)
-        formData.append('filename', encodeURIComponent(files.value[fileIndex].name))
-        formData.append('uploadId', uploadId)
-        formData.append('partNumber', partNumber)
-        // formData.append('hash', chunks[i].hash);
-        formData.append('oldTags', JSON.stringify(oldTags))
+    const formData = new FormData()
+    const partNumber = chunk.partNumber
+    if (i <= oldTags?.length) {
+      etags[i] = matchingTag[i]
+    } else {
+      formData.append('file', chunk.file)
+      formData.append('filename', encodeURIComponent(files.value[fileIndex].name))
+      formData.append('uploadId', uploadId)
+      formData.append('partNumber', partNumber)
+      const task = limit(async () => {
         const etag = await API.oss.uploadPart(formData, (progress) => {
           chunksProgress[i] = progress
           uploaded = calcProgress(chunksProgress)
           if (uploaded > files.value[fileIndex].totalSize) uploaded = files.value[fileIndex].totalSize
           files.value[fileIndex].percent = parseFloat(((uploaded / files.value[fileIndex].totalSize) * 100).toFixed())
-          console.log('fileidx', fileIndex, 'chunk idx:', i, 'loaded:', uploaded, 'total:', files.value[fileIndex].totalSize, 'percent:', files.value[fileIndex].percent)
+          console.log('fileidx', fileIndex, 'partNumber', partNumber, 'loaded:', uploaded, 'total:', files.value[fileIndex].totalSize, 'percent:', files.value[fileIndex].percent)
         })
         etags[i] = etag
-      }
-      // await taskQueue.waitForAll()
-    })
+      })
+      tasks.push(task)
+    }
   }
-  await taskQueue.waitForAll()
+  await Promise.all(tasks)
   // uploaded = files.value[fileIndex].totalSize
   files.value[fileIndex].percent = 100
   console.log('100%', etags)

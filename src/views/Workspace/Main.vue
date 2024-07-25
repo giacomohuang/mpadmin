@@ -29,7 +29,6 @@ import CryptoJS from 'crypto-js'
 // import SparkMD5 from 'spark-md5'
 import API from '../../api/API'
 import FetchEventSource from '../../api/fetcheventsource'
-import ConcurrentTaskQueue from '../../js/ConcurrentTaskQueue'
 import pLimit from 'p-limit'
 const aaa = ref('')
 const state = reactive({
@@ -148,7 +147,6 @@ const uploadFiles = async (handles) => {
     const upload = await API.oss.initNewMultipartUpload(file.name)
     const { uploadId, newFilename, oldTags } = upload
     files.value.push({ originalName: file.name, name: newFilename, totalSize: file.size, percent: 0, status: 0 })
-
     let chunkSize = calculatePartSize(file.size)
     const chunks = await chunkFile(file, chunkSize)
     const task = limit(async () => {

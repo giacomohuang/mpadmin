@@ -14,7 +14,7 @@
             <div style="display: flex; flex-direction: row; align-items: center">
               <div style="font-size: 12px; padding-right: 8px">校验:</div>
               <div class="progress"><a-progress :percent="file.checksumPercent" size="small" :steps="10" /></div>
-              <div class="progress" style="width: 60%"><a-progress :percent="file.percent" size="small" /></div>
+              <div class="progress" style="width: 60%"><a-progress :percent="file.percent" size="small" :status="file.status" /></div>
             </div>
           </li>
         </ul>
@@ -146,7 +146,7 @@ const uploadFiles = async (handles) => {
     const file = await handle.getFile()
     const upload = await API.oss.initNewMultipartUpload(file.name)
     const { uploadId, newFilename, oldTags } = upload
-    files.value.push({ originalName: file.name, name: newFilename, totalSize: file.size, percent: 0, status: 0 })
+    files.value.push({ originalName: file.name, name: newFilename, totalSize: file.size, percent: 0 })
     let chunkSize = calculatePartSize(file.size)
     const chunks = await chunkFile(file, chunkSize)
     const task = limit(async () => {
@@ -229,26 +229,35 @@ const uploadParts = async (chunks, fileIndex, uploadId, oldTags) => {
       formData.append('uploadId', uploadId)
       formData.append('partNumber', partNumber)
       const task = limit(async () => {
-        const etag = await API.oss.uploadPart(formData, (progress) => {
-          chunksProgress[i] = progress
-          uploaded = calcProgress(chunksProgress)
-          if (uploaded > files.value[fileIndex].totalSize) uploaded = files.value[fileIndex].totalSize
-          files.value[fileIndex].percent = parseFloat(((uploaded / files.value[fileIndex].totalSize) * 100).toFixed())
-          console.log('fileidx', fileIndex, 'partNumber', partNumber, 'loaded:', uploaded, 'total:', files.value[fileIndex].totalSize, 'percent:', files.value[fileIndex].percent)
-        })
+        const etag = await API.oss
+          .uploadPart(formData, (progress) => {
+            chunksProgress[i] = progress
+            uploaded = calcProgress(chunksProgress)
+            if (uploaded > files.value[fileIndex].totalSize) uploaded = files.value[fileIndex].totalSize
+            const percent = parseFloat(((uploaded / files.value[fileIndex].totalSize) * 100).toFixed())
+            if (percent > files.value[fileIndex].percent) files.value[fileIndex].percent = percent
+            console.log('fileidx', fileIndex, 'partNumber', partNumber, 'loaded:', uploaded, 'total:', files.value[fileIndex].totalSize, 'percent:', files.value[fileIndex].percent)
+          })
+          .catch((err) => {
+            console.log(err)
+            files.value[fileIndex].status = 'exception'
+          })
         etags[i] = etag
       })
       tasks.push(task)
     }
   }
   await Promise.all(tasks)
-  // uploaded = files.value[fileIndex].totalSize
+
   files.value[fileIndex].percent = 100
-  console.log('100%', etags)
+  console.log('100%', files.value[fileIndex].originalName)
   // console.log('&&&etags', JSON.stringify(etags));
-  const resp = await API.oss.completeMultipartUpload(files.value[fileIndex].name, uploadId, etags)
-  // console.log(resp);
+  const resp = await API.oss.completeMultipartUpload(files.value[fileIndex].name, uploadId, etags).catch((err) => {
+    console.log(err)
+    files.value[fileIndex].status = 'exception'
+  })
   return resp
+  // console.log(resp);
 }
 
 const calcProgress = (chunksProgress) => {

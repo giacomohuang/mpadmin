@@ -1,9 +1,9 @@
 import fetch from './fetch'
 import baseUrl from './baseUrl'
-
 const oss = {
   uploadPart(formData, onProgress) {
     // console.log(partNumber, filename, uploadId, hash)
+
     return fetch({
       timeout: 30 * 60 * 1000,
       baseURL: baseUrl.default,

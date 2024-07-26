@@ -60,8 +60,8 @@ fetch.interceptors.response.use(
     if (!response) return Promise.reject({ status: 500, message: 'Internal Server Error' })
     // 如果header中携带refreshToken，更新本地存储
     switch (response.status) {
+      // accesstoken过期
       case 409:
-        // need refresh
         try {
           // 使用isRefreshing解决并发问题
           if (!isRefreshing) {
@@ -69,12 +69,18 @@ fetch.interceptors.response.use(
             const { newAccessToken, newRefreshToken } = await API.account.refreshToken(localStorage.getItem('refreshToken'))
             localStorage.setItem('accessToken', newAccessToken)
             localStorage.setItem('refreshToken', newRefreshToken)
+            // ----------------
+            response.config.headers['Authorization'] = 'Bearer ' + newAccessToken
+            response.config.headers['refreshtoken'] = newRefreshToken
             isRefreshing = false
             // 重新执行队列中的请求
             requests.forEach((cb) => cb())
             // 清空队列
             requests = []
-            return response.data
+            // 重新执行本次请求
+            return new Promise((resolve) => {
+              resolve(fetch(response.config))
+            })
           }
           // 暂时将并发的请求挂起，暂存到requests中
           else {
@@ -88,16 +94,15 @@ fetch.interceptors.response.use(
           router.push('/signin')
         }
         break
+      // jwt/sign鉴权失败
       case 401:
         console.log(response)
-        // console.log(err)
         router.push('/signin')
         break
-      // return Promise.reject(response)
+      // 一般业务错误
       case 500:
       default:
         console.log(response)
-        // console.log('Internal Server Error, code:500')
         return Promise.reject(response)
     }
   }

@@ -62,16 +62,16 @@ const calculatePartSize = (size) => {
 // OpenAI test
 // SSE Server-Sent Events
 const handleClick = async () => {
-  // var encryptedData = '3k3tbrBUdf4Gpkqhj4eIUIfngJnzqcleA8IX+jjqqc0xJoA3wMsGY7msQoHUom4jMmxXsGb5N/uUreqdzhnLj45Li4fC3Z52ndN714dyaYEiIXR9H51mDXKWv5oM7ZOs'
-  // var key = CryptoJS.enc.Utf8.parse('8Co5CsG5yrH0VT7M')
-  // var iv = CryptoJS.enc.Hex.parse('00000000000000000000000000000000')
+  var encryptedData = '3k3tbrBUdf4Gpkqhj4eIUIfngJnzqcleA8IX+jjqqc0xJoA3wMsGY7msQoHUom4jMmxXsGb5N/uUreqdzhnLj45Li4fC3Z52ndN714dyaYEiIXR9H51mDXKWv5oM7ZOs'
+  var key = CryptoJS.enc.Utf8.parse('8Co5CsG5yrH0VT7M')
+  var iv = CryptoJS.enc.Hex.parse('00000000000000000000000000000000')
 
   // 解密
-  // var decrypted = CryptoJS.AES.decrypt(encryptedData, key, {
-  //   iv: iv,
-  //   padding: CryptoJS.pad.Pkcs7,
-  //   mode: CryptoJS.mode.CBC
-  // })
+  var decrypted = CryptoJS.AES.decrypt(encryptedData, key, {
+    iv: iv,
+    padding: CryptoJS.pad.Pkcs7,
+    mode: CryptoJS.mode.CBC
+  })
 
   // 解析解密后的数据，转换为JSON对象
   var decryptedJson = JSON.parse(decrypted.toString(CryptoJS.enc.Utf8))

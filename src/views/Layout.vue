@@ -156,13 +156,13 @@ header {
   width: 100%;
   min-width: 640px;
   // font-size: 16px;
-  background-color: var(--bg-layout);
+  background-color: var(--bg-main);
   // background-image: radial-gradient(transparent 1px, #fff 1px);
   // background-size: 4px 4px;
   // backdrop-filter: saturate(50%) blur(4px);
   border-bottom: 1px solid var(--color-border);
   z-index: 12;
-  box-shadow: 0px 4px 4px 0px var(--color-shadow);
+  // box-shadow: 0px 4px 4px 0px var(--color-shadow);
 }
 
 .logo {
@@ -231,8 +231,8 @@ header {
   min-width: 120px;
   padding-top: 20px;
   background: var(--bg-main);
-  // border-right: 1px solid var(--color-border);
-  box-shadow: 4px 0px 4px 0px var(--color-shadow);
+  border-right: 1px solid var(--color-border);
+  // box-shadow: 4px 0px 4px 0px var(--color-shadow);
   color: #333;
   font-size: 14px;
   // &:lang(en) {
@@ -279,9 +279,11 @@ header {
 
 .sub-menu {
   z-index: 11;
+  left: -1px;
   position: relative;
   background: var(--bg-component);
-  box-shadow: 4px 0px 4px 0px var(--color-shadow);
+  border-right: 1px solid var(--color-border);
+  // box-shadow: 4px 0px 4px 0px var(--color-shadow);
   display: flex;
   flex-direction: column;
   width: 140px;

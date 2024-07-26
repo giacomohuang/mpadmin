@@ -12,7 +12,7 @@ class FetchEventSource {
     const nonce = nanoid()
     const timestamp = Date.now()
     const sortedParams = JSON.stringify(helper.sortJSON(params)) + nonce + timestamp
-    const cipher = CryptoJS.HmacSHA256(sortedParams, 'emDmpsE2Ad4wLLYwD66xjzY1eZhVHyEqSPrAxIcaC66xR9mkgzJJ9GswVyUyiWRb8MXfY9fKZlRuvEURySHMY8X6D5GqjMYKLUiIDs6Zq6uH9LJn4nArFje5SY0C1Yfk')
+    const cipher = CryptoJS.HmacSHA256(sortedParams, import.meta.env.VITE_SIGN_KEY)
     const cipherText = CryptoJS.enc.Hex.stringify(cipher)
 
     const fetchOptions = {

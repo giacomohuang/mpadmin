@@ -39,24 +39,43 @@ brew install node
 npm install -g nodemon
 ```
 
+## Minio
+
+**install**
+
+```
+brew install minio/stable/minio
+minio server ~/minio_data
+```
+
 # Run App
 
 ```
+
 git clone https://github.com/giacomohuang/mpadmin.git
+
 ```
 
 **client side**
 
 ```
+
 cd mpadmin
 npm install
 npm run dev
+
 ```
 
 **server side**
 
 ```
+
 cd mpadmin/server
 npm install
 npm run dev
+
+```
+
+```
+
 ```

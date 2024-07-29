@@ -2,11 +2,9 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 import { createSvgIconsPlugin } from './plugins/svgicons/index'
-import { obfuscator } from 'rollup-obfuscator'
+import { obfuscator } from './plugins/obfuscator/index'
 import Components from 'unplugin-vue-components/vite'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
-// import obfuscator from 'rollup-plugin-obfuscator'
-// import { viteObfuscateFile } from 'vite-plugin-obfuscator'
 
 // https://vitejs.dev/config/
 export default defineConfig({

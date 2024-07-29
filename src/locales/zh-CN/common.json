@@ -19,7 +19,8 @@
       "my": "我的",
       "profile": "我的个人资料",
       "signout": "退出登录",
-      "authentication": "密码和身份验证"
+      "authentication": "密码和身份验证",
+      "upload": "文件上传"
     },
     "cpnt": {
       "submit": "提交",

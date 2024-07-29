@@ -19,7 +19,8 @@
       "my": "My",
       "profile": "My Profile",
       "signout": "Sign out",
-      "authentication": "Authentication"
+      "authentication": "Authentication",
+      "upload": "Upload Files"
     },
     "cpnt": {
       "submit": "Submit",

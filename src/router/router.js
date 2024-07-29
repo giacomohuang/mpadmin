@@ -84,9 +84,10 @@ export const dynamicRoutes = [
     name: 'workspace',
     meta: { title: 'common.route.workspace', permissionId: '000010000' },
     icon: '#icon-workspace',
-    redirect: '/workspace/main',
-    // isHidden: true,
-    children: [{ path: '/workspace/main', component: () => import('@/views/Workspace/Main.vue'), meta: { title: 'common.route.workspace', permission: '0000010001' } }]
+    children: [
+      { path: '/workspace/main', component: () => import('@/views/Workspace/Main.vue'), meta: { title: 'common.route.workspace', permission: '0000010001' } },
+      { path: '/workspace/upload', component: () => import('@/views/Workspace/Upload.vue'), meta: { title: 'common.route.upload', permission: '0000010002' } }
+    ]
   },
   {
     path: '/account',

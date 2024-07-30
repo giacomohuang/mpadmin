@@ -46,11 +46,11 @@ onMounted(() => {
   align-items: center;
   margin: 0;
   color: var(--text-primary);
+  cursor: pointer;
   &:hover,
   &:active {
     background: var(--bg-component-active);
   }
-  cursor: pointer;
 }
 
 .sub {

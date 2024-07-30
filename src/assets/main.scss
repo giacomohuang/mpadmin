@@ -1,9 +1,6 @@
-@import './variables.css';
-@import './rest.css';
+@use 'vars';
+@use 'rest';
 
-:root {
-  font-size: 12px;
-}
 @media screen and (max-width: 640px) {
 }
 @media screen and (max-width: 768px) {

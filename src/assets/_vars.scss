@@ -89,6 +89,7 @@
   --color-border-muted: #d0d7deb3;
   --color-border-hover: var(--c-gray5);
   --color-border-strong: var(--c-gray4);
+
   --color-shadow: var(--c-gray3);
 
   --text-primary: var(--c-gray8);
@@ -120,4 +121,29 @@
   --text-secondary-active: var(--c-gray3);
   --text-tertiary: var(--c-gray5);
   --text-tertiary-active: var(--c-gray4);
+}
+
+// 配色方案生成
+$color-sets: (
+  'grey': #212030,
+  'indigo': #213547,
+  'brand': darken(#1677ff, 50%),
+  'blue': #007bff,
+  'purple': #7b00ff,
+  'red': #d00000,
+  'orange': #ff7b00,
+  'yellow': #ffd000,
+  'green': #2e6f00
+);
+:root {
+  @each $name, $color in $color-sets {
+    // debug: $color;
+    // --c-#{$name}: #{$color};
+    @for $i from 1 through 20 {
+      $lightened-color: lighten($color, $i * 5%);
+      @if $lightened-color != #ffffff {
+        --c-#{$name}#{$i*10}: #{$lightened-color};
+      }
+    }
+  }
 }

@@ -7,7 +7,7 @@
           <li v-for="file in files" key="file.name">
             <div class="filename">{{ file.originalName }}</div>
             <div style="display: flex; flex-direction: row; align-items: center">
-              <div style="font-size: 12px; padding-right: 8px">校验:</div>
+              <div style="font-size: 12px; padding-right: 8px">SHA1:</div>
               <div class="progress"><a-progress :percent="file.checksumPercent" size="small" :steps="10" /></div>
               <div class="progress" style="width: 60%"><a-progress :percent="file.percent" size="small" :status="file.status" /></div>
             </div>
@@ -19,11 +19,10 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, reactive } from 'vue'
+import { ref, reactive } from 'vue'
 import CryptoJS from 'crypto-js'
 // import SparkMD5 from 'spark-md5'
 import API from '../../api/API'
-import FetchEventSource from '../../api/fetcheventsource'
 import pLimit from 'p-limit'
 const aaa = ref('')
 const state = reactive({

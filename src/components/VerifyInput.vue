@@ -120,7 +120,7 @@ const onKeyUp = (e) => {
 
 .lwrap {
   position: absolute;
-  right: -30px;
+  right: -5px;
   opacity: 0;
   transition-duration: 0.25s;
   transition-property: right, opacity;
@@ -129,11 +129,11 @@ const onKeyUp = (e) => {
 }
 
 .loading {
-  right: -35px;
+  right: -10px;
   opacity: 1;
   width: 20px;
   height: 20px;
-  border: 2px solid var(--c-brand2);
+  border: 2px solid var(--c-brand100);
   border-top-color: rgba(0, 0, 0, 0.2);
   border-right-color: rgba(0, 0, 0, 0.2);
   border-bottom-color: rgba(0, 0, 0, 0.2);
@@ -164,8 +164,8 @@ input {
 
   &:focus,
   .active {
-    border-color: var(--c-brand2);
-    box-shadow: 0px 0px 0px 2px var(--c-brand2);
+    border-color: var(--c-brand100);
+    box-shadow: 0px 0px 0px 2px var(--c-brand100);
   }
   &:disabled {
     color: var(--text-tertiary);

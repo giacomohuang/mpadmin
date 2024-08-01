@@ -21,7 +21,7 @@ const darkMode = window.matchMedia('(prefers-color-scheme: dark)')
 // antv组件主题
 const antTheme = ref('')
 // antv主色设置为系统的品牌色
-const antColorPrimary = ref(getComputedStyle(document.documentElement).getPropertyValue('--c-brand'))
+const antColorPrimary = ref(getComputedStyle(document.documentElement).getPropertyValue('--c-brand100'))
 setTheme(theme.value)
 
 darkMode.addEventListener('change', (e) => {

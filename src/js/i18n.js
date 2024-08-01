@@ -43,17 +43,17 @@ export function getLocale() {
 // 懒加载语言包
 export async function loadLocaleData(locale, path) {
   // load locale messages with dynamic import
-
   const p = `../locales/${locale}${path}.json`
-  console.log('local path', p)
+  // console.log('local path', p)
   try {
     // const [common, page] = await Promise.all([import(/* @vite-ignore */ `../locales/${locale}/common.json`), import(/* @vite-ignore */ `${p}.json`)])
     const common = await import(`../locales/${locale}/common.json`)
+    i18n.global.setLocaleMessage(locale, common.default)
     const localeFile = Object.keys(localeFiles).find((path) => {
       return path === p
     })
+    if (!localeFile) throw new Error('locale file load error')
     const page = await localeFiles[localeFile]()
-    i18n.global.setLocaleMessage(locale, common.default)
     i18n.global.mergeLocaleMessage(locale, page.default)
 
     // set locale and locale message
@@ -61,9 +61,10 @@ export async function loadLocaleData(locale, path) {
     // console.log(page.default)
   } catch (e) {
     // i18n.global.setLocaleMessage(locale, global.default)
-    console.log('locale file load error', e)
+    console.log(e)
+  } finally {
+    return nextTick()
   }
-  return nextTick()
 }
 
 // 加载组件中的语言包

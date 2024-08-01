@@ -203,12 +203,12 @@ header {
 
 .theme {
   cursor: pointer;
-  color: var(--c-gray4);
+  color: var(--c-gray100);
   .active1 {
-    color: var(--c-yellow4);
+    color: var(--c-orange40);
   }
   .active2 {
-    color: var(--c-blue3);
+    color: var(--c-blue30);
   }
   .active3 {
     color: var(--c-black);

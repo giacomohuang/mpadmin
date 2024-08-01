@@ -262,7 +262,7 @@ const calcProgress = (chunksProgress) => {
   display: block;
 }
 .dragarea {
-  background-color: var(--bg-main-striped);
+  background-color: var(--bg-list-striped);
   height: fit-content;
   width: 400px;
   // padding: 20px;

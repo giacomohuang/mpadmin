@@ -98,23 +98,23 @@ watch(
 
   .s0 {
     flex-grow: 1;
-    background-color: var(--c-gray5);
+    background-color: var(--c-gray150);
   }
   .s1 {
     flex-grow: 1;
-    background-color: var(--c-red1);
+    background-color: var(--c-red60);
   }
   .s2 {
     flex-grow: 1;
-    background-color: var(--c-blue3);
+    background-color: var(--c-blue40);
   }
   .s3 {
     flex-grow: 1;
-    background-color: var(--c-green1);
+    background-color: var(--c-green30);
   }
   .s4 {
     flex-grow: 1;
-    background-color: var(--c-green4);
+    background-color: var(--c-green10);
   }
 }
 </style>

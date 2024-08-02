@@ -1,19 +1,44 @@
+<template>
+  <a-config-provider :theme="{ algorithm: antTheme, token: { colorPrimary: antColorPrimary } }" :locale="antLocale">
+    <RouterView />
+  </a-config-provider>
+</template>
+
 <script setup>
 import { ref, watch } from 'vue'
 import { RouterView } from 'vue-router'
 import { useStore } from './stores/stores'
 import { theme as antdTheme } from 'ant-design-vue'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
+import zhCN from 'ant-design-vue/es/locale/zh_CN'
+import enUS from 'ant-design-vue/es/locale/en_US'
 
 // 全局主题: [dark, light, system]
 const store = useStore()
 const { theme } = storeToRefs(store)
+const { locale } = useI18n()
+const antLocale = ref(null)
+
+const setAntLocale = (locale) => {
+  if (locale == 'zh-CN') {
+    antLocale.value = zhCN
+  } else {
+    antLocale.value = enUS
+  }
+}
+
+setAntLocale(locale.value)
+
 theme.value = getTheme()
 console.log(theme.value)
 
 watch(theme, (val) => {
   console.log('watch', val)
   setTheme(val)
+})
+watch(locale, (val) => {
+  setAntLocale(val)
 })
 
 // 媒体查询当前系统是否为暗黑模式
@@ -75,11 +100,5 @@ function setThemeCss(mode) {
   }
 }
 </script>
-
-<template>
-  <a-config-provider :theme="{ algorithm: antTheme, token: { colorPrimary: antColorPrimary } }">
-    <RouterView />
-  </a-config-provider>
-</template>
 
 <style scoped></style>

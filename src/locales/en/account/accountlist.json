@@ -5,7 +5,7 @@
       "realname": "Real Name",
       "email": "Email",
       "phone": "Mobile Phone",
-      "2fa": "Enable 2FA"
+      "2fa": "2FA"
     }
   }
 }

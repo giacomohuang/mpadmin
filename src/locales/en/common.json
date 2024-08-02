@@ -27,8 +27,14 @@
       "reset": "Reset",
       "send": "Send",
       "del": "Delete",
+      "disable": "Disable",
+      "enable": "Enable",
+      "disabled": "Disabled",
+      "enabled": "Enabled",
       "edit": "Edit",
-      "action": "Action"
+      "action": "Action",
+      "status": "Status",
+      "all": "All"
     }
   }
 }

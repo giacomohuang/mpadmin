@@ -5,8 +5,33 @@
       { title: $t('account.accountlist.realname'), dataIndex: 'realname', key: 'realname' },
       { title: $t('account.accountlist.email'), dataIndex: 'email', key: 'email' },
       { title: $t('account.accountlist.phone'), dataIndex: 'phone', key: 'phone' },
-      { title: $t('account.accountlist.2fa'), dataIndex: 'enable2FA', key: 'enable2FA' },
-      { title: $t('common.cpnt.action'), key: 'action', width: 120 }
+      {
+        title: $t('account.accountlist.2fa'),
+        dataIndex: 'enable2FA',
+        key: 'enable2FA',
+        align: 'center',
+        filters: [
+          { text: $t('common.cpnt.enabled'), value: true },
+          { text: $t('common.cpnt.disabled'), value: false }
+        ],
+        filterMultiple: false,
+        width: 120
+      },
+
+      {
+        title: $t('common.cpnt.status'),
+        dataIndex: 'status',
+        key: 'status',
+        align: 'center',
+        defaultFilteredValue: defaultFilters['status'],
+        filters: [
+          { text: $t('common.cpnt.enabled'), value: 1 },
+          { text: $t('common.cpnt.disabled'), value: 0 }
+        ],
+        filterMultiple: false,
+        width: 80
+      },
+      { title: $t('common.cpnt.action'), key: 'action', width: 128, align: 'center' }
     ]"
     :dataSource="accounts"
     :pagination="pagination"
@@ -15,16 +40,29 @@
     :loading="isLoading"
   >
     <template #bodyCell="{ column, record }">
-      <template v-if="column.key === 'enable2FA'">
-        <a-tag :color="record.enable2FA ? 'green' : 'red'">{{ record.enable2FA ? 'ON' : 'OFF' }}</a-tag>
+      <template v-if="column.key === 'accountname'">
+        <a :href="`/account/${record._id}`">{{ record.accountname }}</a>
+      </template>
+      <template v-else-if="column.key === 'enable2FA'">
+        <a-tag :color="record.enable2FA ? 'green' : 'red'">{{ record.enable2FA ? '已开启' : '未开启' }}</a-tag>
       </template>
       <template v-else-if="column.key === 'action'">
-        <a href="####">{{ $t('common.cpnt.edit') }}</a>
+        <a @click="handleEdit(record._id)">{{ $t('common.cpnt.edit') }}</a>
         <a-divider type="vertical" />
-        <a href="####">{{ $t('common.cpnt.del') }}</a>
+        <a href="####">{{ $t('common.cpnt.disable') }}</a>
+      </template>
+      <template v-else-if="column.key === 'status'">
+        <a-tag :color="record.status ? 'green' : 'red'">{{ record.status ? $t('common.cpnt.enabled') : $t('common.cpnt.disabled') }}</a-tag>
       </template>
     </template>
   </a-table>
+  <a-drawer title="Basic Drawer" size="large" :open="openEditor" @close="onCloseEditor">
+    <template #extra>
+      <a-button style="margin-right: 8px" @click="onCloseEditor">Cancel</a-button>
+      <a-button type="primary" @click="onCloseEditor">Submit</a-button>
+    </template>
+    <p>{{ editForm.id }}</p>
+  </a-drawer>
 </template>
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
@@ -35,25 +73,50 @@ const { t, locale } = useI18n()
 
 const accounts = ref([])
 const isLoading = ref(false)
-
+const openEditor = ref(false)
+const editForm = reactive({})
+const defaultFilters = ref({
+  status: ['1']
+})
 const pagination = reactive({
   current: 1,
   pageSize: 10,
   total: 0
 })
 
+const handleEdit = (id) => {
+  openEditor.value = true
+  editForm.id = id
+}
+
+const onCloseEditor = () => {
+  openEditor.value = false
+}
+
 onMounted(async () => {
   isLoading.value = true
-  const result = await API.account.list(pagination.current - 1, pagination.pageSize)
+  const result = await API.account.list(pagination.current - 1, pagination.pageSize, { status: 1 })
   accounts.value = result.accounts
   pagination.total = result.total
   isLoading.value = false
 })
 
-const handleTableChange = async (p) => {
+const handleTableChange = async (p, filters, sorter) => {
+  const query = {}
+  if (filters.enable2FA) {
+    query.enable2FA = filters.enable2FA[0]
+  }
+  if (filters.status) {
+    query.status = filters.status[0]
+  }
+  console.log('query', filters, query)
+  // for (const filter in filters) {
+  //   if (filter) {
+  //     query[filter] = filters[filter][0]
+  //   }
+  // }
   isLoading.value = true
-  console.log(pagination.current)
-  const result = await API.account.list(p.current - 1, p.pageSize)
+  const result = await API.account.list(p.current - 1, p.pageSize, query)
   accounts.value = result.accounts
   pagination.total = result.total
   pagination.current = p.current

@@ -1,0 +1,11 @@
+{
+  "account": {
+    "accountlist": {
+      "accountname": "Account Name",
+      "realname": "Real Name",
+      "email": "Email",
+      "phone": "Mobile Phone",
+      "2fa": "Enable 2FA"
+    }
+  }
+}

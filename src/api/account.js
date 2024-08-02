@@ -136,6 +136,15 @@ const account = {
       data: { num },
       url: '/account/hello1'
     })
+  },
+  list(page, limit, filter = '') {
+    console.log('list')
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: { page, limit, filter },
+      url: '/account/list'
+    })
   }
 }
 export default account

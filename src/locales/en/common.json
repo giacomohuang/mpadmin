@@ -25,7 +25,10 @@
     "cpnt": {
       "submit": "Submit",
       "reset": "Reset",
-      "send": "Send"
+      "send": "Send",
+      "del": "Delete",
+      "edit": "Edit",
+      "action": "Action"
     }
   }
 }

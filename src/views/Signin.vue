@@ -1,12 +1,15 @@
 <template>
   <div class="main-wrap radial-gradient">
     <context-holder />
-    <header>
-      <div class="logo">
-        <a href="/"><img src="@/assets/logo.png" width="24" /></a>
+    <header class="min-w[640px] border-normal relative z-20 flex h-16 w-full flex-row items-center gap-5 border-b bg-[var(--bg-main)]">
+      <div class="shrink-0 flex-grow whitespace-nowrap px-5">
+        <a href="/" class="flex">
+          <img src="@/assets/logo.png" class="mr-2 h-6 w-6" />
+          <div class="text-2xl/none font-semibold text-[var(--text-primary)]">{{ $t('common.appname') }}</div>
+        </a>
       </div>
-      <div class="app-name">{{ $t('common.appname') }}</div>
-      <div class="lang">
+
+      <div class="mx-3">
         <a-dropdown>
           <a @click.prevent> <Icon name="global" size="2em" /></a>
           <template #overlay>
@@ -17,10 +20,10 @@
           </template>
         </a-dropdown>
       </div>
-      <div class="theme">
-        <Icon name="theme-light" size="2em" class="icon" @click="store.theme = 'light'" :class="{ active1: store.theme === 'light' }"></Icon>
-        <Icon name="theme-dark" size="2em" class="icon" @click="store.theme = 'dark'" :class="{ active2: store.theme === 'dark' }"></Icon>
-        <Icon name="theme-system" size="2em" class="icon" @click="store.theme = 'system'" :class="{ active3: store.theme === 'system' }"></Icon>
+      <div class="flex cursor-pointer flex-nowrap text-[var(--c-gray100)]">
+        <Icon name="theme-light" size="2em" class="icon" @click="store.changeTheme('light')" :class="{ 'text-[var(--c-orange40)]': store.theme === 'light' }"></Icon>
+        <Icon name="theme-dark" size="2em" class="icon" @click="store.changeTheme('dark')" :class="{ 'text-[var(--c-blue30)]': store.theme === 'dark' }"></Icon>
+        <Icon name="theme-system" size="2em" class="icon" @click="store.changeTheme('system')" :class="{ 'text-[var(--c-black)]': store.theme === 'system' }"></Icon>
       </div>
     </header>
     <section v-if="state.method === 'pwd'">

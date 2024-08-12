@@ -1,14 +1,16 @@
 <template>
-  <header>
-    <div class="logo">
-      <a href="/"><img src="@/assets/logo.png" width="24" /></a>
+  <header class="min-w[640px] border-primary bg-primary relative z-20 flex h-16 w-full items-center gap-5 border-b border-solid">
+    <div class="border-primary shrink-0 whitespace-nowrap border-r-2 border-solid px-5">
+      <a href="/" class="flex">
+        <img src="@/assets/logo.png" class="mr-2 h-6 w-6" />
+        <div class="text-primary text-2xl/none font-semibold">{{ $t('common.appname') }}</div>
+      </a>
     </div>
-    <div class="app-name">{{ $t('common.appname') }}</div>
-    <div class="title">{{ $t($route.meta.title) }}</div>
-    <div class="my">
+    <div class="text-primary grow whitespace-nowrap text-lg">{{ $t($route.meta.title) }}</div>
+    <div class="mx-3 shrink-0">
       <a-dropdown>
-        <a @click.prevent style="font-size: 16px; display: flex; align-items: center">
-          <img width="30" height="30" src="@/assets/avatar.jpg" class="avatar" />
+        <a @click.prevent class="flex items-center text-base">
+          <img src="@/assets/avatar.jpg" class="mr-2 h-[30px] w-[30px] rounded-full" />
           <div>{{ store.realname }}({{ store.accountname }})</div>
         </a>
         <template #overlay>
@@ -23,7 +25,7 @@
         </template>
       </a-dropdown>
     </div>
-    <div class="lang">
+    <div class="mx-3">
       <a-dropdown>
         <a @click.prevent> <Icon name="global" size="2em" /></a>
         <template #overlay>
@@ -34,23 +36,23 @@
         </template>
       </a-dropdown>
     </div>
-    <div class="theme">
-      <Icon name="theme-light" size="2em" class="icon" @click="store.changeTheme('light')" :class="{ active1: store.theme === 'light' }"></Icon>
-      <Icon name="theme-dark" size="2em" class="icon" @click="store.changeTheme('dark')" :class="{ active2: store.theme === 'dark' }"></Icon>
-      <Icon name="theme-system" size="2em" class="icon" @click="store.changeTheme('system')" :class="{ active3: store.theme === 'system' }"></Icon>
+    <div class="mr-3 flex cursor-pointer flex-nowrap text-gray-300">
+      <Icon name="theme-light" size="2em" class="icon" @click="store.changeTheme('light')" :class="{ 'text-[var(--c-orange40)]': store.theme === 'light' }"></Icon>
+      <Icon name="theme-dark" size="2em" class="icon" @click="store.changeTheme('dark')" :class="{ 'text-[var(--c-blue30)]': store.theme === 'dark' }"></Icon>
+      <Icon name="theme-system" size="2em" class="icon" @click="store.changeTheme('system')" :class="{ 'text-[var(--c-black)]': store.theme === 'system' }"></Icon>
     </div>
   </header>
-  <div class="main-wrap">
-    <aside class="main-menu">
+  <div class="relative flex h-[calc(100vh-64px)] flex-row bg-[var(--bg-main)]">
+    <aside class="z-20 min-w-[120px] select-none bg-[var(--bg-main)] pt-5">
       <RouterLink custom :to="item.path" v-for="(item, index) in menu" :key="index">
         <div v-if="!item.isHidden" @click="changeSubMenu(index)" :class="['item', { 'router-link-active': index == currentMenuIdx || (currentMenuIdx == -1 && $route.path.indexOf(item.path + '/') == 0) }]"><Icon name="carousel" size="2em"></Icon>{{ $t(item.meta.title) }}</div>
       </RouterLink>
     </aside>
     <!-- v-if="" -->
-    <aside class="sub-menu" v-if="!submenu.redirect">
+    <aside class="h-[calc(100vh - 64px)] border-primary bg-secondary relative -left-[1px] z-20 flex w-[140px] flex-col border-r pt-5" v-if="!submenu.redirect">
       <SubMenu :data="submenu.children"></SubMenu>
     </aside>
-    <main>
+    <main class="h-[calc(100vh - 64px)] bg-primary relative grow overflow-y-auto">
       <a-spin :spinning="globalLoading" style="margin: 20px"></a-spin>
       <router-view />
     </main>
@@ -146,163 +148,116 @@ onMounted(() => {})
 //   }
 // }
 
-header {
-  display: flex;
-  flex-direction: row;
-  position: relative;
-  align-items: center;
-  padding: 0 12px;
-  height: 64px;
-  width: 100%;
-  min-width: 640px;
-  // font-size: 16px;
-  background-color: var(--bg-main);
-  // background-image: radial-gradient(transparent 1px, #fff 1px);
-  // background-size: 4px 4px;
-  // backdrop-filter: saturate(50%) blur(4px);
-  border-bottom: 1px solid var(--color-border);
-  z-index: 12;
-  // box-shadow: 0px 4px 4px 0px var(--color-shadow);
-}
+// header {
+//   display: flex;
+//   flex-direction: row;
+//   position: relative;
+//   align-items: center;
+//   padding: 0 12px;
+//   height: 64px;
+//   width: 100%;
+//   min-width: 640px;
+//   // font-size: 16px;
+//   background-color: var(--bg-main);
+//   // background-image: radial-gradient(transparent 1px, #fff 1px);
+//   // background-size: 4px 4px;
+//   // backdrop-filter: saturate(50%) blur(4px);
+//   border-bottom: 1px solid var(--color-border);
+//   z-index: 12;
+//   // box-shadow: 0px 4px 4px 0px var(--color-shadow);
+// }
 
-.logo {
-  margin-left: 12px;
-}
-.app-name {
-  font-size: 24px;
-  padding: 0 20px 0 16px;
-  margin-right: 20px;
-  border-right: 2px solid #ccc;
-  color: var(--text-primary);
-  font-weight: 600;
-}
-.title {
-  color: var(--text-primary);
-  font-size: 18px;
-  flex-grow: 1;
-}
+// .app-name {
+//   font-size: 24px;
+//   padding: 0 20px 0 16px;
+//   margin-right: 20px;
+//   border-right: 2px solid #ccc;
+//   color: var(--text-primary);
+//   font-weight: 600;
+// }
 
-.my,
-.lang {
-  display: block;
-  padding: 0 10px;
-  margin: 0 10px;
-}
+// .title {
+//   color: var(--text-primary);
+//   font-size: 18px;
+//   flex-grow: 1;
+// }
 
-.avatar {
-  border-radius: 50%;
-  margin-right: 8px;
-  // box-sizing: content-box;
-  // border: 2px solid #ffffffff;
-  // &: hover;
-  // &:active {
-  //   // border: 2px solid var(--color-background-2);
-  //   box-shadow: 0px 0px 8px 2px var(--t-gray5);
-  // }
-}
+// .my,
+// .lang {
+//   display: block;
+//   padding: 0 10px;
+//   margin: 0 10px;
+// }
 
-.theme {
-  cursor: pointer;
-  color: var(--c-gray100);
-  .active1 {
-    color: var(--c-orange40);
-  }
-  .active2 {
-    color: var(--c-blue30);
-  }
-  .active3 {
-    color: var(--c-black);
-  }
-}
+// .avatar {
+//   border-radius: 50%;
+//   margin-right: 8px;
+//   // box-sizing: content-box;
+//   // border: 2px solid #ffffffff;
+//   // &: hover;
+//   // &:active {
+//   //   // border: 2px solid var(--color-background-2);
+//   //   box-shadow: 0px 0px 8px 2px var(--t-gray5);
+//   // }
+// }
 
-.main-wrap {
-  position: relative;
-  background: var(--bg-main);
-  display: flex;
-  flex-direction: row;
-  height: calc(100vh - 64px);
-  // margin-top: 68px;
-  min-width: 640px;
-}
+// .theme {
+//   cursor: pointer;
+//   color: var(--c-gray100);
+//   .active1 {
+//     color: var(--c-orange40);
+//   }
+//   .active2 {
+//     color: var(--c-blue30);
+//   }
+//   .active3 {
+//     color: var(--c-black);
+//   }
+// }
 
-.main-menu {
-  z-index: 11;
-  user-select: none;
-  min-width: 120px;
-  padding-top: 20px;
-  background: var(--bg-main);
-  border-right: 1px solid var(--color-border);
-  // box-shadow: 4px 0px 4px 0px var(--color-shadow);
-  color: #333;
-  font-size: 14px;
-  // &:lang(en) {
-  //   min-width: 160px;
-  // }
-  .item {
-    color: var(--text-primary);
-    display: flex;
-    position: relative;
-    align-items: center;
-    cursor: pointer;
-    padding: 8px 0 8px 4px;
-    margin: 0;
-    line-height: 32px;
-    // vertical-align: middle;
-    // transition:
-    //   cubic-bezier(0.645, 0.045, 0.355, 1),
-    //   background-color 0.25s;
-    &:hover:not(.router-link-active),
-    &:active:not(.router-link-active) {
-      background: none;
-      color: var(--c-brand);
-      //   cubic-bezier(0.645, 0.045, 0.355, 1),
-      //   background-color 0.25s;
-    }
+// .main-wrap {
+//   position: relative;
+//   background: var(--bg-main);
+//   display: flex;
+//   flex-direction: row;
+//   height: calc(100vh - 64px);
+//   // margin-top: 68px;
+//   min-width: 640px;
+// }
+
+.item {
+  @apply text-primary relative m-0 flex cursor-pointer items-center py-2 pr-[4px] leading-8;
+  &:hover:not(.router-link-active),
+  &:active:not(.router-link-active) {
+    @apply text-[var(--c-brand100)];
   }
 }
 
 .router-link-active {
-  background: var(--bg-layout-active);
-  color: var(--c-brand);
-  font-weight: 600;
-  // &::after {
-  //   content: ' ';
-  //   display: block;
-  //   position: absolute;
-  //   right: 0px;
-  //   width: 4px;
-  //   height: 40px;
-  //   border-radius: 5px;
-  //   background-color: var(--bg-brand);
-  // }
+  @apply bg-[var(--bg-layout-active)] font-semibold text-[var(--c-brand100)];
 }
 
-.sub-menu {
-  z-index: 11;
-  left: -1px;
-  position: relative;
-  background: var(--bg-component);
-  border-right: 1px solid var(--color-border);
-  // box-shadow: 4px 0px 4px 0px var(--color-shadow);
-  display: flex;
-  flex-direction: column;
-  width: 140px;
-  padding-top: 20px;
-  height: calc(100vh - 64px);
-}
+// .sub-menu {
+//   z-index: 11;
+//   left: -1px;
+//   position: relative;
+//   background: var(--bg-component);
+//   border-right: 1px solid var(--color-border);
+//   // box-shadow: 4px 0px 4px 0px var(--color-shadow);
+//   display: flex;
+//   flex-direction: column;
+//   width: 140px;
+//   padding-top: 20px;
+//   height: calc(100vh - 64px);
+// }
 
-main {
-  position: relative;
-  flex-grow: 1;
-  background: var(--bg-main);
-  height: calc(100vh - 64px);
-  overflow-y: auto;
-  // padding: 25px;
-  // padding-top: 64px;
-}
-
-/* <PerfectScrollbar> */
-.ps {
-  height: calc(100vh - 64px);
-}
+// main {
+//   position: relative;
+//   flex-grow: 1;
+//   background: var(--bg-main);
+//   height: calc(100vh - 64px);
+//   overflow-y: auto;
+//   // padding: 25px;
+//   // padding-top: 64px;
+// }
 </style>

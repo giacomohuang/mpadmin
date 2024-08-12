@@ -1,9 +1,10 @@
 <template>
-  <div class="main-wrap">
-    <div style="display: flex; gap: 10px">
+  <h1 className="text-3xl font-bold underline">Hello world!</h1>
+  <div class="block pl-5 pt-5">
+    <div class="flex gap-3">
       <a-button @click="handleConcurrentClick">并发测试</a-button>
       <a-button @click="handleClick">OPEN AI Test</a-button>
-      <div style="white-space: pre-line">{{ aaa }}</div>
+      <div class="whitespace-pre-line">{{ aaa }}</div>
     </div>
   </div>
 </template>
@@ -63,9 +64,3 @@ const handleConcurrentClick = async (e) => {
   })
 }
 </script>
-<style lang="scss" scoped>
-.main-wrap {
-  padding: 20px 0 0 20px;
-  display: block;
-}
-</style>

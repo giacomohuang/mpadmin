@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer theme {
+  [data-theme='light'] {
+    --bg-primary: #fffff;
+    --bg-secondary: theme(colors.neutral.100);
+
+    --text-primary: theme(colors.neutral.900);
+    --text-secondary: theme(colors.neutral.700);
+    --text-tertiary: theme(colors.neutral.300);
+
+    --border-primary: #e5e5e5;
+    --border-secondary: theme(colors.neutral.300);
+  }
+
+  [data-theme='dark'] {
+    --bg-primary: #171717;
+    --bg-secondary: theme(colors.neutral.800);
+
+    --text-primary: theme(colors.white);
+    --text-secondary: theme(colors.neutral.200);
+    --text-tertiary: theme(colors.neutral.500);
+
+    --border-primary: theme(colors.neutral.700);
+    --border-secondary: theme(colors.neutral.500);
+  }
+}

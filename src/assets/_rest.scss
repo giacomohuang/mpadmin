@@ -30,12 +30,12 @@ a {
 }
 a:link,
 a:visited {
-  color: var(--c-brand100);
+  @apply text-brand-600;
   text-decoration: none;
 }
 a:hover,
 a:active {
-  color: var(--c-brand90);
+  @apply text-brand-500;
   text-decoration: none;
 }
 

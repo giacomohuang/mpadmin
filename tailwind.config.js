@@ -1,46 +1,89 @@
-function withOpacity(variable) {
-  // 返回一个函数，透明度为可选参数，这样在 HTML 元素中使用颜色基础类时，既可以采用 text-blue-500 方式，也支持 text-blue-500/20 快捷同时设置透明度的形式
-  return ({ opacityValue }) => {
-    if (opacityValue === undefined) {
-      return `rgb(var(${variable}))`
-    }
-    return `rgba(var(${variable}), ${opacityValue})`
-  }
-}
-
 /** @type {import('tailwindcss').Config} */
+
 export default {
   content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
-        white: '#fff',
-        black: '#000',
-        gray: {
-          50: '#f7f7f7',
-          100: '#ededed',
-          200: '#dfdfdf',
-          300: '#cccccc',
-          400: '#adadad',
-          500: '#999999',
-          600: '#888888',
-          700: '#7b7b7b',
-          800: '#676767',
-          900: '#545454',
-          950: '#363636'
+        brand: {
+          50: '#edf8ff',
+          100: '#d7edff',
+          200: '#b9e1ff',
+          300: '#88d0ff',
+          400: '#50b5ff',
+          500: '#2893ff',
+          600: '#1677ff',
+          700: '#0a5ceb',
+          800: '#0f4abe',
+          900: '#134295',
+          950: '#112a5a'
+        },
+        orange: {
+          50: '#fff4ed',
+          100: '#ffe6d5',
+          200: '#feccaa',
+          300: '#fdac74',
+          400: '#fb8a3c',
+          500: '#f97316',
+          600: '#ea670c',
+          700: '#c2570c',
+          800: '#9a4a12',
+          900: '#7c3d12',
+          950: '#432007'
+        },
+        green: {
+          50: '#f0fdf5',
+          100: '#dcfce8',
+          200: '#bbf7d1',
+          300: '#86efad',
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803c',
+          800: '#166533',
+          900: '#14532b',
+          950: '#052e14'
+        },
+        blue: {
+          50: '#eff5ff',
+          100: '#dbe8fe',
+          200: '#bfd7fe',
+          300: '#93bbfd',
+          400: '#609afa',
+          500: '#3b82f6',
+          600: '#2570eb',
+          700: '#1d64d8',
+          800: '#1e55af',
+          900: '#1e478a',
+          950: '#172e54'
+        },
+        red: {
+          50: '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
+          300: '#fca5a5',
+          400: '#f87171',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+          800: '#991b1b',
+          900: '#7f1d1d',
+          950: '#450a0a'
         }
       },
+
       borderColor: {
-        primary: 'var(--color-border)',
-        secondary: 'var(--color-border-hover)'
+        primary: 'var(--border-primary)',
+        secondary: 'var(--border-secondary)'
       },
       textColor: {
         primary: 'var(--text-primary)',
-        secondary: 'var(--text-secondary)'
+        secondary: 'var(--text-secondary)',
+        tertiary: 'var(--text-tertiary)'
       },
       backgroundColor: {
-        primary: 'var(--bg-main)',
-        secondary: 'var(--bg-component)'
+        primary: 'var(--bg-primary)',
+        secondary: 'var(--bg-secondary)'
       }
     }
   },

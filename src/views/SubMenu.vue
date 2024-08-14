@@ -1,12 +1,15 @@
 <template>
   <RouterLink custom :to="item.path" v-slot="{ isActive, href, navigate }" v-for="(item, index) in props.data" :key="index">
     <template v-if="item.children">
-      <div @click="toggle_children" class="item dir" :class="{ 'sub-active': isActive }">{{ $t(item.meta.title) }}<Icon name="arrow-down" size="2em" class="arrow"></Icon></div>
+      <div @click="toggle_children" class="m-0 flex h-9 w-36 cursor-pointer items-center pl-3 text-primary visited:text-primary" :class="{ 'sub-active': isActive }">
+        {{ $t(item.meta.title) }}
+        <Icon name="arrow-down" size="2em" class="arrow"></Icon>
+      </div>
       <div class="sub">
         <SubMenu :data="item.children"></SubMenu>
       </div>
     </template>
-    <a v-else :class="['item', { 'sub-active': isActive }]" :href="href" @click="navigate">{{ $t(item.meta.title) }}</a>
+    <a v-else :class="['m-0 flex h-9 w-36 cursor-pointer items-center pl-3 text-primary visited:text-primary', { 'sub-active': isActive }]" :href="href" @click="navigate">{{ $t(item.meta.title) }}</a>
   </RouterLink>
 </template>
 
@@ -37,21 +40,21 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.item {
-  font-size: 14px;
-  display: flex;
-  width: 140px;
-  height: 35px;
-  padding: 0 0 0 12px;
-  align-items: center;
-  margin: 0;
-  color: var(--text-primary);
-  cursor: pointer;
-  &:hover,
-  &:active {
-    background: var(--bg-component-active);
-  }
-}
+// .item {
+//   font-size: 14px;
+//   display: flex;
+//   width: 144px;
+//   height: 35px;
+//   padding: 0 0 0 12px;
+//   align-items: center;
+//   margin: 0;
+//   color: var(--text-primary);
+//   cursor: pointer;
+//   &:hover,
+//   &:active {
+//     background: var(--bg-component-active);
+//   }
+// }
 
 .sub {
   display: none;

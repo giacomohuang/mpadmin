@@ -57,7 +57,7 @@ watch(
   display: flex;
   flex-direction: row;
   align-items: center;
-
+  background: var(--bg-main);
   width: 100%;
 
   ul {
@@ -66,14 +66,13 @@ watch(
     flex-direction: row;
     list-style-type: none;
     border: 1px solid var(--color-border);
-    background: var(--bg-main);
+
     border-radius: 5px;
   }
   li {
     flex-grow: 1;
     height: 10px;
     box-shadow: inset 0 0 0px 2px var(--bg-main);
-    // text-align: center;
 
     transition: all linear 0.15s;
     &:not(:first-child) {

@@ -1,17 +1,6 @@
 @use 'vars';
 @use 'rest';
 
-@media screen and (max-width: 640px) {
-}
-@media screen and (max-width: 768px) {
-}
-@media screen and (max-width: 1024px) {
-}
-@media screen and (max-width: 1280px) {
-}
-@media screen and (max-width: 1536px) {
-}
-
 /* iconfont */
 .iconfont {
   width: 1.5em;
@@ -36,29 +25,29 @@ h2 {
   margin: 0;
 }
 
-.flex {
-  display: flex;
-  flex-direction: row;
-}
-.flex-col {
-  display: flex;
-  flex-direction: column;
-}
+// .flex {
+//   display: flex;
+//   flex-direction: row;
+// }
+// .flex-col {
+//   display: flex;
+//   flex-direction: column;
+// }
 
-.flex-between {
-  justify-content: space-between;
-}
+// .flex-between {
+//   justify-content: space-between;
+// }
 
-.flex-cnt-c {
-  justify-content: center;
-}
-.flex-item-c {
-  align-items: center;
-}
+// .flex-cnt-c {
+//   justify-content: center;
+// }
+// .flex-item-c {
+//   align-items: center;
+// }
 
-.flex-rc {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
+// .flex-rc {
+//   display: flex;
+//   flex-direction: row;
+//   justify-content: center;
+//   align-items: center;
+// }

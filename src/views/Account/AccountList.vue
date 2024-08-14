@@ -47,7 +47,7 @@
         <a-tag :color="record.enable2FA ? 'green' : 'red'">{{ record.enable2FA ? '已开启' : '未开启' }}</a-tag>
       </template>
       <template v-else-if="column.key === 'action'">
-        <a @click="handleEdit(record._id)">{{ $t('common.cpnt.edit') }}</a>
+        <a @click="handleEdit(record._id)" href="####">{{ $t('common.cpnt.edit') }}</a>
         <a-divider type="vertical" />
         <a href="####">{{ $t('common.cpnt.disable') }}</a>
       </template>

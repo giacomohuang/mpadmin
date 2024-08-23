@@ -2,7 +2,7 @@
   <context-holder />
   <div class="main" v-show="!globalLoading">
     <section>
-      <div class="title flex flex-item-c flex-between">
+      <div class="title flex-item-c flex-between flex">
         <h2>{{ $t('my.authentication.pwd') }}</h2>
         <a-button @click.stop="state.toggleChangePwd = !state.toggleChangePwd">{{ state.toggleChangePwd ? $t('my.authentication.hide') : $t('my.authentication.cpwd') }}</a-button>
       </div>
@@ -20,14 +20,14 @@
             <a-input-password v-model:value="pwdForm.confirmPassword" autocomplete="new-password" />
           </a-form-item>
           <a-form-item :wrapper-col="{ offset: 6 }">
-            <a-button type="ghost" @click="handleResetPwdForm">{{ $t('common.cpnt.reset') }}</a-button>
-            <a-button type="primary" html-type="submit" style="margin-left: 10px">{{ $t('common.cpnt.submit') }}</a-button>
+            <a-button type="ghost" @click="handleResetPwdForm">{{ $t('common.reset') }}</a-button>
+            <a-button type="primary" html-type="submit" style="margin-left: 10px">{{ $t('common.submit') }}</a-button>
           </a-form-item>
         </a-form>
       </div>
     </section>
     <section>
-      <div class="title flex flex-item-c">
+      <div class="title flex-item-c flex">
         <h2>{{ $t('my.authentication.mobi') }}</h2>
       </div>
       <div class="tips">{{ $t('my.authentication.enhphone') }}</div>
@@ -50,7 +50,7 @@
             <span class="resend resend-hint" v-if="phoneState.isCountDown">{{ $t('my.authentication.resendin', phoneState.countDownTime) }}</span>
           </a-form-item>
         </a-form>
-        <div class="flex-col flex-item-c verifycode" v-if="phoneState.isSend">
+        <div class="flex-item-c verifycode flex-col" v-if="phoneState.isSend">
           <div class="hint">{{ $t('my.authentication.rsvphone') }}</div>
           <VerifyInput v-model="phoneState.verifyCode" :autofocus="true" :digits="6" @finish="handleUpdatePhone"></VerifyInput>
         </div>
@@ -58,7 +58,7 @@
     </section>
 
     <section>
-      <div class="title flex flex-item-c">
+      <div class="title flex-item-c flex">
         <h2>{{ $t('my.authentication.email') }}</h2>
       </div>
       <div class="tips">{{ $t('my.authentication.enhemail') }}</div>
@@ -76,7 +76,7 @@
             <span class="resend resend-hint" v-if="emailState.isCountDown">{{ $t('my.authentication.resendin', emailState.countDownTime) }}</span>
           </a-form-item>
         </a-form>
-        <div class="flex-col flex-item-c verifycode" v-if="emailState.isSend">
+        <div class="flex-item-c verifycode flex-col" v-if="emailState.isSend">
           <div class="hint">{{ $t('my.authentication.rsvemail') }}</div>
           <VerifyInput v-model="emailState.verifyCode" :autofocus="true" :digits="6" @finish="handleUpdateEmail"></VerifyInput>
         </div>
@@ -84,7 +84,7 @@
     </section>
 
     <section>
-      <div class="title flex flex-item-c">
+      <div class="title flex-item-c flex">
         <h2>{{ $t('my.authentication.totp') }}</h2>
       </div>
       <div class="tips">{{ $t('my.authentication.enhtotp') }}</div>
@@ -96,7 +96,7 @@
         <div class="step">
           <div class="title"><span class="badage">1</span>使用验证APP扫描二维码</div>
           <div class="hint">扫描验证码后，将得到一组6位数字验证码。还没有安装验证APP？ <a href="/downauthapp" target="_blank">点击这里下载</a></div>
-          <div style="margin-top: 20px" class="flex-col flex-item-c">
+          <div style="margin-top: 20px" class="flex-item-c flex-col">
             <div style="border-radius: 8px; width: fit-content; height: fit-content"><a-qrcode v-if="totpState.activationUrl" :value="totpState.activationUrl" /></div>
           </div>
         </div>
@@ -109,7 +109,7 @@
     </section>
 
     <section>
-      <div class="title flex flex-item-c flex-between">
+      <div class="title flex-item-c flex-between flex">
         <h2>{{ $t('my.authentication.2fa') }}</h2>
       </div>
       <div class="tips">{{ $t('my.authentication.enh2fa') }}</div>
@@ -123,6 +123,7 @@
     </section>
   </div>
 </template>
+
 <script setup>
 // common
 import { inject, toRefs, onUnmounted, reactive, ref } from 'vue'

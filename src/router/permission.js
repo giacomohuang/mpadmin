@@ -1,4 +1,5 @@
-import { router, dynamicRoutes } from './router'
+import { router } from './router'
+import dynamicRoutes from 'virtual:router'
 
 // import store from './store'
 // import { Message } from 'element-ui'

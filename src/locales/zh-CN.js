@@ -1,0 +1,127 @@
+export default {
+  common: {
+    appname: '管理运营平台',
+    lang: '语言',
+    enabled: '启用',
+    disabled: '禁用',
+    disable: '禁用',
+    enable: '启用',
+    submit: '提交',
+    reset: '重置',
+    send: '发送',
+    del: '删除',
+    edit: '编辑',
+    action: '动作',
+    status: '状态',
+    all: '全部',
+    components: {
+      pwdstrength: {
+        weak: '很弱',
+        fair: '较弱',
+        good: '中等',
+        strong: '较强',
+        excellent: '很强'
+      }
+    }
+  },
+  404: {
+    _title: '404 页面不存在',
+    backhome: '返回首页',
+    description: '你访问的页面不存在'
+  },
+  workspace: {
+    _title: '工作台',
+    main: {
+      _title: '工作台'
+    },
+    upload: {
+      _title: '上传'
+    }
+  },
+  signin: {
+    _title: '登录',
+    title: '登录管理运营平台',
+    accountname: '账号',
+    password: '密码',
+    signin: '登录',
+    error: '用户名/密码错误',
+    newpwd: '新密码',
+    pep: '请输入密码',
+    pepa: '请再次输入密码',
+    pnm: '两次输入密码不一致',
+    cfpwd: '确认新密码',
+    samepwd: '新密码不能与初始密码一样',
+    peya: '请输入账号名',
+    peypwd: '请输入密码',
+    forgotpwd: '忘记密码',
+    email: '电子邮件',
+    phone: '手机短信'
+  },
+  account: {
+    _title: '账户',
+    account: {
+      _title: '账户信息'
+    },
+    accountlist: {
+      _title: '账户列表',
+      accountname: '帐户名',
+      realname: '真实姓名',
+      email: '邮箱',
+      phone: '手机',
+      '2fa': '两步验证'
+    }
+  },
+  my: {
+    _title: '我的',
+    authentication: {
+      _title: '密码和身份认证',
+      hide: '隐藏',
+      pwd: '密码',
+      oldpwd: '旧密码',
+      newpwd: '新密码',
+      pep: '请输入密码',
+      pepa: '请再次输入密码',
+      pnm: '两次输入密码不一致',
+      cpwd: '修改密码',
+      cfpwd: '确认新密码',
+      syaeyps: '强化账户安全，确保使用强度高的密码。',
+      pst: '密码太简单了，请使用数字、大小写字母、符号的组合。',
+      auth: '身份验证',
+      email: '电子邮件',
+      mobi: '手机号码',
+      totp: '动态口令App',
+      emailad: '电子邮件',
+      svcode: '发送验证码',
+      edit: '修改',
+      notset: '未设置',
+      set: '设置',
+      reset: '重新设置',
+      editemail: '修改电子邮件地址',
+      setemail: '设置电子邮件地址',
+      resendin: '{count}秒后可以重新发送',
+      rsvemail: '你的邮箱将收到一封验证邮件，请将邮件中的4位数字验证码填入下方空格内，切勿将验证码透露给其他人',
+      editphone: '修改手机号码',
+      setphone: '设置手机号码',
+      phonead: '手机号码',
+      rsvphone: '你的手机将收到一条验证短信，请将短信中的4位数字验证码填入下方空格内，切勿将验证码透露给其他人',
+      havset: '已设置',
+      settotp: '绑定动态口令App',
+      samepwd: '新密码不能与旧密码一样',
+      enhphone: '设置手机号码，用于接收登录验证码、接收系统消息',
+      enhtotp: '使用动态口令增强账户安全',
+      enhemail: '配置电子邮件账户，用于接收登录验证码、接收系统消息',
+      areacode: '国际区号',
+      pephone: '请输入手机号码',
+      pedphone: '请输入与之前不同的号码',
+      pecphone: '请输入正确的手机号码',
+      peemail: '请输入电子邮件地址',
+      pecemail: '请输入正确的电子邮件地址',
+      pedemail: '请输入与之前不同的电子邮件地址',
+      '2fa': '两步验证',
+      enh2fa: '使用两步验证(2FA)增强账户安全，验证方式包括短信验证码、邮件验证码和动态口令验证'
+    },
+    profile: {
+      _title: '我的资料'
+    }
+  }
+}

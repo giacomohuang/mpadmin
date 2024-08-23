@@ -37,11 +37,11 @@ onMounted(() => {
 })
 
 const strength = {
-  0: 'comp.pwdstrength.weak',
-  1: 'comp.pwdstrength.fair',
-  2: 'comp.pwdstrength.good',
-  3: 'comp.pwdstrength.strong',
-  4: 'comp.pwdstrength.excellent'
+  0: 'components.pwdstrength.weak',
+  1: 'components.pwdstrength.fair',
+  2: 'components.pwdstrength.good',
+  3: 'components.pwdstrength.strong',
+  4: 'components.pwdstrength.excellent'
 }
 
 watch(

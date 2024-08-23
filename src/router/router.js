@@ -3,7 +3,9 @@ import Layout from '@/views/Layout.vue'
 import helper from '../js/helper'
 import i18n, { loadLocaleData, getLocale } from '../js/i18n'
 import account from '../api/account'
+// import dynamicRoutes from 'virtual:routes'
 
+// routes[0].component().then(
 // import Layout1 from '@/views/Layout1.vue'
 
 export const router = createRouter({
@@ -16,6 +18,7 @@ export const router = createRouter({
   // },
   // 静态加载的公共页面，不需要认证token
   routes: [
+    { path: '/', component: Layout, redirect: 'workspace/main', meta: { title: 'common.route.workspace', permissionId: '00010000' }, isHidden: true },
     { path: '/signin', name: 'signin', component: () => import('@/views/Signin.vue'), meta: { title: 'common.route.signin', noAuth: true } },
     { path: '/404', name: '404', component: () => import('@/views/404.vue'), meta: { title: 'common.route.404', noAuth: true } },
     { path: '/:pathMatch(.*)', redirect: '/404', meta: { title: 'common.route.404', noAuth: true } }
@@ -36,7 +39,7 @@ router.beforeEach(async (to, from, next) => {
   // 载入路由对应的语言文件
   // console.log(getLocale())
   // console.log(to.path)
-  await loadLocaleData(getLocale(), to.path)
+  await loadLocaleData(getLocale())
   setTitle(meta.title)
   // 如果当前页面不需要认证token，直接放行
   if (meta.noAuth) {
@@ -70,64 +73,59 @@ router.beforeEach(async (to, from, next) => {
   }
 })
 
-export const dynamicRoutes = [
-  {
-    path: '/',
-    component: Layout,
-    redirect: 'workspace/main',
-    meta: { title: 'common.route.workspace', permissionId: '00010000' },
-    isHidden: true
-  },
-  {
-    path: '/workspace',
-    component: Layout,
-    name: 'workspace',
-    meta: { title: 'common.route.workspace', permissionId: '000010000' },
-    icon: '#icon-workspace',
-    children: [
-      { path: '/workspace/main', component: () => import('@/views/Workspace/Main.vue'), meta: { title: 'common.route.workspace', permission: '0000010001' } },
-      { path: '/workspace/upload', component: () => import('@/views/Workspace/Upload.vue'), meta: { title: 'common.route.upload', permission: '0000010002' } }
-    ]
-  },
-  {
-    path: '/account',
-    component: Layout,
-    name: 'account',
-    meta: { title: 'common.route.account', permissionId: '000010000' },
-    icon: '#icon-Account',
-    children: [
-      { path: '/account/accountlist', component: () => import('@/views/Account/AccountList.vue'), meta: { title: 'common.route.accountlist', permission: '0000010001' } },
-      { path: '/account/permission', component: () => import('@/views/Account/Permission.vue'), meta: { title: 'common.route.permission', permission: '0000010001' } }
-    ]
-  },
-  {
-    path: '/voucher',
-    component: Layout,
-    name: 'voucher',
-    meta: { title: 'common.route.voucher', permissionId: '100' },
-    icon: '#icon-voucher',
-    children: [
-      {
-        path: '/voucher/voucherlist',
-        name: 'voucherlist',
-        meta: { title: 'common.route.voucherlist', permission: '000010001' },
-        children: [
-          { path: '/voucher/voucheradd', component: () => import('@/views/Voucher/VoucherList.vue'), meta: { title: 'common.route.voucherlist', permission: '000010001' } },
-          { path: '/voucher/verification', component: () => import('@/views/Voucher/Verification.vue'), meta: { title: 'common.route.verification', permission: '0000100003' } }
-        ]
-      },
-      { path: '/voucher/templatelist', component: () => import('@/views/Voucher/TemplateList.vue'), meta: { title: 'common.route.templatelist', permission: '000010002' } }
-    ]
-  },
-  {
-    path: '/my',
-    component: Layout,
-    name: 'my',
-    meta: { title: 'common.route.my', permissionId: '000010000' },
-    icon: '#icon-my',
-    children: [
-      { path: '/my/profile', component: () => import('@/views/My/Profile.vue'), meta: { title: 'common.route.profile', permission: '40001' } },
-      { path: '/my/authentication', component: () => import('@/views/My/Authentication.vue'), meta: { title: 'common.route.authentication', permission: '40002' } }
-    ]
-  }
-]
+// export const dynamicRoutes = [
+//   {
+//     path: '/workspace',
+//     component: Layout,
+//     name: 'workspace',
+//     meta: { title: 'common.route.workspace', permissionId: '000010000' },
+//     icon: '#icon-workspace',
+//     children: [
+//       { path: '/workspace/main', component: () => import('@/views/Workspace/Main.vue'), meta: { title: 'common.route.workspace', permission: '0000010001' } },
+//       { path: '/workspace/upload', component: () => import('@/views/Workspace/Upload.vue'), meta: { title: 'common.route.upload', permission: '0000010002' } }
+//     ]
+//   },
+//   {
+//     path: '/account',
+//     component: Layout,
+//     name: 'account',
+//     meta: { title: 'common.route.account', permissionId: '000010000' },
+//     icon: '#icon-Account',
+//     children: [
+//       { path: '/account/accountlist', component: () => import('@/views/Account/AccountList.vue'), meta: { title: 'common.route.accountlist', permission: '0000010001' } },
+//       { path: '/account/permission', component: () => import('@/views/Account/Permission.vue'), meta: { title: 'common.route.permission', permission: '0000010001' } }
+//     ]
+//   },
+//   {
+//     path: '/voucher',
+//     component: Layout,
+//     name: 'voucher',
+//     meta: { title: 'common.route.voucher', permissionId: '100' },
+//     icon: '#icon-voucher',
+//     children: [
+//       {
+//         path: '/voucher/voucherlist',
+//         name: 'voucherlist',
+//         meta: { title: 'common.route.voucherlist', permission: '000010001' },
+//         children: [
+//           { path: '/voucher/voucheradd', component: () => import('@/views/Voucher/VoucherList.vue'), meta: { title: 'common.route.voucherlist', permission: '000010001' } },
+//           { path: '/voucher/verification', component: () => import('@/views/Voucher/Verification.vue'), meta: { title: 'common.route.verification', permission: '0000100003' } }
+//         ]
+//       },
+//       { path: '/voucher/templatelist', component: () => import('@/views/Voucher/TemplateList.vue'), meta: { title: 'common.route.templatelist', permission: '000010002' } }
+//     ]
+//   },
+//   {
+//     path: '/my',
+//     component: Layout,
+//     name: 'my',
+//     meta: { title: 'common.route.my', permissionId: '000010000' },
+//     icon: '#icon-my',
+//     children: [
+//       { path: '/my/profile', component: () => import('@/views/My/Profile.vue'), meta: { title: 'common.route.profile', permission: '40001' } },
+//       { path: '/my/authentication', component: () => import('@/views/My/Authentication.vue'), meta: { title: 'common.route.authentication', permission: '40002' } }
+//     ]
+//   }
+// ]
+
+// console.log(dynamicRoutes)

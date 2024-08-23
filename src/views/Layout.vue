@@ -73,7 +73,8 @@
 
 <script setup>
 import { onMounted, ref, toRefs, provide } from 'vue'
-import { router, dynamicRoutes } from '../router/router'
+import { router } from '../router/router'
+import dynamicRoutes from 'virtual:router'
 import { changeLocale } from '../js/i18n'
 import SubMenu from './SubMenu.vue'
 import { useStore } from '../stores/stores'

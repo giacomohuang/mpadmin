@@ -2,9 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@function hex2rgb($hex) {
+  @return red($hex) + ' ' + green($hex) + ' ' + blue($hex);
+}
+
 @layer theme {
   [data-theme='light'] {
-    --bg-primary: #fffff;
+    --bg-primary: #{hex2rgb(#ffffff)};
     --bg-secondary: theme(colors.neutral.100);
 
     --text-primary: theme(colors.neutral.900);
@@ -16,7 +20,7 @@
   }
 
   [data-theme='dark'] {
-    --bg-primary: #171717;
+    --bg-primary: #{hex2rgb(#171717)};
     --bg-secondary: theme(colors.neutral.800);
 
     --text-primary: theme(colors.white);

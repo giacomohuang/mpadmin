@@ -1,0 +1,124 @@
+export default {
+  common: {
+    appname: 'MPAdmin',
+    lang: 'Language',
+    enabled: 'Enabled',
+    disable: 'Disable',
+    enable: 'Enable',
+    disabled: 'Disabled',
+    submit: 'Submit',
+    reset: 'Reset',
+    send: 'Send',
+    del: 'Delete',
+    edit: 'Edit',
+    action: 'Action',
+    status: 'Status',
+    all: 'All',
+    components: {
+      pwdstrength: {
+        weak: 'weak',
+        fair: 'fair',
+        good: 'good',
+        strong: 'strong',
+        excellent: 'excellent'
+      }
+    }
+  },
+  404: {
+    _title: '404 Not Found',
+    backhome: 'Back to home',
+    description: 'Sorry, the page you visited does not exist.'
+  },
+  workspace: {
+    _title: 'Workspace',
+    main: {
+      _title: 'Workspace'
+    },
+    upload: {
+      _title: 'Upload'
+    }
+  },
+  signin: {
+    _title: 'Sign in',
+    title: 'Sign in to MPAdmin',
+    accountname: 'Account',
+    password: 'Password',
+    signin: 'Sign in',
+    error: 'Accountname or Password is Incorrect',
+    newpwd: 'New Password',
+    pep: 'Please enter the password.',
+    pepa: 'Please enter password again.',
+    pnm: "Password confirmation doesn't match the password.",
+    cfpwd: 'Confirm password',
+    samepwd: 'The new password cannot be the same as the initial password.',
+    peya: 'Please input your accountname',
+    peypwd: 'Please input your password',
+    forgotpwd: 'Forgot Password',
+    email: 'By Email',
+    phone: 'By Phone'
+  },
+  account: {
+    _title: 'Account',
+    accountlist: {
+      _title: 'Account List',
+      accountname: 'Account Name',
+      realname: 'Real Name',
+      email: 'Email',
+      phone: 'Mobile Phone',
+      '2fa': '2FA'
+    }
+  },
+  my: {
+    _title: 'My',
+    authentication: {
+      _title: 'Authentication',
+      hide: 'Hide',
+      pwd: 'Password',
+      oldpwd: 'Old Password',
+      newpwd: 'New Password',
+      pep: 'Please enter the password.',
+      pepa: 'Please enter password again.',
+      pnm: "Password confirmation doesn't match the password.",
+      cpwd: 'Change Password',
+      cfpwd: 'Confirm password',
+      syaeyps: 'Strengthen your account by ensuring your password is strong.',
+      pst: 'The password is too simple. Please use a combination of numbers, uppercase and lowercase letters, and symbols.',
+      auth: 'Authentication',
+      email: 'Email',
+      mobi: 'Mobile Phone',
+      totp: 'Dynamic Password App',
+      emailad: 'Email',
+      svcode: 'Send Code',
+      edit: 'Edit',
+      notset: 'Not set',
+      set: 'Set',
+      reset: 'Reset',
+      editemail: 'Edit Email Address',
+      setemail: 'Set Email Address',
+      resendin: "It's possible to resend after {count}s.",
+      rsvemail: 'You will receive a verification email. Please fill in the 4-digit verification code in the email below. DO NOT share the code to others.',
+      editphone: 'Modify Mobile Phone Number',
+      setphone: 'Set Mobile Phone Number',
+      phonead: 'Phone Number',
+      rsvphone: 'You will receive a verification text message. Please fill in the 4-digit verification code below. DO NOT share the verification code to others.',
+      havset: 'Already set',
+      settotp: 'Setup Dynamic Password App',
+      samepwd: 'The new password cannot be the same as the old password.',
+      enhphone: 'Set a mobile phone number to receive verification codes, system messages, etc.',
+      enhtotp: 'Enhance account security with dynamic password.',
+      enhemail: 'Set an email account to receive verification codes, system messages, etc.',
+      areacode: 'Areacode',
+      pephone: 'Please enter the phone number.',
+      pedphone: 'Please enter a different phone number.',
+      pecphone: 'Please enter the correct phone number',
+      peemail: 'Please enter email.',
+      pecemail: 'Please enter correct email.',
+      pedemail: 'Please enter a different email.',
+      '2fa': 'Two-Factor Authentication',
+      enh2fa: 'Use two-step verification (2FA) to enhance account security, include SMS verification, email verification and dynamic password verification.'
+    },
+    profile: {
+      _title: 'My Profile'
+    }
+  }
+}

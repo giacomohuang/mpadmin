@@ -18,8 +18,9 @@ const i18n = createI18n({
 
 // 切换语言
 export async function changeLocale(locale) {
-  console.log('bbbbb', router.currentRoute.value.path)
-  await loadLocaleData(locale, router.currentRoute.value.path)
+  // console.log('bbbbb', router.currentRoute.value.path)
+  // await loadLocaleData(locale, router.currentRoute.value.path)
+  await loadLocaleData(locale)
   if (i18n.mode === 'legacy') {
     i18n.global.locale = locale
   } else {
@@ -41,26 +42,22 @@ export function getLocale() {
 }
 
 // 懒加载语言包
-export async function loadLocaleData(locale, path) {
+export async function loadLocaleData(locale) {
   // load locale messages with dynamic import
-  const p = `../locales/${locale}${path}.json`
-  // console.log('local path', p)
+  // const p = `../locales/${locale}${path}.json`
   try {
-    // const [common, page] = await Promise.all([import(/* @vite-ignore */ `../locales/${locale}/common.json`), import(/* @vite-ignore */ `${p}.json`)])
-    const common = await import(`../locales/${locale}/common.json`)
-    i18n.global.setLocaleMessage(locale, common.default)
-    const localeFile = Object.keys(localeFiles).find((path) => {
-      return path === p
-    })
-    if (!localeFile) throw new Error('locale file load error')
-    const page = await localeFiles[localeFile]()
-    i18n.global.mergeLocaleMessage(locale, page.default)
-
-    // set locale and locale message
-
-    // console.log(page.default)
+    const lang = await import(`../locales/${locale}.js`)
+    // console.log(lang)
+    i18n.global.setLocaleMessage(locale, lang.default)
+    // const common = await import(`../locales/${locale}/common.json`)
+    // i18n.global.setLocaleMessage(locale, common.default)
+    // const localeFile = Object.keys(localeFiles).find((path) => {
+    //   return path === p
+    // })
+    // if (!localeFile) throw new Error('locale file load error')
+    // const page = await localeFiles[localeFile]()
+    // i18n.global.mergeLocaleMessage(locale, page.default)
   } catch (e) {
-    // i18n.global.setLocaleMessage(locale, global.default)
     console.log(e)
   } finally {
     return nextTick()

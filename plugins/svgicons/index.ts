@@ -49,6 +49,7 @@ export function createSvgIconsPlugin(opt: ViteSvgIconsPlugin): Plugin {
     },
     resolveId(id) {
       if ([SVG_ICONS_REGISTER_NAME, SVG_ICONS_CLIENT].includes(id)) {
+        // console.log(id)
         return id
       }
       return null

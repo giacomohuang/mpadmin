@@ -1,11 +1,14 @@
 import { parse } from '@vue/compiler-sfc'
 import fs from 'fs'
 import fg from 'fast-glob'
+import cors from 'cors'
+import getEtag from 'etag'
 import chokidar from 'chokidar'
 import { resolve } from 'path'
 import json5 from 'json5'
 import path from 'path'
 import { get } from 'http'
+import { normalizePath } from 'vite'
 // export default function routesGeneratorPlugin() {
 //   const virtualModuleId = 'virtual:routes'
 //   const resolvedVirtualModuleId = '\0' + virtualModuleId
@@ -43,27 +46,42 @@ export default function routesGeneratorPlugin() {
 
   return {
     name: 'routes-generator-plugin', // 必须的，将会在 warning 和 error 中显示
-    configureServer(server) {
-      const watchPath = resolve('./src/views')
-      const watcher = chokidar.watch(watchPath)
-      watcher.on('change', (path) => {
-        console.log('/src/views file changed')
-        server.ws.send({
-          type: 'custom',
-          event: 'routes-generator-plugin',
-          data: `export default ${getCode()}`
-        })
+    // configureServer(server) {
+    //   const watchPath = resolve('./src/views')
+    //   const watcher = chokidar.watch(watchPath, { ignored: [`${watchPath}/*.vue`] })
+    //   watcher.on('all', (event, watchPath) => {
+    //     if (event === 'change' || event === 'add' || event === 'unlink') {
+    //       // 当文件变动时，通知 Vite 重新加载虚拟模块
+    //       console.log('service reload')
+    //       return `export default ${getCode()}`
+    //     }
+    //   })
+    //   // watcher.on('change', (watchPath) => {
+    //   //   server.ws.send({
+    //   //     type: 'custom',
+    //   //     event: 'routes-generator-plugin',
+    //   //     data: `export default ${getCode()}`
+    //   //   })
+    //   // })
+    // },
+    configureServer: ({ middlewares }) => {
+      middlewares.use(cors({ origin: '*' }))
+      middlewares.use(async (req, res, next) => {
+        const url = normalizePath(req.url)
+        if (url.includes(virtualModuleId)) {
+          // console.log(url)
+          res.setHeader('Content-Type', 'application/javascript')
+          res.setHeader('Cache-Control', 'no-cache')
+          const content = `export default ${getCode()}`
+          res.setHeader('Etag', getEtag(content, { weak: true }))
+          res.statusCode = 200
+          res.end(content)
+        } else {
+          next()
+        }
       })
     },
-    // handleHotUpdate({ server }) {
-    //   // Also use `server.ws.send` to support Vite <5.1 if needed
-    //   server.ws.send({
-    //     type: 'custom',
-    //     event: 'special-update',
-    //     data: getCode()
-    //   })
-    //   return `export default ${getCode()}`
-    // },
+
     resolveId(id) {
       if (id === virtualModuleId) {
         return resolvedVirtualModuleId
@@ -102,7 +120,8 @@ function getCode() {
   routeJson = getRouteMap([])
   // console.log('-------------------')
   const routeStr = JSON.stringify(routeJson, null, '  ').replace(/"(\(\) => import\([\s\S]*?\))"/gm, '$1')
-  console.log(routeStr)
+  // console.log(routeStr)
+  console.log('router has been generated.')
   return routeStr
 
   function getRouteMap(json) {

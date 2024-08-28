@@ -9,6 +9,15 @@
   </div>
 </template>
 
+<route lang="json">
+{
+  "meta": {
+    "title": "main",
+    "isNav": false
+  }
+}
+</route>
+
 <script setup>
 import { ref, inject, onMounted, reactive } from 'vue'
 import CryptoJS from 'crypto-js'

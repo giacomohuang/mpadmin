@@ -46,7 +46,7 @@ export async function loadLocaleData(locale) {
   // load locale messages with dynamic import
   // const p = `../locales/${locale}${path}.json`
   try {
-    const lang = await import(`../locales/${locale}.js`)
+    const lang = await import(`../locales/${locale}.json`)
     // console.log(lang)
     i18n.global.setLocaleMessage(locale, lang.default)
     // const common = await import(`../locales/${locale}/common.json`)

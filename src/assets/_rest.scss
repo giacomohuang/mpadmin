@@ -9,6 +9,16 @@
 }
 html {
   font-size: 16px;
+  line-height: 1;
+}
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe {
+  vertical-align: baseline;
 }
 
 body {

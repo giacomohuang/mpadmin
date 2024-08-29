@@ -25,10 +25,10 @@
         <template #overlay>
           <a-menu>
             <a-menu-item>
-              <a @click="router.push('/my/profile')">{{ $t('common.route.profile') }}</a>
+              <a @click="router.push('/my/profile')">{{ $t('my.profile._title') }}</a>
             </a-menu-item>
             <a-menu-item>
-              <a @click="signout">{{ $t('common.route.signout') }}</a>
+              <a @click="signout">{{ $t('signout._title') }}</a>
             </a-menu-item>
           </a-menu>
         </template>
@@ -54,7 +54,7 @@
   <div class="relative flex h-[calc(100vh-64px)] flex-row bg-primary">
     <aside class="z-20 min-w-8 select-none bg-primary pt-5 md:min-w-32">
       <RouterLink custom :to="item.path" v-for="(item, index) in menu" :key="index">
-        <div v-if="!item.isHidden" @click="changeSubMenu(index)" :class="['item', { 'router-link-active': index == currentMenuIdx || (currentMenuIdx == -1 && $route.path.indexOf(item.path + '/') == 0) }]">
+        <div v-if="!item.isHidden" @click="changeSubMenu(index)" :class="['item', { 'router-link-active': index == currentMenuIdx || (currentMenuIdx == -1 && $route.name.indexOf(item.name + '-') == 0) }]">
           <Icon name="carousel" size="2em"></Icon>
           <span class="hidden md:inline">{{ $t(item.meta.title) }}</span>
         </div>

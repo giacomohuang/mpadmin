@@ -36,7 +36,7 @@
     :dataSource="accounts"
     :pagination="pagination"
     @change="handleTableChange"
-    rowKey="id"
+    rowKey="_id"
     :loading="isLoading"
   >
     <template #bodyCell="{ column, record }">
@@ -77,7 +77,7 @@ const isLoading = ref(false)
 const openEditor = ref(false)
 const editForm = reactive({})
 const defaultFilters = ref({
-  status: ['1']
+  status: ['0']
 })
 const pagination = reactive({
   current: 1,

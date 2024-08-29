@@ -100,17 +100,18 @@ function getCode() {
   let vueFiles = []
   let dirSet = new Set()
   let globs = fg.sync(`${viewsPath}/**/*.vue`, { ignore: [`${viewsPath}/*.vue`] })
-  globs.sort()
   globs.forEach((f) => {
     let file = f.replace(viewsPath, '')
     let dir = getDir(file)
+    console.log(dir)
     if (!dirSet.has(dir)) {
       dirSet.add(dir)
       vueFiles.push('/' + dir + '/')
     }
     vueFiles.push(file)
   })
-  // console.log(vueFiles)
+  vueFiles = vueFiles.sort()
+  console.log(vueFiles)
   // vueFiles = ['/Account/', '/Account/Account.vue', '/Account/AccountList.vue', '/Account/Asc/', '/Account/Asc/aaa.vue', '/Account/Asc/bbb.vue', '/Account/Permission.vue', '/My/', '/My/Main.vue']
 
   let index = -1
@@ -138,7 +139,7 @@ function getCode() {
       .replace(/^\//, '')
       .replace(/\//g, '-')
       .replace(/\[[\d]+\]/g, '')
-    j.meta = { title: j.name.replace('-', '.') + '._title' }
+    j.meta = { title: j.name.replace(/-/g, '.') + '._title' }
 
     if (!dir.includes(curDir)) {
       curDir = dir

@@ -58,7 +58,7 @@
     "phone": "By Phone"
   },
   "signout": {
-    "_title": "退出登录"
+    "_title": "Sign Out"
   },
   "account": {
     "_title": "Account",
@@ -134,8 +134,8 @@
       "role": {
         "_title": "Roles"
       },
-      "permission": {
-        "_title": "Permission Pts."
+      "resource": {
+        "_title": "Resources"
       }
     }
   }

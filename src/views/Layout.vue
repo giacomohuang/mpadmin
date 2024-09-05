@@ -64,7 +64,7 @@
     <aside class="h-[calc(100vh - 64px)] relative -left-[1px] z-20 flex w-36 flex-col border-r border-primary bg-secondary pt-5" v-if="!submenu.redirect">
       <SubMenu :data="submenu.children"></SubMenu>
     </aside>
-    <main class="h-[calc(100vh - 64px)] min-w[640px] relative grow overflow-y-auto bg-primary">
+    <main class="h-[calc(100vh - 64px)] min-w[640px] relative grow overflow-y-auto bg-primary p-5">
       <a-spin :spinning="globalLoading" style="margin: 20px"></a-spin>
       <router-view />
     </main>

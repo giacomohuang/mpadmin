@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64px" height="64px" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>add</title>
+    <g id="add" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M32,8 C45.254834,8 56,18.745166 56,32 C56,45.254834 45.254834,56 32,56 C18.745166,56 8,45.254834 8,32 C8,18.745166 18.745166,8 32,8 Z M32,11 C20.4020203,11 11,20.4020203 11,32 C11,43.5979797 20.4020203,53 32,53 C43.5979797,53 53,43.5979797 53,32 C53,20.4020203 43.5979797,11 32,11 Z" id="椭圆形" fill="#000000" fill-rule="nonzero"></path>
+        <polygon id="直线-4" fill="#000000" fill-rule="nonzero" points="45.5 30.5 45.5 33.5 18.5 33.5 18.5 30.5"></polygon>
+        <polygon id="直线-4" fill="#000000" fill-rule="nonzero" points="33.5 19.5 33.5 46.5 30.5 46.5 30.5 19.5"></polygon>
+    </g>
+</svg>

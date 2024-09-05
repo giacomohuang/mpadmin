@@ -1,4 +1,9 @@
 {
+  "404": {
+    "_title": "404 页面不存在",
+    "backhome": "返回首页",
+    "description": "你访问的页面不存在"
+  },
   "common": {
     "appname": "管理运营平台",
     "lang": "语言",
@@ -23,11 +28,6 @@
         "excellent": "很强"
       }
     }
-  },
-  "404": {
-    "_title": "404 页面不存在",
-    "backhome": "返回首页",
-    "description": "你访问的页面不存在"
   },
   "workspace": {
     "_title": "工作台",
@@ -134,8 +134,8 @@
       "role": {
         "_title": "角色"
       },
-      "permission": {
-        "_title": "权限点"
+      "resource": {
+        "_title": "资源"
       }
     }
   }

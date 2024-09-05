@@ -1,4 +1,9 @@
 import { customRef } from 'vue'
+/**
+ * 防抖ref
+ * @param data - 初始化数据
+ * @param delay - 延迟同步时间
+ */
 export default function debounceRef(data, delay = 300) {
   // 创建定时器
   let timer = null

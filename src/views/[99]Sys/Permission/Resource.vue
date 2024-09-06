@@ -6,13 +6,12 @@
       <input class="h-8 w-56 rounded-md border border-secondary bg-primary px-8 outline-none duration-300 focus:border-brand-500 focus:ease-in" placeholder="搜索组或权限点名称" v-model="keywords" />
     </div>
   </div>
-
-  <a-tabs v-model:activeKey="activeTabKey">
-    <a-tab-pane v-for="root in roots" :key="root.id" :tab="root.name"></a-tab-pane>
-  </a-tabs>
+  <ul class="my-5 flex gap-5">
+    <li v-for="root in roots" :key="root.id" class="cursor-pointer py-1" :class="{ 'border-b-2 border-brand-500 font-semibold': activeTabKey === root.id }" @click="onChange(root.id)">{{ root.name }}</li>
+  </ul>
 
   <div class="w-1/2 min-w-[500px] rounded-md border border-primary" style="overflow-y: auto">
-    <ResourceList :data="filteredResouces" :pid="activeTabKey" @add="addResource"></ResourceList>
+    <ResourceList :data="resources" @add="addResource" v-if="resources"></ResourceList>
   </div>
 
   <a-drawer title="资源编辑器" width="500px" :open="resourceEditor" @close="resourceEditor = false">
@@ -47,87 +46,60 @@ import { ref, reactive, onMounted, inject, watch, computed, nextTick } from 'vue
 // import vDebounce from '@/directives/debounce'
 import debounceRef from '@/js/debounceRef'
 import ResourceList from './ResourceList.vue'
-import { resourceData } from './data'
+// import { resourceData } from './data'
 import API from '@/api/API'
 
+const activeTabKey = ref(null)
+let roots
+// const resources = JSON.parse(JSON.stringify(resourceData.filter((item) => item.path.startsWith(activeTabKey.value + '-') || item.id === activeTabKey.value)))
 const keywords = debounceRef('', 500)
 
-const filteredResouces = computed(() => {
-  if (keywords.value) {
-    const ids = new Set()
-    let items = resources.value.filter((item) => item.name.includes(keywords.value))
-    if (items) {
-      items.forEach((item) => {
-        item.path.split('-').forEach((id) => ids.add(id))
-      })
-    }
-    return resources.value.filter((item) => ids.has('' + item.id))
-  } else {
-    return resources.value
-  }
-})
-
-const activeTabKey = ref(1)
-const roots = ref(resourceData.filter((item) => item.pid == null))
-const resources = ref(resourceData.filter((item) => item.path.startsWith(activeTabKey.value + '-')))
-// console.log(resources)
-
-// const resourcesTree = ref(buildTree(resources))
-// console.log(resources)
-
-watch(activeTabKey, (val) => {
-  resources.value = resourceData.filter((item) => item.path.startsWith(activeTabKey.value + '-'))
-})
-
-// const resourcesFiltered = computed(() => {
-//   // const ids = new Set()
-//   // if (keywords.value) {
-//   //   return buildTree(
-//   //     resources.value.filter((item) => {
-//   //       // console.log(item.name, keywords.value)
-//   //       if (item.name.includes(keywords.value)) {
-//   //         ids.add(item.id)
-//   //         return true
-//   //       } else if (ids.has(item.pid)) {
-//   //         ids.add(item.id)
-//   //         return true
-//   //       } else {
-//   //         return false
-//   //       }
-//   //     })
-//   //   )
-//   // } else {
-//   //   return buildTree(resources.value)
-//   // }
-//   return buildTree(resources.value)
+// watch(keywords, (val) => {
+//   console.log(val)
 // })
 
+// const resourcesFiltered = computed(() => {
+//   const ids = new Set()
+//   if (keywords.value) {
+//     return resourceData.value.filter((item) => {
+//       // console.log(item.name, keywords.value)
+//       if (item.name.includes(keywords.value)) {
+//         ids.add(item.id)
+//         return true
+//       }
+//       if (ids.has(item.pid)) {
+//         ids.add(item.id)
+//         return true
+//       } else {
+//         return false
+//       }
+//     })
+//   } else {
+//     return resourceData.value
+//   }
+// })
+const resources = ref(null)
+
+// console.log(resourceTree.value)
 let currentId = null
 
 const resourceEditor = ref(false)
+// const batchDelItems = inject('batchDelItems', new Set())
 
 const resourceFormRef = ref()
 const resourceForm = reactive({ type: 1 })
 
 const isLoading = ref(false)
 
-function buildTree(items) {
-  const tree = [{ id: null, code: '', name: '页面与功能', type: 1, pid: null, children: [] }]
-  const itemMap = new Map()
-  for (let i = 0; i < items.length; i++) {
-    itemMap.set(items[i].id, JSON.parse(JSON.stringify(items[i])))
-  }
-  console.log(itemMap)
-
-  items.forEach((item) => {
-    const parent = item.pid === null ? tree[0] : itemMap.get(item.pid)
-    if (!parent.children) {
-      parent.children = []
-    }
-    parent.children.push(itemMap.get(item.id))
-  })
-  return tree
+async function onChange(val) {
+  console.log('loading。。。')
+  activeTabKey.value = val
+  // console.log(d)
+  resources.value = await API.permission.resource.list(val, false)
+  console.log('loaded。。。')
 }
+
+async function render() {}
 
 function batchRemove(items) {
   // 获取数组长度，用于后续循环
@@ -141,6 +113,24 @@ function batchRemove(items) {
       batchRemove(item.children) // 递归处理子项
     }
   }
+}
+
+const buildTree = (items) => {
+  // console.log(items)
+  // const tree = [{ id: null, code: '', name: '页面与功能', type: 1, pid: null, children: [] }]
+  const tree = []
+  const itemMap = new Map(items.map((item) => [item.id, item]))
+
+  items.forEach((item) => {
+    // console.log(item)
+    const parent = item.pid === null ? tree : itemMap.get(item.pid)
+    if (!parent.children) {
+      parent.children = []
+    }
+    parent.children.push(itemMap.get(item.id))
+  })
+  // console.log(tree)
+  return tree
 }
 
 function addResource(id) {
@@ -157,15 +147,19 @@ const getPrefixCode = (items, id) => {
       return items[i].code
     } else if (items[i].children) {
       const code = getPrefixCode(items[i].children, id)
-      if (code) return code
+      if (code) {
+        return code
+      }
     }
   }
 }
 
 onMounted(async () => {
   isLoading.value = true
-  // const resources = await API.Permission.getPermissionGroups()
-  // const groups = await API.Permission.getPermissions()
+  roots = await API.permission.resource.list(null, true)
+  activeTabKey.value = roots[0].id
+
+  resources.value = await API.permission.resource.list(activeTabKey.value, false)
 })
 
 // const search = () => {

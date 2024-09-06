@@ -1,18 +1,14 @@
 import fetch from './fetch'
 
 const permission = {
-  getList(group) {
-    return fetch({
-      params: { group: group },
-      url: '/api/permission/getlist',
-      method: 'get'
-    })
-  },
-  getList() {
-    return fetch({
-      url: '/api/permission/getlist',
-      method: 'get'
-    })
+  resource: {
+    list(pid, isOneLevel) {
+      return fetch({
+        data: { pid: pid, isOneLevel },
+        url: '/permission/resource/list',
+        method: 'post'
+      })
+    }
   }
 }
 export default permission

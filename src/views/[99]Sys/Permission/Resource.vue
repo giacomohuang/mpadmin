@@ -14,7 +14,7 @@
     <div class="hl-area relative flex-1" style="overflow-y: auto">
       <div v-if="keywords && resourcesFiltered.length == 0" class="p-4 text-secondary">没有符合条件的数据。<a href="####" @click="keywords = ''">清除搜索关键词</a></div>
 
-      <ResourceList :data="resourcesFiltered.children" :pid="0" @open="openEditor" @remove="remove" v-if="resources"></ResourceList>
+      <div class="list"><ResourceList :data="resourcesFiltered.children" :pid="0" @open="openEditor" @remove="remove" v-if="resources"></ResourceList></div>
     </div>
   </div>
 

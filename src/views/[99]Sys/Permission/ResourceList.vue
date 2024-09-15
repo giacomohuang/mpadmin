@@ -1,9 +1,9 @@
 <template>
-  <ul v-if="data">
-    <li v-for="(resource, index) in data" draggable="true" :key="resource.id" class="pl-4" :class="['list-' + resource.id, { show: show(resource.path) }]" @mousedown="mousedown" :data-id="resource.id" :data-pid="resource.pid">
+  <ul v-if="data" :class="`list-${pid}`">
+    <li v-for="(resource, index) in data" draggable="true" :key="resource.id" class="dragitem pl-4" :data-id="resource.id" :data-pid="resource.pid">
       <div class="item group">
         <div class="flex flex-row items-center gap-1">
-          <icon name="arrow-down" v-if="resource.pid > 0 && resource.type === 1" size="2em" class="cursor-pointer transition-transform" :class="{ '-rotate-90': collapseItems.has(resource.id) }" @click="toggle(resource.id)"></icon>
+          <icon name="arrow-down" v-if="resource.pid > 0 && resource.type === 1" size="2em" class="cursor-pointer transition-transform" :class="{ '-rotate-90': resource.isCollapse }" @click="toggle(resource)"></icon>
           <div class="ml-8" v-else-if="resource.type > 1"></div>
           <a-checkbox class="text-base" v-model:checked="resource.checked" @change="check(resource)">
             <span class="resource-name">{{ resource.name }}</span>
@@ -22,7 +22,7 @@
         </div>
       </div>
 
-      <ResourceList :data="resource.children" :pid="resource.id" @open="openEditor" @remove="remove" />
+      <ResourceList :data="resource.children" :pid="resource.id" @open="openEditor" @remove="remove" v-show="!resource.isCollapse" />
     </li>
   </ul>
 </template>
@@ -36,9 +36,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const collapseItems = ref(new Set())
 const { data, pid } = defineProps(['data', 'pid'])
 const emits = defineEmits(['open', 'remove'])
+let collapseId = null
 
 function check(resource) {
   data.forEach((item) => {
@@ -48,30 +48,8 @@ function check(resource) {
   })
 }
 
-function show(path) {
-  let show = true
-  collapseItems.value.forEach((item) => {
-    if (path.startsWith(item + '-')) {
-      show = false
-      return
-    }
-  })
-  return show
-}
-
-function mousedown(ev) {
-  ev.stopPropagation()
-}
-function toggle(id) {
-  if (collapseItems.value.has(id)) {
-    collapseItems.value.delete(id)
-  } else {
-    collapseItems.value.add(id)
-  }
-}
-
-function collapse(path) {
-  collapseItems.value.add(path)
+function toggle(item) {
+  item.isCollapse = !item.isCollapse
 }
 
 function confirm(ev, path) {
@@ -87,7 +65,6 @@ function openEditor(parent, mode) {
 }
 
 function copyToClipBoard(ev, text) {
-  ev.stopPropagation()
   navigator.clipboard.writeText(text)
   const clickableItem = ev.target
   if (clickableItem.nextSibling?.classList.value == 'checkmark') return
@@ -100,100 +77,65 @@ function copyToClipBoard(ev, text) {
   }, 1800) // 3000 毫秒即 3 秒后消失
 }
 
-/*
-
-// :class="[{ dragging: index === dragIndex.src }, { target: index === dragIndex.target && dragIndex.src !== dragIndex.target }, { top: dragIndex.src > dragIndex.target }]"
-// @dragstart="onDragStart($event, resource.id, index)"
-// @dragover="onDragOver($event, resource.id, index)"
-// @drop="onDrop"
-
-function onDragStart(ev, id, index) {
-  // ev.preventDefault()
-  ev.stopPropagation()
-  ev.target.addEventListener('dragend', (ev) => {
-    dragIndex.src = null
-    dragIndex.target = null
-  })
-  ev.dataTransfer.effectAllowed = 'move'
-  // ev.dataTransfer.setData('text/plain', '')
-  // var transparentPixel = new Image(4, 4)
-  // transparentPixel.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
-  // ev.dataTransfer.setDragImage(transparentPixel, 0, 0)
-  // ev.tsartgetstyle.display = 'none'
-  dragIndex.src = index
-}
-function onDragOver(ev, id, index) {
-  ev.preventDefault() // 阻止默认的拖动行为
-  ev.stopPropagation()
-  dragIndex.target = index
-}
-
-function onDrop(ev) {
-  ev.preventDefault()
-  ev.stopPropagation()
-  if (dragIndex.src !== dragIndex.target) {
-    const draggedItem = data[dragIndex.src]
-    data.splice(dragIndex.src, 1)
-    data.splice(dragIndex.target, 0, draggedItem)
-  }
-  dragIndex.src = null
-  dragIndex.target = null
-}
-
-*/
-
-let sourceEl
-
 onMounted(() => {
-  const list = document.querySelector(`.list-${pid}`)
+  console.clear()
+  let sourceEl
+  const list = document.querySelector('.list-' + pid)
   if (!list) return
   list.ondragstart = (e) => {
-    e.stopPropagation()
-    sourceEl = e.target
+    sourceEl = e.target.closest('li')
+    const sourceId = sourceEl.dataset.id
+    const sourceItem = data.find((item) => item.id == sourceId)
+    console.log(sourceItem)
+    if (!sourceItem.isCollapse) {
+      sourceItem.isCollapse = true
+      collapseId = sourceId
+    } else {
+      collapseId = null
+    }
+
     // collapse(el.dataset.path)
-    console.clear()
-    console.log('sourceEl', sourceEl.dataset.id)
+    // console.clear()
+    console.log('sourceEl', sourceEl)
+    // console.log('sourceEl', sourceEl.dataset.id)
     e.dataTransfer.effectAllowed = 'move'
     setTimeout(() => {
-      sourceEl.classList.add('dragging')
+      sourceEl?.classList.add('dragging')
     }, 0)
+    e.stopPropagation()
   }
   list.ondragover = (e) => {
-    e.stopPropagation()
     e.preventDefault()
   }
   list.ondragenter = (e) => {
-    e.stopPropagation()
     e.preventDefault()
-
     drag(e)
+    console.log('dragenter')
   }
   list.ondragend = (e) => {
-    e.stopPropagation()
     e.preventDefault()
-    sourceEl.classList.remove('dragging')
+    if (collapseId) {
+      const sourceId = sourceEl.dataset.id
+      const sourceItem = data.find((item) => item.id == sourceId)
+      console.log(sourceItem)
+      delete sourceItem.isCollapse
+    }
+    sourceEl?.classList.remove('dragging')
   }
   list.ondrop = (e) => {
-    e.stopPropagation()
     e.preventDefault()
   }
   function drag(e) {
     const targetEl = e.target.closest('li')
-    console.log(sourceEl, targetEl.dataset.id)
-    if (targetEl === list || targetEl === sourceEl) {
-      return
-    }
+    if (!sourceEl?.classList.contains('dragging')) return
 
     const itemsEl = [...list.children]
-    // const childrenEl = itemsEl.filter((item) => item.dataset.path.startsWith(sourceEl.dataset.path))
+
+    // console.log('itemsEL', list)
     const sourceIndex = itemsEl.indexOf(sourceEl)
-
     const targetIndex = itemsEl.indexOf(targetEl)
-
-    // if (targetIndex === -1 || sourceIndex === -1 || sourceEl.dataset.pid !== targetEl.dataset.pid) return
-
-    console.log(itemsEl, sourceEl.dataset.id, targetEl.dataset.id)
-    console.log('source', sourceEl.dataset.id, 'target', targetEl.dataset.id)
+    if (targetIndex === -1 || sourceIndex === -1 || sourceEl.dataset.pid !== targetEl.dataset.pid) return
+    console.log(list, sourceEl, targetEl)
     const oldTop = targetEl.getBoundingClientRect().top
     if (sourceIndex < targetIndex) {
       list.insertBefore(sourceEl, targetEl.nextElementSibling)
@@ -202,7 +144,7 @@ onMounted(() => {
     }
     const newTop = targetEl.getBoundingClientRect().top
     const offset = oldTop - newTop
-    let animation = targetEl.animate([{ transform: `translateY(${offset}px)` }, { transform: 'translateY(0px)' }], { duration: 50, easing: 'ease-in-out' })
+    let animation = targetEl.animate([{ transform: `translateY(${offset}px)` }, { transform: 'translateY(0px)' }], { duration: 80, easing: 'ease-in-out' })
     animation.onfinish = () => {
       animation = null
       targetEl.style.removeProperty('transform')
@@ -213,7 +155,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .dragging {
-  background: var(--bg-secondary) !important;
+  @apply border-2 border-dashed border-brand-500 bg-brand-50;
   > * {
     opacity: 0;
   }
@@ -227,6 +169,12 @@ onMounted(() => {
     display: none;
   }
 }
+/* 
+ * This class applies content-visibility optimization
+ * It sets content-visibility to auto for better performance
+ * A fixed height and contain-intrinsic-size are specified
+ * to help the browser estimate the content size before rendering
+ */
 .content-visibility {
   content-visibility: auto;
   height: 50px;
@@ -249,6 +197,10 @@ onMounted(() => {
       top: -10px;
     }
   }
+}
+
+.hide {
+  display: none;
 }
 
 .item {

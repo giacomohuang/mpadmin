@@ -237,6 +237,7 @@ const handleSignin = async (values) => {
     state.totpSecret = data.totpSecret
     state.methodBit = state.methodBit | (data.phone ? 1 : 0) | (data.email ? 2 : 0) | (data.totpSecret ? 4 : 0)
     console.log(data)
+
     // 未激活，跳转去激活
     if (!data.initPwd) {
       state.method = 'initPwd'

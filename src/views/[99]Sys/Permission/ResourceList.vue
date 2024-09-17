@@ -18,7 +18,7 @@
         <div class="tools flex items-center">
           <icon name="edit" class="edit" @click="openEditor(resource, 'edit')"></icon>
           <icon name="add" v-if="resource.type === 1" class="add" @click="openEditor(resource, 'add')"></icon>
-          <icon name="del" class="del" @click="confirm($event, resource.path)"></icon>
+          <icon name="del" class="del" @click="confirm(resource.id)"></icon>
         </div>
       </div>
 
@@ -52,12 +52,12 @@ function toggle(item) {
   item.isCollapse = !item.isCollapse
 }
 
-function confirm(ev, path) {
-  remove(ev, path)
+function confirm(id) {
+  remove(id)
 }
 
-function remove(ev, path) {
-  emits('remove', ev, path)
+function remove(id) {
+  emits('remove', id)
 }
 
 function openEditor(parent, mode) {
@@ -82,22 +82,17 @@ onMounted(() => {
   let sourceEl
   const list = document.querySelector('.list-' + pid)
   if (!list) return
+  // 拖拽开始
   list.ondragstart = (e) => {
-    sourceEl = e.target.closest('li')
+    sourceEl = e.target
     const sourceId = sourceEl.dataset.id
     const sourceItem = data.find((item) => item.id == sourceId)
-    console.log(sourceItem)
     if (!sourceItem.isCollapse) {
       sourceItem.isCollapse = true
       collapseId = sourceId
     } else {
       collapseId = null
     }
-
-    // collapse(el.dataset.path)
-    // console.clear()
-    console.log('sourceEl', sourceEl)
-    // console.log('sourceEl', sourceEl.dataset.id)
     e.dataTransfer.effectAllowed = 'move'
     setTimeout(() => {
       sourceEl?.classList.add('dragging')
@@ -105,37 +100,24 @@ onMounted(() => {
     e.stopPropagation()
   }
   list.ondragover = (e) => {
+    e.stopPropagation()
     e.preventDefault()
   }
+
+  // 进入元素
   list.ondragenter = (e) => {
+    // console.log('dragenter', e.target.closest('li').dataset.id)
+    e.stopPropagation()
     e.preventDefault()
-    drag(e)
-    console.log('dragenter')
-  }
-  list.ondragend = (e) => {
-    e.preventDefault()
-    if (collapseId) {
-      const sourceId = sourceEl.dataset.id
-      const sourceItem = data.find((item) => item.id == sourceId)
-      console.log(sourceItem)
-      delete sourceItem.isCollapse
-    }
-    sourceEl?.classList.remove('dragging')
-  }
-  list.ondrop = (e) => {
-    e.preventDefault()
-  }
-  function drag(e) {
-    const targetEl = e.target.closest('li')
     if (!sourceEl?.classList.contains('dragging')) return
+    const targetEl = e.target.closest('li')
+    console.log(list, sourceEl, targetEl)
 
     const itemsEl = [...list.children]
-
-    // console.log('itemsEL', list)
     const sourceIndex = itemsEl.indexOf(sourceEl)
     const targetIndex = itemsEl.indexOf(targetEl)
-    if (targetIndex === -1 || sourceIndex === -1 || sourceEl.dataset.pid !== targetEl.dataset.pid) return
-    console.log(list, sourceEl, targetEl)
+    // if (targetIndex === -1 || sourceIndex === -1 || sourceEl.dataset.pid !== targetEl.dataset.pid) return
+
     const oldTop = targetEl.getBoundingClientRect().top
     if (sourceIndex < targetIndex) {
       list.insertBefore(sourceEl, targetEl.nextElementSibling)
@@ -149,6 +131,25 @@ onMounted(() => {
       animation = null
       targetEl.style.removeProperty('transform')
     }
+    console.log('dragenter')
+  }
+
+  // 拖拽结束
+  list.ondragend = (e) => {
+    e.stopPropagation()
+    e.preventDefault()
+    if (collapseId) {
+      const sourceId = sourceEl.dataset.id
+      const sourceItem = data.find((item) => item.id == sourceId)
+      console.log(sourceItem)
+      delete sourceItem.isCollapse
+    }
+    sourceEl?.classList.remove('dragging')
+  }
+
+  // 拖拽释放
+  list.ondrop = (e) => {
+    e.preventDefault()
   }
 })
 </script>
@@ -162,7 +163,8 @@ onMounted(() => {
 }
 // 避免在拖拽时触发子级元素事件
 .list:has(.dragging) {
-  .item > * {
+  // pointer-events: none;
+  .item * {
     pointer-events: none;
   }
   .item > .tools {
@@ -175,11 +177,11 @@ onMounted(() => {
  * A fixed height and contain-intrinsic-size are specified
  * to help the browser estimate the content size before rendering
  */
-.content-visibility {
-  content-visibility: auto;
-  height: 50px;
-  contain-intrinsic-size: 50px;
-}
+// .content-visibility {
+//   content-visibility: auto;
+//   height: 50px;
+//   contain-intrinsic-size: 50px;
+// }
 
 //保证在js中可以成功调用
 :deep(.checkmark) {

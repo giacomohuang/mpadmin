@@ -229,17 +229,21 @@ const vRules = {
   ]
 }
 
-async function remove(ev, path) {
-  let removeItems = []
-  for (let index = resources.value.length - 1; index >= 0; index--) {
-    if (resources.value[index].path === path || resources.value[index].path.startsWith(path + '-')) {
-      removeItems.push(resources.value[index].id)
-    }
+async function remove(id) {
+  const ids = [id]
+  let pid = id
+  // 遍历树，找出所有子节点
+  function getChildren(data, pid) {
+    if (!data) return
+    data.forEach((item) => {
+      if (item.pid === pid) {
+        ids.push(id)
+        pid = item.id
+      }
+      getChildren(item.children, pid)
+    })
   }
-  await API.permission.resource.remove(removeItems)
-  const res = await API.permission.resource.list(activeTabKey.value, false)
-  orderMap = new Map(res.map((item) => [item.id, item.order ? 999 - item.order : 999]))
-  resources.value = res.sort(compareFn)
+  getChildren(resources.value.children, pid)
 }
 
 function openEditor(item, mode) {
@@ -298,21 +302,6 @@ async function submit() {
   resourceEditor.value = false
 }
 
-const compareFn = (a, b) => {
-  let pathOrderA = '',
-    pathOrderB = ''
-  a.path.split('-').forEach((item) => {
-    const id = parseInt(item)
-    pathOrderA += `(${orderMap.get(id)})${id}-`
-  })
-  b.path.split('-').forEach((item) => {
-    const id = parseInt(item)
-    pathOrderB += `(${orderMap.get(id)})${id}-`
-  })
-  // console.log(pathOrderA, pathOrderB)
-  return pathOrderA > pathOrderB ? 1 : -1
-}
-
 function buildTree(items) {
   // const tree = [{ id: null, code: '', name: '页面与功能', type: 1, pid: null, children: [] }]
   const tree = []
@@ -323,7 +312,12 @@ function buildTree(items) {
     if (!parent.children) {
       parent.children = []
     }
-    parent.children.push(itemMap.get(item.id))
+    // order越大越靠前
+    if (!parent.children.length <= 1 || item.order < parent.children[parent.children.length - 1].order) {
+      parent.children.push(item)
+    } else {
+      parent.children.splice(parent.children.length - 1, 0, item)
+    }
   })
   return tree
 }

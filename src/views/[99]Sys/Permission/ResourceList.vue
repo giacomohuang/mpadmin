@@ -1,29 +1,32 @@
 <template>
-  <ul v-if="data" :class="`list-${pid}`">
-    <li v-for="(resource, index) in data" draggable="true" :key="resource.id" class="dragitem pl-4" :data-id="resource.id" :data-pid="resource.pid">
-      <div class="item group">
-        <div class="flex flex-row items-center gap-1">
-          <icon name="arrow-down" v-if="resource.pid > 0 && resource.type === 1" size="2em" class="cursor-pointer transition-transform" :class="{ '-rotate-90': resource.isCollapse }" @click="toggle(resource)"></icon>
-          <div class="ml-8" v-else-if="resource.type > 1"></div>
-          <a-checkbox class="text-base" v-model:checked="resource.checked" @change="check(resource)">
+  <ul v-if="data" ref="listRef">
+    <template v-for="(resource, index) in data" :key="resource.id">
+      <li v-if="resourceType == 0 || resource.type <= 1 || resourceType == resource.type" :draggable="resource.pid != null" class="dragitem pl-4" :data-id="resource.id" :id="'_MPRES_' + resource.id">
+        <div class="item group">
+          <div class="flex flex-row items-center gap-1">
+            <icon name="arrow-down" v-if="resource.pid > 0 && resource.type === 1" size="2em" class="cursor-pointer transition-transform" :class="{ '-rotate-90': collapseIds.has(resource.id) }" @click="toggleCollapse(resource.id)"></icon>
+            <div class="ml-7" v-else-if="resource.type > 1"></div>
+            <!-- <a-checkbox class="text-base" v-model:checked="resource.checked" @change="check(resource)"> -->
             <span class="resource-name">{{ resource.name }}</span>
-          </a-checkbox>
-          <span class="tag green">id:{{ resource.id }}</span>
-          <span class="tag red">order:{{ resource.order }}</span>
+            <!-- </a-checkbox> -->
+            <span class="tag green">id:{{ resource.id }}</span>
+            <span class="tag green">pid:{{ resource.pid }}</span>
+            <span class="tag red">order:{{ resource.order }}</span>
 
-          <span color="default" class="tag gray clickable-item mr-2 cursor-pointer" title="点击复制到剪贴板" v-if="resource.code" @click="copyToClipBoard($event, resource.code)">
-            {{ resource.code }}
-          </span>
+            <span color="default" class="tag gray clickable-item mr-2 cursor-pointer" title="点击复制到剪贴板" v-if="resource.code" @click="copyToClipBoard($event, resource.code)">
+              {{ resource.code }}
+            </span>
+          </div>
+          <div class="tools flex items-center">
+            <icon name="edit" class="edit" @click="openEditor(resource, EDITOR_MODE.EDIT)"></icon>
+            <icon name="add" v-if="resource.type === 1" class="add" @click="openEditor(resource, EDITOR_MODE.ADD)"></icon>
+            <icon name="del" class="del" @click="confirm(resource.id, resource.pid)"></icon>
+          </div>
         </div>
-        <div class="tools flex items-center">
-          <icon name="edit" class="edit" @click="openEditor(resource, 'edit')"></icon>
-          <icon name="add" v-if="resource.type === 1" class="add" @click="openEditor(resource, 'add')"></icon>
-          <icon name="del" class="del" @click="confirm(resource.id)"></icon>
-        </div>
-      </div>
 
-      <ResourceList :data="resource.children" :pid="resource.id" @open="openEditor" @remove="remove" v-show="!resource.isCollapse" />
-    </li>
+        <ResourceList :data="resource.children" @open="openEditor" @remove="remove" @reorder="reorder" @toggleCollapse="toggleCollapse" v-show="!collapseIds.has(resource.id)" />
+      </li>
+    </template>
   </ul>
 </template>
 
@@ -34,30 +37,37 @@
 </router>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick, inject } from 'vue'
 
-const { data, pid } = defineProps(['data', 'pid'])
-const emits = defineEmits(['open', 'remove'])
-let collapseId = null
+const { data } = defineProps(['data'])
+const EDITOR_MODE = { ADD: 1, EDIT: 2 }
+const emits = defineEmits(['open', 'remove', 'reorder', 'toggleCollapse'])
+const listRef = ref(null)
 
-function check(resource) {
-  data.forEach((item) => {
-    if (item.id !== resource.id && item.path?.startsWith(resource.path + '-')) {
-      item.checked = resource.checked
-    }
-  })
+const collapseIds = inject('collapseIds')
+const resourceType = inject('resourceType')
+
+// function check(resource) {
+//   data.forEach((item) => {
+//     if (item.id !== resource.id && item.path?.startsWith(resource.path + '-')) {
+//       item.checked = resource.checked
+//     }
+//   })
+// }
+
+function toggleCollapse(id) {
+  emits('toggleCollapse', id)
 }
 
-function toggle(item) {
-  item.isCollapse = !item.isCollapse
+function confirm(id, pid) {
+  remove(id, pid)
 }
 
-function confirm(id) {
-  remove(id)
+function remove(id, pid) {
+  emits('remove', id, pid)
 }
-
-function remove(id) {
-  emits('remove', id)
+function reorder(pid) {
+  emits('reorder', pid)
 }
 
 function openEditor(parent, mode) {
@@ -78,21 +88,13 @@ function copyToClipBoard(ev, text) {
 }
 
 onMounted(() => {
-  console.clear()
+  // console.clear()
   let sourceEl
-  const list = document.querySelector('.list-' + pid)
+  const list = listRef.value
   if (!list) return
   // 拖拽开始
   list.ondragstart = (e) => {
     sourceEl = e.target
-    const sourceId = sourceEl.dataset.id
-    const sourceItem = data.find((item) => item.id == sourceId)
-    if (!sourceItem.isCollapse) {
-      sourceItem.isCollapse = true
-      collapseId = sourceId
-    } else {
-      collapseId = null
-    }
     e.dataTransfer.effectAllowed = 'move'
     setTimeout(() => {
       sourceEl?.classList.add('dragging')
@@ -106,24 +108,23 @@ onMounted(() => {
 
   // 进入元素
   list.ondragenter = (e) => {
-    // console.log('dragenter', e.target.closest('li').dataset.id)
     e.stopPropagation()
     e.preventDefault()
     if (!sourceEl?.classList.contains('dragging')) return
     const targetEl = e.target.closest('li')
-    console.log(list, sourceEl, targetEl)
-
+    // console.log('enter:',targetEl)
     const itemsEl = [...list.children]
     const sourceIndex = itemsEl.indexOf(sourceEl)
     const targetIndex = itemsEl.indexOf(targetEl)
-    // if (targetIndex === -1 || sourceIndex === -1 || sourceEl.dataset.pid !== targetEl.dataset.pid) return
-
+    if (targetIndex == -1) return
     const oldTop = targetEl.getBoundingClientRect().top
+
     if (sourceIndex < targetIndex) {
       list.insertBefore(sourceEl, targetEl.nextElementSibling)
     } else {
       list.insertBefore(sourceEl, targetEl)
     }
+
     const newTop = targetEl.getBoundingClientRect().top
     const offset = oldTop - newTop
     let animation = targetEl.animate([{ transform: `translateY(${offset}px)` }, { transform: 'translateY(0px)' }], { duration: 80, easing: 'ease-in-out' })
@@ -131,20 +132,17 @@ onMounted(() => {
       animation = null
       targetEl.style.removeProperty('transform')
     }
-    console.log('dragenter')
+    // console.log('dragenter')
   }
 
   // 拖拽结束
   list.ondragend = (e) => {
     e.stopPropagation()
     e.preventDefault()
-    if (collapseId) {
-      const sourceId = sourceEl.dataset.id
-      const sourceItem = data.find((item) => item.id == sourceId)
-      console.log(sourceItem)
-      delete sourceItem.isCollapse
-    }
     sourceEl?.classList.remove('dragging')
+    const items = [...list.children]
+    const ids = items.map((item) => item.dataset.id)
+    emits('reorder', ids)
   }
 
   // 拖拽释放
@@ -206,7 +204,10 @@ onMounted(() => {
 }
 
 .item {
-  @apply relative flex cursor-move items-center justify-between border-b border-primary bg-primary py-3;
+  @apply relative flex h-14 items-center justify-between border-b border-primary py-3;
+}
+.dragitem[draggable='true'] {
+  @apply cursor-move bg-primary;
 }
 .tools {
   @apply opacity-0 transition-opacity duration-150 ease-in-out group-hover:opacity-100;

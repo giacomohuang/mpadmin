@@ -1,20 +1,28 @@
 <template>
   <div class="mb-3 flex items-center gap-3">
-    <a-button @click="removeSel">批量删除勾选项</a-button>
+    <!-- <a-button @click="removeSel">批量删除勾选项</a-button> -->
+    <a-radio-group v-model:value="resourceType">
+      <a-radio-button value="0">全部</a-radio-button>
+      <a-radio-button value="1">仅页面</a-radio-button>
+      <a-radio-button value="2">页面+功能</a-radio-button>
+      <a-radio-button value="3">页面+数据</a-radio-button>
+    </a-radio-group>
     <div class="relative flex items-center">
       <icon name="search" class="absolute m-2"></icon>
-      <input class="h-8 w-56 rounded-md border border-secondary bg-primary px-8 outline-none duration-300 focus:border-brand-500 focus:ease-in" placeholder="搜索组或权限点名称" v-model="keywords" />
+      <input class="h-8 w-56 rounded-md border border-secondary bg-primary px-8 outline-none duration-300 focus:border-brand-500 focus:ease-in" placeholder="输入关键词搜索" v-model="keywords" />
     </div>
   </div>
 
-  <div class="flex max-h-[calc(100%-46px)] w-[800px] overflow-y-auto rounded-md border border-primary">
+  <div class="flex w-[800px] rounded-md border border-primary">
     <ul class="border-r border-primary">
-      <li v-for="root in roots" :key="root.id" class="cursor-pointer px-5 py-3 text-base" :class="{ 'bg-secondary font-semibold': activeTabKey === root.id }" @click="onChange(root.id)">{{ root.name }}</li>
+      <li v-for="root in roots" :key="root.id" class="flex cursor-pointer justify-center px-5 py-3 text-base" :class="{ 'bg-secondary font-semibold': activeTabKey === root.id }" @click="onChange(root.id)">{{ root.name }}</li>
+      <li class="flex cursor-pointer justify-center px-5 py-3">
+        <div class="w-[60px] rounded-md border border-transparent py-1 text-center text-base hover:border-brand-500 hover:text-brand-500" @click="openEditor(null, EDITOR_MODE.ADD)">+</div>
+      </li>
     </ul>
     <div class="hl-area relative flex-1" style="overflow-y: auto">
-      <div v-if="keywords && resourcesFiltered.length == 0" class="p-4 text-secondary">没有符合条件的数据。<a href="####" @click="keywords = ''">清除搜索关键词</a></div>
-
-      <div class="list"><ResourceList :data="resourcesFiltered.children" :pid="0" @open="openEditor" @remove="remove" v-if="resources"></ResourceList></div>
+      <div v-if="keywords && !resourceTree.children" class="p-4 text-secondary">没有符合条件的数据。<a href="####" @click="keywords = ''">清除搜索关键词</a></div>
+      <div class="list"><ResourceList :data="resourceTree.children" @open="openEditor" @remove="remove" @reorder="reorder" @toggleCollapse="toggleCollapse" v-if="resourceTree"></ResourceList></div>
     </div>
   </div>
 
@@ -34,169 +42,109 @@
           <a-radio :value="3">数据</a-radio>
         </a-radio-group>
       </a-form-item>
-      <a-form-item label="排序" name="order" :wrapper-col="{ span: 5 }">
-        <a-input v-model:value="resourceForm.order" />
-      </a-form-item>
       <a-form-item :wrapper-col="{ offset: 6 }">
         <a-button type="primary" html-type="submit">保存</a-button>
         <a-button type="link" @click="resourceEditor = false">取消</a-button>
       </a-form-item>
     </a-form>
   </a-drawer>
-  <!-- <Teleport to="body">
-    <div class="mask">hello</div>
-    <div id="mp-dialog" class="mp-dialog">
-      <div>确认删除？</div>
-      <div class="flex justify-end gap-5">
-        <a-button type="primary">确认</a-button>
-        <a-button>取消</a-button>
-      </div>
-    </div>
-  </Teleport> -->
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, inject, watch, computed, nextTick } from 'vue'
-// import vDebounce from '@/directives/debounce'
+import { ref, reactive, onMounted, inject, watch, computed, nextTick, provide } from 'vue'
 import debounceRef from '@/js/debounceRef'
 import ResourceList from './ResourceList.vue'
-// import { resourceData } from './data'
 import API from '@/api/API'
 
-const resourceEditor = ref(false)
-const resourceFormRef = ref()
-const resourceForm = reactive({ type: 1 })
-const isLoading = ref(false)
-const activeTabKey = ref(null)
-const keywords = debounceRef('', 500)
-const resources = ref(null)
-const EDITOR_MODE = { add: 1, edit: 2 }
-let roots, orderMap, editorMode, currentResource
+const resourceEditor = ref(false),
+  resourceFormRef = ref(),
+  resourceForm = reactive({ type: 1 }),
+  isLoading = ref(false),
+  activeTabKey = ref(null),
+  keywords = debounceRef('', 500),
+  resourceTree = ref(null),
+  EDITOR_MODE = { ADD: 1, EDIT: 2 },
+  collapseIds = ref(new Set()),
+  resourceType = ref('0'),
+  roots = ref(null)
 
-async function onChange(val) {
-  activeTabKey.value = val
-  // console.log(d)
+let orderMap,
+  editorMode,
+  currentResource = null,
+  resourceData = null
 
-  const res = await API.permission.resource.list(val, false)
-  // orderMap = new Map(res.map((item) => [item.id, item.order ? 999 - item.order : 999]))
-  resources.value = buildTree(res)
-}
+provide('resourceType', resourceType)
+provide('collapseIds', collapseIds)
 
-const resourcesFiltered = computed(() => {
-  if (!keywords.value) return resources.value
-  const ids = new Set()
-  const directMatch = resources.value.filter((item) => item.name.includes(keywords.value) || item.code.includes(keywords.value))
-  const matched = []
+const buildTree = (data) => {
+  const rsdata = JSON.parse(JSON.stringify(data))
+  let items
 
-  directMatch.forEach((item) => {
-    // 插入本身
-    if (!ids.has(item.id)) {
-      matched.push(item)
-      ids.add(item.id)
-    }
-
-    let pathArr = item.path.split('-')
-    // 查所有父元素,并插入
-    let i
-    for (i = 0; i < item.level - 1; i++) {
-      if (!ids.has(parseInt(pathArr[i]))) {
-        ids.add(parseInt(pathArr[i]))
-        const parent = resources.value.find((a) => {
-          return a.id == pathArr[i]
-        })
-        if (parent) {
-          matched.push(parent)
+  // 根据关键词过滤
+  if (keywords.value) {
+    const nodes = new Map()
+    const itemMap = new Map(rsdata.map((item) => [item.id, item]))
+    const hitItems = rsdata.filter((item) => item.name.toLowerCase().includes(keywords.value) && (resourceType.value == 0 || resourceType.value == item.type))
+    console.log(keywords.value)
+    hitItems.forEach((item) => {
+      const id = item.id
+      let pid = item.pid
+      if (!nodes.has(id)) {
+        nodes.set(id, item)
+        while (true) {
+          const parent = itemMap.get(pid)
+          if (!parent) break
+          nodes.set(parent.id, parent)
+          pid = parent.pid
         }
-      }
-    }
-
-    // 查所有子元素,并插入
-    const children = resources.value.filter((itm) => {
-      if (!ids.has(itm.id) && itm.path.startsWith(item.path + '-')) {
-        ids.add(itm.id)
-        return true
-      } else {
-        return false
+        getChildren(id)
       }
     })
-    // console.log('children', children)
-    matched.push(...children)
-  })
-  return matched.sort(compareFn)
-})
-
-watch(resourcesFiltered, () => {
-  nextTick(() => {
-    if (!CSS.highlights) {
-      warn('CSS Custom Highlight API not supported.')
-      return
-    }
-    // 清除上个高亮
-    CSS.highlights.clear()
-    if (!resourcesFiltered.value || !keywords.value) return
-    const article = document.querySelector('.hl-area')
-    if (!article) return
-    const treeWalker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT)
-    const allTextNodes = []
-    let currentNode = treeWalker.nextNode()
-    while (currentNode) {
-      allTextNodes.push(currentNode)
-      currentNode = treeWalker.nextNode()
-    }
-    // 查找所有文本节点是否包含搜索词
-    const ranges = allTextNodes
-      .map((el) => {
-        return { el, text: el.textContent.toLowerCase() }
-      })
-      .map(({ text, el }) => {
-        const indices = []
-        let startPos = 0
-        while (startPos < text.length) {
-          const index = text.indexOf(keywords.value, startPos)
-          if (index === -1) break
-          indices.push(index)
-          startPos = index + keywords.value.length
+    items = Array.from(nodes.values())
+    // 获取当前节点下的所有子节点
+    function getChildren(id) {
+      rsdata.forEach((itm) => {
+        if (itm.pid == id) {
+          nodes.set(itm.id, itm)
+          getChildren(itm.id)
         }
-
-        // 根据搜索词的位置创建选区
-        return indices.map((index) => {
-          const range = new Range()
-          range.setStart(el, index)
-          range.setEnd(el, index + keywords.value.length)
-          return range
-        })
       })
+    }
+  } else {
+    items = rsdata
+  }
 
-    // 创建高亮对象
-    const searchResultsHighlight = new Highlight(...ranges.flat())
-    // 注册高亮
-    CSS.highlights.set('search-results', searchResultsHighlight)
+  // 构建树形结构
+  const tree = []
+  const itemMap = new Map(items.map((item) => [item.id, item]))
+  items.forEach((item) => {
+    const parent = item.pid === null ? tree : itemMap.get(item.pid)
+    if (!parent.children) {
+      parent.children = []
+    }
+    let index = parent.children.findIndex((itm) => item.order < itm.order)
+    if (index != -1) {
+      parent.children.splice(index, 0, item)
+    } else {
+      parent.children.push(item)
+    }
   })
+  return tree
+}
+
+// const resourceTreeFiltered = computed(() => {
+
+// })
+
+watch(keywords, (val) => {
+  resourceTree.value = buildTree(resourceData)
+  nextTick(() => highlight())
 })
 
-function removeSel() {
-  const items = resources.value.filter((item) => {
-    if (item.checked) {
-      removeItems.push(items)
-    }
-  })
-}
-
-// 清空所有数据
-function clearData(data) {
-  for (const key in data) {
-    if (data.hasOwnProperty(key)) {
-      data[key] = null // 或者设置为默认值
-    }
-  }
-}
-
-function getCodePrefix(code) {
-  if (!code || code.indexOf('.') === -1) {
-    return ''
-  }
-  return code.replace(/\.[^.]+$/, '')
-}
+watch(resourceType, (val) => {
+  resourceTree.value = buildTree(resourceData)
+  nextTick(() => highlight())
+})
 
 const vRules = {
   name: [
@@ -229,156 +177,238 @@ const vRules = {
   ]
 }
 
-async function remove(id) {
-  const ids = [id]
-  let pid = id
-  // 遍历树，找出所有子节点
-  function getChildren(data, pid) {
-    if (!data) return
-    data.forEach((item) => {
-      if (item.pid === pid) {
-        ids.push(id)
-        pid = item.id
+const highlight = () => {
+  if (!CSS.highlights) {
+    warn('CSS Custom Highlight API not supported.')
+    return
+  }
+  // 清除上个高亮
+  CSS.highlights.clear()
+  if (!resourceTree.value.children || !keywords.value) return
+  const article = document.querySelector('.hl-area')
+  if (!article) return
+
+  const treeWalker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT)
+  const allTextNodes = []
+  let currentNode = treeWalker.nextNode()
+  while (currentNode) {
+    allTextNodes.push(currentNode)
+    currentNode = treeWalker.nextNode()
+  }
+  // 查找所有文本节点是否包含搜索词
+  const ranges = allTextNodes
+    .map((el) => {
+      return { el, text: el.textContent.toLowerCase() }
+    })
+    .map(({ text, el }) => {
+      const indices = []
+      let startPos = 0
+      while (startPos < text.length) {
+        const index = text.indexOf(keywords.value, startPos)
+        if (index === -1) break
+        indices.push(index)
+        startPos = index + keywords.value.length
       }
-      getChildren(item.children, pid)
+
+      // 根据搜索词的位置创建选区
+      return indices.map((index) => {
+        const range = new Range()
+        range.setStart(el, index)
+        range.setEnd(el, index + keywords.value.length)
+        return range
+      })
+    })
+  // 创建高亮对象
+  const searchResultsHighlight = new Highlight(...ranges.flat())
+  // 注册高亮
+  CSS.highlights.set('search-results', searchResultsHighlight)
+}
+
+async function onChange(val) {
+  activeTabKey.value = val
+  resourceData = await API.permission.resource.list(activeTabKey.value, false)
+  resourceTree.value = buildTree(resourceData)
+  nextTick(() => highlight())
+}
+
+function clearFormData(data) {
+  for (const key in data) {
+    if (data.hasOwnProperty(key)) {
+      data[key] = null // 或者设置为默认值
+    }
+  }
+}
+
+function getCodePrefix(code) {
+  if (!code || code.indexOf('.') === -1) {
+    return ''
+  }
+  return code.replace(/\.[^.]+$/, '')
+}
+
+async function reorder(ids) {
+  await API.permission.resource.reorder(ids)
+  resourceData = await API.permission.resource.list(activeTabKey.value, false)
+  resourceTree.value = buildTree(resourceData)
+  nextTick(() => highlight())
+}
+
+function toggleCollapse(id) {
+  if (collapseIds.value.has(id)) {
+    collapseIds.value.delete(id)
+  } else {
+    collapseIds.value.add(id)
+  }
+}
+
+async function remove(id, pid) {
+  const ids = []
+  getNode(resourceTree.value)
+  const result = await API.permission.resource.remove(ids)
+  // 如果删除的是根节点数据
+  if (pid == null) {
+    roots.value = await API.permission.resource.list(null, true)
+    roots.value.sort((a, b) => a.order - b.order)
+    activeTabKey.value = roots.value[0]?.id
+  }
+  resourceData = await API.permission.resource.list(activeTabKey.value, false)
+  resourceTree.value = buildTree(resourceData)
+  nextTick(() => highlight())
+  function getNode(resourceTree) {
+    if (!resourceTree.children) return
+    resourceTree.children.forEach((item, index) => {
+      console.log(item.id, index)
+      if (item.id === id) {
+        console.log('remove', item.id)
+        ids.push(item.id)
+        getChildren(item)
+        resourceTree.children.splice(index, 1)
+        return
+      }
+      getNode(item)
     })
   }
-  getChildren(resources.value.children, pid)
+  function getChildren(data) {
+    if (!data.children) return
+    data.children.forEach((item) => {
+      ids.push(item.id)
+      getChildren(item)
+    })
+  }
 }
 
 function openEditor(item, mode) {
   // console.e
-  currentResource = item
-  console.log(currentResource, mode)
+  currentResource = item ? item : {}
   resourceEditor.value = true
-  editorMode = EDITOR_MODE[mode]
+  editorMode = mode
+  if (item) {
+    currentResource.maxOrder = item.children?.length
+  } else {
+    currentResource.maxOrder = roots.value.length
+  }
 
   // 新增模式
-  if (EDITOR_MODE[mode] === EDITOR_MODE.add) {
+  if (editorMode === EDITOR_MODE.ADD) {
     nextTick(() => {
-      clearData(resourceForm)
+      clearFormData(resourceForm)
       resourceForm.type = 1
     })
   }
   // 修改模式
-  else if (EDITOR_MODE[mode] === EDITOR_MODE.edit) {
+  else if (editorMode === EDITOR_MODE.EDIT) {
     resourceForm.name = item.name
     resourceForm.code = item.code.split('.').pop()
     resourceForm.type = item.type
-    resourceForm.order = item.order
   }
 }
 
 async function submit() {
   const item = { ...resourceForm }
+  let res
   // 新增模式
-  if (editorMode === EDITOR_MODE.add) {
-    console.log('add')
-    item.level = currentResource.level + 1
-    item.pid = currentResource.id
-    // 这里先传父节点路径，到服务器端获得了节点id后再拼接成完整的path
-    item.path = currentResource.path
-    item.code = currentResource.code + '.' + resourceForm.code
+  if (editorMode === EDITOR_MODE.ADD) {
     item.id = null
-    await API.permission.resource.add(item)
+    item.level = currentResource?.level ? currentResource.level + 1 : 1
+    item.pid = currentResource?.id ? currentResource.id : null
+    // 这里先传父节点路径，到服务器端获得了节点id后再拼接成完整的path
+    item.path = currentResource?.path ? currentResource.path : ''
+    item.code = currentResource?.code ? currentResource.code + '.' + resourceForm.code : resourceForm.code
+    item.order = currentResource.maxOrder + 1
+    res = await API.permission.resource.add(item)
+    // 如果是顶层菜单
+    if (!item.pid) {
+      roots.value = await API.permission.resource.list(null, true)
+      roots.value.sort((a, b) => a.order - b.order)
+      activeTabKey.value = res.id
+    }
   }
   // 修改模式
-  else if (editorMode === EDITOR_MODE.edit) {
+  else if (editorMode === EDITOR_MODE.EDIT) {
     item.path = currentResource.path
     item.code = currentResource.code
     item.pid = currentResource.pid
     item.id = currentResource.id
     item.level = currentResource.level
+    item.order = currentResource.order
     item.code = getCodePrefix(currentResource.code) + '.' + resourceForm.code
-    console.log('edit', item)
-    await API.permission.resource.update(item)
+    res = await API.permission.resource.update(item)
+    if (!item.pid) {
+      roots.value = await API.permission.resource.list(null, true)
+      roots.value.sort((a, b) => a.order - b.order)
+    }
   } else {
-    throw new Error('Editor Mode Error.')
+    throw new Error('Invalid Editor Mode.')
   }
 
-  const res = await API.permission.resource.list(activeTabKey.value, false)
-  orderMap = new Map(res.map((item) => [item.id, item.order ? 999 - item.order : 999]))
-  resources.value = res.sort(compareFn)
+  resourceData = await API.permission.resource.list(activeTabKey.value, false)
+  resourceTree.value = buildTree(resourceData)
+  nextTick(() => highlight())
+
+  // 滚动到新增节点的位置
+  if (editorMode === EDITOR_MODE.ADD) {
+    nextTick(() => {
+      const el = document.getElementById('_MPRES_' + res.id)
+      el.scrollIntoView({ behavior: 'instant' })
+      el.classList.add('blink')
+      el.onanimationend = () => {
+        el.classList.remove('blink')
+      }
+    })
+  }
+
   resourceEditor.value = false
-}
-
-function buildTree(items) {
-  // const tree = [{ id: null, code: '', name: '页面与功能', type: 1, pid: null, children: [] }]
-  const tree = []
-  const itemMap = new Map(items.map((item) => [item.id, item]))
-
-  items.forEach((item) => {
-    const parent = item.pid === null ? tree : itemMap.get(item.pid)
-    if (!parent.children) {
-      parent.children = []
-    }
-    // order越大越靠前
-    if (!parent.children.length <= 1 || item.order < parent.children[parent.children.length - 1].order) {
-      parent.children.push(item)
-    } else {
-      parent.children.splice(parent.children.length - 1, 0, item)
-    }
-  })
-  return tree
 }
 
 onMounted(async () => {
   isLoading.value = true
-  roots = await API.permission.resource.list(null, true)
-  activeTabKey.value = roots[0].id
+  roots.value = await API.permission.resource.list(null, true)
+  roots.value.sort((a, b) => a.order - b.order)
+  activeTabKey.value = roots.value[0]?.id
 
-  const res = await API.permission.resource.list(activeTabKey.value, false)
-  resources.value = buildTree(res)
-  // orderMap = new Map(res.map((item) => [item.id, item.order ? 999 - item.order : 999]))
-  //  = res.sort(compareFn)
+  resourceData = await API.permission.resource.list(activeTabKey.value, false)
+  resourceTree.value = buildTree(resourceData)
+  nextTick(() => highlight())
 })
 </script>
 
 <style scoped lang="scss">
-/*
-.mask {
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: 1999;
-  min-height: 100vh;
-  min-width: 100vw;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(6px);
-}
-#mp-dialog {
-  z-index: 2000;
-  position: absolute;
-  width: 200px;
-  padding: 12px;
-  border: 1px solid var(--border-primary);
-  border-radius: 5px;
-  background: var(--bg-primary);
-  display: none;
-  &:before,
-  &:after {
-    content: '';
-    width: 0;
-    height: 0;
-    font-size: 0;
-    overflow: hidden;
-    display: block;
-    border-width: 5px;
-    border-color: var(--border-primary) transparent transparent transparent;
-    // border-style: dashed dashed dashed dashed;
-    position: absolute;
-    bottom: -10px;
-    left: 20px;
-  }
-
-  &:after {
-    bottom: -9px;
-    border-color: white transparent transparent transparent;
-  }
-}
-*/
 ::highlight(search-results) {
   background-color: #4e9a06;
   color: white;
+}
+
+:deep(.blink) {
+  animation: blink 0.15s 3;
+  @keyframes blink {
+    0%,
+    80%,
+    100% {
+      opacity: 1;
+    }
+    40% {
+      opacity: 0;
+    }
+  }
 }
 </style>

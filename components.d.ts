@@ -27,6 +27,7 @@ declare module 'vue' {
     AProgress: typeof import('ant-design-vue/es')['Progress']
     AQrcode: typeof import('ant-design-vue/es')['QRCode']
     ARadio: typeof import('ant-design-vue/es')['Radio']
+    ARadioButton: typeof import('ant-design-vue/es')['RadioButton']
     ARadioGroup: typeof import('ant-design-vue/es')['RadioGroup']
     AResult: typeof import('ant-design-vue/es')['Result']
     ASelect: typeof import('ant-design-vue/es')['Select']

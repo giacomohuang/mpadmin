@@ -111,7 +111,7 @@ function getCode() {
     vueFiles.push(file)
   })
   vueFiles = vueFiles.sort()
-  console.log(vueFiles)
+  // console.log(vueFiles)
   // vueFiles = ['/Account/', '/Account/Account.vue', '/Account/AccountList.vue', '/Account/Asc/', '/Account/Asc/aaa.vue', '/Account/Asc/bbb.vue', '/Account/Permission.vue', '/My/', '/My/Main.vue']
 
   let index = -1
@@ -130,6 +130,21 @@ function getCode() {
     if (index > vueFiles.length - 1) return json
     if (!json) json = []
     const file = vueFiles[index]
+
+    // 从vue文件的<router>标签中获取用户自定义的路由信息
+    if (file.endsWith('.vue')) {
+      const fullPath = resolve(viewsPath + file)
+
+      const content = fs.readFileSync(fullPath, 'utf-8')
+      const routerRegex = /<router[\s\S]*>([\s\S]*?)<\/router>/
+      const match = content.match(routerRegex)
+      if (match) {
+        const routerJson = JSON.parse(match[1])
+        console.log(routerJson)
+        if (!routerJson.isMenu) return getRouteMap(json)
+      }
+    }
+    //
     const dir = getDir(file).toLowerCase()
     const p = file.replace(/\/$/, '').replace('.vue', '').toLowerCase()
     if (index === 0) curDir = dir

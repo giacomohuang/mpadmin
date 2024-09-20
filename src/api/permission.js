@@ -30,6 +30,13 @@ const permission = {
         url: '/permission/resource/remove',
         method: 'post'
       })
+    },
+    reorder(ids) {
+      return fetch({
+        data: JSON.stringify(ids),
+        url: '/permission/resource/reorder',
+        method: 'post'
+      })
     }
   }
 }

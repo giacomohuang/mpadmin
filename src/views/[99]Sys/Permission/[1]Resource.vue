@@ -1,5 +1,5 @@
 <template>
-  <div class="z-50 mb-3 flex items-center gap-3 bg-white">
+  <div class="z-50 mb-3 flex items-center gap-3">
     <!-- <a-button @click="removeSel">批量删除勾选项</a-button> -->
     <a-radio-group v-model:value="resourceType">
       <a-radio-button value="0">全部</a-radio-button>
@@ -59,7 +59,7 @@ import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick, provide } f
 import debounceRef from '@/js/debounceRef'
 import ResourceList from './ResourceList.vue'
 import API from '@/api/API'
-import { DnD } from '@/utils/DnD.js'
+import { DnD } from '@/js/DnD.js'
 
 const resourceEditor = ref(false),
   resourceFormRef = ref(),
@@ -139,10 +139,6 @@ const buildTree = (data) => {
   })
   return tree
 }
-
-// const resourceTreeFiltered = computed(() => {
-
-// })
 
 watch(keywords, (val) => {
   resourceTree.value = buildTree(resourceData)

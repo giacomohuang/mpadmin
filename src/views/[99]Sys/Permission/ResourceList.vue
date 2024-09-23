@@ -34,7 +34,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, inject } from 'vue'
-import { DnD } from '@/utils/DnD.js'
+import { DnD } from '@/js/DnD.js'
 
 const { data } = defineProps(['data'])
 const EDITOR_MODE = { ADD: 1, EDIT: 2 }

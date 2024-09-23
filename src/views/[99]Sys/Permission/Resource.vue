@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-3 flex items-center gap-3">
+  <div class="z-50 mb-3 flex items-center gap-3 bg-white">
     <!-- <a-button @click="removeSel">批量删除勾选项</a-button> -->
     <a-radio-group v-model:value="resourceType">
       <a-radio-button value="0">全部</a-radio-button>
@@ -14,12 +14,16 @@
   </div>
 
   <div class="flex w-[800px] rounded-md border border-primary">
-    <ul class="border-r border-primary">
-      <li v-for="root in roots" :key="root.id" class="flex cursor-pointer justify-center px-5 py-3 text-base" :class="{ 'bg-secondary font-semibold': activeTabKey === root.id }" @click="onChange(root.id)">{{ root.name }}</li>
-      <li class="flex cursor-pointer justify-center px-5 py-3">
-        <div class="w-[60px] rounded-md border border-transparent py-1 text-center text-base hover:border-brand-500 hover:text-brand-500" @click="openEditor(null, EDITOR_MODE.ADD)">+</div>
-      </li>
-    </ul>
+    <div class="border-r border-primary">
+      <div class="sticky top-0">
+        <ul ref="rootsRef">
+          <li v-for="root in roots" :key="root.id" :data-id="root.id" draggable="true" class="flex cursor-pointer justify-center px-5 py-3 text-base" :class="{ 'bg-secondary font-semibold': activeTabKey === root.id }" @click="onChange(root.id)">{{ root.name }}</li>
+        </ul>
+        <div class="flex cursor-pointer justify-center px-5 py-3">
+          <div class="w-[60px] rounded-md border border-transparent py-1 text-center text-base hover:border-brand-500 hover:text-brand-500" @click="openEditor(null, EDITOR_MODE.ADD)">+</div>
+        </div>
+      </div>
+    </div>
     <div class="hl-area relative flex-1" style="overflow-y: auto">
       <div v-if="keywords && !resourceTree.children" class="p-4 text-secondary">没有符合条件的数据。<a href="####" @click="keywords = ''">清除搜索关键词</a></div>
       <div class="list"><ResourceList :data="resourceTree.children" @open="openEditor" @remove="remove" @reorder="reorder" @toggleCollapse="toggleCollapse" v-if="resourceTree"></ResourceList></div>
@@ -51,10 +55,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, inject, watch, computed, nextTick, provide } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick, provide } from 'vue'
 import debounceRef from '@/js/debounceRef'
 import ResourceList from './ResourceList.vue'
 import API from '@/api/API'
+import { DragAndDrop } from '@/utils/DnD.js'
 
 const resourceEditor = ref(false),
   resourceFormRef = ref(),
@@ -66,7 +71,8 @@ const resourceEditor = ref(false),
   EDITOR_MODE = { ADD: 1, EDIT: 2 },
   collapseIds = ref(new Set()),
   resourceType = ref('0'),
-  roots = ref(null)
+  roots = ref(null),
+  rootsRef = ref(null)
 
 let orderMap,
   editorMode,
@@ -75,6 +81,8 @@ let orderMap,
 
 provide('resourceType', resourceType)
 provide('collapseIds', collapseIds)
+
+let dragAndDrop
 
 const buildTree = (data) => {
   const rsdata = JSON.parse(JSON.stringify(data))
@@ -91,7 +99,7 @@ const buildTree = (data) => {
       let pid = item.pid
       if (!nodes.has(id)) {
         nodes.set(id, item)
-        while (true) {
+        while (pid) {
           const parent = itemMap.get(pid)
           if (!parent) break
           nodes.set(parent.id, parent)
@@ -122,7 +130,7 @@ const buildTree = (data) => {
     if (!parent.children) {
       parent.children = []
     }
-    let index = parent.children.findIndex((itm) => item.order < itm.order)
+    let index = parent.children.findIndex((itm) => item.type < itm.type || (item.type === itm.type && item.order < itm.order))
     if (index != -1) {
       parent.children.splice(index, 0, item)
     } else {
@@ -247,6 +255,7 @@ function getCodePrefix(code) {
 }
 
 async function reorder(ids) {
+  // console.log(ids)
   await API.permission.resource.reorder(ids)
   resourceData = await API.permission.resource.list(activeTabKey.value, false)
   resourceTree.value = buildTree(resourceData)
@@ -369,7 +378,12 @@ async function submit() {
   if (editorMode === EDITOR_MODE.ADD) {
     nextTick(() => {
       const el = document.getElementById('_MPRES_' + res.id)
-      el.scrollIntoView({ behavior: 'instant' })
+      // 判断节点是不是在可视范围内
+      const rect = el.getBoundingClientRect()
+      const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight
+      if (!isVisible) {
+        el.scrollIntoView({ behavior: 'instant', block: 'center' })
+      }
       el.classList.add('blink')
       el.onanimationend = () => {
         el.classList.remove('blink')
@@ -384,22 +398,50 @@ onMounted(async () => {
   isLoading.value = true
   roots.value = await API.permission.resource.list(null, true)
   roots.value.sort((a, b) => a.order - b.order)
+
   activeTabKey.value = roots.value[0]?.id
 
   resourceData = await API.permission.resource.list(activeTabKey.value, false)
   resourceTree.value = buildTree(resourceData)
-  nextTick(() => highlight())
+
+  dragAndDrop = new DragAndDrop(rootsRef, (ids) => reorder(ids))
+  dragAndDrop.init()
+  nextTick(() => {
+    highlight()
+  })
+})
+
+onBeforeUnmount(() => {
+  dragAndDrop.destroy()
 })
 </script>
 
 <style scoped lang="scss">
+.dragging {
+  @apply border-2 border-dashed border-brand-500 bg-brand-50;
+  > * {
+    opacity: 0;
+  }
+}
+// 避免在拖拽时触发�����元素事件
+.list:has(.dragging) {
+  // pointer-events: none;
+  .item * {
+    pointer-events: none;
+  }
+  .item > .tools {
+    display: none;
+  }
+}
+
 ::highlight(search-results) {
   background-color: #4e9a06;
   color: white;
 }
 
 :deep(.blink) {
-  animation: blink 0.15s 3;
+  border: 2px dashed #4e9a06;
+  animation: blink 0.15s 6;
   @keyframes blink {
     0%,
     80%,

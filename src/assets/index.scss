@@ -1,11 +1,15 @@
+@use 'sass:color';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @function hex2rgb($hex) {
-  @return red($hex) + ' ' + green($hex) + ' ' + blue($hex);
+  $r: color.channel($hex, 'red', $space: rgb);
+  $g: color.channel($hex, 'green', $space: rgb);
+  $b: color.channel($hex, 'blue', $space: rgb);
+  @return $r + ' ' + $g + ' ' + $b;
 }
-
 @layer theme {
   [data-theme='light'] {
     --bg-primary: #{hex2rgb(#ffffff)};

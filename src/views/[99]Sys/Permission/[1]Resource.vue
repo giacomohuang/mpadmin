@@ -59,7 +59,7 @@ import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick, provide } f
 import debounceRef from '@/js/debounceRef'
 import ResourceList from './ResourceList.vue'
 import API from '@/api/API'
-import { DragAndDrop } from '@/utils/DnD.js'
+import { DnD } from '@/utils/DnD.js'
 
 const resourceEditor = ref(false),
   resourceFormRef = ref(),
@@ -410,7 +410,7 @@ onMounted(async () => {
   resourceData = await API.permission.resource.list(currentRootId.value, false)
   resourceTree.value = buildTree(resourceData)
 
-  dragAndDrop = new DragAndDrop(rootsRef, (ids) => reorder(ids))
+  dragAndDrop = new DnD(rootsRef, (ids) => reorder(ids))
   dragAndDrop.init()
   nextTick(() => {
     highlight()

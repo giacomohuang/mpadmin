@@ -1,4 +1,4 @@
-export class DragAndDrop {
+export class DnD {
   constructor(elRef, onReorder) {
     this.elRef = elRef
     this.onReorder = onReorder

@@ -17,7 +17,7 @@
     <div class="border-r border-primary">
       <div class="sticky top-0">
         <ul ref="rootsRef">
-          <li v-for="root in roots" :key="root.id" :data-id="root.id" draggable="true" class="flex cursor-pointer justify-center px-5 py-3 text-base" :class="{ 'bg-secondary font-semibold': activeTabKey === root.id }" @click="onChange(root.id)">{{ root.name }}</li>
+          <li v-for="root in roots" :key="root.id" :data-id="root.id" draggable="true" class="flex cursor-pointer justify-center px-5 py-3 text-base" :class="{ 'bg-secondary font-semibold': currentRootId === root.id }" @click="onChange(root.id)">{{ root.name }}</li>
         </ul>
         <div class="flex cursor-pointer justify-center px-5 py-3">
           <div class="w-[60px] rounded-md border border-transparent py-1 text-center text-base hover:border-brand-500 hover:text-brand-500" @click="openEditor(null, EDITOR_MODE.ADD)">+</div>
@@ -41,9 +41,9 @@
       </a-form-item>
       <a-form-item label="类型" name="type" :wrapper-col="{ span: 20 }">
         <a-radio-group v-model:value="resourceForm.type">
-          <a-radio :value="1" :checked="true">页面</a-radio>
-          <a-radio :value="2">功能</a-radio>
-          <a-radio :value="3">数据</a-radio>
+          <a-radio :value="1" :checked="resourceType <= 1">页面</a-radio>
+          <a-radio :value="2" :checked="resourceType == 2" :disabled="resourceType == 1 || resourceType == 3">功能</a-radio>
+          <a-radio :value="3" :checked="resourceType == 3" :disabled="resourceType == 1 || resourceType == 2">数据</a-radio>
         </a-radio-group>
       </a-form-item>
       <a-form-item :wrapper-col="{ offset: 6 }">
@@ -65,7 +65,7 @@ const resourceEditor = ref(false),
   resourceFormRef = ref(),
   resourceForm = reactive({ type: 1 }),
   isLoading = ref(false),
-  activeTabKey = ref(null),
+  currentRootId = ref(null),
   keywords = debounceRef('', 500),
   resourceTree = ref(null),
   EDITOR_MODE = { ADD: 1, EDIT: 2 },
@@ -233,8 +233,8 @@ const highlight = () => {
 }
 
 async function onChange(val) {
-  activeTabKey.value = val
-  resourceData = await API.permission.resource.list(activeTabKey.value, false)
+  currentRootId.value = val
+  resourceData = await API.permission.resource.list(currentRootId.value, false)
   resourceTree.value = buildTree(resourceData)
   nextTick(() => highlight())
 }
@@ -257,7 +257,7 @@ function getCodePrefix(code) {
 async function reorder(ids) {
   // console.log(ids)
   await API.permission.resource.reorder(ids)
-  resourceData = await API.permission.resource.list(activeTabKey.value, false)
+  resourceData = await API.permission.resource.list(currentRootId.value, false)
   resourceTree.value = buildTree(resourceData)
   nextTick(() => highlight())
 }
@@ -278,9 +278,9 @@ async function remove(id, pid) {
   if (pid == null) {
     roots.value = await API.permission.resource.list(null, true)
     roots.value.sort((a, b) => a.order - b.order)
-    activeTabKey.value = roots.value[0]?.id
+    currentRootId.value = roots.value[0]?.id
   }
-  resourceData = await API.permission.resource.list(activeTabKey.value, false)
+  resourceData = await API.permission.resource.list(currentRootId.value, false)
   resourceTree.value = buildTree(resourceData)
   nextTick(() => highlight())
   function getNode(resourceTree) {
@@ -321,7 +321,13 @@ function openEditor(item, mode) {
   if (editorMode === EDITOR_MODE.ADD) {
     nextTick(() => {
       clearFormData(resourceForm)
-      resourceForm.type = 1
+      if (resourceType.value == 2) {
+        resourceForm.type = 2
+      } else if (resourceType.value == 3) {
+        resourceForm.type = 3
+      } else {
+        resourceForm.type = 1
+      }
     })
   }
   // 修改模式
@@ -349,7 +355,7 @@ async function submit() {
     if (!item.pid) {
       roots.value = await API.permission.resource.list(null, true)
       roots.value.sort((a, b) => a.order - b.order)
-      activeTabKey.value = res.id
+      currentRootId.value = res.id
     }
   }
   // 修改模式
@@ -370,7 +376,7 @@ async function submit() {
     throw new Error('Invalid Editor Mode.')
   }
 
-  resourceData = await API.permission.resource.list(activeTabKey.value, false)
+  resourceData = await API.permission.resource.list(currentRootId.value, false)
   resourceTree.value = buildTree(resourceData)
   nextTick(() => highlight())
 
@@ -399,9 +405,9 @@ onMounted(async () => {
   roots.value = await API.permission.resource.list(null, true)
   roots.value.sort((a, b) => a.order - b.order)
 
-  activeTabKey.value = roots.value[0]?.id
+  currentRootId.value = roots.value[0]?.id
 
-  resourceData = await API.permission.resource.list(activeTabKey.value, false)
+  resourceData = await API.permission.resource.list(currentRootId.value, false)
   resourceTree.value = buildTree(resourceData)
 
   dragAndDrop = new DragAndDrop(rootsRef, (ids) => reorder(ids))

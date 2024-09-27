@@ -23,10 +23,10 @@ const permission = {
         method: 'post'
       })
     },
-    remove(items) {
-      console.log('remove api', items)
+    remove(path) {
+      console.log('remove api', path)
       return fetch({
-        data: JSON.stringify(items),
+        data: { path: path },
         url: '/permission/resource/remove',
         method: 'post'
       })
@@ -63,9 +63,9 @@ const permission = {
         method: 'post'
       })
     },
-    remove(id) {
+    remove(path) {
       return fetch({
-        data: { id: id },
+        data: { path: path },
         url: '/permission/role/remove',
         method: 'post'
       })

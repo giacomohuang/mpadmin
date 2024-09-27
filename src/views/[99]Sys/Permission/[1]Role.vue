@@ -29,26 +29,51 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount, provide, nextTick } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, provide } from 'vue'
 import ResourceSelector from './ResourceSelector.vue'
 import { DnD } from '@/js/DnD.js'
 import RoleList from './RoleList.vue'
 import API from '@/api/API'
-const roleTree = ref([]),
-  collapseRoleIds = ref(new Set()),
-  listRef = ref(null),
-  roleEditor = ref(false),
-  roleForm = reactive({}),
-  EDITOR_MODE = { ADD: 1, EDIT: 2 },
-  dragAndDrop = new DnD(listRef, (ids) => reorder(ids)),
-  selectedIds = ref()
 
-let editorMode,
-  roleData = null
+// 常量定义
+const EDITOR_MODE = { ADD: 1, EDIT: 2 }
 
+// 响应式状态
+const roleTree = ref([])
+const collapseRoleIds = ref(new Set())
+const listRef = ref(null)
+const roleEditor = ref(false)
+const roleForm = reactive({})
+const selectedIds = ref()
+
+// 非响应式状态
+let editorMode
+let roleData = null
+
+// 提供给子组件的状态
 provide('collapseRoleIds', collapseRoleIds)
 provide('selectedIds', selectedIds)
 
+// 拖拽实例
+const dragAndDrop = new DnD(listRef, reorder)
+
+// 表单验证规则
+const vRules = {
+  name: [
+    { required: true, message: '名称不能为空' },
+    {
+      validator: async (_rule, value) => {
+        if (value === 'huangjia') {
+          return Promise.reject('重名了')
+        }
+        return Promise.resolve()
+      },
+      trigger: 'blur'
+    }
+  ]
+}
+
+// 方法定义
 const buildTree = (data) => {
   const rsdata = JSON.parse(JSON.stringify(data))
 
@@ -56,6 +81,7 @@ const buildTree = (data) => {
   const tree = []
   const itemMap = new Map(rsdata.map((item) => [item.id, item]))
   rsdata.forEach((item) => {
+    // console.log(item.name, item.id, item.pid, item.path)
     const parent = item.pid === null ? tree : itemMap.get(item.pid)
     if (!parent.children) {
       parent.children = []
@@ -70,25 +96,8 @@ const buildTree = (data) => {
   return tree
 }
 
-const vRules = {
-  name: [
-    { required: true, message: '名称不能为空' },
-    {
-      validator: async (_rule, value) => {
-        if (value == 'huangjia') {
-          return Promise.reject('重名了')
-        } else {
-          return Promise.resolve()
-        }
-      },
-      trigger: 'blur'
-    }
-  ]
-}
-
 function openEditor(item, mode) {
   roleEditor.value = true
-  // 新增模式
   editorMode = mode
   if (editorMode === EDITOR_MODE.ADD) {
     roleForm.parentData = getParent(item.pid)
@@ -122,38 +131,31 @@ function openEditor(item, mode) {
 // 表单提交，保存数据
 async function submit() {
   const { parentData, ...item } = roleForm
+  item.resources = Array.from(selectedIds.value)
 
   // 新增模式
   if (editorMode === EDITOR_MODE.ADD) {
-    item.resources = Array.from(selectedIds.value)
-    const res = await API.permission.role.add(item)
+    await API.permission.role.add(item)
   }
   // 修改模式
   else if (editorMode === EDITOR_MODE.EDIT) {
-    item.resources = Array.from(selectedIds.value)
-    const res = await API.permission.role.update(item)
+    await API.permission.role.update(item)
   } else {
     throw new Error('Invalid Editor Mode.')
   }
 
-  console.log(item)
-
-  roleData = await API.permission.role.list(null)
-  roleTree.value = buildTree(roleData)
+  await refreshRoleData()
   roleEditor.value = false
 }
 
-async function remove(id) {
-  await API.permission.role.remove(id)
-  roleData = await API.permission.role.list(null)
-  roleTree.value = buildTree(roleData)
+async function remove(path) {
+  await API.permission.role.remove(path)
+  await refreshRoleData()
 }
 
 async function reorder(ids) {
-  console.log(ids)
   await API.permission.role.reorder(ids)
-  roleData = await API.permission.role.list(null)
-  roleTree.value = buildTree(roleData)
+  await refreshRoleData()
 }
 
 function toggleCollapse(id) {
@@ -164,22 +166,6 @@ function toggleCollapse(id) {
   }
 }
 
-function clearFormData(data) {
-  for (const key in data) {
-    if (data.hasOwnProperty(key)) {
-      data[key] = null // 或者设置为默认值
-    }
-  }
-}
-
-function getParentResources(pid) {
-  if (pid) {
-    const parent = roleData.find((item) => item.id === pid)
-    return [...parent.resources]
-  }
-  return null
-}
-
 function getParent(pid) {
   if (pid) {
     const parent = roleData.find((item) => item.id === pid)
@@ -188,10 +174,14 @@ function getParent(pid) {
   return null
 }
 
-onMounted(async () => {
-  console.log('onMounted')
+async function refreshRoleData() {
   roleData = await API.permission.role.list(null)
   roleTree.value = buildTree(JSON.parse(JSON.stringify(roleData)))
+}
+
+// 生命周期钩子
+onMounted(async () => {
+  await refreshRoleData()
   dragAndDrop.init()
 })
 

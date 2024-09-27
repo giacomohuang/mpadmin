@@ -61,32 +61,41 @@ import ResourceList from './ResourceList.vue'
 import API from '@/api/API'
 import { DnD } from '@/js/DnD.js'
 
-const resourceEditor = ref(false),
-  resourceFormRef = ref(),
-  resourceForm = reactive({ type: 1 }),
-  isLoading = ref(false),
-  currentRootId = ref(null),
-  keywords = debounceRef('', 500),
-  resourceTree = ref(null),
-  EDITOR_MODE = { ADD: 1, EDIT: 2 },
-  collapseIds = ref(new Set()),
-  resourceType = ref('0'),
-  roots = ref(null),
-  rootsRef = ref(null),
-  listRef = ref(null),
-  dndResource = new DnD(listRef, (ids) => reorder(ids)),
-  dndRoot = new DnD(rootsRef, (ids) => reorder(ids))
+// 常量定义
+const EDITOR_MODE = { ADD: 1, EDIT: 2 }
 
-let orderMap,
-  editorMode,
-  currentResource = null,
-  resourceData = null
+// 响应式状态
+const resourceEditor = ref(false)
+const resourceFormRef = ref()
+const resourceForm = reactive({ type: 1 })
+const isLoading = ref(false)
+const currentRootId = ref(null)
+const keywords = debounceRef('', 500)
+const resourceTree = ref(null)
+const collapseIds = ref(new Set())
+const resourceType = ref('0')
+const roots = ref(null)
+const rootsRef = ref(null)
+const listRef = ref(null)
 
+// DnD 实例
+const dndResource = new DnD(listRef, (ids) => reorder(ids))
+const dndRoot = new DnD(rootsRef, (ids) => reorder(ids))
+
+// 非响应式状态
+let orderMap
+let editorMode
+let currentResource = null
+let resourceData = null
+
+// 提供上下文
 provide('resourceType', resourceType)
 provide('collapseIds', collapseIds)
 
+// 辅助函数
 const buildTree = (data) => {
   const rsdata = JSON.parse(JSON.stringify(data))
+  // console.log(rsdata)
   let items
 
   // 根据关键词过滤
@@ -94,7 +103,7 @@ const buildTree = (data) => {
     const nodes = new Map()
     const itemMap = new Map(rsdata.map((item) => [item.id, item]))
     const hitItems = rsdata.filter((item) => item.name.toLowerCase().includes(keywords.value) && (resourceType.value == 0 || resourceType.value == item.type))
-    console.log(keywords.value)
+    // console.log(keywords.value)
     hitItems.forEach((item) => {
       const id = item.id
       let pid = item.pid
@@ -139,47 +148,6 @@ const buildTree = (data) => {
     }
   })
   return tree
-}
-
-watch(keywords, (val) => {
-  resourceTree.value = buildTree(resourceData)
-  nextTick(() => highlight())
-})
-
-watch(resourceType, (val) => {
-  resourceTree.value = buildTree(resourceData)
-  nextTick(() => highlight())
-})
-
-const vRules = {
-  name: [
-    { required: true, message: '名称不能为空' },
-    {
-      validator: async (_rule, value) => {
-        if (value == 'huangjia') {
-          return Promise.reject('重名了')
-        } else {
-          return Promise.resolve()
-        }
-      },
-      trigger: 'blur'
-    }
-  ],
-  code: [
-    { required: true, message: '编码不能为空' },
-    {
-      validator: async (_rule, value) => {
-        const code = getCodePrefix(currentResource.code) + value
-        console.log(code)
-        if (code === 'dashboard.lalala') {
-          return Promise.reject('编码已存在，请更换')
-        } else {
-          return Promise.resolve()
-        }
-      },
-      trigger: 'blur'
-    }
-  ]
 }
 
 const highlight = () => {
@@ -229,37 +197,37 @@ const highlight = () => {
   CSS.highlights.set('search-results', searchResultsHighlight)
 }
 
-async function onChange(val) {
-  currentRootId.value = val
-  resourceData = await API.permission.resource.list(currentRootId.value, false)
-  resourceTree.value = buildTree(resourceData)
-  nextTick(() => highlight())
-}
-
-function clearFormData(data) {
-  for (const key in data) {
-    if (data.hasOwnProperty(key)) {
-      data[key] = null // 或者设置为默认值
-    }
-  }
-}
-
-function getCodePrefix(code) {
+const getCodePrefix = (code) => {
   if (!code || code.indexOf('.') === -1) {
     return ''
   }
   return code.replace(/\.[^.]+$/, '')
 }
 
-async function reorder(ids) {
-  // console.log(ids)
+const clearFormData = (data) => {
+  for (const key in data) {
+    if (data.hasOwnProperty(key)) {
+      data[key] = null
+    }
+  }
+}
+
+// 主要功能函数
+const onChange = async (val) => {
+  currentRootId.value = val
+  resourceData = await API.permission.resource.list(currentRootId.value, false)
+  resourceTree.value = buildTree(resourceData)
+  nextTick(() => highlight())
+}
+
+const reorder = async (ids) => {
   await API.permission.resource.reorder(ids)
   resourceData = await API.permission.resource.list(currentRootId.value, false)
   resourceTree.value = buildTree(resourceData)
   nextTick(() => highlight())
 }
 
-function toggleCollapse(id) {
+const toggleCollapse = (id) => {
   if (collapseIds.value.has(id)) {
     collapseIds.value.delete(id)
   } else {
@@ -267,11 +235,9 @@ function toggleCollapse(id) {
   }
 }
 
-async function remove(id, pid) {
-  const ids = []
-  getNode(resourceTree.value)
-  const result = await API.permission.resource.remove(ids)
-  // 如果删除的是根节点数据
+const remove = async (path, pid) => {
+  const result = await API.permission.resource.remove(path)
+  // 如果删除的是根节点数据，刷新roots列表
   if (pid == null) {
     roots.value = await API.permission.resource.list(null, true)
     roots.value.sort((a, b) => a.order - b.order)
@@ -280,31 +246,9 @@ async function remove(id, pid) {
   resourceData = await API.permission.resource.list(currentRootId.value, false)
   resourceTree.value = buildTree(resourceData)
   nextTick(() => highlight())
-  function getNode(resourceTree) {
-    if (!resourceTree.children) return
-    resourceTree.children.forEach((item, index) => {
-      console.log(item.id, index)
-      if (item.id === id) {
-        console.log('remove', item.id)
-        ids.push(item.id)
-        getChildren(item)
-        resourceTree.children.splice(index, 1)
-        return
-      }
-      getNode(item)
-    })
-  }
-  function getChildren(data) {
-    if (!data.children) return
-    data.children.forEach((item) => {
-      ids.push(item.id)
-      getChildren(item)
-    })
-  }
 }
 
-function openEditor(item, mode) {
-  // console.e
+const openEditor = (item, mode) => {
   currentResource = item ? item : {}
   resourceEditor.value = true
   editorMode = mode
@@ -335,7 +279,7 @@ function openEditor(item, mode) {
   }
 }
 
-async function submit() {
+const submit = async () => {
   const item = { ...resourceForm }
   let res
   // 新增模式
@@ -397,6 +341,7 @@ async function submit() {
   resourceEditor.value = false
 }
 
+// 生命周期钩子
 onMounted(async () => {
   isLoading.value = true
   roots.value = await API.permission.resource.list(null, true)
@@ -418,6 +363,49 @@ onBeforeUnmount(() => {
   dndResource.destroy()
   dndRoot.destroy()
 })
+
+// 监听器
+watch(keywords, (val) => {
+  resourceTree.value = buildTree(resourceData)
+  nextTick(() => highlight())
+})
+
+watch(resourceType, (val) => {
+  resourceTree.value = buildTree(resourceData)
+  nextTick(() => highlight())
+})
+
+// 表单验证规则
+const vRules = {
+  name: [
+    { required: true, message: '名称不能为空' },
+    {
+      validator: async (_rule, value) => {
+        if (value == 'huangjia') {
+          return Promise.reject('重名了')
+        } else {
+          return Promise.resolve()
+        }
+      },
+      trigger: 'blur'
+    }
+  ],
+  code: [
+    { required: true, message: '编码不能为空' },
+    {
+      validator: async (_rule, value) => {
+        const code = getCodePrefix(currentResource.code) + value
+        console.log(code)
+        if (code === 'dashboard.lalala') {
+          return Promise.reject('编码已存在，请更换')
+        } else {
+          return Promise.resolve()
+        }
+      },
+      trigger: 'blur'
+    }
+  ]
+}
 </script>
 
 <style scoped lang="scss">

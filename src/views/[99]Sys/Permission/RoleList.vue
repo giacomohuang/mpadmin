@@ -12,7 +12,7 @@
         </div>
         <div class="tools flex items-center">
           <icon name="add" size="1.8em" class="add" @click.stop="openEditor(role, EDITOR_MODE.ADD)" />
-          <icon name="del" size="1.8em" class="del" @click.stop="confirm(role.id, role.pid)" />
+          <icon name="del" size="1.8em" class="del" @click.stop="confirm(role.path)" />
         </div>
       </div>
 
@@ -39,9 +39,9 @@ function toggleCollapse(id) {
   emits('toggleCollapse', id)
 }
 
-function confirm(id, pid) {
-  console.log(id, pid)
-  emits('remove', id, pid)
+function confirm(path) {
+  console.log(path)
+  emits('remove', path)
 }
 
 function openEditor(parent, mode) {

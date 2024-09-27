@@ -18,7 +18,7 @@
         <div class="tools flex items-center">
           <icon name="edit" size="1.8em" class="edit" @click="openEditor(resource, EDITOR_MODE.EDIT)" />
           <icon v-if="resource.type === 1" size="1.8em" name="add" class="add" @click="openEditor(resource, EDITOR_MODE.ADD)" />
-          <icon name="del" size="1.8em" class="del" @click="confirm(resource.id, resource.pid)" />
+          <icon name="del" size="1.8em" class="del" @click="confirm(resource.path, resource.pid)" />
         </div>
       </div>
       <ResourceList v-show="!collapseIds.has(resource.id)" :data="resource.children" @open="openEditor" @remove="confirm" @toggleCollapse="toggleCollapse" />
@@ -52,8 +52,8 @@ function toggleCollapse(id) {
   emits('toggleCollapse', id)
 }
 
-function confirm(id, pid) {
-  emits('remove', id, pid)
+function confirm(path, pid) {
+  emits('remove', path, pid)
 }
 
 function openEditor(parent, mode) {

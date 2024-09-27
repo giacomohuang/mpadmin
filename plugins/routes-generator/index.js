@@ -103,7 +103,7 @@ function getCode() {
   globs.forEach((f) => {
     let file = f.replace(viewsPath, '')
     let dir = getDir(file)
-    console.log(dir)
+    // console.log(dir)
     if (!dirSet.has(dir)) {
       dirSet.add(dir)
       vueFiles.push('/' + dir + '/')
@@ -140,7 +140,7 @@ function getCode() {
       const match = content.match(routerRegex)
       if (match) {
         const routerJson = JSON.parse(match[1])
-        console.log(routerJson)
+        // console.log(routerJson)
         if (!routerJson.isMenu) return getRouteMap(json)
       }
     }

@@ -38,6 +38,45 @@ const permission = {
         method: 'post'
       })
     }
+  },
+  role: {
+    list(pid) {
+      return fetch({
+        data: { pid: pid },
+        url: '/permission/role/list',
+        method: 'post'
+      })
+    },
+    add(item) {
+      console.log('add api', item)
+      return fetch({
+        data: JSON.stringify(item),
+        url: '/permission/role/add',
+        method: 'post'
+      })
+    },
+    update(item) {
+      console.log('update api', item)
+      return fetch({
+        data: JSON.stringify(item),
+        url: '/permission/role/update',
+        method: 'post'
+      })
+    },
+    remove(id) {
+      return fetch({
+        data: { id: id },
+        url: '/permission/role/remove',
+        method: 'post'
+      })
+    },
+    reorder(ids) {
+      return fetch({
+        data: JSON.stringify(ids),
+        url: '/permission/role/reorder',
+        method: 'post'
+      })
+    }
   }
 }
 export default permission

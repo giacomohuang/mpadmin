@@ -26,7 +26,7 @@
     </div>
     <div class="hl-area relative flex-1" style="overflow-y: auto">
       <div v-if="keywords && !resourceTree.children" class="p-4 text-secondary">没有符合条件的数据。<a href="####" @click="keywords = ''">清除搜索关键词</a></div>
-      <div class="list"><ResourceList :data="resourceTree.children" @open="openEditor" @remove="remove" @reorder="reorder" @toggleCollapse="toggleCollapse" v-if="resourceTree"></ResourceList></div>
+      <div class="list" ref="listRef"><ResourceList :data="resourceTree.children" @open="openEditor" @remove="remove" @reorder="reorder" @toggleCollapse="toggleCollapse" v-if="resourceTree"></ResourceList></div>
     </div>
   </div>
 
@@ -72,7 +72,10 @@ const resourceEditor = ref(false),
   collapseIds = ref(new Set()),
   resourceType = ref('0'),
   roots = ref(null),
-  rootsRef = ref(null)
+  rootsRef = ref(null),
+  listRef = ref(null),
+  dndResource = new DnD(listRef, (ids) => reorder(ids)),
+  dndRoot = new DnD(rootsRef, (ids) => reorder(ids))
 
 let orderMap,
   editorMode,
@@ -81,8 +84,6 @@ let orderMap,
 
 provide('resourceType', resourceType)
 provide('collapseIds', collapseIds)
-
-let dragAndDrop
 
 const buildTree = (data) => {
   const rsdata = JSON.parse(JSON.stringify(data))
@@ -406,15 +407,16 @@ onMounted(async () => {
   resourceData = await API.permission.resource.list(currentRootId.value, false)
   resourceTree.value = buildTree(resourceData)
 
-  dragAndDrop = new DnD(rootsRef, (ids) => reorder(ids))
-  dragAndDrop.init()
+  dndResource.init()
+  dndRoot.init()
   nextTick(() => {
     highlight()
   })
 })
 
 onBeforeUnmount(() => {
-  dragAndDrop.destroy()
+  dndResource.destroy()
+  dndRoot.destroy()
 })
 </script>
 
@@ -425,9 +427,8 @@ onBeforeUnmount(() => {
     opacity: 0;
   }
 }
-// 避免在拖拽时触发�����元素事件
+// 避免在拖拽时触发子级元素事件
 .list:has(.dragging) {
-  // pointer-events: none;
   .item * {
     pointer-events: none;
   }

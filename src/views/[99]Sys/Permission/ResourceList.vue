@@ -1,5 +1,5 @@
 <template>
-  <ul v-if="data" ref="listRef">
+  <ul v-if="data">
     <li v-for="resource in data" :key="resource.id" v-show="resourceType == 0 || resource.type <= 1 || resourceType == resource.type" :draggable="resource.pid != null" class="dragitem pl-4" :data-id="resource.id" :data-type="resource.type" :id="'_MPRES_' + resource.id">
       <div class="item group">
         <div class="flex flex-row items-center gap-1" :class="{ 'pl-6': resource.pid > 0 }">
@@ -16,12 +16,12 @@
           </span>
         </div>
         <div class="tools flex items-center">
-          <icon name="edit" class="edit" @click="openEditor(resource, EDITOR_MODE.EDIT)" />
-          <icon v-if="resource.type === 1" name="add" class="add" @click="openEditor(resource, EDITOR_MODE.ADD)" />
-          <icon name="del" class="del" @click="confirm(resource.id, resource.pid)" />
+          <icon name="edit" size="1.8em" class="edit" @click="openEditor(resource, EDITOR_MODE.EDIT)" />
+          <icon v-if="resource.type === 1" size="1.8em" name="add" class="add" @click="openEditor(resource, EDITOR_MODE.ADD)" />
+          <icon name="del" size="1.8em" class="del" @click="confirm(resource.id, resource.pid)" />
         </div>
       </div>
-      <ResourceList v-show="!collapseIds.has(resource.id)" :data="resource.children" @open="openEditor" @remove="confirm" @reorder="emits('reorder', $event)" @toggleCollapse="toggleCollapse" />
+      <ResourceList v-show="!collapseIds.has(resource.id)" :data="resource.children" @open="openEditor" @remove="confirm" @toggleCollapse="toggleCollapse" />
     </li>
   </ul>
 </template>
@@ -34,17 +34,14 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, inject } from 'vue'
-import { DnD } from '@/js/DnD.js'
 
 const { data } = defineProps(['data'])
 const EDITOR_MODE = { ADD: 1, EDIT: 2 }
-const emits = defineEmits(['open', 'remove', 'reorder', 'toggleCollapse'])
-const listRef = ref(null)
+const emits = defineEmits(['open', 'remove', 'toggleCollapse'])
 
 const collapseIds = inject('collapseIds')
 const resourceType = inject('resourceType')
 
-const dragAndDrop = new DnD(listRef, (ids) => emits('reorder', ids))
 const RESTYPE = {
   1: { type: 'menu', style: 'text-sky-600' },
   2: { type: 'func', style: 'text-lime-600' },
@@ -73,14 +70,6 @@ function copyToClipBoard(ev, text) {
   clickableItem.insertAdjacentElement('afterend', checkmark)
   setTimeout(() => checkmark.remove(), 1800)
 }
-
-onMounted(() => {
-  dragAndDrop.init()
-})
-
-onBeforeUnmount(() => {
-  dragAndDrop.destroy()
-})
 </script>
 
 <style lang="scss" scoped>
@@ -90,17 +79,8 @@ onBeforeUnmount(() => {
     opacity: 0;
   }
 }
-// 避免在拖拽时触发子级元素事件
-.list:has(.dragging) {
-  // pointer-events: none;
-  .item * {
-    pointer-events: none;
-  }
-  .item > .tools {
-    display: none;
-  }
-}
-/* 
+
+/*
  * This class applies content-visibility optimization
  * It sets content-visibility to auto for better performance
  * A fixed height and contain-intrinsic-size are specified
@@ -130,15 +110,15 @@ onBeforeUnmount(() => {
   }
 }
 
-.hide {
-  display: none;
-}
+// .hide {
+//   display: none;
+// }
 
 .item {
-  @apply relative flex h-14 items-center justify-between border-b border-primary py-3;
+  @apply relative flex h-14 items-center justify-between border-b py-3;
 }
 .dragitem[draggable='true'] {
-  @apply cursor-move bg-primary;
+  @apply cursor-move;
 }
 .tools {
   @apply opacity-0 transition-opacity duration-150 ease-in-out group-hover:opacity-100;

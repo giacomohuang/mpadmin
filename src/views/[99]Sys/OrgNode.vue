@@ -165,7 +165,7 @@ function editNode(ev, node) {
 function removeNode(items, index) {
   if (dragged) return
   items.splice(index, 1)
-  resize()
+  // resize()
 }
 
 function clearText(ev, json) {

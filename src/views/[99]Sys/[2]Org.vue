@@ -98,7 +98,7 @@ function addNode(items, index, flag) {
     isEntity: false,
     leaderId: null,
     leaderName: '',
-    order: 0,
+    order: 1,
     status: 1,
     children: []
   }

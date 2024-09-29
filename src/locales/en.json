@@ -137,6 +137,9 @@
       "resource": {
         "_title": "Resources"
       }
+    },
+    "org": {
+      "_title": "Org Structure"
     }
   }
 }

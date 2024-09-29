@@ -20,7 +20,7 @@
     "p-limit": "^6.1.0",
     "pinia": "^2.2.2",
     "spark-md5": "^3.0.2",
-    "vue": "^3.5.8",
+    "vue": "^3.5.10",
     "vue-draggable-plus": "^0.5.3",
     "vue-i18n": "^10.0.3",
     "vue-router": "^4.4.5",
@@ -28,7 +28,7 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
-    "@rollup/pluginutils": "^5.1.1",
+    "@rollup/pluginutils": "^5.1.2",
     "@rushstack/eslint-patch": "^1.10.4",
     "@vitejs/plugin-vue": "^5.1.4",
     "@vue/cli-plugin-typescript": "^5.0.8",
@@ -37,7 +37,7 @@
     "autoprefixer": "^10.4.20",
     "chokidar": "^4.0.1",
     "cors": "^2.8.5",
-    "eslint": "^9.11.0",
+    "eslint": "^9.11.1",
     "eslint-plugin-vue": "^9.28.0",
     "fast-glob": "^3.3.2",
     "javascript-obfuscator": "^4.1.1",
@@ -45,15 +45,15 @@
     "json5": "^2.2.3",
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
-    "prettier-plugin-tailwindcss": "^0.6.6",
-    "rollup": "^4.22.4",
-    "sass": "^1.79.3",
+    "prettier-plugin-tailwindcss": "^0.6.8",
+    "rollup": "^4.22.5",
+    "sass": "^1.79.4",
     "sass-loader": "^16.0.2",
     "svg-baker": "^1.7.0",
     "svgo": "^3.3.2",
-    "tailwindcss": "^3.4.12",
+    "tailwindcss": "^3.4.13",
     "unplugin-vue-components": "^0.27.4",
-    "vite": "^5.4.7",
+    "vite": "^5.4.8",
     "vitest": "^2.1.1"
   }
 }

@@ -42,8 +42,8 @@
       <a-form-item label="类型" name="type" :wrapper-col="{ span: 20 }">
         <a-radio-group v-model:value="resourceForm.type">
           <a-radio :value="1" :checked="resourceType <= 1">页面</a-radio>
-          <a-radio :value="2" :checked="resourceType == 2" :disabled="resourceType == 1 || resourceType == 3">功能</a-radio>
-          <a-radio :value="3" :checked="resourceType == 3" :disabled="resourceType == 1 || resourceType == 2">数据</a-radio>
+          <a-radio :value="2" :checked="resourceType == 2" :disabled="resourceType == 1 || resourceType == 3 || !resourceForm.pid">功能</a-radio>
+          <a-radio :value="3" :checked="resourceType == 3" :disabled="resourceType == 1 || resourceType == 2 || !resourceForm.pid">数据</a-radio>
         </a-radio-group>
       </a-form-item>
       <a-form-item :wrapper-col="{ offset: 6 }">

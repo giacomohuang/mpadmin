@@ -1,14 +1,12 @@
 <template>
   <div class="main">
-    <PerfectScrollbar>
-      <div id="canvas">
-        <div id="scaler">
-          <div id="nodes">
-            <OrgNode v-if="is_ready" :data="org_data.children" :level="0" @addNode="addNode"></OrgNode>
-          </div>
+    <div id="canvas">
+      <div id="scaler">
+        <div id="nodes">
+          <OrgNode v-if="is_ready" :data="org_data.children" :level="0" @add="add"></OrgNode>
         </div>
       </div>
-    </PerfectScrollbar>
+    </div>
   </div>
 
   <a-drawer v-model="drawer">
@@ -35,8 +33,8 @@ import OrgNode from './OrgNode.vue'
 import { customAlphabet } from 'nanoid'
 import Drag from '@/js/dragCanvas'
 import API from '@/api/API'
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
-import '@/assets/scrollbar.css'
+import PerfectScrollbar from 'perfect-scrollbar'
+import '@/assets/perfect-scrollbar.css'
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6)
 
@@ -64,6 +62,7 @@ const buildTree = (data) => {
   data.forEach((item) => {
     // console.log(item.name, item.id, item.pid, item.path)
     const parent = item.pid === null ? tree : itemMap.get(item.pid)
+    item.children = []
     if (!parent.children) {
       parent.children = []
     }
@@ -89,7 +88,7 @@ async function initData() {
   })
 }
 
-function addNode(items, index, flag) {
+function add(items, index, flag) {
   //direction: previous/next/parent/child
   const data = {
     id: nanoid(),
@@ -103,7 +102,6 @@ function addNode(items, index, flag) {
     children: []
   }
   let old_item
-  console.log(items)
   switch (flag) {
     case 'parent':
       if (items == null) {
@@ -175,6 +173,8 @@ function zoom(mode) {
 
 onMounted(() => {
   initData()
+  const container = document.querySelector('.main')
+  new PerfectScrollbar(container)
   new Drag(document.querySelector('.ps'))
 })
 </script>
@@ -193,10 +193,6 @@ onMounted(() => {
 }
 .canvas {
   position: relative;
-}
-
-.bg {
-  background: #f0f0f2;
 }
 
 #scaler {
@@ -229,43 +225,18 @@ onMounted(() => {
   position: relative;
 }
 
-.settings {
-  min-width: 300px;
-  padding-top: 40px;
-  background: #fff;
-  overflow-y: auto;
-  border-left: 1px solid #e3e3e3;
-}
-
-.node-edit {
-  .title {
-    font-size: 16px;
-    color: #000;
-  }
-  .close {
-    font-size: 16px;
-    border-radius: 50%;
-    padding: 8px;
-    cursor: pointer;
-    &:hover {
-      background: #f1f1f1;
-      color: #000;
-    }
-  }
-}
-
 #zoom {
   position: fixed;
   display: flex;
   flex-direction: row;
   left: 280px;
   bottom: 50px;
-  background: #f7f7f7;
-  border: 1px solid #f1f1f1;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
   z-index: 100;
   padding: 8px;
   border-radius: 12px;
-  box-shadow: 2px 2px 4px 0 rgba(170, 170, 170, 0.3);
+  box-shadow: 2px 2px 4px 0 var(--shadow-primary);
   .item {
     user-select: none;
     border-radius: 8px;

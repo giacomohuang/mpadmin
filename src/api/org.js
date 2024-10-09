@@ -14,6 +14,12 @@ export const org = {
       url: '/org/get',
       method: 'post'
     })
+  },
+  update() {
+    return fetch({
+      url: '/org/update',
+      method: 'post'
+    })
   }
 }
 export default org

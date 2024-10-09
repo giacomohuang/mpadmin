@@ -21,10 +21,13 @@
 
     --border-primary: #e5e5e5;
     --border-secondary: theme(colors.neutral.300);
+    --border-tertiary: theme(colors.neutral.400);
+
+    --shadow-primary: rgba(170, 170, 170, 0.3);
   }
 
   [data-theme='dark'] {
-    --bg-primary: #{hex2rgb(#171717)};
+    --bg-primary: #{hex2rgb(#222222)};
     --bg-secondary: theme(colors.neutral.800);
 
     --text-primary: theme(colors.white);
@@ -32,6 +35,9 @@
     --text-tertiary: theme(colors.neutral.500);
 
     --border-primary: theme(colors.neutral.700);
-    --border-secondary: theme(colors.neutral.500);
+    --border-secondary: theme(colors.neutral.600);
+    --border-tertiary: theme(colors.neutral.500);
+
+    --shadow-primary: rgba(0, 0, 0, 0.3);
   }
 }

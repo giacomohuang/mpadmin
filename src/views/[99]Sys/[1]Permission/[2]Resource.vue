@@ -1,35 +1,36 @@
 <template>
-  <div class="z-50 mb-3 flex items-center gap-3">
-    <!-- <a-button @click="removeSel">批量删除勾选项</a-button> -->
-    <a-radio-group v-model:value="resourceType">
-      <a-radio-button value="0">全部</a-radio-button>
-      <a-radio-button value="1">仅页面</a-radio-button>
-      <a-radio-button value="2">页面+功能</a-radio-button>
-      <a-radio-button value="3">页面+数据</a-radio-button>
-    </a-radio-group>
-    <div class="relative flex items-center">
-      <icon name="search" class="absolute m-2"></icon>
-      <input class="h-8 w-56 rounded-md border border-secondary bg-primary px-8 outline-none duration-300 focus:border-brand-500 focus:ease-in" placeholder="输入关键词搜索" v-model="keywords" />
-    </div>
-  </div>
-
-  <div class="flex w-[800px] rounded-md border border-primary">
-    <div class="border-r border-primary">
-      <div class="sticky top-0">
-        <ul ref="rootsRef">
-          <li v-for="root in roots" :key="root.id" :data-id="root.id" draggable="true" class="flex cursor-pointer justify-center px-5 py-3 text-base" :class="{ 'bg-secondary font-semibold': currentRootId === root.id }" @click="onChange(root.id)">{{ root.name }}</li>
-        </ul>
-        <div class="flex cursor-pointer justify-center px-5 py-3">
-          <div class="w-[60px] rounded-md border border-transparent py-1 text-center text-base hover:border-brand-500 hover:text-brand-500" @click="openEditor(null, EDITOR_MODE.ADD)">+</div>
-        </div>
+  <div class="m-8">
+    <div class="z-50 mb-3 flex items-center gap-3">
+      <!-- <a-button @click="removeSel">批量删除勾选项</a-button> -->
+      <a-radio-group v-model:value="resourceType">
+        <a-radio-button value="0">全部</a-radio-button>
+        <a-radio-button value="1">仅页面</a-radio-button>
+        <a-radio-button value="2">页面+功能</a-radio-button>
+        <a-radio-button value="3">页面+数据</a-radio-button>
+      </a-radio-group>
+      <div class="relative flex items-center">
+        <icon name="search" class="absolute m-2"></icon>
+        <input class="h-8 w-56 rounded-md border border-secondary bg-primary px-8 outline-none duration-300 focus:border-brand-500 focus:ease-in" placeholder="输入关键词搜索" v-model="keywords" />
       </div>
     </div>
-    <div class="hl-area relative flex-1" style="overflow-y: auto">
-      <div v-if="keywords && !resourceTree.children" class="p-4 text-secondary">没有符合条件的数据。<a href="####" @click="keywords = ''">清除搜索关键词</a></div>
-      <div class="list" ref="listRef"><ResourceList :data="resourceTree.children" @open="openEditor" @remove="remove" @reorder="reorder" @toggleCollapse="toggleCollapse" v-if="resourceTree"></ResourceList></div>
+
+    <div class="flex w-[800px] rounded-md border border-primary">
+      <div class="border-r border-primary">
+        <div class="sticky top-0">
+          <ul ref="rootsRef">
+            <li v-for="root in roots" :key="root.id" :data-id="root.id" draggable="true" class="flex cursor-pointer justify-center px-5 py-3 text-base" :class="{ 'bg-secondary font-semibold': currentRootId === root.id }" @click="onChange(root.id)">{{ root.name }}</li>
+          </ul>
+          <div class="flex cursor-pointer justify-center px-5 py-3">
+            <div class="w-[60px] rounded-md border border-transparent py-1 text-center text-base hover:border-brand-500 hover:text-brand-500" @click="openEditor(null, EDITOR_MODE.ADD)">+</div>
+          </div>
+        </div>
+      </div>
+      <div class="hl-area relative flex-1" style="overflow-y: auto">
+        <div v-if="keywords && !resourceTree.children" class="p-4 text-secondary">没有符合条件的数据。<a href="####" @click="keywords = ''">清除搜索关键词</a></div>
+        <div class="list" ref="listRef"><ResourceList :data="resourceTree.children" @open="openEditor" @remove="remove" @reorder="reorder" @toggleCollapse="toggleCollapse" v-if="resourceTree"></ResourceList></div>
+      </div>
     </div>
   </div>
-
   <a-drawer title="资源编辑器" width="500px" :open="resourceEditor" @close="resourceEditor = false">
     <a-form ref="resourceFormRef" :model="resourceForm" :rules="vRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 20 }" @finish="submit">
       <a-form-item label="名称" :wrapper-col="{ span: 12 }" name="name">

@@ -1,42 +1,38 @@
 <template>
-  <ul class="group" v-draggable="[data, { animation: 100, handle: '.title', ghostClass: 'ghost', disabled: is_drag_disabled, chosenClass: 'chosen', group: { name: level == 0 ? 'root' : 'children' } }]">
-    <li v-for="(item, index) in data" class="wrapper" :class="{ draggable: level != 0 }" @mousedown.stop="">
-      <div class="line-v"></div>
-      <div class="node" :class="['level' + (level % 10), { root: level == 0 }]">
+  <ul class="group" v-draggable="[data, { animation: 100, onChange: onChange, handle: '.title', ghostClass: 'ghost', disabled: is_drag_disabled, chosenClass: 'chosen', group: { name: level == 0 ? 'root' : 'children' } }]">
+    <li v-for="(item, index) in data" class="wrapper" :class="{ draggable: level != 0 }" @mousedown.stop="" :key="item.id">
+      <div class="node" :class="['level' + (level % 10), { root: level == 0 }, { leaf: item.children?.length == 0 }]">
         <div class="handler" :class="{ show: item.id === active_nodeid }">
-          <div class="add top" @click.stop="addNode(parent, index, 'parent')" v-if="level !== 0"><icon name="plus"></icon></div>
-          <div class="add bottom" @click.stop="addNode(data, index, 'child')"><icon name="plus"></icon></div>
-          <div class="add left" @click.stop="addNode(data, index, 'previous')" v-if="level !== 0"><icon name="plus"></icon></div>
-          <div class="add right" @click.stop="addNode(data, index, 'next')" v-if="level !== 0"><icon name="plus"></icon></div>
+          <div class="add top" @click.stop="add(parent, index, 'parent')" v-if="level !== 0"><icon name="plus"></icon></div>
+          <div class="add bottom" @click.stop="add(data, index, 'child')"><icon name="plus"></icon></div>
+          <div class="add left" @click.stop="add(data, index, 'previous')" v-if="level !== 0"><icon name="plus"></icon></div>
+          <div class="add right" @click.stop="add(data, index, 'next')" v-if="level !== 0"><icon name="plus"></icon></div>
         </div>
         <div class="node-wrap" @mouseenter.stop="showHandler($event, item.id)">
           <div class="title">
             <div class="inputbox">
               <input v-model="item.name" @mousedown.stop="" @click.stop="" @mouseup.stop="" />
-              <div class="clear" vDraggableCustom @click.stop="clearText($event, item)"><icon name="remove" size="1em"></icon></div>
+              <div class="clear" @click.stop="clearText($event, item)"><icon name="remove" size="1em"></icon></div>
             </div>
-            <div class="name" vDraggableCustom @click.stop="editNodeTitle($event, item)">
+            <div class="name" vDraggableCustom @click.stop="editTitle($event, item)">
               <span :placeholder="item.id">{{ item.name }}</span>
               <icon name="edit"></icon>
             </div>
 
             <div class="tools">
-              <div class="remove" v-if="level != 0" vDraggableCustom @click.stop="removeNode(data, index)"><icon name="remove" size="1em"></icon></div>
+              <div class="remove" v-if="level != 0" @click.stop="remove(data, index)"><icon name="remove" size="1em"></icon></div>
             </div>
           </div>
-          <div class="body" vDraggableCustom @click.stop="editNode($event, item)">
+          <div class="body" @click.stop="edit($event, item)">
             <div class="leader">
-              <span class="avatar"><img />张</span>
+              <icon name="role"></icon>
               <span class="name" :title="item.leaderName">{{ item.leaderName }}</span>
             </div>
-            <div class="num"><icon name="role"></icon>1000</div>
+            <div class="num">1000人</div>
           </div>
         </div>
       </div>
-      <OrgNode :data="item.children" :level="level + 1" :parent="item" @addNode="addNode"></OrgNode>
-      <ul>
-        <li></li>
-      </ul>
+      <OrgNode :data="item.children" :level="level + 1" :parent="item" @add="add"></OrgNode>
     </li>
   </ul>
 </template>
@@ -48,14 +44,14 @@
 </router>
 
 <script setup>
-import { ref, inject, onMounted, computed, stop } from 'vue'
+import { ref, inject } from 'vue'
 import { vDraggable } from 'vue-draggable-plus'
 import { customAlphabet } from 'nanoid'
 
 const nanoid = customAlphabet('~!@#$%^&*+()-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 3)
 const { data, parent, level } = defineProps(['data', 'parent', 'level'])
 
-const emit = defineEmits(['addNode'])
+const emit = defineEmits(['add'])
 const active_nodeid = inject('active_nodeid')
 const editing_node = inject('editing_node')
 const is_drag_disabled = ref(false)
@@ -87,17 +83,9 @@ const vDraggableCustom = {
   }
 }
 
-// function onUpdate(event) {
-//   console.log('onUpdate', event)
-// }
-
-// function onAdd(event) {
-//   console.log('onAdd', event)
-// }
-
-// function onRemove(event) {
-//   console.log('onRemove', event)
-// }
+function onChange(dragEvent) {
+  console.log(dragEvent)
+}
 
 function showHandler(ev, id) {
   // console.log('showHandler', ev.target, id)
@@ -125,8 +113,9 @@ function showHandler(ev, id) {
   }
 }
 
-function addNode(items, id, flag) {
-  emit('addNode', items, id, flag)
+function add(items, id, flag) {
+  console.log('aaaaaaa', items, id, flag)
+  emit('add', items, id, flag)
 }
 
 function getElPos(el) {
@@ -155,14 +144,14 @@ function getMousePos() {
   return { x: x, y: y }
 }
 
-function editNode(ev, node) {
+function edit(ev, node) {
   if (dragged) return
   // console.log(id)
   drawer.value = true
   editing_node.value = node
 }
 
-function removeNode(items, index) {
+function remove(items, index) {
   if (dragged) return
   items.splice(index, 1)
   // resize()
@@ -175,7 +164,7 @@ function clearText(ev, json) {
   json.name = ''
 }
 
-function editNodeTitle(ev, json) {
+function editTitle(ev, json) {
   if (dragged) return
   // console.log('aaaaaa', json)
   const el = ev.currentTarget.previousElementSibling
@@ -241,13 +230,23 @@ function editNodeTitle(ev, json) {
 <style scoped lang="scss">
 .group {
   display: flex;
-  justify-content: top;
   padding: 0;
   margin: 0;
   list-style-type: none;
+
   &:not(:first-child) {
     padding-top: 20px;
   }
+  // &:after {
+  //   content: '';
+  //   position: absolute;
+  //   width: calc(100% - 200px);
+  //   border-top: 1px solid #aead93;
+  //   height: 20px;
+  //   background: red;
+  // }
+
+  // 空子节点占位,拖动用
   &:empty {
     content: '';
     position: absolute;
@@ -256,9 +255,11 @@ function editNodeTitle(ev, json) {
     height: 100px;
     left: 30px;
     top: 100px;
-    // border: 1px solid red;
   }
 }
+
+$border-color: var(--border-tertiary);
+$border-radius: 5px;
 
 .wrapper {
   display: flex;
@@ -267,62 +268,104 @@ function editNodeTitle(ev, json) {
   justify-content: top;
   align-items: center;
   position: relative;
-  background: #fff;
-  &:before {
-    position: absolute;
-    content: '';
-    width: 100%;
-    height: 1px;
-    background: #afaacb;
-  }
-
-  &:first-child::before {
-    right: 0;
-    width: 50%;
-  }
-
-  &:last-child::before {
-    left: 0;
-    width: 50%;
-  }
-
-  &:only-child::before {
-    background: #fff;
-  }
-
-  &:after {
-    content: '';
-    width: 10px;
-    height: 100%;
-    background: #fff;
-    z-index: 0;
-  }
 
   &.chosen {
-    .handler {
-      display: none;
+    // left: 2px;
+    // width: 100%;
+    border: 2px dashed rgb(255, 136, 0);
+    &::before {
+      border: 0 !important;
     }
+
+    &::after {
+      border: 0 !important;
+    }
+
+    .wrapper::before {
+      border: 0 !important;
+    }
+    .node::before {
+      border: 0 !important;
+    }
+
+    .node::after {
+      border: 0 !important;
+    }
+    .handler {
+      visibility: hidden;
+    }
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    height: 20px;
+    border-color: $border-color;
+    border-style: $border-radius;
+  }
+
+  // 只有一个子节点，且不是根节点，才显示竖线
+  &:only-child:not(.root)::before {
+    left: 50%;
+    width: 1px;
+    border-left-width: 1px;
+  }
+
+  // 不止一个子节点，才显示横线
+  &:not(:only-child)::before {
+    width: 100%;
+    border-top-width: 1px;
+  }
+
+  // 不是第一个也不是最后一个节点，需要显示T字形线段，所以借用node节点的before显示竖线
+  &:not(:first-child):not(:last-child) {
+    > .node::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      height: 20px;
+      border-left: 1px solid $border-color;
+    }
+  }
+
+  // 最后一个节点，并且不是单一节点，显示左圆角
+  &:first-child:not(:only-child)::before {
+    left: 50%;
+    width: 50%;
+    border-left-width: 1px;
+    border-radius: $border-radius 0 0 0;
+  }
+
+  // 最后一个节点，，并且不是单一节点，显示右圆角
+  &:last-child:not(:only-child)::before {
+    width: 50%;
+    left: 0;
+    border-right-width: 1px;
+    border-radius: 0 $border-radius 0 0;
+    // background: red;
   }
 }
 
 .ghost {
-  z-index: 3;
-  // 避免叶子节点右边框不显示
-  left: -2px;
-  outline: 2px dashed rgb(255, 136, 0);
-  .wrapper {
-    &:before {
-      background: #fff;
-    }
-  }
-  div {
+  // outline: 2px dashed rgb(255, 136,; 0)
+  // left: -2px;
+  * {
     visibility: hidden;
   }
 }
 
-.node {
-  .handler {
-    visibility: hidden;
+// 层级颜色
+
+$lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fce87, #cecc87, #aead93);
+// 使用@each指令遍历颜色数组
+@each $color in $lv-colors {
+  $i: index($lv-colors, $color);
+  .level#{$i - 1} {
+    background: $color;
+    &:hover {
+      box-shadow: 0px 0px 8px 0 $color;
+    }
   }
 }
 
@@ -330,75 +373,24 @@ function editNodeTitle(ev, json) {
   position: relative;
   border-radius: 8px;
   padding: 4px;
-  margin: 20px 20px 0 30px;
+  margin: 20px 20px 0 20px;
   z-index: 3;
   width: 180px;
+
+  &:not(.leaf)::after {
+    content: '';
+    position: absolute;
+    margin-top: 4px;
+    width: 1px;
+    height: 20px;
+    left: 50%;
+    border-left: 1px solid $border-color;
+  }
 
   &.root {
     margin-top: 0;
   }
   cursor: default;
-
-  &.level0 {
-    background: #f29999;
-    &:hover {
-      box-shadow: 0px 0px 8px 0 #f29999;
-    }
-  }
-  &.level1 {
-    background: #eda763;
-    &:hover {
-      box-shadow: 0px 0px 8px 0 #eda763;
-    }
-  }
-  &.level2 {
-    background: #ceb0d2;
-    &:hover {
-      box-shadow: 0px 0px 8px 0 #ceb0d2;
-    }
-  }
-  &.level3 {
-    background: #c8adad;
-    &:hover {
-      box-shadow: 0px 0px 8px 0 #c8adad;
-    }
-  }
-  &.level4 {
-    background: #b3bcd9;
-    &:hover {
-      box-shadow: 0px 0px 8px 0 #b3bcd9;
-    }
-  }
-  &.level5 {
-    background: #b0c6cd;
-    &:hover {
-      box-shadow: 0px 0px 8px 0 #b0c6cd;
-    }
-  }
-  &.level6 {
-    background: #93b9fa;
-    &:hover {
-      box-shadow: 0px 0px 8px 0 #93b9fa;
-    }
-  }
-  &.level7 {
-    background: #9fce87;
-    &:hover {
-      box-shadow: 0px 0px 8px 0 #9fce87;
-    }
-  }
-  &.level8 {
-    background: #cecc87;
-    &:hover {
-      box-shadow: 0px 0px 8px 0 #cecc87;
-    }
-  }
-  &.level9 {
-    background: #aead93;
-    &:hover {
-      box-shadow: 0px 0px 8px 0 #aead93;
-    }
-  }
 
   .title {
     position: relative;
@@ -520,7 +512,6 @@ function editNodeTitle(ev, json) {
 
 .handler {
   visibility: hidden;
-
   &.show {
     visibility: visible;
   }
@@ -545,28 +536,20 @@ function editNodeTitle(ev, json) {
 
   &.top {
     top: -16px;
-    left: calc(50% - 13px);
+    left: calc(50% - 8px);
   }
   &.bottom {
     bottom: -16px;
-    left: calc(50% - 13px);
+    left: calc(50% - 8px);
   }
   &.left {
-    top: calc(50% - 7px);
+    top: calc(50% - 8px);
     left: -16px;
   }
   &.right {
-    top: calc(50% - 7px);
+    top: calc(50% - 8px);
     right: -16px;
   }
-}
-
-.line-v {
-  position: absolute;
-  width: 1px;
-  height: 100%;
-  z-index: 0;
-  background-color: #afaacb;
 }
 
 .body {
@@ -585,19 +568,7 @@ function editNodeTitle(ev, json) {
 .leader {
   display: flex;
   align-items: center;
-  .avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    // border: 1px solid #f1f1f1;
-    background-image: linear-gradient(180deg, #ffbb72 0%, #ff962d 100%);
-    color: #fff;
-    font-size: 14px;
-    overflow: hidden;
-  }
+  color: #000;
   .name {
     overflow: hidden;
     white-space: nowrap;
@@ -605,5 +576,9 @@ function editNodeTitle(ev, json) {
     width: 50px;
     margin-left: 4px;
   }
+}
+
+.num {
+  color: #000;
 }
 </style>

@@ -64,7 +64,7 @@
     <aside class="h-[calc(100vh - 64px)] relative -left-[1px] z-20 flex w-36 flex-col border-r border-primary bg-secondary pt-5" v-if="!submenu.redirect">
       <SubMenu :data="submenu.children"></SubMenu>
     </aside>
-    <main class="h-[calc(100vh - 64px)] min-w[640px] relative grow overflow-y-auto bg-primary">
+    <main class="h-[calc(100vh - 64px)] min-w[640px] relative grow overflow-y-auto bg-primary" id="mp-main-wrap">
       <a-spin :spinning="globalLoading" style="margin: 20px"></a-spin>
       <router-view />
     </main>
@@ -80,6 +80,8 @@ import SubMenu from './SubMenu.vue'
 import { useStore } from '../stores/stores'
 import helper from '../js/helper'
 import API from '../api/API'
+import PerfectScrollbar from 'perfect-scrollbar'
+import '@/assets/perfect-scrollbar.css'
 
 const globalLoading = ref(false)
 provide('globalLoading', globalLoading)
@@ -117,7 +119,9 @@ async function signout() {
   router.push('/signin')
 }
 
-onMounted(() => {})
+onMounted(() => {
+  // new PerfectScrollbar('#mp-main-wrap')
+})
 </script>
 
 <style scoped lang="scss">

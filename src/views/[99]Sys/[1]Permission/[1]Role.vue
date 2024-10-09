@@ -1,10 +1,12 @@
 <template>
-  <div class="w-[500px] flex-col rounded-md border border-primary">
-    <div class="list flex-1" ref="listRef">
-      <RoleList :data="roleTree.children" @toggleCollapse="toggleCollapse" @open="openEditor" @remove="remove" />
-    </div>
-    <div class="flex cursor-pointer justify-center px-5 py-3">
-      <div class="w-[60px] rounded-md border border-transparent py-1 text-center text-base hover:border-brand-500 hover:text-brand-500" @click="openEditor(roleTree, EDITOR_MODE.ADD)">+</div>
+  <div class="m-8">
+    <div class="w-[500px] flex-col rounded-md border border-primary">
+      <div class="list flex-1" ref="listRef">
+        <RoleList :data="roleTree.children" @toggleCollapse="toggleCollapse" @open="openEditor" @remove="remove" />
+      </div>
+      <div class="flex cursor-pointer justify-center px-5 py-3">
+        <div class="w-[60px] rounded-md border border-transparent py-1 text-center text-base hover:border-brand-500 hover:text-brand-500" @click="openEditor(roleTree, EDITOR_MODE.ADD)">+</div>
+      </div>
     </div>
   </div>
   <a-drawer title="角色编辑器" width="650px" :open="roleEditor" @close="roleEditor = false" :destroyOnClose="true">

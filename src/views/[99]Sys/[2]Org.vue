@@ -33,9 +33,9 @@ import OrgNode from './OrgNode.vue'
 import { customAlphabet } from 'nanoid'
 import Drag from '@/js/dragCanvas'
 import API from '@/api/API'
-import PerfectScrollbar from 'perfect-scrollbar'
+import PerfectScrollbar from '@/components/PerfectScrollerBar'
 import '@/assets/perfect-scrollbar.css'
-import { DnD } from '@/js/DnD2'
+import { DnD } from '@/js/DnDTree'
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6)
 

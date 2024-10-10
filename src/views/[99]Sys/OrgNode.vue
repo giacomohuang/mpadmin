@@ -23,7 +23,7 @@
               <input v-model="item.name" @mousedown.stop="" @click.stop="" @mouseup.stop="" />
               <div class="clear" @click.stop="clearText($event, item)"><icon name="remove" size="1em"></icon></div>
             </div>
-            <div class="name" vDraggableCustom @click.stop="editTitle($event, item)">
+            <div class="name" @click.stop="editTitle($event, item)">
               <span :placeholder="item.id">{{ item.id }}, {{ item.name }}</span>
               <icon name="edit"></icon>
             </div>
@@ -217,13 +217,26 @@ function editTitle(ev, json) {
 </script>
 
 <style scoped lang="scss">
-:root:has(.dragging) .handler {
-  visibility: hidden !important;
+:root:has(.dragging) {
+  .handler {
+    visibility: hidden !important;
+  }
+  .node {
+    box-shadow: none !important;
+  }
+  .name {
+    // background: none !important;
+    &:hover {
+      background: none !important;
+    }
+    > svg {
+      display: none !important;
+    }
+  }
 }
 
 .dragging {
   .node {
-    box-shadow: none !important;
     @apply bg-brand-50 outline-dashed outline-2 outline-brand-500;
   }
   .node > * {
@@ -380,12 +393,6 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
     color: #fff;
     background: inherit;
 
-    &:hover {
-      > .tools {
-        display: flex;
-      }
-    }
-
     .inputbox {
       display: none;
       align-content: space-between;
@@ -435,8 +442,7 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
       max-width: 140px;
       cursor: pointer;
       z-index: 12;
-      &:hover,
-      &:active {
+      &:hover {
         background: #00000010;
         > svg {
           display: block;

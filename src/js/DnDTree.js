@@ -23,6 +23,13 @@ export class DnD {
     this.onDragEnter = this.onDragEnter.bind(this)
     this.onDragEnd = this.onDragEnd.bind(this)
     this.onDragOver = this.onDragOver.bind(this)
+
+    this.scrollSpeed = 10 // 滚动速度
+    this.scrollThreshold = 50 // 触发滚动的阈值
+    this.scrollInterval = null // 用于存储滚动定时器
+    this.maxScrollSpeed = 20 // 最大滚动速度
+    this.scrollAcceleration = 0.2 // 滚动加速度
+    this.currentScrollSpeed = { x: 0, y: 0 } // 当前滚动速度
   }
 
   onDragStart(e) {
@@ -38,9 +45,61 @@ export class DnD {
   onDragOver(e) {
     e.preventDefault()
     e.stopPropagation()
+    this.handleScroll(e)
+  }
+
+  handleScroll(e) {
+    const container = document.querySelector('.ps')
+    if (!container) return
+
+    const containerRect = container.getBoundingClientRect()
+
+    const topThreshold = containerRect.top + this.scrollThreshold
+    const bottomThreshold = containerRect.bottom - this.scrollThreshold
+    const leftThreshold = containerRect.left + this.scrollThreshold
+    const rightThreshold = containerRect.right - this.scrollThreshold
+
+    clearInterval(this.scrollInterval)
+
+    this.scrollInterval = setInterval(() => {
+      let scrollX = 0
+      let scrollY = 0
+
+      if (e.clientY < topThreshold) {
+        const distance = Math.max(0, topThreshold - e.clientY)
+        this.currentScrollSpeed.y -= this.scrollAcceleration * distance
+        scrollY = Math.max(-this.maxScrollSpeed, this.currentScrollSpeed.y)
+      } else if (e.clientY > bottomThreshold) {
+        const distance = Math.max(0, e.clientY - bottomThreshold)
+        this.currentScrollSpeed.y += this.scrollAcceleration * distance
+        scrollY = Math.min(this.maxScrollSpeed, this.currentScrollSpeed.y)
+      } else {
+        this.currentScrollSpeed.y = 0
+      }
+
+      if (e.clientX < leftThreshold) {
+        const distance = Math.max(0, leftThreshold - e.clientX)
+        this.currentScrollSpeed.x -= this.scrollAcceleration * distance
+        scrollX = Math.max(-this.maxScrollSpeed, this.currentScrollSpeed.x)
+      } else if (e.clientX > rightThreshold) {
+        const distance = Math.max(0, e.clientX - rightThreshold)
+        this.currentScrollSpeed.x += this.scrollAcceleration * distance
+        scrollX = Math.min(this.maxScrollSpeed, this.currentScrollSpeed.x)
+      } else {
+        this.currentScrollSpeed.x = 0
+      }
+
+      container.scrollBy(scrollX, scrollY)
+
+      // 如果没有滚动，则停止定时器
+      if (scrollX === 0 && scrollY === 0) {
+        clearInterval(this.scrollInterval)
+      }
+    }, 16) // 约60fps的更新频率
   }
 
   onDragEnter(e) {
+    console.log('enter')
     e.preventDefault()
     e.stopPropagation()
     if (!this.sourceEl) return
@@ -59,32 +118,6 @@ export class DnD {
     const isRight = mouseX > targetRect.width * 0.4
     const isBottom = mouseY > targetRect.height * 0.9
 
-    // 添加一个标志来记录上一次的操作
-    if (!this.lastOperation) {
-      this.lastOperation = { type: null, target: null }
-    }
-
-    let currentOperation = { type: null, target: null }
-
-    if (isBottom) {
-      currentOperation.type = 'bottom'
-      currentOperation.target = targetEl
-    } else if (isLeft) {
-      currentOperation.type = 'left'
-      currentOperation.target = targetEl
-    } else if (isRight) {
-      currentOperation.type = 'right'
-      currentOperation.target = targetEl
-    }
-
-    // 如果当前操作与上一次操作相同，则不执行
-    if (currentOperation.type === this.lastOperation.type && currentOperation.target === this.lastOperation.target) {
-      return
-    }
-
-    // 更新上一次操作
-    this.lastOperation = currentOperation
-
     if (isBottom) {
       let targetChildList = targetEl.querySelector('ul')
       if (!targetChildList) {
@@ -97,16 +130,12 @@ export class DnD {
     } else if (isRight) {
       targetParent.insertBefore(this.sourceEl, targetEl.nextElementSibling)
     }
-
-    // // 添加动画效果
-    // const oldTop = targetEl.getBoundingClientRect().top
-    // const newTop = this.sourceEl.getBoundingClientRect().top
-    // const offset = oldTop - newTop
-    // this.sourceEl.animate([{ transform: `translateY(${offset}px)` }, { transform: 'translateY(0px)' }], { duration: 80, easing: 'ease-in-out' })
   }
+
   onDragEnd() {
     if (!this.sourceEl) return
     this.sourceEl.classList.remove('dragging')
+    clearInterval(this.scrollInterval) // 停止滚动
     const items = [...this.sourceEl.parentElement.children]
     const ids = items.map((item) => item.dataset.id)
     this.onReorder(ids)

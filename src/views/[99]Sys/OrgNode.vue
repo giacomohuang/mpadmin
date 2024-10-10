@@ -2,7 +2,7 @@
   <!-- <ul class="group" v-draggable="[data, { animation: 100, onAdd: onAdd, onUpdate: onUpdate, onMove: onMove, handle: '.title', ghostClass: 'ghost', disabled: is_drag_disabled, chosenClass: 'chosen', group: { name: level == 0 ? 'root' : 'children' } }]"> -->
   <ul class="group">
     <li v-for="(item, index) in data" class="wrapper" :class="{ draggable: level != 0, root: level == 0 }" @mousedown.stop="" :key="item.id" :data-id="item.id">
-      <div class="node" :class="'level' + (level % 10)" :draggable="item.pid == null ? false : true">
+      <div class="node" :class="'level' + (level % 10)" :draggable="true">
         <div class="handler">
           <div class="add top" v-if="level !== 0">
             <div class="btn"><icon name="plus" @click.stop="add(parent, index, 'parent')"></icon></div>

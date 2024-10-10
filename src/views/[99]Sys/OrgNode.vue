@@ -225,7 +225,6 @@ function editTitle(ev, json) {
     box-shadow: none !important;
   }
   .name {
-    // background: none !important;
     &:hover {
       background: none !important;
     }

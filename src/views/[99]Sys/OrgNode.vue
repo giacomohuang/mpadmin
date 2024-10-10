@@ -1,21 +1,30 @@
 <template>
-  <ul class="group" v-draggable="[data, { animation: 100, onChange: onChange, handle: '.title', ghostClass: 'ghost', disabled: is_drag_disabled, chosenClass: 'chosen', group: { name: level == 0 ? 'root' : 'children' } }]">
-    <li v-for="(item, index) in data" class="wrapper" :class="{ draggable: level != 0 }" @mousedown.stop="" :key="item.id">
-      <div class="node" :class="['level' + (level % 10), { root: level == 0 }, { leaf: item.children?.length == 0 }]">
-        <div class="handler" :class="{ show: item.id === active_nodeid }">
-          <div class="add top" @click.stop="add(parent, index, 'parent')" v-if="level !== 0"><icon name="plus"></icon></div>
-          <div class="add bottom" @click.stop="add(data, index, 'child')"><icon name="plus"></icon></div>
-          <div class="add left" @click.stop="add(data, index, 'previous')" v-if="level !== 0"><icon name="plus"></icon></div>
-          <div class="add right" @click.stop="add(data, index, 'next')" v-if="level !== 0"><icon name="plus"></icon></div>
+  <!-- <ul class="group" v-draggable="[data, { animation: 100, onAdd: onAdd, onUpdate: onUpdate, onMove: onMove, handle: '.title', ghostClass: 'ghost', disabled: is_drag_disabled, chosenClass: 'chosen', group: { name: level == 0 ? 'root' : 'children' } }]"> -->
+  <ul class="group">
+    <li v-for="(item, index) in data" class="wrapper" :draggable="item.pid == null ? false : true" :class="{ draggable: level != 0, root: level == 0 }" @mousedown.stop="" :key="item.id" :data-id="item.id">
+      <div class="node" :class="'level' + (level % 10)">
+        <div class="handler">
+          <div class="add top" v-if="level !== 0">
+            <div class="btn"><icon name="plus" @click.stop="add(parent, index, 'parent')"></icon></div>
+          </div>
+          <div class="add bottom">
+            <div class="btn"><icon name="plus" @click.stop="add(data, index, 'child')"></icon></div>
+          </div>
+          <div class="add left" v-if="level !== 0">
+            <div class="btn"><icon name="plus" @click.stop="add(data, index, 'previous')"></icon></div>
+          </div>
+          <div class="add right" v-if="level !== 0">
+            <div class="btn"><icon name="plus" @click.stop="add(data, index, 'next')"></icon></div>
+          </div>
         </div>
-        <div class="node-wrap" @mouseenter.stop="showHandler($event, item.id)">
+        <div class="node-wrap">
           <div class="title">
             <div class="inputbox">
               <input v-model="item.name" @mousedown.stop="" @click.stop="" @mouseup.stop="" />
               <div class="clear" @click.stop="clearText($event, item)"><icon name="remove" size="1em"></icon></div>
             </div>
             <div class="name" vDraggableCustom @click.stop="editTitle($event, item)">
-              <span :placeholder="item.id">{{ item.name }}</span>
+              <span :placeholder="item.id">{{ item.id }}, {{ item.name }}</span>
               <icon name="edit"></icon>
             </div>
 
@@ -52,7 +61,6 @@ const nanoid = customAlphabet('~!@#$%^&*+()-_abcdefghijklmnopqrstuvwxyzABCDEFGHI
 const { data, parent, level } = defineProps(['data', 'parent', 'level'])
 
 const emit = defineEmits(['add'])
-const active_nodeid = inject('active_nodeid')
 const editing_node = inject('editing_node')
 const is_drag_disabled = ref(false)
 
@@ -83,34 +91,18 @@ const vDraggableCustom = {
   }
 }
 
-function onChange(dragEvent) {
-  console.log(dragEvent)
+function onAdd(dragEvent) {
+  console.log(dragEvent.data)
+  console.log(dragEvent.target.closest('.wrapper').dataset.id)
 }
 
-function showHandler(ev, id) {
-  // console.log('showHandler', ev.target, id)
-  ev.stopPropagation()
-  const el = ev.currentTarget
-  // console.log(el)
-  active_nodeid.value = id
-  document.addEventListener('mousemove', move, true)
+function onUpdate(dragEvent) {
+  console.log(dragEvent.data)
+  console.log(dragEvent.target.closest('.wrapper').dataset.id)
+}
 
-  function move() {
-    isInObject(el)
-    if (!isInObject(el)) {
-      active_nodeid.value = -1
-      document.removeEventListener('mousemove', move, true)
-    }
-  }
-  function isInObject(el) {
-    const elPos = getElPos(el)
-    const mousePos = getMousePos()
-    if (mousePos.x > elPos.left + el.offsetWidth + 30 || mousePos.x < elPos.left - 30 || mousePos.y > elPos.top + el.offsetHeight + 30 || mousePos.y < elPos.top - 30) {
-      return false
-    } else {
-      return true
-    }
-  }
+function onMove(dragEvent) {
+  console.log(dragEvent.clientLeft)
 }
 
 function add(items, id, flag) {
@@ -196,15 +188,12 @@ function editTitle(ev, json) {
     }
     // ESC：回滚
     if (key === 27) {
-      // el.children[0].value = titleUndoText
-      // console.log('undo:', title_undo_text)
       json.name = title_undo_text
       el.style.display = 'none'
       document.removeEventListener('keydown', onKeyDown)
     }
   }
   function onMouseUp(event) {
-    // console.log('edit:mouseup')
     if (isOutside(event)) {
       el.style.display = 'none'
 
@@ -228,73 +217,62 @@ function editTitle(ev, json) {
 </script>
 
 <style scoped lang="scss">
-.group {
-  display: flex;
-  padding: 0;
-  margin: 0;
-  list-style-type: none;
+:root:has(.dragging) .handler {
+  visibility: hidden !important;
+}
 
-  &:not(:first-child) {
-    padding-top: 20px;
+.dragging {
+  .node {
+    box-shadow: none !important;
+    @apply bg-brand-50 outline-dashed outline-2 outline-brand-500;
   }
-  // &:after {
-  //   content: '';
-  //   position: absolute;
-  //   width: calc(100% - 200px);
-  //   border-top: 1px solid #aead93;
-  //   height: 20px;
-  //   background: red;
-  // }
-
-  // 空子节点占位,拖动用
-  &:empty {
-    content: '';
-    position: absolute;
-    z-index: 2;
-    width: calc(100% - 50px);
-    height: 100px;
-    left: 30px;
-    top: 100px;
+  .node > * {
+    opacity: 0;
   }
 }
 
 $border-color: var(--border-tertiary);
 $border-radius: 5px;
+$border-size: 1px;
+.group {
+  display: flex;
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+  &:not(:first-child) {
+    padding-top: 20px;
+  }
+
+  // 空子节点占位,拖动用
+  &:empty {
+    content: '';
+    // position: absolute;
+    z-index: 2;
+    width: calc(100% - 40px);
+    height: 50px;
+    left: 30px;
+    // top: 100px;
+    // background: red;
+  }
+
+  // 如果节点只有一个子节点，并且不是根节点，则补一条竖线
+  > :only-child:not(.root) > .node::before {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    width: 50%;
+    top: -20px;
+    height: 20px;
+    left: 50%;
+    border-left: $border-size solid $border-color;
+  }
+}
 
 .wrapper {
   display: flex;
-  z-index: 1;
   flex-direction: column;
-  justify-content: top;
   align-items: center;
   position: relative;
-
-  &.chosen {
-    // left: 2px;
-    // width: 100%;
-    border: 2px dashed rgb(255, 136, 0);
-    &::before {
-      border: 0 !important;
-    }
-
-    &::after {
-      border: 0 !important;
-    }
-
-    .wrapper::before {
-      border: 0 !important;
-    }
-    .node::before {
-      border: 0 !important;
-    }
-
-    .node::after {
-      border: 0 !important;
-    }
-    .handler {
-      visibility: hidden;
-    }
-  }
 
   &::before {
     content: '';
@@ -304,17 +282,17 @@ $border-radius: 5px;
     border-style: $border-radius;
   }
 
-  // 只有一个子节点，且不是根节点，才显示竖线
-  &:only-child:not(.root)::before {
-    left: 50%;
-    width: 1px;
-    border-left-width: 1px;
-  }
+  // // 只有一个子节点，且不是根节点，才显示竖线
+  // &:only-child:not(.root)::before {
+  //   left: 50%;
+  //   width: 1px;
+  //   border-left-width: $border-size;
+  // }
 
   // 不止一个子节点，才显示横线
   &:not(:only-child)::before {
     width: 100%;
-    border-top-width: 1px;
+    border-top-width: $border-size;
   }
 
   // 不是第一个也不是最后一个节点，需要显示T字形线段，所以借用node节点的before显示竖线
@@ -325,7 +303,7 @@ $border-radius: 5px;
       top: -20px;
       left: 50%;
       height: 20px;
-      border-left: 1px solid $border-color;
+      border-left: $border-size solid $border-color;
     }
   }
 
@@ -333,7 +311,7 @@ $border-radius: 5px;
   &:first-child:not(:only-child)::before {
     left: 50%;
     width: 50%;
-    border-left-width: 1px;
+    border-left-width: $border-size;
     border-radius: $border-radius 0 0 0;
   }
 
@@ -341,22 +319,18 @@ $border-radius: 5px;
   &:last-child:not(:only-child)::before {
     width: 50%;
     left: 0;
-    border-right-width: 1px;
+    border-right-width: $border-size;
     border-radius: 0 $border-radius 0 0;
-    // background: red;
   }
 }
 
 .ghost {
-  // outline: 2px dashed rgb(255, 136,; 0)
-  // left: -2px;
-  * {
-    visibility: hidden;
-  }
+  width: 200px;
+  height: 200px;
+  @apply bg-brand-50 outline-dashed outline-2 outline-brand-500;
 }
 
 // 层级颜色
-
 $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fce87, #cecc87, #aead93);
 // 使用@each指令遍历颜色数组
 @each $color in $lv-colors {
@@ -377,14 +351,18 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
   z-index: 3;
   width: 180px;
 
-  &:not(.leaf)::after {
+  &:hover > .handler {
+    visibility: visible;
+  }
+
+  &:has(+ ul > li)::after {
     content: '';
     position: absolute;
     margin-top: 4px;
     width: 1px;
     height: 20px;
     left: 50%;
-    border-left: 1px solid $border-color;
+    border-left: $border-size solid $border-color;
   }
 
   &.root {
@@ -469,7 +447,6 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-        // text-align: left;
         width: 100%;
         display: inline-block;
       }
@@ -511,44 +488,46 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
 }
 
 .handler {
-  visibility: hidden;
-  &.show {
-    visibility: visible;
-  }
-}
-.add {
-  cursor: pointer;
-  border: 1px solid #37f;
-  color: #37f;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  font-size: 8px;
-  display: flex;
-  z-index: 6;
-  line-height: 1;
-  justify-content: center;
-  align-items: center;
   position: absolute;
-  line-height: 0;
-  background: #fff;
-  box-shadow: 2px 2px 4px 0 rgba(84, 85, 90, 0.158);
+  visibility: hidden;
+  top: -15px;
+  left: -15px;
+  bottom: -15px;
+  right: -15px;
+}
 
+.add {
+  position: absolute;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @apply text-brand-600;
   &.top {
-    top: -16px;
-    left: calc(50% - 8px);
+    width: 100%;
   }
   &.bottom {
-    bottom: -16px;
-    left: calc(50% - 8px);
+    width: 100%;
+    bottom: 0;
   }
   &.left {
-    top: calc(50% - 8px);
-    left: -16px;
+    width: 14px;
+    height: 100%;
   }
   &.right {
-    top: calc(50% - 8px);
-    right: -16px;
+    right: 0;
+    height: 100%;
+  }
+
+  .btn {
+    z-index: 10;
+    @apply border border-brand-600 bg-primary;
+    border-radius: 50%;
+    height: 15px;
+    width: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 

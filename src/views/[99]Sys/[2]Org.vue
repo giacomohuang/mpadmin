@@ -2,7 +2,7 @@
   <div class="main">
     <div id="canvas">
       <div id="scaler">
-        <div id="nodes">
+        <div id="nodes" ref="orgRef">
           <OrgNode v-if="is_ready" :data="org_data.children" :level="0" @add="add"></OrgNode>
         </div>
       </div>
@@ -35,6 +35,7 @@ import Drag from '@/js/dragCanvas'
 import API from '@/api/API'
 import PerfectScrollbar from 'perfect-scrollbar'
 import '@/assets/perfect-scrollbar.css'
+import { DnD } from '@/js/DnD2'
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6)
 
@@ -54,6 +55,9 @@ provide('active_nodeid', active_nodeid)
 provide('editing_node', editing_node)
 provide('org_data', org_data)
 provide('drawer', drawer)
+
+const orgRef = ref(null)
+const orgDnD = new DnD(orgRef, (ids) => reorder(ids))
 
 const buildTree = (data) => {
   // 构建树形结构
@@ -171,8 +175,13 @@ function zoom(mode) {
   document.getElementById('scaler').style.transform = `scale(${zoom_percent.value / 100})`
 }
 
+const reorder = async (ids) => {
+  console.log(reorder)
+}
+
 onMounted(() => {
   initData()
+  orgDnD.init()
   const container = document.querySelector('.main')
   new PerfectScrollbar(container)
   new Drag(document.querySelector('.ps'))

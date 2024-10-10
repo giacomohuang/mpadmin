@@ -13,7 +13,7 @@ export class DnD {
   }
 
   onDragStart(e) {
-    // console.log('onDragStart')
+    console.log('onDragStart')
     this.sourceEl = e.target.closest('li')
     if (!this.sourceEl) return
     e.dataTransfer.effectAllowed = 'move'
@@ -27,6 +27,7 @@ export class DnD {
   }
 
   onDragEnter(e) {
+    console.log('aaaa')
     e.preventDefault()
     if (!this.sourceEl) return
     const targetEl = e.target.closest('li')

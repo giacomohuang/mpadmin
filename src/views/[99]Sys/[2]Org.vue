@@ -193,13 +193,15 @@ onMounted(() => {
   position: relative;
   display: block;
   overflow: hidden !important;
-}
-.ps {
   position: relative;
   cursor: grab;
   max-width: calc(100vw - 270px);
   max-height: calc(100vh - 65px);
+  background-image: radial-gradient(circle, var(--border-tertiary) 0.5px, transparent 0.5px);
+  background-size: 15px 15px;
+  background-position: 20px 20px;
 }
+
 .canvas {
   position: relative;
 }

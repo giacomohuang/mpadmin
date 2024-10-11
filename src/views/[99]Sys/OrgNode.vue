@@ -3,42 +3,35 @@
   <ul class="group">
     <li v-for="(item, index) in data" class="wrapper" :class="{ draggable: level != 0, root: level == 0 }" @mousedown.stop="" :key="item.id" :data-id="item.id">
       <div class="node" :class="'level' + (level % 10)" :draggable="true">
-        <div class="handler">
-          <div class="add top" v-if="level !== 0">
-            <div class="btn"><icon name="plus" @click.stop="add(parent, index, 'parent')"></icon></div>
+        <div class="title">
+          <div class="inputbox">
+            <input v-model="item.name" @mousedown.stop="" @click.stop="" @mouseup.stop="" />
+            <div class="clear" @click.stop="clearText($event, item)"><icon name="remove" size="1em"></icon></div>
           </div>
-          <div class="add bottom">
-            <div class="btn"><icon name="plus" @click.stop="add(data, index, 'child')"></icon></div>
+
+          <div class="name" @click.stop="editTitle($event, item)">
+            <span :placeholder="item.id">{{ item.id }}, {{ item.name }}</span>
+            <icon name="edit"></icon>
           </div>
-          <div class="add left" v-if="level !== 0">
-            <div class="btn"><icon name="plus" @click.stop="add(data, index, 'previous')"></icon></div>
-          </div>
-          <div class="add right" v-if="level !== 0">
-            <div class="btn"><icon name="plus" @click.stop="add(data, index, 'next')"></icon></div>
+
+          <div class="tools">
+            <div class="remove" v-if="level != 0" @click.stop="remove(data, index)"><icon name="remove" size="1em"></icon></div>
           </div>
         </div>
-        <div class="node-wrap">
-          <div class="title">
-            <div class="inputbox">
-              <input v-model="item.name" @mousedown.stop="" @click.stop="" @mouseup.stop="" />
-              <div class="clear" @click.stop="clearText($event, item)"><icon name="remove" size="1em"></icon></div>
-            </div>
-            <div class="name" @click.stop="editTitle($event, item)">
-              <span :placeholder="item.id">{{ item.id }}, {{ item.name }}</span>
-              <icon name="edit"></icon>
-            </div>
 
-            <div class="tools">
-              <div class="remove" v-if="level != 0" @click.stop="remove(data, index)"><icon name="remove" size="1em"></icon></div>
-            </div>
+        <div class="body" @click.stop="edit($event, item)">
+          <div class="leader">
+            <icon name="role"></icon>
+            <span class="name" :title="item.leaderName">{{ item.leaderName }}</span>
           </div>
-          <div class="body" @click.stop="edit($event, item)">
-            <div class="leader">
-              <icon name="role"></icon>
-              <span class="name" :title="item.leaderName">{{ item.leaderName }}</span>
-            </div>
-            <div class="num">1000人</div>
-          </div>
+          <div class="num">1000人</div>
+        </div>
+
+        <div class="handler">
+          <div class="add top" v-if="level !== 0"><span class="btn" @click.stop="add(parent, index, 'parent')"></span></div>
+          <div class="add bottom"><span class="btn" @click.stop="add(data, index, 'child')"></span></div>
+          <div class="add left" v-if="level !== 0"><span class="btn" @click.stop="add(data, index, 'previous')"></span></div>
+          <div class="add right" v-if="level !== 0"><span class="btn" @click.stop="add(data, index, 'next')"></span></div>
         </div>
       </div>
       <OrgNode :data="item.children" :level="level + 1" :parent="item" @add="add"></OrgNode>
@@ -228,7 +221,7 @@ function editTitle(ev, json) {
     &:hover {
       background: none !important;
     }
-    > svg {
+    svg {
       display: none !important;
     }
   }
@@ -342,19 +335,6 @@ $border-size: 1px;
   @apply bg-brand-50 outline-dashed outline-2 outline-brand-500;
 }
 
-// 层级颜色
-$lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fce87, #cecc87, #aead93);
-// 使用@each指令遍历颜色数组
-@each $color in $lv-colors {
-  $i: index($lv-colors, $color);
-  .level#{$i - 1} {
-    background: $color;
-    &:hover {
-      box-shadow: 0px 0px 8px 0 $color;
-    }
-  }
-}
-
 .node {
   position: relative;
   border-radius: 8px;
@@ -363,8 +343,10 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
   z-index: 3;
   width: 180px;
 
-  &:hover > .handler {
-    visibility: visible;
+  &:hover {
+    .handler {
+      visibility: visible;
+    }
   }
 
   &:has(+ ul > li)::after {
@@ -381,112 +363,132 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
     margin-top: 0;
   }
   cursor: default;
+}
 
-  .title {
-    position: relative;
+// 层级颜色
+$lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fce87, #cecc87, #aead93);
+// 使用@each指令遍历颜色数组
+@each $color in $lv-colors {
+  $i: index($lv-colors, $color);
+  .level#{$i - 1} {
+    background: $color;
+    &:hover {
+      box-shadow: 0px 0px 8px 0 $color;
+    }
+  }
+}
+
+.title {
+  z-index: 1;
+  position: relative;
+  // width: inherit;
+  display: flex;
+  justify-content: space-between;
+  height: 24px;
+  margin-bottom: 4px;
+  color: #fff;
+  background: inherit;
+
+  &:hover > .tools {
     display: flex;
+  }
+
+  .inputbox {
+    display: none;
+    align-content: space-between;
     align-items: center;
-    justify-content: space-between;
-    height: 24px;
-    margin-bottom: 4px;
-    color: #fff;
-    background: inherit;
+    position: absolute;
+    z-index: 10;
+    width: 100%;
+    left: 0;
+    height: 22px;
+    background: #fff;
+    padding-left: 4px;
+    border-radius: 3px;
 
-    .inputbox {
-      display: none;
-      align-content: space-between;
-      align-items: center;
-      position: absolute;
-      z-index: 15;
-      width: 100%;
-      left: 0;
-      // background: #ccc;
-      background: #fff;
+    input {
+      width: calc(100% - 20px);
       border-radius: 3px;
-
-      input {
-        width: calc(100% - 20px);
-        border-radius: 3px;
-        border: 0;
-        outline: 0;
-        box-shadow: none;
-        color: #000;
+      border: 0;
+      outline: 0;
+      box-shadow: none;
+      color: #000;
+    }
+    .clear {
+      cursor: pointer;
+      position: absolute;
+      right: 3px;
+      height: 12px;
+      width: 12px;
+      color: #fff;
+      font-size: 8px;
+      border-radius: 50%;
+      background: #888;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      &:hover {
+        background: #000;
       }
-      .clear {
-        cursor: pointer;
-        position: absolute;
-        right: 3px;
-        height: 12px;
-        width: 12px;
-        color: #fff;
-        font-size: 8px;
-        border-radius: 50%;
-        background: #888;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        &:hover {
-          background: #000;
-        }
+    }
+  }
+
+  .name {
+    display: flex;
+    text-align: left;
+    align-items: center;
+    padding: 2px 4px;
+    border-radius: 5px;
+    min-width: 120px;
+    max-width: 140px;
+    cursor: pointer;
+    z-index: 2;
+    &:hover {
+      background: #00000010;
+      svg {
+        display: block;
       }
     }
 
-    .name {
-      display: flex;
-      text-align: left;
-      align-items: center;
-      padding: 2px 4px;
-      border-radius: 5px;
-      min-width: 120px;
-      max-width: 140px;
-      cursor: pointer;
-      z-index: 12;
-      &:hover {
-        background: #00000010;
-        > svg {
-          display: block;
-        }
-      }
+    span {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      width: 100%;
+      display: inline-block;
+    }
+    svg {
+      display: none;
+      font-size: 14px;
+    }
+  }
 
-      > span {
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        width: 100%;
-        display: inline-block;
+  .tools {
+    display: none;
+    justify-content: right;
+    background: inherit;
+    position: absolute;
+    right: 0;
+    width: 100%;
+    color: #000;
+    // padding: 2px 0;
+
+    .remove {
+      cursor: pointer;
+      border-radius: 4px;
+      margin: 2px 0;
+      padding: 4px;
+      //
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      &:hover,
+      &:active {
+        background: #00000010;
       }
       > svg {
-        display: none;
-        font-size: 14px;
-      }
-    }
-
-    .tools {
-      display: none;
-      justify-content: right;
-      background: inherit;
-      position: absolute;
-      right: 0;
-      width: 100%;
-      color: #000;
-      // padding: 2px 0;
-
-      .remove {
-        cursor: pointer;
-        border-radius: 4px;
-        padding: 4px;
-        //
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        &:hover,
-        &:active {
-          background: #00000010;
-        }
-        > svg {
-          font-size: 12px;
-          color: #fff;
-        }
+        font-size: 12px;
+        color: #fff;
       }
     }
   }
@@ -495,6 +497,7 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
 .handler {
   position: absolute;
   visibility: hidden;
+  // background: #9fce87;
   top: -15px;
   left: -15px;
   bottom: -15px;
@@ -502,30 +505,39 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
 }
 
 .add {
+  z-index: 2;
   position: absolute;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+
   @apply text-brand-600;
   &.top {
     width: 100%;
+    height: 15px;
+    // background: red;
   }
   &.bottom {
     width: 100%;
+    height: 15px;
     bottom: 0;
+    // background: green;
   }
   &.left {
-    width: 14px;
+    width: 15px;
     height: 100%;
+    // background: blue;
   }
   &.right {
     right: 0;
+    width: 15px;
     height: 100%;
+    // background: pink;
   }
 
   .btn {
-    z-index: 10;
+    position: absolute;
     @apply border border-brand-600 bg-primary;
     border-radius: 50%;
     height: 15px;
@@ -533,10 +545,31 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
     display: flex;
     align-items: center;
     justify-content: center;
+    &:before {
+      content: '';
+      position: absolute;
+      display: block;
+      height: 9px;
+      width: 11px;
+      top: 2px;
+      left: 6px;
+      @apply border-l border-brand-600;
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      display: block;
+      height: 11px;
+      width: 9px;
+      top: 6px;
+      left: 2px;
+      @apply border-t border-brand-600;
+    }
   }
 }
 
 .body {
+  z-index: 1;
   cursor: default;
   display: flex;
   align-items: center;

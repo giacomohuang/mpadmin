@@ -6,19 +6,22 @@ export class DnD {
     this.sourceEl = null
     this.list = null
 
-    this.canvas = document.createElement('canvas')
-    this.canvas.width = 200
-    this.canvas.height = 100
-    const ctx = this.canvas.getContext('2d')
+    // 生成拖拽图像
+    const canvas = document.createElement('canvas')
+    canvas.width = 200
+    canvas.height = 100
+    const ctx = canvas.getContext('2d')
     ctx.strokeStyle = 'orange'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.roundRect(0, 0, 200, 100, 5)
+    ctx.roundRect(0, 0, 200, 100, 10)
     ctx.fillStyle = 'rgba(255, 165, 0, 0.5)' // 半透明橙色
     ctx.fill()
     ctx.stroke()
     this.img = new Image()
-    this.img.src = this.canvas.toDataURL()
+    this.img.src = canvas.toDataURL()
+
+    // 初始化事件
     this.onDragStart = this.onDragStart.bind(this)
     this.onDragEnter = this.onDragEnter.bind(this)
     this.onDragEnd = this.onDragEnd.bind(this)
@@ -37,7 +40,7 @@ export class DnD {
     this.sourceEl = e.target.closest('li')
     if (!this.sourceEl) return
     e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setDragImage(this.img, 50, 25)
+    e.dataTransfer.setDragImage(this.img, 100, 50)
     setTimeout(() => this.sourceEl.classList.add('dragging'), 100)
     e.stopPropagation()
   }

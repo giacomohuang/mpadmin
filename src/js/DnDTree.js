@@ -14,7 +14,7 @@ export class DnD {
     ctx.strokeStyle = 'orange'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.roundRect(0, 0, 200, 100, 10)
+    ctx.roundRect(1, 1, 198, 98, 10)
     ctx.fillStyle = 'rgba(255, 165, 0, 0.5)' // 半透明橙色
     ctx.fill()
     ctx.stroke()
@@ -36,12 +36,11 @@ export class DnD {
   }
 
   onDragStart(e) {
-    console.log('onDragStart')
     this.sourceEl = e.target.closest('li')
     if (!this.sourceEl) return
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setDragImage(this.img, 100, 50)
-    setTimeout(() => this.sourceEl.classList.add('dragging'), 100)
+    setTimeout(() => this.sourceEl.classList.add('dragging'), 1)
     e.stopPropagation()
   }
 
@@ -102,7 +101,6 @@ export class DnD {
   }
 
   onDragEnter(e) {
-    console.log('enter')
     e.preventDefault()
     e.stopPropagation()
     if (!this.sourceEl) return
@@ -139,9 +137,7 @@ export class DnD {
     if (!this.sourceEl) return
     this.sourceEl.classList.remove('dragging')
     clearInterval(this.scrollInterval) // 停止滚动
-    const items = [...this.sourceEl.parentElement.children]
-    const ids = items.map((item) => item.dataset.id)
-    this.onReorder(ids)
+    this.onReorder(this.sourceEl)
     this.sourceEl = null
   }
 

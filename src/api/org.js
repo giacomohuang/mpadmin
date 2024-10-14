@@ -20,6 +20,27 @@ export const org = {
       url: '/org/update',
       method: 'post'
     })
+  },
+  reorder(items) {
+    return fetch({
+      data: JSON.stringify(items),
+      url: '/org/reorder',
+      method: 'post'
+    })
+  },
+  add(item) {
+    return fetch({
+      data: JSON.stringify(item),
+      url: '/org/add',
+      method: 'post'
+    })
+  },
+  remove(path) {
+    return fetch({
+      data: JSON.stringify({ path: path }),
+      url: '/org/remove',
+      method: 'post'
+    })
   }
 }
 export default org

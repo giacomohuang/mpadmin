@@ -1,29 +1,35 @@
-// $color-sets: (
-//   'gray': #f7f7f7,
-//   'indigo': #213547,
-//   'brand': darken(#1677ff, 50%),
-//   'blue': #007bff,
-//   'purple': #7b00ff,
-//   'red': #d00000,
-//   'orange': #ff7b00,
-//   'yellow': #ffd000,
-//   'green': #2e6f00
-// );
+@use 'sass:color';
 
-// :root {
-//   /* 纯黑、纯白 */
-//   --c-white: #fff;
-//   --c-black: #000;
+$color-sets: (
+  'gray': #f7f7f7,
+  'indigo': #486c8b,
+  'brand': #1677ff,
+  'blue': #007bff,
+  'purple': #7b00ff,
+  'red': #d00000,
+  'orange': #ff7b00,
+  'yellow': #ffd000,
+  'green': #2e6f00
+);
 
-//   @each $name, $color in $color-sets {
-//     @for $i from 1 through 20 {
-//       $lightened-color: darken($color, $i * 5%);
-//       @if $lightened-color != #ffffff {
-//         --c-#{$name}#{$i*10}: #{$lightened-color};
-//       }
-//     }
-//   }
-// }
+:root {
+  /* 纯黑、纯白 */
+  --c-white: #fff;
+  --c-black: #000;
+
+
+@each $name, $base-color in $color-sets {
+  @for $i from 1 through 5 {
+    --c-#{$name}-#{$i * 100}: #{color.scale($base-color, $lightness: (6 - $i) * 10%)};
+  }
+  
+  --c-#{$name}: #{$base-color};
+  
+  @for $i from 1 through 5 {
+    --c-#{$name}-#{($i + 5) * 100}: #{color.scale($base-color, $lightness: $i * -10%)};
+  }
+}
+}
 
 // /* semantic color variables for this project */ // [data-theme='light'],
 // [data-theme='dark'] {

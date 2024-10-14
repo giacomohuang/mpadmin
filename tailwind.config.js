@@ -74,7 +74,6 @@ export default {
           950: '#450a0a'
         }
       },
-
       borderColor: {
         primary: 'var(--border-primary)',
         secondary: 'var(--border-secondary)'

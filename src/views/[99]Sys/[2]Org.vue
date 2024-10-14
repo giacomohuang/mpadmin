@@ -3,7 +3,7 @@
     <div id="canvas">
       <div id="scaler">
         <div id="nodes" ref="orgRef">
-          <OrgNode v-if="is_ready" :data="org_data.children" :level="0" @add="add"></OrgNode>
+          <OrgNode :data="orgTree" :level="1" @add="add" @edit="edit" @remove="remove"></OrgNode>
         </div>
       </div>
     </div>
@@ -36,11 +36,10 @@ import API from '@/api/API'
 import PerfectScrollbar from '@/components/PerfectScrollerBar'
 import '@/assets/perfect-scrollbar.css'
 import { DnD } from '@/js/DnDTree'
+import org from '@/api/org'
 
-const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6)
+const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 4)
 
-// “+"按钮对应的节点ID
-const active_nodeid = ref('')
 // 当前编辑节点
 const editing_node = ref('')
 // 侧边栏打开状态
@@ -48,90 +47,91 @@ const drawer = ref(false)
 // 画布缩放倍率
 const zoom_percent = ref(100)
 // 主数据
-const org_data = ref([])
-// 是否完成初始数据异步载入
-const is_ready = ref(false)
-provide('active_nodeid', active_nodeid)
+const orgTree = ref([])
+
 provide('editing_node', editing_node)
-provide('org_data', org_data)
 provide('drawer', drawer)
 
 const orgRef = ref(null)
-const orgDnD = new DnD(orgRef, (ids) => reorder(ids))
+const orgDnD = new DnD(orgRef, (el) => reorder(el))
+let orgData = null
 
 const buildTree = (data) => {
   // 构建树形结构
   const tree = []
-  const itemMap = new Map(data.map((item) => [item.id, item]))
-  data.forEach((item) => {
-    // console.log(item.name, item.id, item.pid, item.path)
-    const parent = item.pid === null ? tree : itemMap.get(item.pid)
-    item.children = []
-    if (!parent.children) {
-      parent.children = []
+  const rsdata = JSON.parse(JSON.stringify(data))
+  const itemMap = new Map(rsdata.map((item) => [item.id, { ...item, children: [] }]))
+
+  rsdata.forEach((item) => {
+    const node = itemMap.get(item.id)
+    if (item.pid === null) {
+      tree.push(node)
+    } else {
+      const parent = itemMap.get(item.pid)
+      if (parent) {
+        const index = parent.children.findIndex((child) => node.order < child.order)
+        if (index !== -1) {
+          parent.children.splice(index, 0, node)
+        } else {
+          parent.children.push(node)
+        }
+      }
     }
-    parent.children.push(item)
-    // let index = parent.children.findIndex((itm) => item.order < itm.order)
-    // if (index != -1) {
-    //   parent.children.splice(index, 0, item)
-    // } else {
-    //   parent.children.push(item)
-    // }
   })
+
   console.log(tree)
   return tree
 }
 // 数据初始化
 async function initData() {
-  let res = await API.org.list()
-  org_data.value = buildTree(res)
+  orgData = await API.org.list()
+  orgTree.value = buildTree(orgData)
   // console.log('data loaded:', t)
-  is_ready.value = true
   nextTick(() => {
     center()
   })
 }
 
-function add(items, index, flag) {
-  //direction: previous/next/parent/child
-  const data = {
-    id: nanoid(),
-    name: '部门',
-    type: 0,
-    isEntity: false,
-    leaderId: null,
-    leaderName: '',
-    order: 1,
-    status: 1,
-    children: []
-  }
-  let old_item
-  switch (flag) {
-    case 'parent':
-      if (items == null) {
-        // // 如果是根节点
-        // org_data.value.unshift(data)
-        // org_data.value[0].children.push(org_data.value.splice(1, 1)[0])
-      } else {
-        old_item = items.children.splice(index, 1, data)[0]
-        console.log(old_item)
-        items.children[index].children.splice(1, 0, old_item)
-      }
-      break
-    case 'child':
-      if (items[index].children == null) {
-        items[index].children = []
-      }
-      items[index].children.push(data)
-      break
-    case 'previous':
-      items.splice(index, 0, data)
-      break
-    case 'next':
-      items.splice(index + 1, 0, data)
-      break
-  }
-  resizeCanvas()
+// function add(items, index, direction) {
+//   console.log('add', index, direction)
+//   const data = {
+//     id: nanoid(),
+//     name: '部门',
+//     type: 0,
+//     isEntity: false,
+//     leaderId: null,
+//     leaderName: '',
+//     order: 1,
+//     status: 1,
+//     level: null,
+//     pid: null,
+//     path: null,
+//     children: []
+//   }
+
+//   switch (direction) {
+//     case 'parent':
+//       const old = items.children.splice(index, 1, data)[0]
+//       items.children[index].children.splice(1, 0, old)
+//       break
+//     case 'child':
+//       if (items[index].children == null) {
+//         items[index].children = []
+//       }
+//       items[index].children.push(data)
+//       break
+//     case 'previous':
+//       items.splice(index, 0, data)
+//       break
+//     case 'next':
+//       items.splice(index + 1, 0, data)
+//       break
+//   }
+//   resizeCanvas()
+// }
+
+function edit(id) {
+  console.log('edit', id)
 }
 
 // 重新计算画布大小，并居中
@@ -175,8 +175,125 @@ function zoom(mode) {
   document.getElementById('scaler').style.transform = `scale(${zoom_percent.value / 100})`
 }
 
-const reorder = async (ids) => {
-  console.log(reorder)
+// 添加节点
+const add = async (item, direction) => {
+  const orgMap = new Map(orgData.map((item) => [item.id, item]))
+  const newData = {
+    id: null,
+    pid: null,
+    name: '部门',
+    fullname: `${item.fullname}-部门`,
+    type: 0,
+    isEntity: false,
+    leaderId: null,
+    leaderName: '',
+    order: 1,
+    status: 1,
+    level: null,
+    path: item.path,
+    children: []
+  }
+
+  switch (direction) {
+    case 'child':
+      newData.pid = item.id
+      newData.level = item.level + 1
+      newData.order = item.children.length + 1
+      break
+    case 'previous':
+    case 'next':
+      const siblings = orgData.filter((node) => node.pid == item.pid).sort((a, b) => a.order - b.order)
+      // 在兄弟节点中找到插入位置的索引
+      const insertIndex = siblings.findIndex((node) => node.id === item.id) + (direction === 'next' ? 1 : 0)
+      newData.pid = item.pid
+      newData.level = item.level
+      newData.path = orgMap.get(item.pid).path
+
+      // 先确定新节点的order：插入位置的前一个节点的order + 1
+      if (direction === 'previous') {
+        newData.order = insertIndex === 0 ? 1 : siblings[insertIndex - 1].order + 1
+      } else if (direction === 'next') {
+        newData.order = item.order + 1
+      }
+      // 更新兄弟节点的order，从插入节点后开始更新
+      siblings.slice(insertIndex).forEach((node, index) => {
+        if (node.order <= newData.order + index) {
+          node.order = newData.order + index + 1
+          node.needUpdate = true
+        }
+      })
+      // 从orgData中提取需要更新的数据
+      const updateItems = siblings.filter((item) => item.needUpdate).map(({ id, path, level, order, pid }) => ({ id, path, level, order, pid }))
+      if (updateItems.length > 0) {
+        // console.log('需要更新的节点:', updateItems)
+        await API.org.reorder(updateItems)
+      }
+      break
+  }
+
+  const resData = await API.org.add(newData)
+  orgData.push(resData)
+  orgTree.value = buildTree(orgData)
+}
+
+// 拖拽后的重新排序
+const reorder = async (el) => {
+  const orgMap = new Map(orgData.map((item) => [item.id, item]))
+
+  const pid = el.parentElement.closest('li').dataset.id
+  const src = orgMap.get(+el.dataset.id)
+  const parent = orgMap.get(+pid)
+  const needUpdateChildren = +pid !== src.pid // 如果拖动的父节点发生变化，则需要更新所有子节点
+
+  // 更新其他相关数据
+  src.pid = +pid
+  src.path = parent.path + '-' + src.id
+  src.level = src.path.split('-').length
+  src.needUpdate = true
+
+  // 更新子节点数据
+  if (needUpdateChildren) {
+    const updateChildren = (node) => {
+      const children = orgData.filter((item) => item.pid === node.id)
+      children.forEach((child) => {
+        child.path = src.path + '-' + child.id
+        child.level = child.path.split('-').length
+        child.needUpdate = true
+        updateChildren(child)
+      })
+    }
+
+    updateChildren(src)
+  }
+
+  const siblingsElements = Array.from(el.parentElement?.children)
+
+  // 获取新的兄弟节点列表
+  const siblings = orgData.filter((node) => node.pid === +pid)
+  siblings.forEach((item) => {
+    const newOrder = siblingsElements.findIndex((child) => child.dataset.id == item.id) + 1
+    if (item.order !== newOrder) {
+      item.order = newOrder
+      item.needUpdate = true
+    }
+  })
+  orgTree.value = buildTree(orgData)
+
+  // 从orgData中提取需要更新的数据
+  const updateItems = orgData.filter((item) => item.needUpdate).map(({ id, path, level, order, pid }) => ({ id, path, level, order, pid }))
+  if (updateItems.length > 0) {
+    // console.log('需要更新的节点:', updateItems)
+    await API.org.reorder(updateItems)
+  }
+  orgData = await API.org.list()
+}
+
+const remove = async (path) => {
+  const res = await API.org.remove(path)
+  // 从orgData中移除指定path及其子级
+  orgData = orgData.filter((item) => item.path !== path && !item.path.startsWith(path + '-'))
+  // 重建组织树
+  orgTree.value = buildTree(orgData)
 }
 
 onMounted(() => {

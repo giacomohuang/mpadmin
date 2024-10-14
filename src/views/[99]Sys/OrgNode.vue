@@ -1,8 +1,8 @@
 <template>
   <!-- <ul class="group" v-draggable="[data, { animation: 100, onAdd: onAdd, onUpdate: onUpdate, onMove: onMove, handle: '.title', ghostClass: 'ghost', disabled: is_drag_disabled, chosenClass: 'chosen', group: { name: level == 0 ? 'root' : 'children' } }]"> -->
   <ul class="group">
-    <li v-for="(item, index) in data" class="wrapper" :class="{ draggable: level != 0, root: level == 0 }" @mousedown.stop="" :key="item.id" :data-id="item.id">
-      <div class="node" :class="'level' + (level % 10)" :draggable="true">
+    <li v-for="(item, index) in data" class="wrapper" :class="{ draggable: level != 1, root: level == 1 }" @mousedown.stop="" :key="item.id" :data-id="item.id">
+      <div class="node" :class="'level' + (level % 10)" :draggable="item.pid != null">
         <div class="title">
           <div class="inputbox">
             <input v-model="item.name" @mousedown.stop="" @click.stop="" @mouseup.stop="" />
@@ -10,12 +10,12 @@
           </div>
 
           <div class="name" @click.stop="editTitle($event, item)">
-            <span :placeholder="item.id">{{ item.id }}, {{ item.name }}</span>
+            <span :placeholder="item.id">{{ item.id }}:{{ item.name }}<br />{{ item.path }}, {{ item.level }},{{ item.order }},{{ item.needUpdate }}</span>
             <icon name="edit"></icon>
           </div>
 
           <div class="tools">
-            <div class="remove" v-if="level != 0" @click.stop="remove(data, index)"><icon name="remove" size="1em"></icon></div>
+            <div class="remove" v-if="level != 1" @click.stop="remove(item.path)"><icon name="remove" size="1em"></icon></div>
           </div>
         </div>
 
@@ -28,13 +28,16 @@
         </div>
 
         <div class="handler">
-          <div class="add top" v-if="level !== 0"><span class="btn" @click.stop="add(parent, index, 'parent')"></span></div>
-          <div class="add bottom"><span class="btn" @click.stop="add(data, index, 'child')"></span></div>
-          <div class="add left" v-if="level !== 0"><span class="btn" @click.stop="add(data, index, 'previous')"></span></div>
-          <div class="add right" v-if="level !== 0"><span class="btn" @click.stop="add(data, index, 'next')"></span></div>
+          <!-- <div class="add top" v-if="level !== 1"><span class="btn" @click.stop="add(parent, index, 'parent')"></span></div> -->
+          <!-- <div class="add bottom"><span class="btn" @click.stop="add(data, index, 'child')"></span></div>
+          <div class="add left" v-if="level !== 1"><span class="btn" @click.stop="add(data, index, 'previous')"></span></div>
+          <div class="add right" v-if="level !== 1"><span class="btn" @click.stop="add(data, index, 'next')"></span></div> -->
+          <div class="add bottom"><span class="btn" @click.stop="add(item, 'child')"></span></div>
+          <div class="add left" v-if="level !== 1"><span class="btn" @click.stop="add(item, 'previous')"></span></div>
+          <div class="add right" v-if="level !== 1"><span class="btn" @click.stop="add(item, 'next')"></span></div>
         </div>
       </div>
-      <OrgNode :data="item.children" :level="level + 1" :parent="item" @add="add"></OrgNode>
+      <OrgNode :data="item.children" :level="level + 1" @add="add" @edit="edit" @remove="remove"></OrgNode>
     </li>
   </ul>
 </template>
@@ -47,111 +50,37 @@
 
 <script setup>
 import { ref, inject } from 'vue'
-import { vDraggable } from 'vue-draggable-plus'
-import { customAlphabet } from 'nanoid'
+// import { vDraggable } from 'vue-draggable-plus'
+// import { customAlphabet } from 'nanoid'
+// const nanoid = customAlphabet('~!@#$%^&*+()-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 3)
+const { data, level } = defineProps(['data', 'parent', 'level'])
 
-const nanoid = customAlphabet('~!@#$%^&*+()-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 3)
-const { data, parent, level } = defineProps(['data', 'parent', 'level'])
-
-const emit = defineEmits(['add'])
-const editing_node = inject('editing_node')
+const emit = defineEmits(['add', 'edit', 'remove'])
 const is_drag_disabled = ref(false)
-
-const drawer = inject('drawer')
-let dragged = false
 let title_undo_text = ''
 
-// 自定义指令，检测鼠标按下后是否拖动，解决拖动和点击事件的冲突
-const vDraggableCustom = {
-  mounted: (el) => {
-    var offsetX = 0
-    var offsetY = 0
-    function onMouseDown(ev) {
-      dragged = false
-      offsetX = ev.clientX
-      offsetY = ev.clientY
-      console.log('----mousedown----', offsetX, offsetY)
-      el.addEventListener('mouseup', onMouseUp)
-    }
-    function onMouseUp(ev) {
-      if (Math.abs(offsetX - ev.clientX) > 5 || Math.abs(offsetY - ev.clientY) > 5) {
-        console.log('----moved----', ev.clientX, ev.clientY)
-        dragged = true
-      }
-      el.removeEventListener('mouseup', onMouseUp)
-    }
-    el.addEventListener('mousedown', onMouseDown)
-  }
+// function add(items, index, direction) {
+//   emit('add', items, index, direction)
+// }
+
+function add(item, direction) {
+  emit('add', item, direction)
 }
 
-function onAdd(dragEvent) {
-  console.log(dragEvent.data)
-  console.log(dragEvent.target.closest('.wrapper').dataset.id)
+function edit(id) {
+  emit('edit', id)
 }
 
-function onUpdate(dragEvent) {
-  console.log(dragEvent.data)
-  console.log(dragEvent.target.closest('.wrapper').dataset.id)
-}
-
-function onMove(dragEvent) {
-  console.log(dragEvent.clientLeft)
-}
-
-function add(items, id, flag) {
-  console.log('aaaaaaa', items, id, flag)
-  emit('add', items, id, flag)
-}
-
-function getElPos(el) {
-  let Box = el.getBoundingClientRect(),
-    doc = el.ownerDocument,
-    body = doc.body,
-    html = doc.documentElement,
-    clientTop = html.clientTop || body.clientTop || 0,
-    clientLeft = html.clientLeft || body.clientLeft || 0,
-    top = Box.top + (self.scrollY || html.scrollTop || body.scrollTop) - clientTop,
-    left = Box.left + (self.scrollX || html.scrollLeft || body.scrollLeft) - clientLeft
-  return { top: top, left: left }
-}
-
-function getMousePos() {
-  let x = 0,
-    y = 0
-  let e = window.event
-  if (e.pageX) {
-    x = e.pageX
-    y = e.pageY
-  } else {
-    x = e.clientX + document.body.scrollLeft - document.body.clientLeft
-    y = e.clientY + document.body.scrollTop - document.body.clientTop
-  }
-  return { x: x, y: y }
-}
-
-function edit(ev, node) {
-  if (dragged) return
-  // console.log(id)
-  drawer.value = true
-  editing_node.value = node
-}
-
-function remove(items, index) {
-  if (dragged) return
-  items.splice(index, 1)
-  // resize()
+function remove(path) {
+  emit('remove', path)
 }
 
 function clearText(ev, json) {
-  if (dragged) return
-  // console.log(ev.currentTarget.offsetParent)
   ev.currentTarget.previousElementSibling.focus()
   json.name = ''
 }
 
 function editTitle(ev, json) {
-  if (dragged) return
-  // console.log('aaaaaa', json)
   const el = ev.currentTarget.previousElementSibling
   el.style.display = 'flex'
   el.children[0].focus()
@@ -248,18 +177,6 @@ $border-size: 1px;
     padding-top: 20px;
   }
 
-  // 空子节点占位,拖动用
-  &:empty {
-    content: '';
-    // position: absolute;
-    z-index: 2;
-    width: calc(100% - 40px);
-    height: 50px;
-    left: 30px;
-    // top: 100px;
-    // background: red;
-  }
-
   // 如果节点只有一个子节点，并且不是根节点，则补一条竖线
   > :only-child:not(.root) > .node::before {
     content: '';
@@ -286,13 +203,6 @@ $border-size: 1px;
     border-color: $border-color;
     border-style: $border-radius;
   }
-
-  // // 只有一个子节点，且不是根节点，才显示竖线
-  // &:only-child:not(.root)::before {
-  //   left: 50%;
-  //   width: 1px;
-  //   border-left-width: $border-size;
-  // }
 
   // 不止一个子节点，才显示横线
   &:not(:only-child)::before {
@@ -370,7 +280,7 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
 // 使用@each指令遍历颜色数组
 @each $color in $lv-colors {
   $i: index($lv-colors, $color);
-  .level#{$i - 1} {
+  .level#{$i} {
     background: $color;
     &:hover {
       box-shadow: 0px 0px 8px 0 $color;
@@ -497,7 +407,6 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
 .handler {
   position: absolute;
   visibility: hidden;
-  // background: #9fce87;
   top: -15px;
   left: -15px;
   bottom: -15px;
@@ -516,24 +425,20 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
   &.top {
     width: 100%;
     height: 15px;
-    // background: red;
   }
   &.bottom {
     width: 100%;
     height: 15px;
     bottom: 0;
-    // background: green;
   }
   &.left {
     width: 15px;
     height: 100%;
-    // background: blue;
   }
   &.right {
     right: 0;
     width: 15px;
     height: 100%;
-    // background: pink;
   }
 
   .btn {
@@ -545,20 +450,20 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
     display: flex;
     align-items: center;
     justify-content: center;
+    &:after,
     &:before {
       content: '';
       position: absolute;
       display: block;
+    }
+    &:before {
       height: 9px;
       width: 11px;
       top: 2px;
       left: 6px;
       @apply border-l border-brand-600;
     }
-    &::after {
-      content: '';
-      position: absolute;
-      display: block;
+    &:after {
       height: 11px;
       width: 9px;
       top: 6px;

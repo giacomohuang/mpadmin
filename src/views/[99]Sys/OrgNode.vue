@@ -10,7 +10,8 @@
           </div>
 
           <div class="name" @click.stop="editTitle($event, item)">
-            <span :placeholder="item.id">{{ item.id }}:{{ item.name }}<br />{{ item.path }}, {{ item.level }},{{ item.order }},{{ item.needUpdate }}</span>
+            <!-- <span :placeholder="item.id">{{ item.id }}:{{ item.name }}<br />{{ item.path }}, {{ item.level }},{{ item.order }},{{ item.needUpdate }}</span> -->
+            <span>{{ item.name }}</span>
             <icon name="edit"></icon>
           </div>
 
@@ -28,10 +29,7 @@
         </div>
 
         <div class="handler">
-          <!-- <div class="add top" v-if="level !== 1"><span class="btn" @click.stop="add(parent, index, 'parent')"></span></div> -->
-          <!-- <div class="add bottom"><span class="btn" @click.stop="add(data, index, 'child')"></span></div>
-          <div class="add left" v-if="level !== 1"><span class="btn" @click.stop="add(data, index, 'previous')"></span></div>
-          <div class="add right" v-if="level !== 1"><span class="btn" @click.stop="add(data, index, 'next')"></span></div> -->
+          <!-- <div class="add top" v-if="level !== 1"><span class="btn" @click.stop="add(item, 'parent')"></span></div> -->
           <div class="add bottom"><span class="btn" @click.stop="add(item, 'child')"></span></div>
           <div class="add left" v-if="level !== 1"><span class="btn" @click.stop="add(item, 'previous')"></span></div>
           <div class="add right" v-if="level !== 1"><span class="btn" @click.stop="add(item, 'next')"></span></div>
@@ -50,18 +48,10 @@
 
 <script setup>
 import { ref, inject } from 'vue'
-// import { vDraggable } from 'vue-draggable-plus'
-// import { customAlphabet } from 'nanoid'
-// const nanoid = customAlphabet('~!@#$%^&*+()-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 3)
 const { data, level } = defineProps(['data', 'parent', 'level'])
 
 const emit = defineEmits(['add', 'edit', 'remove'])
-const is_drag_disabled = ref(false)
 let title_undo_text = ''
-
-// function add(items, index, direction) {
-//   emit('add', items, index, direction)
-// }
 
 function add(item, direction) {
   emit('add', item, direction)
@@ -84,19 +74,23 @@ function editTitle(ev, json) {
   const el = ev.currentTarget.previousElementSibling
   el.style.display = 'flex'
   el.children[0].focus()
-  is_drag_disabled.value = true
 
   document.addEventListener('mousedown', onMouseDown, true)
   document.addEventListener('keydown', onKeyDown)
   title_undo_text = ''
   title_undo_text = json.name
-  // console.log(title_undo_text)
 
   function onMouseDown(event) {
-    console.log('edit:mouseddwn', isOutside(event))
-    if (isOutside(event)) {
-      is_drag_disabled.value = false
+    if (!el.contains(event.target)) {
       document.addEventListener('mouseup', onMouseUp)
+    }
+  }
+  function onMouseUp(event) {
+    if (!el.contains(event.target)) {
+      el.style.display = 'none'
+      document.removeEventListener('mouseup', onMouseUp)
+      document.removeEventListener('mousedown', onMouseDown, true)
+      document.removeEventListener('keydown', onKeyDown)
     }
   }
 
@@ -113,26 +107,6 @@ function editTitle(ev, json) {
       json.name = title_undo_text
       el.style.display = 'none'
       document.removeEventListener('keydown', onKeyDown)
-    }
-  }
-  function onMouseUp(event) {
-    if (isOutside(event)) {
-      el.style.display = 'none'
-
-      document.removeEventListener('mouseup', onMouseUp)
-      document.removeEventListener('mousedown', onMouseDown, true)
-      document.removeEventListener('keydown', onKeyDown)
-    }
-  }
-
-  function isOutside(event) {
-    const x = event.clientX
-    const y = event.clientY
-    let bound = el.getBoundingClientRect()
-    if (x < bound.x || x > bound.x + bound.width || y < bound.y || y > bound.y + bound.height) {
-      return true
-    } else {
-      return false
     }
   }
 }

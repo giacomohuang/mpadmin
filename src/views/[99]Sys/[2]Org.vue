@@ -16,7 +16,7 @@
         <div>{{ orgForm.fullname }}</div>
       </a-form-item>
       <a-form-item label="负责人" name="leaderId">
-        <div>{{ orgForm.leaderName }} {{ typeof orgForm.leaderId }}</div>
+        <div>{{ orgForm.leaderName }}</div>
         <a-select v-model:value="orgForm.leaderId" show-search :filter-option="orgListFilter" :options="userList" :fieldNames="{ label: 'name', value: 'id' }"> </a-select>
       </a-form-item>
       <a-form-item label="角色" name="roles">

@@ -12,22 +12,16 @@
 
   <a-drawer :title="orgForm.name" width="500px" :open="orgEditor" @close="orgEditor = false">
     <a-form ref="orgFormRef" :model="orgForm" :rules="formRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
-      <a-form-item label="名称" name="name">
-        <a-input v-model:value="orgForm.name" />
-      </a-form-item>
       <a-form-item label="全称" name="fullname">
         <div>{{ orgForm.fullname }}</div>
       </a-form-item>
       <a-form-item label="负责人" name="leaderId">
-        <a-select v-model:value="orgForm.leaderId" show-search>
-          <a-select-option v-for="user in users" :key="user.id" :value="user.id">
-            {{ user.name }}
-          </a-select-option>
-        </a-select>
+        <div>{{ orgForm.leaderName }} {{ typeof orgForm.leaderId }}</div>
+        <a-select v-model:value="orgForm.leaderId" show-search :filter-option="orgListFilter" :options="userList" :fieldNames="{ label: 'name', value: 'id' }"> </a-select>
       </a-form-item>
       <a-form-item label="角色" name="roles">
-        <a-select v-model:value="orgForm.roles" mode="multiple" show-search>
-          <a-select-option v-for="role in roleOptions" :key="role.id" :value="role.id">
+        <a-select v-model:value="orgForm.roles" mode="multiple">
+          <a-select-option v-for="role in roleList" :value="role.id" :key="role.id">
             {{ role.name }}
           </a-select-option>
         </a-select>
@@ -60,11 +54,13 @@ import { DnD } from '@/js/DnDTree'
 // 侧边栏打开状态
 const orgEditor = ref(false)
 const orgForm = reactive({})
+const orgFormRef = ref(null)
 // 画布缩放倍率
 const zoom_percent = ref(100)
-const users = ref([])
+const userList = ref([])
+const roleList = ref([])
 
-users.value = [
+userList.value = [
   { id: 1, name: '张三' },
   { id: 2, name: '李四' },
   { id: 3, name: '王五' },
@@ -343,44 +339,44 @@ const openEditor = async (item) => {
 }
 
 const formRules = {
-  name: [
-    { required: true, message: '请输入组织名称', trigger: 'blur' },
-    { min: 2, max: 50, message: '组织名称长度应在2-50个字符之间', trigger: 'blur' }
-  ],
   leaderId: [{ required: true, message: '请选择负责人', trigger: 'change' }],
   roles: [{ type: 'array', min: 1, message: '请至少选择一个角色', trigger: 'change' }]
 }
 
-const update = async (item) => {
-  const res = await API.org.update(item)
+const orgListFilter = (input, option) => {
+  console.log(option)
+  return option.name.toLowerCase().includes(input.toLowerCase())
 }
-
-// 添加以下代码
-const orgFormRef = ref(null)
-const leaderOptions = ref([])
-const roleOptions = ref([])
-
 // 提交表单的方法
 const submitForm = async () => {
   try {
-    await orgFormRef.value.validate()
-    // 表单验证通过，执行提交逻辑
-    const res = await API.org.update(orgForm)
-    if (res) {
-      // 更新成功，关闭抽屉并刷新数据
-      orgEditor.value = false
-      // 更新orgMap中的数据
-      orgMap.value.set(orgForm.id, { ...orgMap.value.get(orgForm.id), ...orgForm })
-      buildTree()
-    }
-  } catch (error) {
-    console.error('表单验证失败', error)
+    await orgFormRef.value.validateFields()
+  } catch {
+    console.log('表单验证失败')
+    return
+  }
+
+  orgForm.leaderId = +orgForm.leaderId
+  const userMap = new Map(userList.value.map((item) => [item.id, item]))
+  orgForm.leaderName = userMap.get(orgForm.leaderId).name
+
+  // 表单验证通过，执行提交逻辑
+  const res = await API.org.update(orgForm)
+  if (res) {
+    // // 更新成功，关闭抽屉并刷新数据
+    orgEditor.value = false
+    // // 更新orgMap中的数据
+
+    orgMap.value.set(orgForm.id, { ...orgMap.value.get(orgForm.id), ...orgForm })
+
+    buildTree()
   }
 }
 
 onMounted(async () => {
-  const res = await API.org.list()
-  orgMap.value = new Map(res.map((item) => [item.id, item]))
+  const orgRes = await API.org.list()
+  orgMap.value = new Map(orgRes.map((item) => [item.id, item]))
+  roleList.value = await API.permission.role.list(null)
   buildTree()
   orgDnD.init()
   const container = document.querySelector('.main')
@@ -389,19 +385,6 @@ onMounted(async () => {
   nextTick(() => {
     center()
   })
-
-  // // 可以在这里预加载负责人和角色选项，如果需要的话
-  // const leadersRes = await API.org.getLeaders()
-  // leaderOptions.value = leadersRes.map((leader) => ({
-  //   id: leader.id,
-  //   name: leader.name
-  // }))
-
-  // const rolesRes = await API.org.getRoles()
-  // roleOptions.value = rolesRes.map((role) => ({
-  //   id: role.id,
-  //   name: role.name
-  // }))
 })
 </script>
 

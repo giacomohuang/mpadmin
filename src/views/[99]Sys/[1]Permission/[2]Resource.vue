@@ -84,7 +84,6 @@ const dndResource = new DnD(listRef, (ids) => reorder(ids))
 const dndRoot = new DnD(rootsRef, (ids) => reorder(ids))
 
 // 非响应式状态
-let orderMap
 let editorMode
 let currentResource = null
 let resourceData = null

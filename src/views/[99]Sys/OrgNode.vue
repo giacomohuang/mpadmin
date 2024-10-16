@@ -1,8 +1,8 @@
 <template>
   <!-- <ul class="group" v-draggable="[data, { animation: 100, onAdd: onAdd, onUpdate: onUpdate, onMove: onMove, handle: '.title', ghostClass: 'ghost', disabled: is_drag_disabled, chosenClass: 'chosen', group: { name: level == 0 ? 'root' : 'children' } }]"> -->
   <ul class="group">
-    <li v-for="(item, index) in data" class="wrapper" :class="{ draggable: level != 1, root: level == 1 }" @mousedown.stop="" :key="item.id" :data-id="item.id">
-      <div class="node" :class="'level' + (level % 10)" :draggable="item.pid != null">
+    <li v-for="item in data" class="wrapper" :class="{ draggable: level != 1, root: level == 1 }" @mousedown.stop="" :key="item.id" :data-id="item.id">
+      <div class="node" :class="['level' + (level % 10), { 'is-hover': cur_id === item.id }]" :draggable="item.pid != null" @mouseover="changeCurId(item.id)" @mouseout="cur_id = null" @click.stop="openEditor(item)">
         <div class="title">
           <div class="inputbox">
             <input v-model="item.name" @mousedown.stop="" @click.stop="" @mouseup.stop="" />
@@ -10,8 +10,8 @@
           </div>
 
           <div class="name" @click.stop="editTitle($event, item)">
-            <!-- <span :placeholder="item.id">{{ item.id }}:{{ item.name }}<br />{{ item.path }}, {{ item.level }},{{ item.order }},{{ item.needUpdate }}</span> -->
-            <span>{{ item.name }}</span>
+            <span>{{ item.id }}:{{ item.name }}</span>
+            <!-- <span>{{ item.name }}</span> -->
             <icon name="edit"></icon>
           </div>
 
@@ -27,7 +27,7 @@
           </div>
           <div class="num">1000人</div>
         </div>
-
+        <div>{{ item.fullname }}<br />{{ item.path }}<br />{{ item.order }},{{ item.needUpdate }}</div>
         <div class="handler">
           <!-- <div class="add top" v-if="level !== 1"><span class="btn" @click.stop="add(item, 'parent')"></span></div> -->
           <div class="add bottom"><span class="btn" @click.stop="add(item, 'child')"></span></div>
@@ -35,7 +35,7 @@
           <div class="add right" v-if="level !== 1"><span class="btn" @click.stop="add(item, 'next')"></span></div>
         </div>
       </div>
-      <OrgNode :data="item.children" :level="level + 1" @add="add" @edit="edit" @remove="remove"></OrgNode>
+      <OrgNode :data="item.children" :level="level + 1" @add="add" @edit="edit" @remove="remove" @rename="rename" @openEditor="openEditor"></OrgNode>
     </li>
   </ul>
 </template>
@@ -49,9 +49,9 @@
 <script setup>
 import { ref, inject } from 'vue'
 const { data, level } = defineProps(['data', 'parent', 'level'])
-
-const emit = defineEmits(['add', 'edit', 'remove'])
+const emit = defineEmits(['add', 'edit', 'remove', 'rename', 'openEditor'])
 let title_undo_text = ''
+let cur_id = inject('cur_id')
 
 function add(item, direction) {
   emit('add', item, direction)
@@ -61,16 +61,31 @@ function edit(id) {
   emit('edit', id)
 }
 
+function changeCurId(id) {
+  if (!document.querySelector('.dragging')) {
+    cur_id.value = id
+    // console.log(id)
+  }
+}
+
 function remove(path) {
   emit('remove', path)
 }
 
-function clearText(ev, json) {
+function clearText(ev, item) {
   ev.currentTarget.previousElementSibling.focus()
-  json.name = ''
+  item.name = ''
 }
 
-function editTitle(ev, json) {
+function rename(item) {
+  emit('rename', item)
+}
+
+function openEditor(item) {
+  emit('openEditor', item)
+}
+
+function editTitle(ev, item) {
   const el = ev.currentTarget.previousElementSibling
   el.style.display = 'flex'
   el.children[0].focus()
@@ -78,7 +93,7 @@ function editTitle(ev, json) {
   document.addEventListener('mousedown', onMouseDown, true)
   document.addEventListener('keydown', onKeyDown)
   title_undo_text = ''
-  title_undo_text = json.name
+  title_undo_text = item.name
 
   function onMouseDown(event) {
     if (!el.contains(event.target)) {
@@ -101,10 +116,11 @@ function editTitle(ev, json) {
     if (key === 13) {
       el.style.display = 'none'
       document.removeEventListener('keydown', onKeyDown)
+      rename(item)
     }
     // ESC：回滚
     if (key === 27) {
-      json.name = title_undo_text
+      item.name = title_undo_text
       el.style.display = 'none'
       document.removeEventListener('keydown', onKeyDown)
     }
@@ -227,7 +243,7 @@ $border-size: 1px;
   z-index: 3;
   width: 180px;
 
-  &:hover {
+  &.is-hover {
     .handler {
       visibility: visible;
     }
@@ -256,7 +272,7 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
   $i: index($lv-colors, $color);
   .level#{$i} {
     background: $color;
-    &:hover {
+    &.is-hover {
       box-shadow: 0px 0px 8px 0 $color;
     }
   }

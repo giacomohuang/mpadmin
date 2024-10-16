@@ -3,19 +3,40 @@
     <div id="canvas">
       <div id="scaler">
         <div id="nodes" ref="orgRef">
-          <OrgNode :data="orgTree" :level="1" @add="add" @edit="edit" @remove="remove"></OrgNode>
+          <!-- <div style="position: fixed; top: 0">{{ cur_id }}</div> -->
+          <OrgNode :data="orgTree" :level="1" @add="add" @edit="edit" @remove="remove" @rename="rename" @openEditor="openEditor"></OrgNode>
         </div>
       </div>
     </div>
   </div>
 
-  <a-drawer v-model="drawer">
-    <template #header="{ close }">
-      <div class="title">{{ editing_node.name }}<icon name="icon-edit"></icon></div>
-      <div class="close" @click="close"><icon name="icon-remove"></icon></div>
-    </template>
-    <span>Hi, there!</span>
-    {{ editing_node }}
+  <a-drawer :title="orgForm.name" width="500px" :open="orgEditor" @close="orgEditor = false">
+    <a-form ref="orgFormRef" :model="orgForm" :rules="formRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
+      <a-form-item label="名称" name="name">
+        <a-input v-model:value="orgForm.name" />
+      </a-form-item>
+      <a-form-item label="全称" name="fullname">
+        <div>{{ orgForm.fullname }}</div>
+      </a-form-item>
+      <a-form-item label="负责人" name="leaderId">
+        <a-select v-model:value="orgForm.leaderId" show-search>
+          <a-select-option v-for="user in users" :key="user.id" :value="user.id">
+            {{ user.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item label="角色" name="roles">
+        <a-select v-model:value="orgForm.roles" mode="multiple" show-search>
+          <a-select-option v-for="role in roleOptions" :key="role.id" :value="role.id">
+            {{ role.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item :wrapper-col="{ offset: 6, span: 18 }">
+        <a-button type="primary" @click="submitForm">保存</a-button>
+        <a-button style="margin-left: 10px" @click="orgEditor = false">取消</a-button>
+      </a-form-item>
+    </a-form>
   </a-drawer>
 
   <div id="zoom">
@@ -27,42 +48,51 @@
 </template>
 
 <script setup>
-import { provide, onMounted, ref, nextTick } from 'vue'
+import { provide, onMounted, ref, nextTick, reactive } from 'vue'
 
 import OrgNode from './OrgNode.vue'
-import { customAlphabet } from 'nanoid'
 import Drag from '@/js/dragCanvas'
 import API from '@/api/API'
 import PerfectScrollbar from '@/components/PerfectScrollerBar'
 import '@/assets/perfect-scrollbar.css'
 import { DnD } from '@/js/DnDTree'
-import org from '@/api/org'
 
-const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 4)
-
-// 当前编辑节点
-const editing_node = ref('')
 // 侧边栏打开状态
-const drawer = ref(false)
+const orgEditor = ref(false)
+const orgForm = reactive({})
 // 画布缩放倍率
 const zoom_percent = ref(100)
-// 主数据
-const orgTree = ref([])
+const users = ref([])
 
-provide('editing_node', editing_node)
-provide('drawer', drawer)
+users.value = [
+  { id: 1, name: '张三' },
+  { id: 2, name: '李四' },
+  { id: 3, name: '王五' },
+  { id: 4, name: '赵六' },
+  { id: 5, name: '钱七' },
+  { id: 6, name: '孙八' },
+  { id: 7, name: '周九' },
+  { id: 8, name: '吴十' }
+]
+
+// 主数据
+// const orgTree = computed(() => buildTree())
+const orgTree = ref(null)
+const cur_id = ref(null)
+
+provide('cur_id', cur_id)
 
 const orgRef = ref(null)
 const orgDnD = new DnD(orgRef, (el) => reorder(el))
-let orgData = null
 
-const buildTree = (data) => {
+// let orgData = null
+const orgMap = ref(new Map())
+const buildTree = () => {
   // 构建树形结构
   const tree = []
-  const rsdata = JSON.parse(JSON.stringify(data))
-  const itemMap = new Map(rsdata.map((item) => [item.id, { ...item, children: [] }]))
+  const itemMap = new Map(Array.from(orgMap.value.values()).map((item) => [item.id, { ...item, children: [] }]))
 
-  rsdata.forEach((item) => {
+  itemMap.forEach((item) => {
     const node = itemMap.get(item.id)
     if (item.pid === null) {
       tree.push(node)
@@ -78,64 +108,16 @@ const buildTree = (data) => {
       }
     }
   })
-
-  console.log(tree)
-  return tree
-}
-// 数据初始化
-async function initData() {
-  orgData = await API.org.list()
-  orgTree.value = buildTree(orgData)
-  // console.log('data loaded:', t)
-  nextTick(() => {
-    center()
-  })
+  orgTree.value = tree
+  console.log('tree builded', orgTree.value)
 }
 
-// function add(items, index, direction) {
-//   console.log('add', index, direction)
-//   const data = {
-//     id: nanoid(),
-//     name: '部门',
-//     type: 0,
-//     isEntity: false,
-//     leaderId: null,
-//     leaderName: '',
-//     order: 1,
-//     status: 1,
-//     level: null,
-//     pid: null,
-//     path: null,
-//     children: []
-//   }
-
-//   switch (direction) {
-//     case 'parent':
-//       const old = items.children.splice(index, 1, data)[0]
-//       items.children[index].children.splice(1, 0, old)
-//       break
-//     case 'child':
-//       if (items[index].children == null) {
-//         items[index].children = []
-//       }
-//       items[index].children.push(data)
-//       break
-//     case 'previous':
-//       items.splice(index, 0, data)
-//       break
-//     case 'next':
-//       items.splice(index + 1, 0, data)
-//       break
-//   }
-//   resizeCanvas()
-// }
-
-function edit(id) {
+const edit = (id) => {
   console.log('edit', id)
 }
 
 // 重新计算画布大小，并居中
-function center() {
+const center = () => {
   let scrollbar = document.querySelector('.ps')
   let canvas = document.getElementById('canvas')
   let nodes = document.getElementById('nodes')
@@ -149,7 +131,7 @@ function center() {
   scrollbar.scrollTop = (canvas.offsetHeight - scrollbar.clientHeight) / 2
 }
 
-function resizeCanvas() {
+const resizeCanvas = () => {
   let canvas = document.getElementById('canvas')
   let nodes = document.getElementById('nodes')
   canvas.style.width = Math.max(nodes.offsetWidth, document.body.clientWidth) * 1.5 + 'px'
@@ -157,7 +139,7 @@ function resizeCanvas() {
 }
 
 // 缩放画布
-function zoom(mode) {
+const zoom = (mode) => {
   switch (mode) {
     case 'out':
       if (zoom_percent.value >= 50) {
@@ -175,21 +157,32 @@ function zoom(mode) {
   document.getElementById('scaler').style.transform = `scale(${zoom_percent.value / 100})`
 }
 
+// 清除needUpdate标记
+const clearUpdateFlag = () => {
+  // orgData.forEach((item) => {
+  //   delete item.needUpdate
+  // })
+  orgMap.value.forEach((item) => {
+    delete item.needUpdate
+  })
+  // console.log('clear update flag', orgData)
+}
+
 // 添加节点
 const add = async (item, direction) => {
-  const orgMap = new Map(orgData.map((item) => [item.id, item]))
+  // const orgMap = new Map(orgData.map((item) => [item.id, item]))
+
   const newData = {
     id: null,
     pid: null,
     name: '部门',
-    fullname: `${item.fullname}-部门`,
     type: 0,
     isEntity: false,
     leaderId: null,
     leaderName: '',
     order: 1,
     status: 1,
-    level: null,
+    // level: null,
     path: item.path,
     children: []
   }
@@ -197,18 +190,22 @@ const add = async (item, direction) => {
   switch (direction) {
     case 'child':
       newData.pid = item.id
-      newData.level = item.level + 1
-      newData.order = item.children.length + 1
+      // newData.level = item.level + 1
+      newData.order = item.children?.length === 0 ? 1 : item.children[item.children.length - 1].order + 1
+      newData.fullname = `${item.fullname}-部门`
       break
     case 'previous':
     case 'next':
-      const siblings = orgData.filter((node) => node.pid == item.pid).sort((a, b) => a.order - b.order)
+      const siblings = Array.from(orgMap.value.values())
+        .filter((node) => node.pid == item.pid)
+        .sort((a, b) => a.order - b.order)
       // 在兄弟节点中找到插入位置的索引
       const insertIndex = siblings.findIndex((node) => node.id === item.id) + (direction === 'next' ? 1 : 0)
+      const parent = orgMap.value.get(item.pid)
       newData.pid = item.pid
-      newData.level = item.level
-      newData.path = orgMap.get(item.pid).path
-
+      // newData.level = item.level
+      newData.path = parent.path
+      newData.fullname = `${parent.fullname}-部门`
       // 先确定新节点的order：插入位置的前一个节点的order + 1
       if (direction === 'previous') {
         newData.order = insertIndex === 0 ? 1 : siblings[insertIndex - 1].order + 1
@@ -223,41 +220,40 @@ const add = async (item, direction) => {
         }
       })
       // 从orgData中提取需要更新的数据
-      const updateItems = siblings.filter((item) => item.needUpdate).map(({ id, path, level, order, pid }) => ({ id, path, level, order, pid }))
+      const updateItems = siblings.filter((item) => item.needUpdate).map(({ id, path, fullname, order, pid }) => ({ id, path, fullname, order, pid }))
       if (updateItems.length > 0) {
-        // console.log('需要更新的节点:', updateItems)
         await API.org.reorder(updateItems)
+        clearUpdateFlag()
       }
       break
   }
-
   const resData = await API.org.add(newData)
-  orgData.push(resData)
-  orgTree.value = buildTree(orgData)
+  orgMap.value.set(resData.id, resData)
+  buildTree()
 }
 
 // 拖拽后的重新排序
 const reorder = async (el) => {
-  const orgMap = new Map(orgData.map((item) => [item.id, item]))
+  // const orgMap = new Map(orgData.map((item) => [item.id, item]))
 
   const pid = el.parentElement.closest('li').dataset.id
-  const src = orgMap.get(+el.dataset.id)
-  const parent = orgMap.get(+pid)
+  const src = orgMap.value.get(+el.dataset.id)
+  const parent = orgMap.value.get(+pid)
   const needUpdateChildren = +pid !== src.pid // 如果拖动的父节点发生变化，则需要更新所有子节点
 
   // 更新其他相关数据
   src.pid = +pid
   src.path = parent.path + '-' + src.id
-  src.level = src.path.split('-').length
+  src.fullname = `${parent.fullname}-${src.name}`
   src.needUpdate = true
 
   // 更新子节点数据
   if (needUpdateChildren) {
     const updateChildren = (node) => {
-      const children = orgData.filter((item) => item.pid === node.id)
+      const children = Array.from(orgMap.value.values()).filter((item) => item.pid === node.id)
       children.forEach((child) => {
         child.path = src.path + '-' + child.id
-        child.level = child.path.split('-').length
+        child.fullname = `${src.fullname}-${child.name}`
         child.needUpdate = true
         updateChildren(child)
       })
@@ -269,7 +265,7 @@ const reorder = async (el) => {
   const siblingsElements = Array.from(el.parentElement?.children)
 
   // 获取新的兄弟节点列表
-  const siblings = orgData.filter((node) => node.pid === +pid)
+  const siblings = Array.from(orgMap.value.values()).filter((node) => node.pid === +pid)
   siblings.forEach((item) => {
     const newOrder = siblingsElements.findIndex((child) => child.dataset.id == item.id) + 1
     if (item.order !== newOrder) {
@@ -277,31 +273,135 @@ const reorder = async (el) => {
       item.needUpdate = true
     }
   })
-  orgTree.value = buildTree(orgData)
+
+  buildTree()
 
   // 从orgData中提取需要更新的数据
-  const updateItems = orgData.filter((item) => item.needUpdate).map(({ id, path, level, order, pid }) => ({ id, path, level, order, pid }))
+  const updateItems = Array.from(orgMap.value.values())
+    .filter((item) => item.needUpdate)
+    .map(({ id, path, fullname, order, pid }) => ({ id, path, fullname, order, pid }))
   if (updateItems.length > 0) {
-    // console.log('需要更新的节点:', updateItems)
     await API.org.reorder(updateItems)
+    clearUpdateFlag()
   }
-  orgData = await API.org.list()
 }
 
 const remove = async (path) => {
   const res = await API.org.remove(path)
-  // 从orgData中移除指定path及其子级
-  orgData = orgData.filter((item) => item.path !== path && !item.path.startsWith(path + '-'))
-  // 重建组织树
-  orgTree.value = buildTree(orgData)
+  // 从 orgMap 中移除指定 path 及其子级
+  orgMap.value.forEach((value, key) => {
+    if (value.path === path || value.path.startsWith(path + '-')) {
+      orgMap.value.delete(key)
+    }
+  })
+  buildTree()
 }
 
-onMounted(() => {
-  initData()
+const rename = async (item) => {
+  const parent = orgMap.value.get(item.pid)
+  item.fullname = parent ? `${parent.fullname}-${item.name}` : item.name
+  const res = await API.org.rename(item.id, item.name, item.fullname, item.path)
+  orgMap.value.set(item.id, { ...orgMap.value.get(item.id), ...item })
+  // 更新子元素的fullname
+  const updateChildrenFullname = (parentId) => {
+    orgMap.value.forEach((node) => {
+      if (node.pid === parentId) {
+        const parent = orgMap.value.get(parentId)
+        node.fullname = `${parent.fullname}-${node.name}`
+        updateChildrenFullname(node.id)
+      }
+    })
+  }
+  updateChildrenFullname(item.id)
+  buildTree()
+}
+
+const openEditor = async (item) => {
+  console.log('打开编辑器')
+  orgForm.id = item.id
+  orgForm.name = item.name
+  orgForm.fullname = item.fullname
+  orgForm.roles = [...(item.roles ?? [])]
+  orgForm.leaderId = item.leaderId
+  orgForm.leaderName = item.leaderName
+
+  // // 获取负责人选项
+  // const leadersRes = await API.org.getLeaders()
+  // leaderOptions.value = leadersRes.map((leader) => ({
+  //   id: leader.id,
+  //   name: leader.name
+  // }))
+
+  // // 获取角色选项
+  // const rolesRes = await API.org.getRoles()
+  // roleOptions.value = rolesRes.map((role) => ({
+  //   id: role.id,
+  //   name: role.name
+  // }))
+
+  orgEditor.value = true
+}
+
+const formRules = {
+  name: [
+    { required: true, message: '请输入组织名称', trigger: 'blur' },
+    { min: 2, max: 50, message: '组织名称长度应在2-50个字符之间', trigger: 'blur' }
+  ],
+  leaderId: [{ required: true, message: '请选择负责人', trigger: 'change' }],
+  roles: [{ type: 'array', min: 1, message: '请至少选择一个角色', trigger: 'change' }]
+}
+
+const update = async (item) => {
+  const res = await API.org.update(item)
+}
+
+// 添加以下代码
+const orgFormRef = ref(null)
+const leaderOptions = ref([])
+const roleOptions = ref([])
+
+// 提交表单的方法
+const submitForm = async () => {
+  try {
+    await orgFormRef.value.validate()
+    // 表单验证通过，执行提交逻辑
+    const res = await API.org.update(orgForm)
+    if (res) {
+      // 更新成功，关闭抽屉并刷新数据
+      orgEditor.value = false
+      // 更新orgMap中的数据
+      orgMap.value.set(orgForm.id, { ...orgMap.value.get(orgForm.id), ...orgForm })
+      buildTree()
+    }
+  } catch (error) {
+    console.error('表单验证失败', error)
+  }
+}
+
+onMounted(async () => {
+  const res = await API.org.list()
+  orgMap.value = new Map(res.map((item) => [item.id, item]))
+  buildTree()
   orgDnD.init()
   const container = document.querySelector('.main')
   new PerfectScrollbar(container)
   new Drag(document.querySelector('.ps'))
+  nextTick(() => {
+    center()
+  })
+
+  // // 可以在这里预加载负责人和角色选项，如果需要的话
+  // const leadersRes = await API.org.getLeaders()
+  // leaderOptions.value = leadersRes.map((leader) => ({
+  //   id: leader.id,
+  //   name: leader.name
+  // }))
+
+  // const rolesRes = await API.org.getRoles()
+  // roleOptions.value = rolesRes.map((role) => ({
+  //   id: role.id,
+  //   name: role.name
+  // }))
 })
 </script>
 

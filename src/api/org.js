@@ -15,9 +15,17 @@ export const org = {
       method: 'post'
     })
   },
-  update() {
+  update(item) {
     return fetch({
+      data: JSON.stringify(item),
       url: '/org/update',
+      method: 'post'
+    })
+  },
+  rename(id, name, fullname, path) {
+    return fetch({
+      data: { id: id, name: name, fullname: fullname, path: path },
+      url: '/org/rename',
       method: 'post'
     })
   },

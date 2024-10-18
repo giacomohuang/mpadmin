@@ -80,7 +80,7 @@ import SubMenu from './SubMenu.vue'
 import { useStore } from '../stores/stores'
 import helper from '../js/helper'
 import API from '../api/API'
-import PerfectScrollbar from 'perfect-scrollbar'
+// import PerfectScrollbar from '@/components/PerfectScrollerBar'
 import '@/assets/perfect-scrollbar.css'
 
 const globalLoading = ref(false)
@@ -92,8 +92,7 @@ const accountInfo = helper.decodeToken()
 // const accountname = accessToken.accountname
 accountname.value = accountInfo.accountname
 accountid.value = accountInfo.id
-realname.value = accountInfo.realname
-
+realname.value = decodeURIComponent(accountInfo.realname)
 const menu = ref(dynamicRoutes)
 const submenu = ref(router.currentRoute.value.matched[0])
 const currentMenuIdx = ref(-1)

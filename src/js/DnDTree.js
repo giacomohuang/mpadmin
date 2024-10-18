@@ -6,7 +6,7 @@ export class DnD {
     this.sourceEl = null
     this.list = null
 
-    // 生成拖拽图像
+    // 生成拖拽图像，这里用canvas转image实现
     const canvas = document.createElement('canvas')
     canvas.width = 200
     canvas.height = 100

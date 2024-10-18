@@ -16,8 +16,24 @@
         <div>{{ orgForm.fullname }}</div>
       </a-form-item>
       <a-form-item label="负责人" name="leaderId">
-        <div>{{ orgForm.leaderName }}</div>
-        <a-select v-model:value="orgForm.leaderId" show-search :filter-option="orgListFilter" :options="userList" :fieldNames="{ label: 'name', value: 'id' }"> </a-select>
+        <a-select v-model:value="orgForm.leaderId" show-search :filter-option="false" @search="getUserList" optionLabelProp="realname" :options="userList.data" :fieldNames="{ label: 'realname', value: '_id' }">
+          <template #option="{ realname, avatar, accountname }">
+            <div class="user-option">
+              <div class="avatar-name">
+                <img :src="avatar" /><span>{{ realname }}({{ accountname }})</span>
+              </div>
+            </div>
+          </template>
+          <template #dropdownRender="{ menuNode: menu }">
+            <v-nodes :vnodes="menu" />
+            <div v-if="userList.total > 1" style="padding: 16px 0; border-top: 1px solid var(--border-primary)">
+              <a-pagination v-model:current="userList.page" :total="userList.total" show-less-items simple @change="changePage" />
+            </div>
+          </template>
+          <template v-if="userList.loading" #notFoundContent>
+            <a-spin size="small" />
+          </template>
+        </a-select>
       </a-form-item>
       <a-form-item label="角色" name="roles">
         <a-select v-model:value="orgForm.roles" mode="multiple">
@@ -42,7 +58,7 @@
 </template>
 
 <script setup>
-import { provide, onMounted, ref, nextTick, reactive } from 'vue'
+import { defineComponent, provide, onMounted, ref, nextTick, reactive } from 'vue'
 
 import OrgNode from './OrgNode.vue'
 import Drag from '@/js/dragCanvas'
@@ -50,6 +66,19 @@ import API from '@/api/API'
 import PerfectScrollbar from '@/components/PerfectScrollerBar'
 import '@/assets/perfect-scrollbar.css'
 import { DnD } from '@/js/DnDTree'
+import { debounce } from 'lodash-es'
+
+const VNodes = defineComponent({
+  props: {
+    vnodes: {
+      type: Object,
+      required: true
+    }
+  },
+  render() {
+    return this.vnodes
+  }
+})
 
 // 侧边栏打开状态
 const orgEditor = ref(false)
@@ -57,19 +86,20 @@ const orgForm = reactive({})
 const orgFormRef = ref(null)
 // 画布缩放倍率
 const zoom_percent = ref(100)
-const userList = ref([])
 const roleList = ref([])
 
-userList.value = [
-  { id: 1, name: '张三' },
-  { id: 2, name: '李四' },
-  { id: 3, name: '王五' },
-  { id: 4, name: '赵六' },
-  { id: 5, name: '钱七' },
-  { id: 6, name: '孙八' },
-  { id: 7, name: '周九' },
-  { id: 8, name: '吴十' }
-]
+const userList = reactive({
+  data: [],
+  loading: false,
+  page: 1,
+  total: 1,
+  keyword: ''
+})
+
+const formRules = {
+  leaderId: [{ required: true, message: '请选择负责人', trigger: 'change' }],
+  roles: [{ type: 'array', min: 1, message: '请至少选择一个角色', trigger: 'change' }]
+}
 
 // 主数据
 // const orgTree = computed(() => buildTree())
@@ -112,7 +142,7 @@ const edit = (id) => {
   console.log('edit', id)
 }
 
-// 重新计算画布大小，并居中
+// 重新计算画布大小，并居中内容
 const center = () => {
   let scrollbar = document.querySelector('.ps')
   let canvas = document.getElementById('canvas')
@@ -127,6 +157,7 @@ const center = () => {
   scrollbar.scrollTop = (canvas.offsetHeight - scrollbar.clientHeight) / 2
 }
 
+// 重新计算画布大小
 const resizeCanvas = () => {
   let canvas = document.getElementById('canvas')
   let nodes = document.getElementById('nodes')
@@ -282,6 +313,7 @@ const reorder = async (el) => {
   }
 }
 
+// 删除节点
 const remove = async (path) => {
   const res = await API.org.remove(path)
   // 从 orgMap 中移除指定 path 及其子级
@@ -293,6 +325,7 @@ const remove = async (path) => {
   buildTree()
 }
 
+// 修改组织名称
 const rename = async (item) => {
   const parent = orgMap.value.get(item.pid)
   item.fullname = parent ? `${parent.fullname}-${item.name}` : item.name
@@ -312,6 +345,7 @@ const rename = async (item) => {
   buildTree()
 }
 
+// 打开编辑器
 const openEditor = async (item) => {
   console.log('打开编辑器')
   orgForm.id = item.id
@@ -321,6 +355,12 @@ const openEditor = async (item) => {
   orgForm.leaderId = item.leaderId
   orgForm.leaderName = item.leaderName
 
+  userList.data = []
+  // 初始化下拉框
+  if (orgForm.leaderId) {
+    const user = await API.account.get(orgForm.leaderId)
+    userList.data.push(user)
+  }
   // // 获取负责人选项
   // const leadersRes = await API.org.getLeaders()
   // leaderOptions.value = leadersRes.map((leader) => ({
@@ -338,16 +378,32 @@ const openEditor = async (item) => {
   orgEditor.value = true
 }
 
-const formRules = {
-  leaderId: [{ required: true, message: '请选择负责人', trigger: 'change' }],
-  roles: [{ type: 'array', min: 1, message: '请至少选择一个角色', trigger: 'change' }]
-}
+// const orgListFilter = (input, option) => {
+//   console.log(option)
+//   return option.name.toLowerCase().includes(input.toLowerCase())
+// }
 
-const orgListFilter = (input, option) => {
-  console.log(option)
-  return option.name.toLowerCase().includes(input.toLowerCase())
+// 获取账户列表，用于编辑组织负责人
+const getUserList = debounce(async (value) => {
+  console.log(value)
+  userList.loading = true
+  const res = await API.account.searchByName(value, userList.page, 10)
+
+  userList.data = res.accounts
+  userList.total = res.total
+  userList.page = 1
+
+  userList.loading = false
+  userList.keyword = value
+}, 300)
+
+// 切换用户列表分页
+const changePage = async (page, pageSize) => {
+  const res = await API.account.searchByName(userList.keyword, page, pageSize)
+  userList.data = res.accounts
+  userList.total = res.total
 }
-// 提交表单的方法
+// 提交表单
 const submitForm = async () => {
   try {
     await orgFormRef.value.validateFields()
@@ -356,12 +412,13 @@ const submitForm = async () => {
     return
   }
 
-  orgForm.leaderId = +orgForm.leaderId
-  const userMap = new Map(userList.value.map((item) => [item.id, item]))
-  orgForm.leaderName = userMap.get(orgForm.leaderId).name
+  const userMap = new Map(userList.data.map((item) => [item._id, item]))
+
+  orgForm.leaderName = userMap.get(orgForm.leaderId).realname
 
   // 表单验证通过，执行提交逻辑
   const res = await API.org.update(orgForm)
+
   if (res) {
     // // 更新成功，关闭抽屉并刷新数据
     orgEditor.value = false
@@ -457,6 +514,22 @@ onMounted(async () => {
     &:hover {
       background: #eee;
     }
+  }
+}
+
+.user-option {
+  display: flex;
+  .avatar-name {
+    img {
+      width: 30px;
+      height: 30px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
   }
 }
 </style>

@@ -43,12 +43,16 @@ const helper = {
     if (tokenArray.length != 3) {
       throw Error('invalid token')
     }
-    return JSON.parse(atob(encodeURIComponent(tokenArray[1])))
+    // console.log(tokenAr)
+    return JSON.parse(atob(tokenArray[1]))
   },
 
   getToken(data) {
     const accessToken = localStorage.getItem('accessToken')
     const refreshToken = localStorage.getItem('refreshToken')
+    // console.log('==get token==')
+    // console.log('accessToken:', localStorage.getItem('accessToken'))
+    // console.log('refreshToken:', localStorage.getItem('refreshToken'))
     return {
       accessToken,
       refreshToken
@@ -58,6 +62,9 @@ const helper = {
   setToken(data) {
     localStorage.setItem('accessToken', data.accessToken)
     localStorage.setItem('refreshToken', data.refreshToken)
+    // console.log('！！！！==set token===！！！！')
+    // console.log('accessToken:', localStorage.getItem('accessToken'))
+    // console.log('refreshToken:', localStorage.getItem('refreshToken'))
   },
 
   removeToken() {

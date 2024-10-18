@@ -10,7 +10,7 @@ export const org = {
   get(id) {
     console.log('get', id)
     return fetch({
-      data: { id: id },
+      data: { _id: id },
       url: '/org/get',
       method: 'post'
     })

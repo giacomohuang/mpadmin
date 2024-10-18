@@ -1,5 +1,6 @@
 import fetch from './fetch'
 import baseUrl from './baseUrl'
+import { get } from '@/components/PerfectScrollerBar/lib/css'
 
 const account = {
   getPermissions(uid) {
@@ -11,7 +12,7 @@ const account = {
     })
   },
   refreshToken(refreshToken) {
-    console.log(refreshToken)
+    // console.log(refreshToken)
     return fetch({
       baseURL: baseUrl.account,
       method: 'post',
@@ -144,6 +145,22 @@ const account = {
       method: 'post',
       data: { page, limit, query },
       url: '/account/list'
+    })
+  },
+  get(id) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: { id },
+      url: '/account/get'
+    })
+  },
+  searchByName(keyword, page, limit) {
+    return fetch({
+      baseURL: baseUrl.account,
+      method: 'post',
+      data: { keyword, page, limit },
+      url: '/account/searchbyname'
     })
   }
 }

@@ -23,7 +23,8 @@ fetch.interceptors.request.use(
   (config) => {
     // console.log(config)
     const accesstoken = localStorage.getItem('accessToken')
-    // console.log(accesstoken, refreshtoken)
+    // console.log('请求拦截')
+    // console.log('refresh:', localStorage.getItem('refreshToken'))
     if (accesstoken) {
       config.headers['Authorization'] = 'Bearer ' + accesstoken
       config.headers['refreshtoken'] = localStorage.getItem('refreshToken')
@@ -34,10 +35,11 @@ fetch.interceptors.request.use(
     const sortedParams = JSON.stringify(helper.sortJSON(params)) + nonce + timestamp
     const cipher = CryptoJS.HmacSHA256(sortedParams, import.meta.env.VITE_SIGN_KEY)
     const cipherText = CryptoJS.enc.Hex.stringify(cipher)
-    // console.log(sortedParams, cipherText)
     config.headers['sign'] = cipherText
     config.headers['nonce'] = nonce
     config.headers['timestamp'] = timestamp
+    // console.log('===请求拦截===')
+    // console.log(cipherText, nonce, timestamp)
     return config
   },
   (err) => {
@@ -66,9 +68,10 @@ fetch.interceptors.response.use(
           // 使用isRefreshing解决并发问题
           if (!isRefreshing) {
             isRefreshing = true
+            // console.log('响应拦截')
+            // console.log('refresh token:', localStorage.getItem('refreshToken'))
             const { newAccessToken, newRefreshToken } = await API.account.refreshToken(localStorage.getItem('refreshToken'))
-            localStorage.setItem('accessToken', newAccessToken)
-            localStorage.setItem('refreshToken', newRefreshToken)
+            helper.setToken({ accessToken: newAccessToken, refreshToken: newRefreshToken })
             // ----------------
             response.config.headers['Authorization'] = 'Bearer ' + newAccessToken
             response.config.headers['refreshtoken'] = newRefreshToken

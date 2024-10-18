@@ -27,7 +27,7 @@
           </div>
           <div class="num">1000人</div>
         </div>
-        <div>{{ item.fullname }}<br />{{ item.path }}<br />{{ item.order }},{{ item.needUpdate }}</div>
+        <!-- <div>{{ item.fullname }}<br />{{ item.path }}<br />{{ item.order }},{{ item.needUpdate }}</div> -->
         <div class="handler">
           <!-- <div class="add top" v-if="level !== 1"><span class="btn" @click.stop="add(item, 'parent')"></span></div> -->
           <div class="add bottom"><span class="btn" @click.stop="add(item, 'child')"></span></div>
@@ -47,7 +47,7 @@
 </router>
 
 <script setup>
-import { ref, inject } from 'vue'
+import { inject } from 'vue'
 const { data, level } = defineProps(['data', 'parent', 'level'])
 const emit = defineEmits(['add', 'edit', 'remove', 'rename', 'openEditor'])
 let title_undo_text = ''
@@ -129,6 +129,8 @@ function editTitle(ev, item) {
 </script>
 
 <style scoped lang="scss">
+@use 'sass:list';
+
 :root:has(.dragging) {
   .handler {
     visibility: hidden !important;
@@ -269,7 +271,7 @@ $border-size: 1px;
 $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fce87, #cecc87, #aead93);
 // 使用@each指令遍历颜色数组
 @each $color in $lv-colors {
-  $i: index($lv-colors, $color);
+  $i: list.index($lv-colors, $color);
   .level#{$i} {
     background: $color;
     &.is-hover {
@@ -485,7 +487,7 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
     overflow: hidden;
     white-space: nowrap;
 
-    width: 50px;
+    width: 90px;
     margin-left: 4px;
   }
 }

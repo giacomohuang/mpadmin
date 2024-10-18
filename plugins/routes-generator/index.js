@@ -9,36 +9,6 @@ import json5 from 'json5'
 import path from 'path'
 import { get } from 'http'
 import { normalizePath } from 'vite'
-// export default function routesGeneratorPlugin() {
-//   const virtualModuleId = 'virtual:routes'
-//   const resolvedVirtualModuleId = '\0' + virtualModuleId
-
-//   return {
-//     name: 'routes-generator-plugin',
-//     // enforce: 'post',
-//     // configureServer(server) {
-//     //   const watchPath = resolve('./src/views')
-//     //   const watcher = chokidar.watch(watchPath)
-//     //   watcher.on('change', (path) => {
-//     //     server.ws.send({
-//     //       type: 'custom',
-//     //       event: 'routes-generator-plugin',
-//     //       data: getCode()
-//     //     })
-//     //   })
-//     // },
-//     resolveId(id) {
-//       if (id === virtualModuleId) {
-//         return resolvedVirtualModuleId
-//       }
-//     },
-//     load(id) {
-//       if (id === resolvedVirtualModuleId) {
-//         return `export default aaa=[]`
-//       }
-//     }
-//   }
-// }
 
 export default function routesGeneratorPlugin() {
   const virtualModuleId = 'virtual:router'
@@ -46,25 +16,8 @@ export default function routesGeneratorPlugin() {
 
   return {
     name: 'routes-generator-plugin', // 必须的，将会在 warning 和 error 中显示
-    // configureServer(server) {
-    //   const watchPath = resolve('./src/views')
-    //   const watcher = chokidar.watch(watchPath, { ignored: [`${watchPath}/*.vue`] })
-    //   watcher.on('all', (event, watchPath) => {
-    //     if (event === 'change' || event === 'add' || event === 'unlink') {
-    //       // 当文件变动时，通知 Vite 重新加载虚拟模块
-    //       console.log('service reload')
-    //       return `export default ${getCode()}`
-    //     }
-    //   })
-    //   // watcher.on('change', (watchPath) => {
-    //   //   server.ws.send({
-    //   //     type: 'custom',
-    //   //     event: 'routes-generator-plugin',
-    //   //     data: `export default ${getCode()}`
-    //   //   })
-    //   // })
-    // },
-    configureServer: ({ middlewares }) => {
+
+    configureServer({ middlewares, watcher, ws }) {
       middlewares.use(cors({ origin: '*' }))
       middlewares.use(async (req, res, next) => {
         const url = normalizePath(req.url)
@@ -80,6 +33,27 @@ export default function routesGeneratorPlugin() {
           next()
         }
       })
+
+      // 添加文件监听逻辑
+      const viewsWatcher = chokidar.watch('./src/views/**/*.vue', {
+        ignored: /(^|[\/\\])\../,
+        persistent: true
+      })
+
+      viewsWatcher.on('change', (path) => {
+        console.log(`文件 ${path} 已被修改`)
+        const content = `export default ${getCode()}`
+        ws.send({
+          type: 'custom',
+          event: 'routes-update',
+          data: { content }
+        })
+      })
+
+      // 在服务器关闭时停止监听
+      return () => {
+        viewsWatcher.close()
+      }
     },
 
     resolveId(id) {

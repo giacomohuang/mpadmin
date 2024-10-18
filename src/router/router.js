@@ -39,6 +39,8 @@ router.beforeEach(async (to, from, next) => {
   // 载入路由对应的语言文件
   // console.log(getLocale())
   // console.log(to.path)
+  // console.log(meta)
+  // console.log(localStorage.getItem('refreshToken'))
   await loadLocaleData(getLocale())
   setTitle(meta.title)
   // 如果当前页面不需要认证token，直接放行
@@ -48,8 +50,11 @@ router.beforeEach(async (to, from, next) => {
   // 如果需要认证token
   else {
     try {
+      // console.log('token认证')
+      // console.log(localStorage.getItem('refreshToken'))
       const resp = await account.verifyToken(helper.getToken())
-
+      // console.log('resp', resp)
+      if (!resp) throw new Error('token认证失败')
       // 如果响应头中有token刷新请求，刷新token
       // if (resp.newAccessToken && resp.newRefreshToken) {
       //   helper.setToken({ accessToken: resp.newAccessToken, refreshToken: resp.newRefreshToken })
@@ -57,13 +62,15 @@ router.beforeEach(async (to, from, next) => {
       // 验证通过，放行
       next()
     } catch (e) {
+      // console.log('验证失败', e)
       // 验证不通过，跳登录页
       if (e.status && e.status === 401) {
         next({ path: '/signin' })
-        console.log('e', e)
+        // console.log('e', e)
       } else if (e.status && e.status === 409) {
         const { newAccessToken, newRefreshToken } = await API.account.refreshToken(localStorage.getItem('refreshToken'))
         helper.setToken({ accessToken: newAccessToken, refreshToken: newRefreshToken })
+        // console.log('====token 刷新了========')
       }
       // 如果是服务器内部错误或者未知错误，放行并传递异常给业务
       else {

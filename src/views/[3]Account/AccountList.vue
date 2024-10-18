@@ -77,7 +77,7 @@ const isLoading = ref(false)
 const openEditor = ref(false)
 const editForm = reactive({})
 const defaultFilters = ref({
-  status: ['0']
+  status: ['1']
 })
 const pagination = reactive({
   current: 1,
@@ -96,7 +96,7 @@ const onCloseEditor = () => {
 
 onMounted(async () => {
   isLoading.value = true
-  const result = await API.account.list(pagination.current - 1, pagination.pageSize, { status: 1 })
+  const result = await API.account.list(pagination.current, pagination.pageSize, { status: 1 })
   accounts.value = result.accounts
   pagination.total = result.total
   isLoading.value = false
@@ -117,7 +117,7 @@ const handleTableChange = async (p, filters, sorter) => {
   //   }
   // }
   isLoading.value = true
-  const result = await API.account.list(p.current - 1, p.pageSize, query)
+  const result = await API.account.list(p.current, p.pageSize, query)
   accounts.value = result.accounts
   pagination.total = result.total
   pagination.current = p.current

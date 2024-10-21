@@ -18,7 +18,7 @@ export const router = createRouter({
   // },
   // 静态加载的公共页面，不需要认证token
   routes: [
-    { path: '/', component: Layout, redirect: 'workspace/main', meta: { title: 'common.route.workspace', permissionId: '00010000' }, isHidden: true },
+    { path: '/', redirect: '/workspace/main' },
     { path: '/signin', name: 'signin', component: () => import('@/views/Signin.vue'), meta: { title: 'common.route.signin', noAuth: true } },
     { path: '/404', name: '404', component: () => import('@/views/404.vue'), meta: { title: 'common.route.404', noAuth: true } },
     { path: '/:pathMatch(.*)', redirect: '/404', meta: { title: 'common.route.404', noAuth: true } }

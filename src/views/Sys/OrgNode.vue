@@ -42,7 +42,7 @@
 
 <router lang="json">
 {
-  "isMenu": false
+  "isRouter": false
 }
 </router>
 

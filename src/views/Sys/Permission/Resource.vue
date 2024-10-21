@@ -1,16 +1,15 @@
 <template>
   <div class="m-8">
     <div class="z-50 mb-3 flex items-center gap-3">
-      <!-- <a-button @click="removeSel">批量删除勾选项</a-button> -->
       <a-radio-group v-model:value="resourceType">
-        <a-radio-button value="0">全部</a-radio-button>
-        <a-radio-button value="1">仅页面</a-radio-button>
-        <a-radio-button value="2">页面+功能</a-radio-button>
-        <a-radio-button value="3">页面+数据</a-radio-button>
+        <a-radio-button value="0">{{ $t('sys.permission.resource.all') }}</a-radio-button>
+        <a-radio-button value="1">{{ $t('sys.permission.resource.pagesOnly') }}</a-radio-button>
+        <a-radio-button value="2">{{ $t('sys.permission.resource.pagesAndFunctions') }}</a-radio-button>
+        <a-radio-button value="3">{{ $t('sys.permission.resource.pagesAndData') }}</a-radio-button>
       </a-radio-group>
       <div class="relative flex items-center">
         <icon name="search" class="absolute m-2"></icon>
-        <input class="h-8 w-56 rounded-md border border-secondary bg-primary px-8 outline-none duration-300 focus:border-brand-500 focus:ease-in" placeholder="输入关键词搜索" v-model="keywords" />
+        <input class="h-8 w-56 rounded-md border border-secondary bg-primary px-8 outline-none duration-300 focus:border-brand-500 focus:ease-in" :placeholder="$t('sys.permission.resource.searchPlaceholder')" v-model="keywords" />
       </div>
     </div>
 
@@ -26,30 +25,32 @@
         </div>
       </div>
       <div class="hl-area relative flex-1" style="overflow-y: auto">
-        <div v-if="keywords && !resourceTree.children" class="p-4 text-secondary">没有符合条件的数据。<a href="####" @click="keywords = ''">清除搜索关键词</a></div>
+        <div v-if="keywords && !resourceTree.children" class="p-4 text-secondary">
+          {{ $t('sys.permission.resource.noMatchingData') }}<a href="####" @click="keywords = ''">{{ $t('sys.permission.resource.clearSearchKeywords') }}</a>
+        </div>
         <div class="list" ref="listRef"><ResourceList :data="resourceTree.children" @open="openEditor" @remove="remove" @reorder="reorder" @toggleCollapse="toggleCollapse" v-if="resourceTree"></ResourceList></div>
       </div>
     </div>
   </div>
-  <a-drawer title="资源编辑器" width="500px" :open="resourceEditor" @close="resourceEditor = false">
+  <a-drawer :title="$t('sys.permission.resource.resourceEditor')" width="500px" :open="resourceEditor" @close="resourceEditor = false">
     <a-form ref="resourceFormRef" :model="resourceForm" :rules="vRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 20 }" @finish="submit">
-      <a-form-item label="名称" :wrapper-col="{ span: 12 }" name="name">
+      <a-form-item :label="$t('sys.permission.resource.name')" :wrapper-col="{ span: 12 }" name="name">
         <a-input v-model:value="resourceForm.name" />
       </a-form-item>
-      <a-form-item label="编码" name="code" required>
+      <a-form-item :label="$t('sys.permission.resource.code')" name="code" required>
         <a-input v-if="editorMode === 1 ? currentResource.code : getCodePrefix(currentResource.code)" v-model:value="resourceForm.code" :addon-before="editorMode === 1 ? currentResource.code + '.' : getCodePrefix(currentResource.code) + '.'" />
         <a-input v-else v-model:value="resourceForm.code" />
       </a-form-item>
-      <a-form-item label="类型" name="type" :wrapper-col="{ span: 20 }">
+      <a-form-item :label="$t('sys.permission.resource.type')" name="type" :wrapper-col="{ span: 20 }">
         <a-radio-group v-model:value="resourceForm.type">
-          <a-radio :value="1" :checked="resourceType <= 1">页面</a-radio>
-          <a-radio :value="2" :checked="resourceType == 2">功能</a-radio>
-          <a-radio :value="3" :checked="resourceType == 3">数据</a-radio>
+          <a-radio :value="1" :checked="resourceType <= 1">{{ $t('sys.permission.resource.page') }}</a-radio>
+          <a-radio :value="2" :checked="resourceType == 2">{{ $t('sys.permission.resource.function') }}</a-radio>
+          <a-radio :value="3" :checked="resourceType == 3">{{ $t('sys.permission.resource.data') }}</a-radio>
         </a-radio-group>
       </a-form-item>
       <a-form-item :wrapper-col="{ offset: 6 }">
-        <a-button type="primary" html-type="submit">保存</a-button>
-        <a-button type="link" @click="resourceEditor = false">取消</a-button>
+        <a-button type="primary" html-type="submit">{{ $t('common.save') }}</a-button>
+        <a-button type="link" @click="resourceEditor = false">{{ $t('common.cancel') }}</a-button>
       </a-form-item>
     </a-form>
   </a-drawer>
@@ -61,6 +62,9 @@ import debounceRef from '@/js/debounceRef'
 import ResourceList from './ResourceList.vue'
 import API from '@/api/API'
 import { DnD } from '@/js/DnD.js'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // 常量定义
 const EDITOR_MODE = { ADD: 1, EDIT: 2 }
@@ -325,7 +329,7 @@ const submit = async () => {
   if (editorMode === EDITOR_MODE.ADD) {
     nextTick(() => {
       const el = document.getElementById('_MPRES_' + res.id)
-      // 判断节点是不是在可视范围内
+      // 判断节点是不是在可视范��内
       const rect = el.getBoundingClientRect()
       const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight
       if (!isVisible) {
@@ -378,11 +382,11 @@ watch(resourceType, (val) => {
 // 表单验证规则
 const vRules = {
   name: [
-    { required: true, message: '名称不能为空' },
+    { required: true, message: t('sys.permission.resource.nameRequired') },
     {
       validator: async (_rule, value) => {
         if (value == 'huangjia') {
-          return Promise.reject('重名了')
+          return Promise.reject(t('sys.permission.resource.nameDuplicate'))
         } else {
           return Promise.resolve()
         }
@@ -391,13 +395,13 @@ const vRules = {
     }
   ],
   code: [
-    { required: true, message: '编码不能为空' },
+    { required: true, message: t('sys.permission.resource.codeRequired') },
     {
       validator: async (_rule, value) => {
         const code = getCodePrefix(currentResource.code) + value
         console.log(code)
         if (code === 'dashboard.lalala') {
-          return Promise.reject('编码已存在，请更换')
+          return Promise.reject(t('sys.permission.resource.codeDuplicate'))
         } else {
           return Promise.resolve()
         }

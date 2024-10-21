@@ -94,15 +94,17 @@
       </div>
       <a-modal v-model:open="state.setTotpVisible" :title="$t('my.authentication.settotp')" :footer="null" @cancel="handleCancelSet" width="500px">
         <div class="step">
-          <div class="title"><span class="badage">1</span>使用验证APP扫描二维码</div>
-          <div class="hint">扫描验证码后，将得到一组6位数字验证码。还没有安装验证APP？ <a href="/downauthapp" target="_blank">点击这里下载</a></div>
+          <div class="title"><span class="badage">1</span>{{ $t('my.authentication.scanQRCode') }}</div>
+          <div class="hint">
+            {{ $t('my.authentication.scanQRCodeHint') }} <a href="/downauthapp" target="_blank">{{ $t('my.authentication.downloadApp') }}</a>
+          </div>
           <div style="margin-top: 20px" class="flex-item-c flex-col">
             <div style="border-radius: 8px; width: fit-content; height: fit-content"><a-qrcode v-if="totpState.activationUrl" :value="totpState.activationUrl" /></div>
           </div>
         </div>
         <div class="step">
-          <div class="title"><span class="badage">2</span>输入6位验证码</div>
-          <div class="hint">在下面的框中输入APP中显示的6位验证码来激活你的动态口令验证服务。</div>
+          <div class="title"><span class="badage">2</span>{{ $t('my.authentication.enterVerificationCode') }}</div>
+          <div class="hint">{{ $t('my.authentication.enterVerificationCodeHint') }}</div>
           <VerifyInput style="margin: 10px 0 30px 30px" v-model:value="totpState.verifyCode" :autofocus="true" @finish="handleUpdateTotpSecret" :digits="6"></VerifyInput>
         </div>
       </a-modal>
@@ -118,7 +120,7 @@
         <a-switch v-model:checked="state.enable2FA" @change="handleToggle2FA" />
       </div>
       <div class="item">
-        <a-alert message="要使两步验证生效，请先设置手机号码、电子邮件或动态口令其中一项" type="warning" show-icon v-if="!(emailForm.email || phoneForm.phone || totpForm.totpSecret)" />
+        <a-alert :message="$t('my.authentication.2faWarning')" type="warning" show-icon v-if="!(emailForm.email || phoneForm.phone || totpForm.totpSecret)" />
       </div>
     </section>
   </div>
@@ -522,7 +524,7 @@ onUnmounted(() => {
 })
 </script>
 <style lang="scss" scoped>
-@import '../../assets/page.scss';
+@use '../../assets/page.scss';
 
 .resend {
   font-size: 12px;

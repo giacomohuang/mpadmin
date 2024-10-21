@@ -19,6 +19,8 @@
     "action": "Action",
     "status": "Status",
     "all": "All",
+    "save": "Save",
+    "cancel": "Cancel",
     "components": {
       "pwdstrength": {
         "weak": "weak",
@@ -92,7 +94,7 @@
       "auth": "Authentication",
       "email": "Email",
       "mobi": "Mobile Phone",
-      "totp": "Dynamic Password App",
+      "totp": "Dynamic Password",
       "emailad": "Email",
       "svcode": "Send Code",
       "edit": "Edit",
@@ -108,7 +110,7 @@
       "phonead": "Phone Number",
       "rsvphone": "You will receive a verification text message. Please fill in the 4-digit verification code below. DO NOT share the verification code to others.",
       "havset": "Already set",
-      "settotp": "Setup Dynamic Password App",
+      "settotp": "Setup Dynamic Password",
       "samepwd": "The new password cannot be the same as the old password.",
       "enhphone": "Set a mobile phone number to receive verification codes, system messages, etc.",
       "enhtotp": "Enhance account security with dynamic password.",
@@ -121,7 +123,13 @@
       "pecemail": "Please enter correct email.",
       "pedemail": "Please enter a different email.",
       "2fa": "Two-Factor Authentication",
-      "enh2fa": "Use two-step verification (2FA) to enhance account security, include SMS verification, email verification and dynamic password verification."
+      "enh2fa": "Use two-step verification (2FA) to enhance account security, include SMS verification, email verification and dynamic password verification.",
+      "scanQRCode": "Scan QR code with authentication APP",
+      "scanQRCodeHint": "After scanning the QR code, you will get a 6-digit verification code. Haven't installed the authentication APP yet?",
+      "downloadApp": "Click here to download",
+      "enterVerificationCode": "Enter 6-digit verification code",
+      "enterVerificationCodeHint": "Enter the 6-digit verification code displayed in the APP below to activate your dynamic password verification service.",
+      "2faWarning": "To enable two-factor authentication, please set up at least one of the following: mobile phone number, email, or dynamic password"
     },
     "profile": {
       "_title": "My Profile"
@@ -135,11 +143,31 @@
         "_title": "Roles"
       },
       "resource": {
-        "_title": "Resources"
+        "_title": "Resources",
+        "all": "All",
+        "pagesOnly": "Pages Only",
+        "pagesAndFunctions": "Pages + Functions",
+        "pagesAndData": "Pages + Data",
+        "searchPlaceholder": "Enter keywords to search",
+        "noMatchingData": "No matching data found.",
+        "clearSearchKeywords": "Clear search keywords",
+        "resourceEditor": "Resource Editor",
+        "name": "Name",
+        "code": "Code",
+        "type": "Type",
+        "page": "Page",
+        "function": "Function",
+        "data": "Data",
+        "nameRequired": "Name is required",
+        "nameDuplicate": "Name already exists",
+        "codeRequired": "Code is required",
+        "codeDuplicate": "Code already exists, please change",
+        "copyToClipboard": "Click to copy to clipboard",
+        "addSubResource": "Add sub-resource"
       }
     },
     "org": {
-      "_title": "Org Structure"
+      "_title": "Organization"
     }
   }
 }

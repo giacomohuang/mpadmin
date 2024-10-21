@@ -8,7 +8,6 @@ export const org = {
     })
   },
   get(id) {
-    console.log('get', id)
     return fetch({
       data: { _id: id },
       url: '/org/get',
@@ -45,7 +44,7 @@ export const org = {
   },
   remove(path) {
     return fetch({
-      data: JSON.stringify({ path: path }),
+      data: { path: path },
       url: '/org/remove',
       method: 'post'
     })

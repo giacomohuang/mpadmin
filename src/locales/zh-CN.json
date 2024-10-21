@@ -19,6 +19,8 @@
     "action": "动作",
     "status": "状态",
     "all": "全部",
+    "save": "保存",
+    "cancel": "取消",
     "components": {
       "pwdstrength": {
         "weak": "很弱",
@@ -92,7 +94,7 @@
       "auth": "身份验证",
       "email": "电子邮件",
       "mobi": "手机号码",
-      "totp": "动态口令App",
+      "totp": "动态口令",
       "emailad": "电子邮件",
       "svcode": "发送验证码",
       "edit": "修改",
@@ -121,7 +123,13 @@
       "pecemail": "请输入正确的电子邮件地址",
       "pedemail": "请输入与之前不同的电子邮件地址",
       "2fa": "两步验证",
-      "enh2fa": "使用两步验证(2FA)增强账户安全，验证方式包括短信验证码、邮件验证码和动态口令验证"
+      "enh2fa": "使用两步验证(2FA)增强账户安全，验证方式包括短信验证码、邮件验证码和动态口令验证",
+      "scanQRCode": "使用验证APP扫描二维码",
+      "scanQRCodeHint": "扫描验证码后，将得到一组6位数字验证码。还没有安装验证APP？",
+      "downloadApp": "点击这里下载",
+      "enterVerificationCode": "输入6位验证码",
+      "enterVerificationCodeHint": "在下面的框中输入APP中显示的6位验证码来激活你的动态口令验证服务。",
+      "2faWarning": "要使两步验证生效，请先设置手机号码、电子邮件或动态口令其中一项"
     },
     "profile": {
       "_title": "我的资料"
@@ -135,10 +143,27 @@
         "_title": "角色"
       },
       "resource": {
-        "_title": "资源"
-      },
-      "aaa": {
-        "_title": "认证授权"
+        "_title": "资源",
+        "all": "全部",
+        "pagesOnly": "仅页面",
+        "pagesAndFunctions": "页面+功能",
+        "pagesAndData": "页面+数据",
+        "searchPlaceholder": "输入关键词搜索",
+        "noMatchingData": "没有符合条件的数据。",
+        "clearSearchKeywords": "清除搜索关键词",
+        "resourceEditor": "资源编辑器",
+        "name": "名称",
+        "code": "编码",
+        "type": "类型",
+        "page": "页面",
+        "function": "功能",
+        "data": "数据",
+        "nameRequired": "名称不能为空",
+        "nameDuplicate": "重名了",
+        "codeRequired": "编码不能为空",
+        "codeDuplicate": "编码已存在，请更换",
+        "copyToClipboard": "点击复制到剪贴板",
+        "addSubResource": "添加子资源"
       }
     },
 

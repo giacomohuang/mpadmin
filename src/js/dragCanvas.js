@@ -65,7 +65,7 @@ class Drag {
       }
     }
     function up() {
-      console.log('move.js:mouseup')
+      // console.log('move.js:mouseup')
       // ev && ev.preventDefault()
       // ev.stopPropagation()
       t.move = false

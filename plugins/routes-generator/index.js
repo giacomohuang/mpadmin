@@ -1,13 +1,9 @@
-import { parse } from '@vue/compiler-sfc'
 import fs from 'fs'
 import fg from 'fast-glob'
 import cors from 'cors'
 import getEtag from 'etag'
 import chokidar from 'chokidar'
 import { resolve } from 'path'
-import json5 from 'json5'
-import path from 'path'
-import { get } from 'http'
 import { normalizePath } from 'vite'
 
 export default function routesGeneratorPlugin() {
@@ -22,7 +18,6 @@ export default function routesGeneratorPlugin() {
       middlewares.use(async (req, res, next) => {
         const url = normalizePath(req.url)
         if (url.includes(virtualModuleId)) {
-          // console.log(url)
           res.setHeader('Content-Type', 'application/javascript')
           res.setHeader('Cache-Control', 'no-cache')
           const content = `export default ${getCode()}`
@@ -76,93 +71,79 @@ function getCode() {
   let globs = fg.sync(`${viewsPath}/**/*.vue`, { ignore: [`${viewsPath}/*.vue`] })
   globs.forEach((f) => {
     let file = f.replace(viewsPath, '')
-    let dir = getDir(file)
-    // console.log(dir)
-    if (!dirSet.has(dir)) {
-      dirSet.add(dir)
-      vueFiles.push('/' + dir + '/')
-    }
     vueFiles.push(file)
   })
   vueFiles = vueFiles.sort()
-  // console.log(vueFiles)
-  // vueFiles = ['/Account/', '/Account/Account.vue', '/Account/AccountList.vue', '/Account/Asc/', '/Account/Asc/aaa.vue', '/Account/Asc/bbb.vue', '/Account/Permission.vue', '/My/', '/My/Main.vue']
 
-  let index = -1
-  let curDir = ''
-  let routeJson = []
+  let routeJson = generateRoutes(vueFiles)
 
-  routeJson = getRouteMap([])
-  // console.log('-------------------')
   const routeStr = JSON.stringify(routeJson, null, '  ').replace(/"(\(\) => import\([\s\S]*?\))"/gm, '$1')
-  // console.log(routeStr)
   console.log('router has been generated.')
   return routeStr
+}
 
-  function getRouteMap(json) {
-    index++
-    if (index > vueFiles.length - 1) return json
-    if (!json) json = []
-    const file = vueFiles[index]
+function generateRoutes(files) {
+  let routes = []
+  let map = {}
 
-    // 从vue文件的<router>标签中获取用户自定义的路由信息
-    if (file.endsWith('.vue')) {
-      const fullPath = resolve(viewsPath + file)
+  files.forEach((file) => {
+    const fullPath = resolve('./src/views' + file)
+    const content = fs.readFileSync(fullPath, 'utf-8')
+    const routerRegex = /<router\s+lang="json">([\s\S]*?)<\/router>/
+    const match = content.match(routerRegex)
 
-      const content = fs.readFileSync(fullPath, 'utf-8')
-      const routerRegex = /<router[\s\S]*>([\s\S]*?)<\/router>/
-      const match = content.match(routerRegex)
-      if (match) {
-        const routerJson = JSON.parse(match[1])
-        // console.log(routerJson)
-        if (!routerJson.isMenu) return getRouteMap(json)
+    if (match) {
+      const routerJson = JSON.parse(match[1])
+      if (routerJson.isRouter === false) {
+        return // 跳过这个文件，不生成路由
       }
     }
-    //
-    const dir = getDir(file).toLowerCase()
-    const p = file.replace(/\/$/, '').replace('.vue', '').toLowerCase()
-    if (index === 0) curDir = dir
-    let j = {}
-    j.path = p.replace(/\[[\d]+\]/g, '')
-    j.name = p
-      .replace(/^\//, '')
-      .replace(/\//g, '-')
-      .replace(/\[[\d]+\]/g, '')
-    j.meta = { title: j.name.replace(/-/g, '.') + '._title' }
 
-    if (!dir.includes(curDir)) {
-      curDir = dir
-      index--
-      return json
-    }
-    curDir = dir
-    if (isDir(file)) {
-      // console.log(getDepth)
-      if (getDepth(dir) == 1) {
-        j.path = ''
-        j.component = `() => import('/src/views/Layout.vue')`
+    let path = file.replace('.vue', '').toLowerCase()
+    let parts = path.split('/').filter(Boolean)
+    let currentLevel = routes
+    let currentPath = ''
+
+    parts.forEach((part, index) => {
+      currentPath += '/' + part
+      if (!map[currentPath]) {
+        let route = {
+          path: currentPath,
+          name: parts.slice(0, index + 1).join('-'),
+          meta: { title: parts.slice(0, index + 1).join('.') + '._title' }
+        }
+
+        if (index === parts.length - 1) {
+          route.component = `() => import('/src/views${file}')`
+        } else if (index === 0) {
+          route.component = `() => import('/src/views/Layout.vue')`
+          delete route.path
+          route.children = []
+        } else {
+          route.children = []
+        }
+
+        if (index === 0) {
+          currentLevel.push(route)
+        } else {
+          let parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'))
+          let parent = map[parentPath]
+          if (parent && parent.children) {
+            parent.children.push(route)
+          }
+        }
+
+        map[currentPath] = route
+
+        if (route.children) {
+          currentLevel = route.children
+        }
+      } else {
+        currentLevel = map[currentPath].children || []
+        map[currentPath].children = currentLevel
       }
-      j.children = getRouteMap([])
-    } else {
-      j.component = `() => import('/src/views${file}')`
-    }
-    json.push(j)
-    return getRouteMap(json)
-  }
-}
+    })
+  })
 
-function isDir(path) {
-  return !path.endsWith('.vue')
-}
-
-function getDir(file) {
-  const regex = /\/([\s\S]*)\//g
-  const match = regex.exec(file)
-  if (match) {
-    return match[1]
-  }
-}
-
-function getDepth(path) {
-  return path.split('/').length
+  return routes
 }

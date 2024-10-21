@@ -7,18 +7,14 @@
           <icon :name="RESTYPE[resource.type].type" :class="RESTYPE[resource.type].style" size="2em"></icon>
           <span class="resource-name">{{ resource.name }}</span>
           <span class="tag red">{{ resource.id }}</span>
-          <!-- 
-          <span class="tag green">pid:{{ resource.pid }}</span>
-          <span class="tag red">order:{{ resource.order }}</span> 
-          -->
-          <span v-if="resource.code" class="tag gray clickable-item mr-2 cursor-pointer" title="点击复制到剪贴板" @click="copyToClipBoard($event, resource.code)">
+          <span v-if="resource.code" class="tag gray clickable-item mr-2 cursor-pointer" :title="$t('sys.permission.resource.copyToClipboard')" @click="copyToClipBoard($event, resource.code)">
             {{ resource.code }}
           </span>
         </div>
         <div class="tools flex items-center">
-          <icon name="edit" size="1.8em" class="edit" @click="openEditor(resource, EDITOR_MODE.EDIT)" />
-          <icon v-if="resource.type === 1" size="1.8em" name="add" class="add" @click="openEditor(resource, EDITOR_MODE.ADD)" />
-          <icon name="del" size="1.8em" class="del" @click="confirm(resource.path, resource.pid)" />
+          <icon name="edit" size="1.8em" class="edit" @click="openEditor(resource, EDITOR_MODE.EDIT)" :title="$t('common.edit')" />
+          <icon v-if="resource.type === 1" size="1.8em" name="add" class="add" @click="openEditor(resource, EDITOR_MODE.ADD)" :title="$t('sys.permission.resource.addSubResource')" />
+          <icon name="del" size="1.8em" class="del" @click="confirm(resource.path, resource.pid)" :title="$t('common.del')" />
         </div>
       </div>
       <ResourceList v-show="!collapseIds.has(resource.id)" :data="resource.children" @open="openEditor" @remove="confirm" @toggleCollapse="toggleCollapse" />
@@ -28,12 +24,12 @@
 
 <router lang="json">
 {
-  "isMenu": false
+  "isRouter": false
 }
 </router>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, inject } from 'vue'
+import { inject } from 'vue'
 
 const { data } = defineProps(['data'])
 const EDITOR_MODE = { ADD: 1, EDIT: 2 }

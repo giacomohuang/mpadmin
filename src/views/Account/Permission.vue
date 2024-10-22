@@ -14,8 +14,14 @@
   <a-button v-if="!loading" @click="calcPermissionBits">计算</a-button>
 </template>
 
+<router lang="json">
+{
+  "isRouter": false
+}
+</router>
+
 <script setup>
-import { ref, reactive, watch, onBeforeMount, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import API from '../../api/API'
 // import { permission } from '../../api/permission'
 

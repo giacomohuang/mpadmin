@@ -117,7 +117,7 @@ function generateRoutes(files) {
           route.component = `() => import('/src/views${file}')`
         } else if (index === 0) {
           route.component = `() => import('/src/views/Layout.vue')`
-          delete route.path
+          route.path = '/404'
           route.children = []
         } else {
           route.children = []

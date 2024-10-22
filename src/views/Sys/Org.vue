@@ -58,7 +58,7 @@
 </template>
 
 <script setup>
-import { defineComponent, provide, onMounted, ref, nextTick, reactive } from 'vue'
+import { defineComponent, provide, onMounted, ref, nextTick, reactive, onUnmounted } from 'vue'
 
 import OrgNode from './OrgNode.vue'
 import Drag from '@/js/dragCanvas'
@@ -430,18 +430,28 @@ const submitForm = async () => {
   }
 }
 
+let dragInstance = null
+
 onMounted(async () => {
   const orgRes = await API.org.list()
   orgMap.value = new Map(orgRes.map((item) => [item.id, item]))
   roleList.value = await API.permission.role.list(null)
   buildTree()
   orgDnD.init()
-  const container = document.querySelector('.main')
-  new PerfectScrollbar(container)
-  new Drag(document.querySelector('.ps'))
+  new PerfectScrollbar('.main')
+  dragInstance = new Drag(document.querySelector('.main'))
   nextTick(() => {
     center()
   })
+})
+
+onUnmounted(() => {
+  if (orgDnD) {
+    orgDnD.destroy()
+  }
+  if (dragInstance) {
+    dragInstance.destroy()
+  }
 })
 </script>
 
@@ -452,7 +462,7 @@ onMounted(async () => {
   overflow: hidden !important;
   position: relative;
   cursor: grab;
-  max-width: calc(100vw - 270px);
+  // max-width: calc(100vw - 270px);
   max-height: calc(100vh - 65px);
   background-image: radial-gradient(circle, var(--border-tertiary) 0.5px, transparent 0.5px);
   background-size: 15px 15px;

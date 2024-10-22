@@ -1,15 +1,12 @@
 <template>
   <RouterLink custom :to="item.path" v-slot="{ isActive, href, navigate }" v-for="(item, index) in props.data" :key="index">
     <template v-if="item.children">
-      <div @click="toggle_children" class="m-0 flex h-9 w-36 cursor-pointer items-center pl-3 text-primary visited:text-primary" :class="{ 'sub-active': isActive }">
-        {{ $t(item.meta.title) }}
-        <Icon name="arrow-down" size="2em" class="arrow"></Icon>
-      </div>
-      <div class="sub">
+      <div @click="toggle_children" class="submenu-item submenu-parent" :class="{ 'sub-active': isActive }"><span class="arrow"></span> {{ $t(item.meta.title) }}</div>
+      <div class="submenu-children">
         <SubMenu :data="item.children"></SubMenu>
       </div>
     </template>
-    <a v-else :class="['m-0 flex h-9 w-36 cursor-pointer items-center pl-3 text-primary visited:text-primary', { 'sub-active': isActive }]" :href="href" @click="navigate">{{ $t(item.meta.title) }}</a>
+    <a v-else :class="['submenu-item', { 'sub-active': isActive }]" :href="href" @click="navigate"> <span class="dot"></span>{{ $t(item.meta.title) }} </a>
   </RouterLink>
 </template>
 
@@ -40,48 +37,103 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-// .item {
-//   font-size: 14px;
-//   display: flex;
-//   width: 144px;
-//   height: 35px;
-//   padding: 0 0 0 12px;
-//   align-items: center;
-//   margin: 0;
-//   color: var(--text-primary);
-//   cursor: pointer;
-//   &:hover,
-//   &:active {
-//     background: var(--bg-component-active);
-//   }
-// }
+.submenu-item {
+  display: flex;
+  align-items: center;
+  width: 180px;
+  height: 36px;
+  padding-left: 12px;
+  margin: 0;
+  color: var(--text-primary);
+  cursor: pointer;
 
-.sub {
+  .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &::before {
+      content: '';
+      position: relative;
+      display: block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      transition: all 0.1s ease;
+      // margin-right: 10px;
+    }
+  }
+
+  &:hover,
+  &:active {
+    // font-weight: 600;
+    .dot::before {
+      width: 10px;
+      height: 10px;
+      background: var(--c-brand-400);
+    }
+  }
+
+  @keyframes breathing {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(5);
+      opacity: 0.2;
+    }
+    100% {
+      transform: scale(5);
+      opacity: 0;
+    }
+  }
+}
+
+.submenu-children {
   display: none;
-  .item {
+
+  .submenu-item {
     padding-left: 24px;
   }
 }
 
-.children {
-  display: none;
-}
-
 .arrow {
-  transition:
-    cubic-bezier(0.645, 0.045, 0.355, 1),
-    transform 0.15s;
-}
-
-.expand {
-  transform: rotate(180deg);
-  transition:
-    cubic-bezier(0.645, 0.045, 0.355, 1),
-    transform 0.15s;
+  transition: transform 0.15s cubic-bezier(0.645, 0.045, 0.355, 1);
+  width: 18px;
+  height: 20px;
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  left: -4px;
+  &.expand {
+    transform: rotate(90deg);
+  }
+  &:before {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 6px;
+    height: 6px;
+    // left: -5px;
+    border-top: 2px solid var(--border-tertiary);
+    border-right: 2px solid var(--border-tertiary);
+    transform: rotate(45deg);
+  }
 }
 
 .sub-active {
   font-weight: 600;
-  color: var(--text-primary-active);
+  color: var(--text-primary);
+  .dot::before {
+    width: 10px;
+    height: 10px;
+    background: var(--c-brand-400);
+  }
 }
 </style>

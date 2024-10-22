@@ -1,11 +1,11 @@
 <template>
   <!-- <ul class="group" v-draggable="[data, { animation: 100, onAdd: onAdd, onUpdate: onUpdate, onMove: onMove, handle: '.title', ghostClass: 'ghost', disabled: is_drag_disabled, chosenClass: 'chosen', group: { name: level == 0 ? 'root' : 'children' } }]"> -->
   <ul class="group">
-    <li v-for="item in data" class="wrapper" :class="{ draggable: level != 1, root: level == 1 }" @mousedown.stop="" :key="item.id" :data-id="item.id">
-      <div class="node" :class="['level' + (level % 10), { 'is-hover': cur_id === item.id }]" :draggable="item.pid != null" @mouseover="changeCurId(item.id)" @mouseout="cur_id = null" @click.stop="openEditor(item)">
+    <li v-for="item in data" class="wrapper" :class="{ draggable: level != 1, root: level == 1 }" :key="item.id" :data-id="item.id">
+      <div class="node" :class="['level' + (level % 10), { 'is-hover': cur_id === item.id }]" :draggable="item.pid != null" @mousedown.stop="" @mouseover="changeCurId(item.id)" @mouseout="cur_id = null" @click.stop="openEditor(item)">
         <div class="title">
           <div class="inputbox">
-            <input v-model="item.name" @mousedown.stop="" @click.stop="" @mouseup.stop="" />
+            <input v-model="item.name" />
             <div class="clear" @click.stop="clearText($event, item)"><icon name="remove" size="1em"></icon></div>
           </div>
 

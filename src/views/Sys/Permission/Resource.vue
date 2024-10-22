@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <div class="flex w-[800px] rounded-md border border-primary">
+    <div class="flex w-[800px] rounded-md border border-primary bg-primary">
       <div class="border-r border-primary">
         <div class="sticky top-0">
           <ul ref="rootsRef">

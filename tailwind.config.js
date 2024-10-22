@@ -84,7 +84,7 @@ export default {
         tertiary: 'var(--text-tertiary)'
       },
       backgroundColor: {
-        primary: 'rgb(var(--bg-primary) / <alpha-value>)',
+        primary: 'var(--bg-primary)',
         secondary: 'var(--bg-secondary)'
       }
     }

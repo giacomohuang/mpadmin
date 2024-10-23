@@ -2,14 +2,12 @@
   <div class="layout">
     <header class="header">
       <div class="logo-container">
-        <a href="/" class="logo-link">
+        <a @click="router.push('/')" class="logo-link">
           <img src="@/assets/logo.png" class="logo-image" />
           <div class="app-name">{{ $t('common.appname') }}</div>
         </a>
       </div>
-      <div class="page-title">
-        {{ $t($route.meta.title) }}
-      </div>
+      <div class="page-title">{{ $t($route.meta.title) }}</div>
       <div class="user-dropdown">
         <a-dropdown>
           <a @click.prevent class="user-info">
@@ -18,9 +16,7 @@
               <span class="real-name">
                 {{ store.realname }}
               </span>
-              <span class="account-name">
-                {{ store.accountname }}
-              </span>
+              <span class="account-name"> {{ store.accountname }}</span>
             </div>
           </a>
           <template #overlay>
@@ -51,7 +47,7 @@
         <Icon name="theme-dark" size="2em" class="icon" @click="store.changeTheme('dark')" :class="{ 'active-dark': store.theme === 'dark' }"></Icon>
         <Icon name="theme-system" size="2em" class="icon" @click="store.changeTheme('system')" :class="{ 'active-system': store.theme === 'system' }"></Icon>
       </div>
-      <div class="assistant-icon"><img src="@/assets/assistant.png" width="20px" height="20px" @click="showAssistant = !showAssistant" /></div>
+      <div class="assist-icon"><img src="@/assets/assist.png" width="20px" height="20px" @click="showAssist = !showAssist" /></div>
     </header>
     <aside class="menu">
       <div style="display: flex; align-items: center; justify-content: center; margin: 10px">
@@ -74,7 +70,7 @@
       <a-spin :spinning="globalLoading" style="margin: 20px"></a-spin>
       <router-view />
     </div>
-    <aside class="assist" v-show="showAssistant">
+    <aside class="assist" v-show="showAssist">
       <div class="assist-header">
         <Icon name="assist" size="2em"></Icon>
       </div>
@@ -101,7 +97,7 @@ const store = useStore()
 const route = useRoute()
 const { accountname, accountid, realname, locale } = toRefs(store)
 
-const showAssistant = ref(false)
+const showAssist = ref(false)
 const miniMenu = ref(false)
 
 const accountInfo = helper.decodeToken()
@@ -216,10 +212,15 @@ onUnmounted(() => {
   display: grid;
   grid-template-areas:
     'header header header header'
-    'menu submenu main assistant';
+    'menu submenu main assist';
   grid-template-columns: auto auto 1fr auto;
   grid-template-rows: 64px 1fr;
   height: 100vh;
+  max-height: 100vh;
+  min-width: 100vw;
+  overflow: hidden;
+
+  // max-width: 100vw;
 }
 
 .header {
@@ -258,6 +259,8 @@ onUnmounted(() => {
   .page-title {
     flex-grow: 1;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 18px;
     color: var(--text-primary);
     padding-left: 20px;
@@ -280,10 +283,10 @@ onUnmounted(() => {
 
       .user-name {
         display: flex;
+        max-width: 200px;
 
         .real-name,
         .account-name {
-          max-width: 80px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -338,7 +341,12 @@ onUnmounted(() => {
     }
   }
 
-  .assistant-icon {
+  .assist-icon {
+    display: none;
+    flex-shrink: 0;
+    @media (min-width: 768px) {
+      display: block;
+    }
     margin-left: 12px;
     cursor: pointer;
   }
@@ -452,7 +460,7 @@ onUnmounted(() => {
 
 .assist {
   position: relative;
-  grid-area: assistant;
+  grid-area: assist;
   width: 400px;
   background-color: var(--bg-primary);
   border-left: 1px solid var(--border-light);
@@ -472,9 +480,7 @@ onUnmounted(() => {
 .main-content {
   position: relative;
   grid-area: main;
-  overflow-y: auto;
+  overflow: auto;
   background-color: var(--bg-secondary);
-  /* padding: 20px; */
-  /* overflow: hidden; */
 }
 </style>

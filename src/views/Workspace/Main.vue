@@ -19,12 +19,12 @@
 </route>
 
 <script setup>
-import { ref, inject, onMounted, reactive } from 'vue'
+import { ref } from 'vue'
 import CryptoJS from 'crypto-js'
 // import SparkMD5 from 'spark-md5'
 import API from '../../api/API'
 import FetchEventSource from '../../api/fetcheventsource'
-import pLimit from 'p-limit'
+
 const aaa = ref('')
 
 // OpenAI test

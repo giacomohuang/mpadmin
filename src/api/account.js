@@ -1,6 +1,5 @@
 import fetch from './fetch'
 import baseUrl from './baseUrl'
-import { get } from '@/components/PerfectScrollerBar/lib/css'
 
 const account = {
   getPermissions(uid) {

@@ -6,9 +6,12 @@ import chokidar from 'chokidar'
 import { resolve } from 'path'
 import { normalizePath } from 'vite'
 
-export default function routesGeneratorPlugin() {
+// 修改插件函数定义，接受配置对象作为参数
+export default function routesGeneratorPlugin(options = {}) {
   const virtualModuleId = 'virtual:router'
   const resolvedVirtualModuleId = '\0' + virtualModuleId
+  // 设置 layoutDir 的默认值
+  const layoutDir = options.layoutDir || '/src/views/Layout.vue'
 
   return {
     name: 'routes-generator-plugin', // 必须的，将会在 warning 和 error 中显示
@@ -20,7 +23,7 @@ export default function routesGeneratorPlugin() {
         if (url.includes(virtualModuleId)) {
           res.setHeader('Content-Type', 'application/javascript')
           res.setHeader('Cache-Control', 'no-cache')
-          const content = `export default ${getCode()}`
+          const content = `import Layout from '${layoutDir}'\nexport default ${getCode(layoutDir)}`
           res.setHeader('Etag', getEtag(content, { weak: true }))
           res.statusCode = 200
           res.end(content)
@@ -64,7 +67,8 @@ export default function routesGeneratorPlugin() {
   }
 }
 
-function getCode() {
+// 修改 getCode 函数，传入 layoutDir 参数
+function getCode(layoutDir) {
   const viewsPath = './src/views'
   let vueFiles = []
   let dirSet = new Set()
@@ -75,14 +79,17 @@ function getCode() {
   })
   vueFiles = vueFiles.sort()
 
-  let routeJson = generateRoutes(vueFiles)
+  let routeJson = generateRoutes(vueFiles, layoutDir)
 
-  const routeStr = JSON.stringify(routeJson, null, '  ').replace(/"(\(\) => import\([\s\S]*?\))"/gm, '$1')
+  const routeStr = JSON.stringify(routeJson, null, '  ')
+    .replace(/"(\(\) => import\([\s\S]*?\))"/gm, '$1')
+    .replace(/"Layout"/g, 'Layout')
   console.log('router has been generated.')
   return routeStr
 }
 
-function generateRoutes(files) {
+// 修改 generateRoutes 函数，接受 layoutDir 参数
+function generateRoutes(files, layoutDir) {
   let routes = []
   let map = {}
 
@@ -116,7 +123,8 @@ function generateRoutes(files) {
         if (index === parts.length - 1) {
           route.component = `() => import('/src/views${file}')`
         } else if (index === 0) {
-          route.component = `() => import('/src/views/Layout.vue')`
+          // 使用传入的 layoutDir 参数
+          route.component = 'Layout'
           route.path = '/404'
           route.children = []
         } else {

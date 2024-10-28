@@ -32,7 +32,7 @@ export default defineConfig({
     }
   },
   plugins: [
-    routesGeneratorPlugin(),
+    routesGeneratorPlugin({ layoutDir: '/src/views/Layout.vue' }),
     vue(),
 
     Components({

@@ -1,7 +1,7 @@
 <template>
   <div class="radial-gradient flex h-screen w-screen items-start justify-center">
     <context-holder />
-    <header class="absolute left-0 right-0 z-20 flex h-16 items-center bg-primary/50 px-3">
+    <header class="bg-primary/50 absolute left-0 right-0 z-20 flex h-16 items-center px-3">
       <div class="shrink-0 flex-grow whitespace-nowrap px-5">
         <a href="/" class="flex">
           <img src="@/assets/logo.png" class="mr-4 h-6 w-6" />
@@ -26,7 +26,7 @@
         <Icon name="theme-system" size="2em" class="icon" @click="store.changeTheme('system')" :class="{ 'text-black': store.theme === 'system' }"></Icon>
       </div>
     </header>
-    <section class="mt-60 block w-[500px] rounded border-primary bg-primary/50 p-10 backdrop-blur" v-if="state.method === 'pwd'">
+    <section class="bg-primary/50 mt-60 block w-[500px] rounded border-primary p-10 backdrop-blur" v-if="state.method === 'pwd'">
       <a-form :model="signinForm" @finish="handleSignin" autocomplete="off" :label-col="{ span: 6 }">
         <h3 class="mx-auto mb-5 text-xl text-primary">{{ $t('signin.title') }}</h3>
         <a-form-item :label="$t('signin.accountname')" name="accountname" :rules="[{ required: true, message: $t('signin.peya') }]">
@@ -44,7 +44,7 @@
       <!-- <div style="margin: 0 0 0 90px; font-size: 12px">30天内没有访问将重新登录</div> -->
     </section>
 
-    <section class="mt-60 block w-[500px] rounded border-primary bg-primary/50 p-10 backdrop-blur" v-if="state.method == 'totp'">
+    <section class="bg-primary/50 mt-60 block w-[500px] rounded border-primary p-10 backdrop-blur" v-if="state.method == 'totp'">
       <h3 class="m-2 flex items-center text-lg font-semibold text-primary">使用动态口令App进行两步验证</h3>
       <div class="m-3 text-sm/normal text-primary" style="margin-top: 40px">请查看动态口令App中的6位动态数字口令，并在下面的的框中输入</div>
       <VerifyInput style="width: 100%" class="flex items-center justify-center" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
@@ -55,7 +55,7 @@
       </div>
     </section>
 
-    <section class="mt-60 block w-[500px] rounded border-primary bg-primary/50 p-10 backdrop-blur" v-if="state.method == 'email'">
+    <section class="bg-primary/50 mt-60 block w-[500px] rounded border-primary p-10 backdrop-blur" v-if="state.method == 'email'">
       <h3 class="m-2 flex items-center text-lg font-semibold text-primary">使用电子邮件进行两步验证</h3>
       <div class="flex items-center justify-center" style="margin-top: 40px">
         <h4 class="ml-5 p-0 text-lg/none">{{ helper.obfuscate('email', state.email) }}</h4>
@@ -73,7 +73,7 @@
       </div>
     </section>
 
-    <section class="mt-60 block w-[500px] rounded border-primary bg-primary/50 p-10 backdrop-blur" v-if="state.method == 'phone'">
+    <section class="bg-primary/50 mt-60 block w-[500px] rounded border-primary p-10 backdrop-blur" v-if="state.method == 'phone'">
       <h3 class="m-2 flex items-center text-lg font-semibold text-primary">使用手机短信进行两步验证</h3>
       <div class="flex items-center justify-center" style="margin-top: 40px">
         <h4 class="ml-5 p-0 text-lg/none">{{ helper.obfuscate('phone', state.phone) }}</h4>
@@ -91,7 +91,7 @@
       </div>
     </section>
 
-    <section class="mt-60 block w-[500px] rounded border-primary bg-primary/50 p-10 backdrop-blur" v-if="state.method == 'initPwd'">
+    <section class="bg-primary/50 mt-60 block w-[500px] rounded border-primary p-10 backdrop-blur" v-if="state.method == 'initPwd'">
       <h3 class="m-2 flex items-center text-lg font-semibold text-primary">需要更新密码</h3>
       <div class="m-3 text-sm/normal text-primary">首次登录或长时间没有修改密码，需要重新设置密码</div>
       <a-form ref="pwdFormRef" style="margin-top: 30px" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" @finish="handleInitPwd">
@@ -109,7 +109,7 @@
       </a-form>
     </section>
 
-    <section class="mt-60 block w-[500px] rounded border-primary bg-primary/50 p-10 backdrop-blur" v-if="state.method == 'resetPwd'">
+    <section class="bg-primary/50 mt-60 block w-[500px] rounded border-primary p-10 backdrop-blur" v-if="state.method == 'resetPwd'">
       <h3 class="m-2 flex items-center text-lg font-semibold text-primary">重置密码</h3>
       使用以下方式接收临时密码，使用临时密码登录后，再设置新的密码。
       <a-form-item>
@@ -131,7 +131,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { router } from '@/router/router'
+import { useRouter } from 'vue-router'
 import { changeLocale } from '../js/i18n'
 import { useStore } from '@/stores/stores'
 import { message } from 'ant-design-vue'
@@ -143,7 +143,7 @@ import API from '../api/API'
 import PasswordStrength from '../components/PasswordStrength.vue'
 
 const store = useStore()
-
+const router = useRouter()
 const state = reactive({
   loading: false,
   activationUrl: '',

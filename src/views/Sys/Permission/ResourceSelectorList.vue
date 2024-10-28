@@ -29,8 +29,8 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, inject } from 'vue'
-import mpSwitch from '@/components/Headless/mpSwitch.vue'
-import mpCheckbox from '@/components/Headless/mpCheckbox.vue'
+import mpSwitch from '@/components/mpSwitch.vue'
+import mpCheckbox from '@/components/mpCheckbox.vue'
 
 const { data, pidEnabled } = defineProps(['data', 'pidEnabled']),
   emits = defineEmits(['toggleCollapse', 'toggleSelect']),

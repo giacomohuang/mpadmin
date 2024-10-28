@@ -1,9 +1,8 @@
 <template>
-  <div class="main">
-    <div id="canvas">
+  <div class="main" data-simplebar>
+    <div class="canvas">
       <div id="scaler">
         <div id="nodes" ref="orgRef">
-          <!-- <div style="position: fixed; top: 0">{{ cur_id }}</div> -->
           <OrgNode :data="orgTree" :level="1" @add="add" @edit="edit" @remove="remove" @rename="rename" @openEditor="openEditor"></OrgNode>
         </div>
       </div>
@@ -63,11 +62,10 @@ import { defineComponent, provide, onMounted, ref, nextTick, reactive, onUnmount
 import OrgNode from './OrgNode.vue'
 import Drag from '@/js/dragCanvas'
 import API from '@/api/API'
-import PerfectScrollbar from '@/components/PerfectScrollerBar'
-import '@/assets/perfect-scrollbar.css'
+import 'simplebar'
+import 'simplebar/dist/simplebar.css'
 import { DnD } from '@/js/DnDTree'
 import { debounce } from 'lodash-es'
-
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -144,14 +142,10 @@ const edit = (id) => {
 
 // 重新计算画布大小，并居中内容
 const center = () => {
-  let scrollbar = document.querySelector('.ps')
-  let canvas = document.getElementById('canvas')
-  let nodes = document.getElementById('nodes')
+  let canvas = document.querySelector('.canvas')
+  let scrollbar = document.querySelector('.simplebar-content-wrapper')
 
   resizeCanvas()
-
-  canvas.style.paddingLeft = (canvas.offsetWidth - nodes.offsetWidth) / 2 + 'px'
-  canvas.style.paddingTop = (canvas.offsetHeight - nodes.offsetHeight) / 2 + 'px'
 
   scrollbar.scrollLeft = (canvas.offsetWidth - scrollbar.clientWidth) / 2
   scrollbar.scrollTop = (canvas.offsetHeight - scrollbar.clientHeight) / 2
@@ -159,10 +153,11 @@ const center = () => {
 
 // 重新计算画布大小
 const resizeCanvas = () => {
-  let canvas = document.getElementById('canvas')
+  let canvas = document.querySelector('.canvas')
   let nodes = document.getElementById('nodes')
   canvas.style.width = Math.max(nodes.offsetWidth, document.body.clientWidth) * 1.5 + 'px'
   canvas.style.height = Math.max(nodes.offsetHeight, document.body.clientHeight) * 1.5 + 'px'
+  console.log(canvas.style.width, canvas.style.height)
 }
 
 // 缩放画布
@@ -438,8 +433,7 @@ onMounted(async () => {
   roleList.value = await API.permission.role.list(null)
   buildTree()
   orgDnD.init()
-  new PerfectScrollbar('.main')
-  dragInstance = new Drag(document.querySelector('.main'))
+  dragInstance = new Drag(document.querySelector('.simplebar-content-wrapper'))
   nextTick(() => {
     center()
   })
@@ -459,11 +453,9 @@ onUnmounted(() => {
 .main {
   position: relative;
   display: block;
-  overflow: hidden !important;
-  position: relative;
+  overflow: auto;
   cursor: grab;
-  // max-width: calc(100vw - 270px);
-  max-height: calc(100vh - 65px);
+  height: calc(100vh - 65px);
   background-image: radial-gradient(circle, var(--border-tertiary) 0.5px, transparent 0.5px);
   background-size: 15px 15px;
   background-position: 20px 20px;
@@ -471,6 +463,9 @@ onUnmounted(() => {
 
 .canvas {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #scaler {
@@ -484,16 +479,6 @@ onUnmounted(() => {
   display: block;
   margin: 0;
   padding: 0;
-}
-
-#root {
-  margin: 0 auto;
-  padding: 0;
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100%;
 }
 
 #nodes {

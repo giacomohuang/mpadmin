@@ -1,8 +1,7 @@
 <template>
-  <!-- <ul class="group" v-draggable="[data, { animation: 100, onAdd: onAdd, onUpdate: onUpdate, onMove: onMove, handle: '.title', ghostClass: 'ghost', disabled: is_drag_disabled, chosenClass: 'chosen', group: { name: level == 0 ? 'root' : 'children' } }]"> -->
   <ul class="group">
     <li v-for="item in data" class="wrapper" :class="{ draggable: level != 1, root: level == 1 }" :key="item.id" :data-id="item.id">
-      <div class="node" :class="['level' + (level % 10), { 'is-hover': cur_id === item.id }]" :draggable="item.pid != null" @mousedown.stop="" @mouseover="changeCurId(item.id)" @mouseout="cur_id = null" @click.stop="openEditor(item)">
+      <div class="node" :class="['level' + (((level - 1) % 10) + 1), { 'is-hover': cur_id === item.id }]" :draggable="item.pid != null" @mousedown.stop="" @mouseover="changeCurId(item.id)" @mouseout="cur_id = null" @click.stop="openEditor(item)">
         <div class="title">
           <div class="inputbox">
             <input v-model="item.name" />
@@ -11,7 +10,6 @@
 
           <div class="name" @click.stop="editTitle($event, item)">
             <span>{{ item.id }}:{{ item.name }}</span>
-            <!-- <span>{{ item.name }}</span> -->
             <icon name="edit"></icon>
           </div>
 
@@ -27,7 +25,7 @@
           </div>
           <div class="num">1000人</div>
         </div>
-        <!-- <div>{{ item.fullname }}<br />{{ item.path }}<br />{{ item.order }},{{ item.needUpdate }}</div> -->
+
         <div class="handler">
           <!-- <div class="add top" v-if="level !== 1"><span class="btn" @click.stop="add(item, 'parent')"></span></div> -->
           <div class="add bottom"><span class="btn" @click.stop="add(item, 'child')"></span></div>

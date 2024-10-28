@@ -80,23 +80,20 @@
 
 <script setup>
 import { onMounted, ref, toRefs, provide, watch, onUnmounted, computed, nextTick } from 'vue'
-import { router } from '../router/router'
 import dynamicRoutes from 'virtual:router'
 import { changeLocale } from '../js/i18n'
 import SubMenu from './SubMenu.vue'
 import { useStore } from '../stores/stores'
 import helper from '../js/helper'
 import API from '../api/API'
-// import PerfectScrollbar from '@/components/PerfectScrollerBar'
-// import '@/assets/perfect-scrollbar.css'
-import { useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const globalLoading = ref(false)
 provide('globalLoading', globalLoading)
 const store = useStore()
-const route = useRoute()
 const { accountname, accountid, realname, locale } = toRefs(store)
-
+const router = useRouter()
+const route = useRoute()
 const showAssist = ref(false)
 const miniMenu = ref(false)
 
@@ -194,7 +191,6 @@ watch(miniMenu, (newValue) => {
 })
 
 onMounted(() => {
-  // new PerfectScrollbar('.main-content')
   // 初始化当前活动菜单
   if (activeMenuIndex.value !== -1) {
     currentMenuIdx.value = activeMenuIndex.value
@@ -344,11 +340,11 @@ onUnmounted(() => {
   .assist-icon {
     display: none;
     flex-shrink: 0;
+    margin-left: 12px;
+    cursor: pointer;
     @media (min-width: 768px) {
       display: block;
     }
-    margin-left: 12px;
-    cursor: pointer;
   }
 }
 
@@ -480,7 +476,8 @@ onUnmounted(() => {
 .main-content {
   position: relative;
   grid-area: main;
-  overflow: auto;
-  background-color: var(--bg-secondary);
+  overflow: hidden;
+  background-color: var(--bg-brand);
+  max-height: calc(100vh - 64px);
 }
 </style>

@@ -47,11 +47,12 @@ declare module 'vue' {
     ATextarea: typeof import('ant-design-vue/es')['Textarea']
     ATree: typeof import('ant-design-vue/es')['Tree']
     Icon: typeof import('./src/components/Icon.vue')['default']
-    MpCheckbox: typeof import('./src/components/Headless/mpCheckbox.vue')['default']
-    MpSwitch: typeof import('./src/components/Headless/mpSwitch.vue')['default']
+    MpCheckbox: typeof import('./src/components/mpCheckbox.vue')['default']
+    MpSwitch: typeof import('./src/components/mpSwitch.vue')['default']
     PasswordStrength: typeof import('./src/components/PasswordStrength.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SIcon: typeof import('./src/components/SIcon.vue')['default']
     VerifyInput: typeof import('./src/components/VerifyInput.vue')['default']
   }
 }

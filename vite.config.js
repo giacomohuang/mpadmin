@@ -32,9 +32,8 @@ export default defineConfig({
     }
   },
   plugins: [
-    routesGeneratorPlugin({ layoutDir: '/src/views/Layout.vue' }),
     vue(),
-
+    routesGeneratorPlugin({ layoutDir: path.resolve(process.cwd(), '/src/views/Layout.vue') }),
     Components({
       resolvers: [
         AntDesignVueResolver({

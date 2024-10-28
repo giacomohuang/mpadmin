@@ -3,10 +3,6 @@ import Layout from '@/views/Layout.vue'
 import helper from '../js/helper'
 import i18n, { loadLocaleData, getLocale } from '../js/i18n'
 import account from '../api/account'
-// import dynamicRoutes from 'virtual:routes'
-
-// routes[0].component().then(
-// import Layout1 from '@/views/Layout1.vue'
 
 export const router = createRouter({
   history: createWebHistory('/'),

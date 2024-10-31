@@ -48,23 +48,97 @@
           <a-radio :value="3" :checked="resourceType == 3">{{ $t('sys.permission.resource.data') }}</a-radio>
         </a-radio-group>
       </a-form-item>
+      <a-form-item :label="$t('sys.permission.resource.icon')" name="icon" v-if="resourceForm.type === 1">
+        <div class="flex items-center gap-2">
+          <a-input v-model:value="resourceForm.icon" placeholder="icon" style="display: none" />
+          <a-button @click="openIconSelect">
+            <Icon v-if="resourceForm.iconType == 1" :name="resourceForm.icon" :key="'t1-' + resourceForm.icon" />
+            <div class="custom-icon" v-else-if="resourceForm.iconType == 2" :style="{ maskImage: `url(${customIconUrlPrefix + resourceForm.icon})` }" :key="'t2-' + resourceForm.icon" />
+            <template v-else>{{ $t('sys.permission.resource.selectIcon') }}</template>
+          </a-button>
+        </div>
+      </a-form-item>
+      <a-form-item :label="$t('sys.permission.resource.linkType')" name="linkType" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren">
+        <a-radio-group v-model:value="resourceForm.linkType">
+          <a-radio :value="1" :checked="resourceForm.linkType == 1">{{ $t('sys.permission.resource.router') }}</a-radio>
+          <a-radio :value="2" :checked="resourceForm.linkType == 2">{{ $t('sys.permission.resource.url') }}</a-radio>
+        </a-radio-group>
+      </a-form-item>
+      <a-form-item :label="$t('sys.permission.resource.router')" name="link" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren && resourceForm.linkType == 1">
+        <a-select v-model:value="resourceForm.router" show-search :filter-option="false" optionLabelProp="name" :options="routerList.data" :fieldNames="{ label: 'name', value: 'path' }" @search="handleSearch">
+          <template #option="{ name, path }">
+            <div class="router-option">
+              <div class="name">{{ name }}</div>
+              <div class="path">{{ path }}</div>
+            </div>
+          </template>
+          <template #dropdownRender="{ menuNode: menu }">
+            <v-nodes :vnodes="menu" />
+            <div v-if="routerList.total > 1" style="padding: 16px 0; border-top: 1px solid var(--border-primary)">
+              <a-pagination v-model:current="routerList.page" :total="routerList.total" show-less-items simple @change="changePage" />
+            </div>
+          </template>
+          <template v-if="routerList.loading" #notFoundContent>
+            <a-spin size="small" />
+          </template>
+        </a-select>
+      </a-form-item>
+      <a-form-item :label="$t('sys.permission.resource.link')" name="link" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren && resourceForm.linkType == 2">
+        <a-input v-model:value="resourceForm.link" type="url" placeholder="https://" />
+      </a-form-item>
+      <a-form-item :label="$t('sys.permission.resource.target')" name="target" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren">
+        <a-radio-group v-model:value="resourceForm.target">
+          <a-radio :value="1">{{ $t('sys.permission.resource.currentPage') }}</a-radio>
+          <a-radio :value="2">{{ $t('sys.permission.resource.newPage') }}</a-radio>
+        </a-radio-group>
+      </a-form-item>
+      <a-form-item :label="$t('sys.permission.resource.isHidden')" name="isHidden" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren">
+        <a-switch v-model:checked="resourceForm.isHidden" />
+      </a-form-item>
       <a-form-item :wrapper-col="{ offset: 6 }">
         <a-button type="primary" html-type="submit">{{ $t('common.save') }}</a-button>
         <a-button type="link" @click="resourceEditor = false">{{ $t('common.cancel') }}</a-button>
       </a-form-item>
     </a-form>
   </a-drawer>
+  <a-modal :title="$t('sys.permission.resource.iconSelector')" v-model:open="iconSelectVisible" :footer="null" width="800px">
+    <IconSelect @iconSelect="handleIconSelect" />
+  </a-modal>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick, provide } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick, provide, defineComponent } from 'vue'
 import debounceRef from '@/js/debounceRef'
 import ResourceList from './ResourceList.vue'
 import API from '@/api/API'
 import { DnD } from '@/js/DnD.js'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import IconSelect from '@/components/IconSelect.vue'
 
 const { t } = useI18n()
+const customIconUrlPrefix = import.meta.env.VITE_SVGICON_URL_PREFIX
+console.log(customIconUrlPrefix)
+
+const VNodes = defineComponent({
+  props: {
+    vnodes: {
+      type: Object,
+      required: true
+    }
+  },
+  render() {
+    return this.vnodes
+  }
+})
+
+const routerList = reactive({
+  data: [],
+  loading: false,
+  page: 1,
+  total: 1,
+  keyword: ''
+})
 
 // 常量定义
 const EDITOR_MODE = { ADD: 1, EDIT: 2 }
@@ -72,7 +146,17 @@ const EDITOR_MODE = { ADD: 1, EDIT: 2 }
 // 响应式状态
 const resourceEditor = ref(false)
 const resourceFormRef = ref()
-const resourceForm = reactive({ type: 1 })
+const resourceForm = reactive({
+  type: 1,
+  name: null,
+  router: null,
+  link: null,
+  linkType: 1,
+  target: 1,
+  isHidden: false,
+  icon: null,
+  iconType: null
+})
 const isLoading = ref(false)
 const currentRootId = ref(null)
 const keywords = debounceRef('', 500)
@@ -258,8 +342,10 @@ const openEditor = (item, mode) => {
   editorMode = mode
   if (item) {
     currentResource.maxOrder = item.children?.length
+    currentResource.hasPageChildren = item.children?.some((child) => child.type === 1)
   } else {
     currentResource.maxOrder = roots.value.length
+    currentResource.hasPageChildren = false
   }
 
   // 新增模式
@@ -280,11 +366,74 @@ const openEditor = (item, mode) => {
     resourceForm.name = item.name
     resourceForm.code = item.code.split('.').pop()
     resourceForm.type = item.type
+    resourceForm.icon = item.icon
+    resourceForm.iconType = item.iconType
+
+    if (item.type === 1 && currentResource.hasPageChildren) {
+      resourceForm.router = null
+      resourceForm.link = null
+      resourceForm.linkType = null
+      resourceForm.target = 1
+      resourceForm.isHidden = false
+    } else {
+      resourceForm.router = item.router || ''
+      resourceForm.linkType = item.linkType || 1
+      resourceForm.link = item.link || ''
+      resourceForm.target = item.target || 1
+      resourceForm.isHidden = item.isHidden || false
+    }
+  }
+
+  console.log(item)
+
+  // 如果是页面类型且没有设置 router，尝试根据 name 自动匹配
+  if (resourceForm.type === 1 && !resourceForm.router && resourceForm.name) {
+    nextTick(() => {
+      const name = resourceForm.name?.toLowerCase()
+      if (name) {
+        // 在所有路由中查找最匹配的路由
+        const matchedRoute = routes.find((route) => {
+          const routeName = (route.name || '').toLowerCase()
+          const routePath = route.path.toLowerCase()
+          return routeName === name || routePath.includes(name)
+        })
+
+        if (matchedRoute) {
+          resourceForm.router = matchedRoute.path
+        }
+      }
+    })
+  }
+
+  if (resourceForm.router) {
+    // 根据router path初始化下拉框内容
+    console.log('refreshing router list')
+    getRouterList(1, resourceForm.router)
   }
 }
 
 const submit = async () => {
   const item = { ...resourceForm }
+
+  // // 处理链接相关字段
+  // if (item.type === 1) {
+  //   if (currentResource.hasPageChildren) {
+  //     item.router = null
+  //     item.link = null
+  //     item.linkType = null
+  //   } else {
+  //     if (item.linkType === 1) {
+  //       item.link = null
+  //     } else {
+  //       item.router = null
+  //     }
+  //   }
+  // } else {
+  //   item.router = null
+  //   item.link = null
+  //   item.linkType = null
+  // }
+
   let res
   // 新增模式
   if (editorMode === EDITOR_MODE.ADD) {
@@ -311,7 +460,8 @@ const submit = async () => {
     item.id = currentResource.id
     item.level = currentResource.level
     item.order = currentResource.order
-    item.code = getCodePrefix(currentResource.code) + '.' + resourceForm.code
+    const prefix = getCodePrefix(currentResource.code)
+    item.code = prefix ? prefix + '.' + resourceForm.code : resourceForm.code
     res = await API.permission.resource.update(item)
     if (!item.pid) {
       roots.value = await API.permission.resource.list(null, true)
@@ -329,7 +479,7 @@ const submit = async () => {
   if (editorMode === EDITOR_MODE.ADD) {
     nextTick(() => {
       const el = document.getElementById('_MPRES_' + res.id)
-      // 判断节点是不是在可视范��内
+      // 判断节点是不是在可视范围内
       const rect = el.getBoundingClientRect()
       const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight
       if (!isVisible) {
@@ -358,6 +508,9 @@ onMounted(async () => {
 
   dndResource.init()
   dndRoot.init()
+
+  getRouterList()
+
   nextTick(() => {
     highlight()
   })
@@ -410,6 +563,74 @@ const vRules = {
     }
   ]
 }
+
+// 在 script setup 中添加
+const router = useRouter()
+
+const routes = router.getRoutes().map((route) => ({
+  name: route.meta?.title ? t(route.meta.title) : route.name || route.path,
+  path: route.path
+}))
+
+console.log(routes)
+
+// 获取路由列表函数
+const getRouterList = (page = 1, keyword = '') => {
+  routerList.loading = true
+  routerList.page = page
+  routerList.keyword = keyword
+
+  // 获取所有路由
+
+  // 过滤和格式化路由
+  let filteredRoutes = routes.filter((route) => {
+    // 排除一些特殊路由
+    if (route.path.includes('*') || route.path === '/' || route.path === '/signin' || route.path === '/404') return false
+    // 如果有关键词则进行过滤
+    if (keyword) {
+      return route.path.toLowerCase().includes(keyword.toLowerCase()) || (route.name || '').toLowerCase().includes(keyword.toLowerCase())
+    }
+    return true
+  })
+
+  // 分页处理
+  const pageSize = 10
+  const total = filteredRoutes.length
+  const start = (page - 1) * pageSize
+  const end = start + pageSize
+
+  routerList.data = filteredRoutes.slice(start, end)
+  routerList.total = total
+  routerList.loading = false
+}
+
+// 分页改变事件处理
+const changePage = (page) => {
+  getRouterList(page, routerList.keyword)
+}
+
+// 搜索处理
+const handleSearch = (value) => {
+  getRouterList(1, value)
+}
+
+// 修改 a-select 组件，添加搜索功能
+
+// 添加新的响应式状态
+const iconSelectVisible = ref(false)
+
+// 添加图标选择相关方法
+const openIconSelect = () => {
+  iconSelectVisible.value = true
+}
+
+const handleIconSelect = (icon) => {
+  // console.log('handleIconSelect', icon)
+  resourceForm.icon = icon.icon
+  resourceForm.iconType = icon.iconType
+  iconSelectVisible.value = false
+  // console.log(resourceForm.icon)
+}
 </script>
 
 <style scoped lang="scss">
@@ -447,5 +668,20 @@ const vRules = {
       opacity: 0;
     }
   }
+}
+
+.router-option {
+  .path {
+    font-size: 12px;
+    color: #888;
+  }
+}
+.custom-icon {
+  width: 1.5em;
+  height: 1.5em;
+  background-color: var(--text-primary);
+  mask-size: 1.5em 1.5em;
+  mask-repeat: no-repeat;
+  mask-position: center;
 }
 </style>

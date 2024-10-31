@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { defineComponent, computed } from 'vue'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'SvgIcon',
@@ -17,10 +17,6 @@ export default defineComponent({
     name: {
       type: String,
       required: true
-    },
-    color: {
-      type: String,
-      default: '#333'
     },
     size: {
       type: String,

@@ -3,8 +3,8 @@
     <li v-for="resource in data" :key="resource.id" v-show="resourceType == 0 || resource.type <= 1 || resourceType == resource.type" :draggable="resource.pid != null" class="dragitem pl-4" :data-id="resource.id" :data-type="resource.type" :id="'_MPRES_' + resource.id">
       <div class="item group">
         <div class="flex flex-row items-center gap-1" :class="{ 'pl-6': resource.pid > 0 }">
-          <icon v-if="resource.pid > 0 && resource.type === 1 && resource.children" name="arrow-down" size="2em" class="absolute left-0 cursor-pointer transition-transform" :class="{ '-rotate-90': collapseIds.has(resource.id) }" @click="toggleCollapse(resource.id)" />
-          <icon :name="RESTYPE[resource.type].type" :class="RESTYPE[resource.type].style" size="2em"></icon>
+          <icon v-if="resource.pid > 0 && resource.type === 1 && resource.children" name="arrow-down" class="absolute left-0 cursor-pointer transition-transform" :class="{ '-rotate-90': collapseIds.has(resource.id) }" @click="toggleCollapse(resource.id)" />
+          <icon :name="RESTYPE[resource.type].type" :class="RESTYPE[resource.type].style"></icon>
           <span class="resource-name">{{ resource.name }}</span>
           <span class="tag red">{{ resource.id }}</span>
           <span v-if="resource.code" class="tag gray clickable-item mr-2 cursor-pointer" :title="$t('sys.permission.resource.copyToClipboard')" @click="copyToClipBoard($event, resource.code)">

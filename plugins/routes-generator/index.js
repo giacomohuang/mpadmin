@@ -23,7 +23,7 @@ export default function routesGeneratorPlugin(options = {}) {
         if (url.includes(virtualModuleId)) {
           res.setHeader('Content-Type', 'application/javascript')
           res.setHeader('Cache-Control', 'no-cache')
-          const content = `import Layout from '${layoutDir}'\nexport default ${getCode(layoutDir)}`
+          const content = `export default ${getCode(layoutDir)}`
           res.setHeader('Etag', getEtag(content, { weak: true }))
           res.statusCode = 200
           res.end(content)
@@ -124,7 +124,7 @@ function generateRoutes(files, layoutDir) {
           route.component = `() => import('/src/views${file}')`
         } else if (index === 0) {
           // 使用传入的 layoutDir 参数
-          route.component = 'Layout'
+          route.component = `() => import('/src/views/Layout.vue')`
           route.path = '/404'
           route.children = []
         } else {

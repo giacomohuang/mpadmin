@@ -1,9 +1,10 @@
 <template>
   <div class="layout">
     <header class="header">
+      <router-link to="https://baidu.com">hello</router-link>
       <div class="logo-container">
         <a @click="router.push('/')" class="logo-link">
-          <img src="@/assets/logo.png" class="logo-image" />
+          <img src="@/assets/logo.svg" style="width: 2em; height: 2em" class="logo-image" />
           <div class="app-name">{{ $t('common.appname') }}</div>
         </a>
       </div>
@@ -33,7 +34,7 @@
       </div>
       <div class="language-dropdown">
         <a-dropdown>
-          <a @click.prevent> <Icon name="global" size="2em" /></a>
+          <a @click.prevent> <Icon name="global" /></a>
           <template #overlay>
             <a-menu @click="onChangeLocale">
               <a-menu-item key="zh-CN">简体中文</a-menu-item>
@@ -43,11 +44,11 @@
         </a-dropdown>
       </div>
       <div class="theme">
-        <Icon name="theme-light" size="2em" class="icon" @click="store.changeTheme('light')" :class="{ 'active-light': store.theme === 'light' }"></Icon>
-        <Icon name="theme-dark" size="2em" class="icon" @click="store.changeTheme('dark')" :class="{ 'active-dark': store.theme === 'dark' }"></Icon>
-        <Icon name="theme-system" size="2em" class="icon" @click="store.changeTheme('system')" :class="{ 'active-system': store.theme === 'system' }"></Icon>
+        <Icon name="theme-light" class="icon" @click="store.changeTheme('light')" :class="{ light: store.theme === 'light' }"></Icon>
+        <Icon name="theme-dark" class="icon" @click="store.changeTheme('dark')" :class="{ dark: store.theme === 'dark' }"></Icon>
+        <Icon name="theme-system" class="icon" @click="store.changeTheme('system')" :class="{ system: store.theme === 'system' }"></Icon>
       </div>
-      <div class="assist-icon"><img src="@/assets/assist.png" width="20px" height="20px" @click="showAssist = !showAssist" /></div>
+      <div class="assist-icon"><img src="@/assets/assist.svg" @click="showAssist = !showAssist" /></div>
     </header>
     <aside class="menu">
       <div style="display: flex; align-items: center; justify-content: center; margin: 10px">
@@ -56,7 +57,7 @@
       <RouterLink custom :to="item.path" v-for="(item, index) in menu" :key="index">
         <div class="wrapper" @mouseenter="handleMenuHover(index)" @click="changeSubMenu(index)">
           <div :class="['item', { active: isActiveMenu(item), hover: index === hoveredMenuIndex }]">
-            <Icon name="carousel" size="2em"></Icon>
+            <Icon name="func"></Icon>
             <span class="text">{{ $t(item.meta.title) }}</span>
           </div>
         </div>
@@ -71,9 +72,7 @@
       <router-view />
     </div>
     <aside class="assist" v-show="showAssist">
-      <div class="assist-header">
-        <Icon name="assist" size="2em"></Icon>
-      </div>
+      <div class="assist-header"></div>
     </aside>
   </div>
 </template>
@@ -224,6 +223,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   padding: 0 20px;
+  gap: 24px;
   background-color: var(--bg-primary);
   border-bottom: 1px solid var(--border-light);
 
@@ -231,7 +231,6 @@ onUnmounted(() => {
     flex-shrink: 0;
     white-space: nowrap;
     border-right: 2px solid var(--border-light);
-    padding: 0 20px;
 
     .logo-link {
       display: flex;
@@ -248,6 +247,7 @@ onUnmounted(() => {
         line-height: 1;
         font-weight: 600;
         color: var(--text-primary);
+        margin-right: 30px;
       }
     }
   }
@@ -259,7 +259,6 @@ onUnmounted(() => {
     text-overflow: ellipsis;
     font-size: 18px;
     color: var(--text-primary);
-    padding-left: 20px;
   }
 
   .user-dropdown {
@@ -305,7 +304,7 @@ onUnmounted(() => {
   }
 
   .language-dropdown {
-    margin: 0 12px;
+    color: var(--text-tertiary);
     display: none;
 
     @media (min-width: 768px) {
@@ -313,26 +312,36 @@ onUnmounted(() => {
     }
   }
 
+  // .ho {
+  //   padding: 10px;
+  //   border-radius: 20px;
+  //   &:hover {
+  //     background: var(--bg-tertiary);
+  //   }
+  // }
+
   .theme {
-    margin-right: 12px;
     display: none;
     cursor: pointer;
     flex-wrap: nowrap;
+    gap: 12px;
     color: var(--text-tertiary);
-
     @media (min-width: 768px) {
       display: flex;
     }
 
     .icon {
-      &.active-light {
-        color: #fbbf24;
+      &:hover {
+        color: var(--c-brand);
       }
-      &.active-dark {
-        color: #3b82f6;
+      &.light {
+        color: var(--c-orange);
       }
-      &.active-system {
-        color: #000000;
+      &.dark {
+        color: var(--c-blue);
+      }
+      &.system {
+        color: var(--c-black);
       }
     }
   }
@@ -340,8 +349,9 @@ onUnmounted(() => {
   .assist-icon {
     display: none;
     flex-shrink: 0;
-    margin-left: 12px;
     cursor: pointer;
+    width: 1.5em;
+    height: 1.5em;
     @media (min-width: 768px) {
       display: block;
     }
@@ -370,7 +380,6 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    // margin: 0;
     padding: 6px 0 12px 0;
     border-radius: 8px;
 

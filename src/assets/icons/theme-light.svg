@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="64px" height="64px" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>theme-light</title>
     <g id="theme-light" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <path d="M33,45 L33,53 L31,53 L31,45 L33,45 Z M21.5398449,41.5459415 L22.9540585,42.9601551 L22.2469517,43.6672619 L16.5900974,49.3241161 L15.8829906,50.0312229 L14.4687771,48.6170094 L21.5398449,41.5459415 Z M42.7530483,40.8388348 L50.5312229,48.6170094 L49.1170094,50.0312229 L41.3388348,42.2530483 L42.7530483,40.8388348 Z M32,20 C38.0751322,20 43,24.9248678 43,31 C43,37.0751322 38.0751322,42 32,42 C25.9248678,42 21,37.0751322 21,31 C21,24.9248678 25.9248678,20 32,20 Z M19,30.5 L19,32.5 L11,32.5 L11,30.5 L19,30.5 Z M53,30.5 L53,32.5 L45,32.5 L45,30.5 L53,30.5 Z M49.1170094,13.9687771 L50.5312229,15.3829906 L42.7530483,23.1611652 L41.3388348,21.7469517 L49.1170094,13.9687771 Z M15.8829906,13.9687771 L22.9540585,21.0398449 L21.5398449,22.4540585 L14.4687771,15.3829906 L15.8829906,13.9687771 Z M33,10 L33,18 L31,18 L31,10 L33,10 Z" id="形状结合" fill="#000000"></path>
+        <circle id="椭圆形" stroke="#000000" stroke-width="4" cx="24" cy="24" r="12"></circle>
+        <polyline id="直线-2" stroke="#000000" stroke-width="4" stroke-linecap="square" points="24 6 24 6.5 24 7"></polyline>
+        <polyline id="直线-2" stroke="#000000" stroke-width="4" stroke-linecap="square" transform="translate(37.2678, 11.2322) rotate(45) translate(-37.2678, -11.2322)" points="37.267767 10.732233 37.267767 11.232233 37.267767 11.732233"></polyline>
+        <polyline id="直线-2" stroke="#000000" stroke-width="4" stroke-linecap="square" transform="translate(10.7322, 11.2322) rotate(-45) translate(-10.7322, -11.2322)" points="10.732233 10.732233 10.732233 11.232233 10.732233 11.732233"></polyline>
+        <polyline id="直线-2" stroke="#000000" stroke-width="4" stroke-linecap="square" transform="translate(37.2678, 36.7678) scale(1, -1) rotate(45) translate(-37.2678, -36.7678)" points="37.267767 36.267767 37.267767 36.767767 37.267767 37.267767"></polyline>
+        <polyline id="直线-2" stroke="#000000" stroke-width="4" stroke-linecap="square" transform="translate(10.7322, 36.7678) scale(1, -1) rotate(-45) translate(-10.7322, -36.7678)" points="10.732233 36.267767 10.732233 36.767767 10.732233 37.267767"></polyline>
+        <line x1="24" y1="42" x2="24" y2="43" id="直线-2" stroke="#000000" stroke-width="4" stroke-linecap="square"></line>
+        <line x1="42" y1="24" x2="43" y2="24" id="直线-2" stroke="#000000" stroke-width="4" stroke-linecap="square"></line>
+        <line x1="5" y1="24" x2="6" y2="24" id="直线-2" stroke="#000000" stroke-width="4" stroke-linecap="square"></line>
     </g>
 </svg>

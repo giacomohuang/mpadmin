@@ -27,7 +27,7 @@ function toggle_children(ev) {
 
 onMounted(() => {
   //默认展开当前路由的子菜单
-  const dom = document.querySelector('.dir.sub-active')
+  const dom = document.querySelector('.submenu-item.sub-active')
   if (dom) {
     dom.style.display = 'flex'
     dom.children[0].classList.add('expand')
@@ -111,6 +111,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   left: -4px;
+
   &.expand {
     transform: rotate(90deg);
   }
@@ -118,9 +119,9 @@ onMounted(() => {
     content: '';
     position: absolute;
     display: block;
-    width: 6px;
-    height: 6px;
-    // left: -5px;
+    width: 7px;
+    height: 7px;
+    // background: #444;
     border-top: 2px solid var(--border-tertiary);
     border-right: 2px solid var(--border-tertiary);
     transform: rotate(45deg);

@@ -21,10 +21,8 @@
 <script setup>
 import { ref } from 'vue'
 import CryptoJS from 'crypto-js'
-// import SparkMD5 from 'spark-md5'
 import API from '../../api/API'
 import FetchEventSource from '../../api/fetcheventsource'
-
 const aaa = ref('')
 
 // OpenAI test

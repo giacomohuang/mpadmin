@@ -3,7 +3,7 @@
     <li v-for="role in data" :key="role.id" draggable="true" class="dragitem pl-5" :data-id="role.id" :data-type="role.type" :id="'_MPRES_' + role.id">
       <div class="item group" @click.stop="openEditor(role, EDITOR_MODE.EDIT)">
         <div class="flex gap-1">
-          <icon v-if="role.children" name="arrow-down" size="2em" class="absolute cursor-pointer transition-transform" :class="{ '-rotate-90': collapseRoleIds.has(role.id) }" @click.stop="toggleCollapse(role.id)" />
+          <icon v-if="role.children" name="arrow-down" class="absolute cursor-pointer transition-transform" :class="{ '-rotate-90': collapseRoleIds.has(role.id) }" @click.stop="toggleCollapse(role.id)" />
           <!--  -->
           <div class="ml-6 flex flex-col">
             <span class="flex text-base"><icon name="role" size="1.4em" class="text-orange-600"></icon>{{ role.name }}</span>

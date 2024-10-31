@@ -163,7 +163,15 @@
         "codeRequired": "Code is required",
         "codeDuplicate": "Code already exists, please change",
         "copyToClipboard": "Click to copy to clipboard",
-        "addSubResource": "Add sub-resource"
+        "addSubResource": "Add sub-resource",
+        "linkType": "Link Type",
+        "router": "Route",
+        "url": "External Link",
+        "link": "URL",
+        "target": "Open Mode",
+        "currentPage": "Current Page",
+        "newPage": "New Page",
+        "isHidden": "Hidden"
       }
     },
     "org": {

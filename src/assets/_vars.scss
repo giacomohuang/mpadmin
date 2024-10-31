@@ -10,7 +10,7 @@ $color-sets: (
   'grass': #7cfc00,
   'green': #22c55e,
   'blue': #3b82f6,
-  'brand': #0ea5e9,
+  'brand': #2893ff,
   'indigo': #4f46e5,
   'purple': #8b5cf6,
   'gray': #6e7781
@@ -42,11 +42,11 @@ $color-sets: (
   // 背景色
   --bg-primary: var(--c-white);
   --bg-secondary: var(--c-gray-50);
-  --bg-tertiary: var(--c-gray-200);
+  --bg-tertiary: var(--c-gray-100);
   --bg-brand: rgb(244, 247, 249);
 
   // 文字颜色s
-  --text-primary: var(--c-gray-900);
+  --text-primary: var(--c-black);
   --text-secondary: var(--c-gray-700);
   --text-tertiary: var(--c-gray-500);
 

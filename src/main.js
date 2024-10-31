@@ -7,7 +7,8 @@ import './router/permission'
 import i18n from './js/i18n'
 import './assets/index.scss'
 import './assets/main.scss'
-import 'virtual:svg-icons-register'
+// import 'virtual:svg-icons-register'
+import 'virtual:svg-sprite'
 import Icon from './components/Icon.vue'
 
 const app = createApp(App)

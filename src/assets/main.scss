@@ -6,7 +6,7 @@
   width: 1.5em;
   height: 1.5em;
   vertical-align: -0.4em;
-  fill: currentColor;
+  fill: none;
   overflow: hidden;
   outline: 0;
 }
@@ -24,4 +24,13 @@ h2 {
   font-size: 24px;
   font-weight: 500;
   margin: 0;
+}
+
+/* 添加到文件末尾 */
+.icon-select-popover {
+  .el-popover__title {
+    margin: 0;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+  }
 }

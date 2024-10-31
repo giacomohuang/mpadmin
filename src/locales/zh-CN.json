@@ -86,7 +86,7 @@
       "newpwd": "新密码",
       "pep": "请输入密码",
       "pepa": "请再次输入密码",
-      "pnm": "两次输入密码不一致",
+      "pnm": "两��输入密码不一致",
       "cpwd": "修改密码",
       "cfpwd": "确认新密码",
       "syaeyps": "强化账户安全，确保使用强度高的密码。",
@@ -163,10 +163,21 @@
         "codeRequired": "编码不能为空",
         "codeDuplicate": "编码已存在，请更换",
         "copyToClipboard": "点击复制到剪贴板",
-        "addSubResource": "添加子资源"
+        "addSubResource": "添加子资源",
+        "linkType": "链接类型",
+        "router": "路由选择",
+        "url": "外部链接",
+        "link": "URL",
+        "target": "跳转方式",
+        "currentPage": "当前页面",
+        "newPage": "新页面",
+        "isHidden": "是否隐藏",
+        "icon": "图标",
+        "selectIcon": "选择图标",
+        "iconSelector": "图标选择器",
+        "searchIcon": "搜索图标"
       }
     },
-
     "org": {
       "_title": "组织架构"
     }

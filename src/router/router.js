@@ -14,10 +14,10 @@ export const router = createRouter({
   // },
   // 静态加载的公共页面，不需要认证token
   routes: [
-    { path: '/', redirect: '/workspace/main' },
-    { path: '/signin', name: 'signin', component: () => import('@/views/Signin.vue'), meta: { title: 'common.route.signin', noAuth: true } },
-    { path: '/404', name: '404', component: () => import('@/views/404.vue'), meta: { title: 'common.route.404', noAuth: true } },
-    { path: '/:pathMatch(.*)', redirect: '/404', meta: { title: 'common.route.404', noAuth: true } }
+    { path: '/', redirect: '/workspace/main', meta: { title: 'workspace._title' } },
+    { path: '/signin', name: 'signin', component: () => import('@/views/Signin.vue'), meta: { title: 'signin._title', noAuth: true } },
+    { path: '/404', name: '404', component: () => import('@/views/404.vue'), meta: { title: '404._title', noAuth: true } },
+    { path: '/:pathMatch(.*)', redirect: '/404', meta: { title: '404._title', noAuth: true } }
   ]
 })
 

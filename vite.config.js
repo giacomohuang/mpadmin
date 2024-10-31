@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
-import { createSvgIconsPlugin } from './plugins/svgicons/index'
 import { obfuscator } from './plugins/obfuscator/index'
 import Components from 'unplugin-vue-components/vite'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
 import routesGeneratorPlugin from './plugins/routes-generator'
+import svgSpritePlugin from './plugins/svg-sprite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -34,6 +34,7 @@ export default defineConfig({
   plugins: [
     vue(),
     routesGeneratorPlugin({ layoutDir: path.resolve(process.cwd(), '/src/views/Layout.vue') }),
+    svgSpritePlugin(),
     Components({
       resolvers: [
         AntDesignVueResolver({
@@ -64,50 +65,6 @@ export default defineConfig({
       transformObjectKeys: true,
       unicodeEscapeSequence: false,
       ignoreImports: true
-    }),
-    createSvgIconsPlugin({
-      // Specify the icon folder to be cached
-      iconDirs: [path.resolve(process.cwd(), 'src/assets/icons')],
-      // Specify symbolId format
-      symbolId: 'icon-[dir]-[name]',
-      svgoOptions: {
-        plugins: [
-          'preset-default',
-          'cleanupIds',
-          'minifyStyles',
-          {
-            name: 'mergePaths',
-            params: {
-              force: false,
-              floatPrecision: 3,
-              noSpaceAfterFlags: true
-            }
-          },
-          'removeTitle',
-          'removeEmptyContainers',
-
-          'removeUselessStrokeAndFill',
-          {
-            name: 'removeAttrs',
-            params: {
-              attrs: ['fill', 'stroke', 'fill-rule']
-            }
-          },
-          'collapseGroups'
-        ]
-      },
-
-      /**
-       * custom insert position
-       * @default: body-last
-       */
-      inject: 'body-last',
-
-      /**
-       * custom dom id
-       * @default: __svg__icons__dom__
-       */
-      customDomId: '__svg__icons__dom__'
     })
   ],
   resolve: {

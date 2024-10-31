@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="64px" height="64px" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>search</title>
     <g id="search" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <path d="M27.5,13 C36.0604136,13 43,19.9395864 43,28.5 C43,37.0604136 36.0604136,44 27.5,44 C18.9395864,44 12,37.0604136 12,28.5 C12,19.9395864 18.9395864,13 27.5,13 Z M27.5,15 C20.0441559,15 14,21.0441559 14,28.5 C14,35.9558441 20.0441559,42 27.5,42 C34.9558441,42 41,35.9558441 41,28.5 C41,21.0441559 34.9558441,15 27.5,15 Z" id="椭圆形" fill="#000000" fill-rule="nonzero"></path>
-        <polygon id="直线-3" fill="#000000" fill-rule="nonzero" points="39.5 38.3786797 40.5606602 39.4393398 50.5606602 49.4393398 51.6213203 50.5 49.5 52.6213203 48.4393398 51.5606602 38.4393398 41.5606602 37.3786797 40.5"></polygon>
+        <circle id="椭圆形" stroke="#000000" stroke-width="4" cx="21.5" cy="19.5" r="13.5"></circle>
+        <line x1="32.5" y1="29.5" x2="41" y2="38" id="直线-6" stroke="#000000" stroke-width="4" stroke-linecap="square"></line>
     </g>
 </svg>

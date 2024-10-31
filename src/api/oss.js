@@ -39,6 +39,49 @@ const oss = {
       data: { filename: filename },
       url: '/oss/initNewMultipartUpload'
     })
+  },
+
+  svgIconUpload(formData, onProgress) {
+    return fetch({
+      timeout: 30 * 60 * 1000,
+      baseURL: baseUrl.default,
+      method: 'post',
+      data: formData,
+      url: '/oss/svgIconUpload',
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      onUploadProgress: (progress) => {
+        onProgress(progress.loaded)
+      }
+    })
+  },
+  addSvgIcon(name, path) {
+    console.log('***name', name)
+    return fetch({
+      baseURL: baseUrl.default,
+      method: 'post',
+      data: { name: name, path: path },
+      url: '/oss/addSvgIcon'
+    })
+  },
+  removeSvgIcon(path) {
+    return fetch({
+      baseURL: baseUrl.default,
+      method: 'post',
+      data: { path: path },
+      url: '/oss/removeSvgIcon'
+    })
+  },
+
+  getSvgIconList(keyword, page, limit) {
+    console.log(keyword, page, limit)
+    return fetch({
+      baseURL: baseUrl.default,
+      method: 'post',
+      data: { keyword, page, limit },
+      url: '/oss/svgIconList'
+    })
   }
 }
 

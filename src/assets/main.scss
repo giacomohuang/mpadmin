@@ -34,3 +34,8 @@ h2 {
     border-bottom: 1px solid #eee;
   }
 }
+
+/* 隐藏antd-design-vue的aria-hidden属性 */
+div[aria-hidden='true'] {
+  display: none !important;
+}

@@ -29,7 +29,8 @@
         "strong": "较强",
         "excellent": "很强"
       }
-    }
+    },
+    "noSubmenu": "暂无子菜单"
   },
   "workspace": {
     "_title": "工作台",
@@ -86,7 +87,7 @@
       "newpwd": "新密码",
       "pep": "请输入密码",
       "pepa": "请再次输入密码",
-      "pnm": "两��输入密码不一致",
+      "pnm": "两输入密码不一致",
       "cpwd": "修改密码",
       "cfpwd": "确认新密码",
       "syaeyps": "强化账户安全，确保使用强度高的密码。",
@@ -165,7 +166,7 @@
         "copyToClipboard": "点击复制到剪贴板",
         "addSubResource": "添加子资源",
         "linkType": "链接类型",
-        "router": "路由选择",
+        "router": "路由",
         "url": "外部链接",
         "link": "URL",
         "target": "跳转方式",

@@ -52,8 +52,7 @@
         <div class="flex items-center gap-2">
           <a-input v-model:value="resourceForm.icon" placeholder="icon" style="display: none" />
           <a-button @click="openIconSelect">
-            <Icon v-if="resourceForm.iconType == 1" :name="resourceForm.icon" :key="'t1-' + resourceForm.icon" />
-            <div class="custom-icon" v-else-if="resourceForm.iconType == 2" :style="{ maskImage: `url(${customIconUrlPrefix + resourceForm.icon})` }" :key="'t2-' + resourceForm.icon" />
+            <Icon v-if="resourceForm.iconType" :name="resourceForm.icon" :key="resourceForm.icon" />
             <template v-else>{{ $t('sys.permission.resource.selectIcon') }}</template>
           </a-button>
         </div>
@@ -88,8 +87,8 @@
       </a-form-item>
       <a-form-item :label="$t('sys.permission.resource.target')" name="target" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren">
         <a-radio-group v-model:value="resourceForm.target">
-          <a-radio :value="1">{{ $t('sys.permission.resource.currentPage') }}</a-radio>
-          <a-radio :value="2">{{ $t('sys.permission.resource.newPage') }}</a-radio>
+          <a-radio value="self">{{ $t('sys.permission.resource.currentPage') }}</a-radio>
+          <a-radio value="_blank">{{ $t('sys.permission.resource.newPage') }}</a-radio>
         </a-radio-group>
       </a-form-item>
       <a-form-item :label="$t('sys.permission.resource.isHidden')" name="isHidden" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren">
@@ -118,7 +117,7 @@ import IconSelect from '@/components/IconSelect.vue'
 
 const { t } = useI18n()
 const customIconUrlPrefix = import.meta.env.VITE_SVGICON_URL_PREFIX
-console.log(customIconUrlPrefix)
+// console.log(customIconUrlPrefix)
 
 const VNodes = defineComponent({
   props: {
@@ -152,7 +151,7 @@ const resourceForm = reactive({
   router: null,
   link: null,
   linkType: 1,
-  target: 1,
+  target: 'self',
   isHidden: false,
   icon: null,
   iconType: null
@@ -373,18 +372,18 @@ const openEditor = (item, mode) => {
       resourceForm.router = null
       resourceForm.link = null
       resourceForm.linkType = null
-      resourceForm.target = 1
+      resourceForm.target = 'self'
       resourceForm.isHidden = false
     } else {
       resourceForm.router = item.router || ''
       resourceForm.linkType = item.linkType || 1
       resourceForm.link = item.link || ''
-      resourceForm.target = item.target || 1
+      resourceForm.target = item.target || 'self'
       resourceForm.isHidden = item.isHidden || false
     }
   }
 
-  console.log(item)
+  // console.log(item)
 
   // 如果是页面类型且没有设置 router，尝试根据 name 自动匹配
   if (resourceForm.type === 1 && !resourceForm.router && resourceForm.name) {
@@ -407,7 +406,7 @@ const openEditor = (item, mode) => {
 
   if (resourceForm.router) {
     // 根据router path初始化下拉框内容
-    console.log('refreshing router list')
+    // console.log('refreshing router list')
     getRouterList(1, resourceForm.router)
   }
 }
@@ -572,7 +571,7 @@ const routes = router.getRoutes().map((route) => ({
   path: route.path
 }))
 
-console.log(routes)
+// console.log(routes)
 
 // 获取路由列表函数
 const getRouterList = (page = 1, keyword = '') => {

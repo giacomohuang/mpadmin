@@ -1,7 +1,7 @@
 <template>
   <ul v-if="data">
     <li v-for="role in data" :key="role.id" draggable="true" class="dragitem pl-5" :data-id="role.id" :data-type="role.type" :id="'_MPRES_' + role.id">
-      <div class="item group" @click.stop="openEditor(role, EDITOR_MODE.EDIT)">
+      <div class="item group">
         <div class="flex gap-1">
           <icon v-if="role.children" name="arrow-down" class="absolute cursor-pointer transition-transform" :class="{ '-rotate-90': collapseRoleIds.has(role.id) }" @click.stop="toggleCollapse(role.id)" />
           <!--  -->
@@ -11,6 +11,7 @@
           </div>
         </div>
         <div class="tools flex items-center">
+          <icon name="edit" size="1.8em" class="edit" @click.stop="openEditor(role, EDITOR_MODE.EDIT)" />
           <icon name="add" size="1.8em" class="add" @click.stop="openEditor(role, EDITOR_MODE.ADD)" />
           <icon name="del" size="1.8em" class="del" @click.stop="confirm(role.path)" />
         </div>
@@ -79,11 +80,20 @@ function openEditor(parent, mode) {
 }
 .del {
   @apply mr-2 cursor-pointer text-red-600;
+  &:hover {
+    @apply text-red-400;
+  }
 }
 .add {
   @apply mx-2 cursor-pointer text-brand-600;
+  &:hover {
+    @apply text-brand-400;
+  }
 }
 .edit {
   @apply mx-2 cursor-pointer text-green-600;
+  &:hover {
+    @apply text-green-400;
+  }
 }
 </style>

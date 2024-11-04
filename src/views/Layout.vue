@@ -1,7 +1,6 @@
 <template>
   <div class="layout">
     <header class="header">
-      <router-link to="https://baidu.com">hello</router-link>
       <div class="logo-container">
         <a @click="router.push('/')" class="logo-link">
           <img src="@/assets/logo.svg" style="width: 2em; height: 2em" class="logo-image" />
@@ -52,19 +51,19 @@
     </header>
     <aside class="menu">
       <div style="display: flex; align-items: center; justify-content: center; margin: 10px">
-        <div class="toggle-menu" :class="{ mini: miniMenu }" @click="miniMenu = !miniMenu"></div>
+        <div class="toggle-menu"></div>
       </div>
-      <RouterLink custom :to="item.path" v-for="(item, index) in menu" :key="index">
-        <div class="wrapper" @mouseenter="handleMenuHover(index)" @click="changeSubMenu(index)">
-          <div :class="['item', { active: isActiveMenu(item), hover: index === hoveredMenuIndex }]">
-            <Icon name="func"></Icon>
-            <span class="text">{{ $t(item.meta.title) }}</span>
+      <div v-for="(item, index) in menu" :key="index">
+        <div class="wrapper" @click.stop="clickMenuItem(item, index)">
+          <div :class="['item', { active: isActiveMenu(item) }]">
+            <Icon class="sys-icon" :name="item.icon || 'func'" :key="item.icon"></Icon>
+            <span class="text">{{ $t(item.name) }}</span>
           </div>
         </div>
-      </RouterLink>
+      </div>
     </aside>
-    <aside class="submenu" :class="{ float: miniMenu }" v-if="showSubmenu" @mouseleave="handleSubmenuLeave" @mouseenter="handleSubmenuEnter" ref="submenuRef">
-      <SubMenu :data="submenu.children"></SubMenu>
+    <aside class="submenu" ref="submenuRef" v-if="submenu?.length > 0">
+      <SubMenu :data="submenu"></SubMenu>
     </aside>
 
     <div class="main-content">
@@ -78,7 +77,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, toRefs, provide, watch, onUnmounted, computed, nextTick } from 'vue'
+import { onMounted, ref, toRefs, provide, watch, onUnmounted, onBeforeMount, computed, nextTick } from 'vue'
 import dynamicRoutes from 'virtual:router'
 import { changeLocale } from '../js/i18n'
 import SubMenu from './SubMenu.vue'
@@ -94,26 +93,32 @@ const { accountname, accountid, realname, locale } = toRefs(store)
 const router = useRouter()
 const route = useRoute()
 const showAssist = ref(false)
-const miniMenu = ref(false)
 
 const accountInfo = helper.decodeToken()
 // const accountname = accessToken.accountname
 accountname.value = accountInfo.accountname
 accountid.value = accountInfo.id
 realname.value = decodeURIComponent(accountInfo.realname)
+let menudata = null
+const currentMenuPath = ref([])
 const menu = ref(dynamicRoutes)
-const submenu = ref(route.matched[0].name)
+const submenu = ref(null)
 const currentMenuIdx = ref(-1)
 const onChangeLocale = async ({ key }) => {
   await changeLocale(key)
   locale.value = key
 }
 
+// 添加一个变量来跟踪用户点击选中的菜单项
+const selectedMenuIndex = ref(-1)
+
 const isActiveMenu = (item) => {
-  if (route.matched.length > 0) {
-    return route.matched[0].name === item.name || route.name.startsWith(item.name + '-')
+  // 如果有用户点击选中的菜单，优先显示该菜单的高亮
+  if (selectedMenuIndex.value !== -1) {
+    return menu.value.indexOf(item) === selectedMenuIndex.value
   }
-  return false
+  // 否则显示当前路由匹配的菜单高亮
+  return currentMenuPath.value.includes(item.id)
 }
 
 const activeMenuIndex = computed(() => {
@@ -123,16 +128,42 @@ const activeMenuIndex = computed(() => {
 watch(activeMenuIndex, (newIndex) => {
   if (newIndex !== -1) {
     currentMenuIdx.value = newIndex
-    submenu.value = menu.value[newIndex]
+    submenu.value = menu.value[newIndex].children
   }
 })
 
-function changeSubMenu(index) {
-  submenu.value = menu.value[index]
-  if (submenu.value.redirect) {
-    // 如果定义了redirect，直接跳转
-    router.push({ path: submenu.value.redirect })
+function clickMenuItem(item, index) {
+  selectedMenuIndex.value = index
+
+  // 切换子菜单
+  if (item.children.length > 0) {
+    submenu.value = item.children
   }
+  // 路由/外链跳转
+  else {
+    // 路由跳转
+    if (item.linkType === 1) {
+      // 当前页面打开
+      if (item.target === 'self') {
+        router.push(item.router)
+      }
+      // 新页面打开
+      else {
+        window.open(item.router, item.target)
+      }
+    }
+    // 外链跳转
+    else {
+      window.open(item.link, item.target)
+    }
+  }
+}
+
+function getCurrentMenuPath() {
+  const path = route.path
+  const item = menudata.find((item) => item.router === path)
+  const fullpath = item?.path
+  return fullpath ? fullpath.split('-').map(Number) : null
 }
 
 async function signout() {
@@ -142,52 +173,55 @@ async function signout() {
   router.push('/signin')
 }
 
-const showSubmenu = ref(!miniMenu.value)
 const submenuRef = ref(null)
 const hoverTimeout = ref(null)
-const hoveredMenuIndex = ref(-1)
 
-const handleMenuHover = (index) => {
-  if (miniMenu.value) {
-    clearTimeout(hoverTimeout.value)
-    submenu.value = menu.value[index]
+onBeforeMount(async () => {
+  menudata = await API.permission.resource.getMenu()
+  // 构建树
+  menu.value = buildTree(menudata)
+  currentMenuPath.value = getCurrentMenuPath()
+  // console.log('tree', currentMenuPath.value)
+})
 
-    currentMenuIdx.value = index
-    hoveredMenuIndex.value = index
-    showSubmenu.value = true
-    nextTick(() => {
-      const offset = 115 + index * 70
-      if (submenuRef.value.offsetHeight + offset > window.innerHeight) {
-        submenuRef.value.style.bottom = 10 + 'px'
-      } else {
-        submenuRef.value.style.top = offset + 'px'
+function buildTree(items) {
+  const tree = []
+  const itemMap = new Map()
+
+  // 先创建所有节点的映射
+  items.forEach((item) => {
+    item.router = item.router || '/404'
+    itemMap.set(item.id, { ...item, children: [] })
+  })
+
+  // 构建树形结构
+  items.forEach((item) => {
+    const node = itemMap.get(item.id)
+    if (item.pid === null) {
+      // 根节点直接加入树中
+      tree.push(node)
+    } else {
+      // 非根节点加入到父节点的children中
+      const parent = itemMap.get(item.pid)
+      if (parent) {
+        parent.children.push(node)
+      }
+    }
+  })
+
+  // 按order排序
+  const sortByOrder = (arr) => {
+    arr.sort((a, b) => a.order - b.order)
+    arr.forEach((item) => {
+      if (item.children && item.children.length) {
+        sortByOrder(item.children)
       }
     })
   }
-}
+  sortByOrder(tree)
 
-const handleSubmenuEnter = () => {
-  if (miniMenu.value) {
-    clearTimeout(hoverTimeout.value)
-  }
+  return tree
 }
-
-const handleSubmenuLeave = () => {
-  if (miniMenu.value) {
-    hoverTimeout.value = setTimeout(() => {
-      showSubmenu.value = false
-      hoveredMenuIndex.value = -1
-    }, 100)
-  }
-}
-
-watch(miniMenu, (newValue) => {
-  showSubmenu.value = !newValue
-  if (!newValue) {
-    clearTimeout(hoverTimeout.value)
-    hoveredMenuIndex.value = -1
-  }
-})
 
 onMounted(() => {
   // 初始化当前活动菜单
@@ -373,6 +407,9 @@ onUnmounted(() => {
       background-color: var(--c-brand-400);
       color: var(--c-white);
       font-weight: 600;
+      .custom-icon {
+        background-color: var(--c-white) !important;
+      }
     }
     padding: 5px;
   }
@@ -393,17 +430,33 @@ onUnmounted(() => {
       background-color: var(--c-brand);
       color: var(--c-white);
       font-weight: 600;
+      .custom-icon {
+        background-color: var(--c-white);
+      }
     }
 
     &.hover {
       background-color: var(--c-brand-400);
       color: var(--c-white);
       font-weight: 600;
+      .custom-icon {
+        background-color: var(--c-white);
+      }
     }
 
     .item-text {
       // display: none;
       display: block;
+    }
+
+    .custom-icon {
+      width: 2em;
+      height: 2em;
+      margin: 4px 0;
+      background-color: var(--text-primary);
+      mask-size: 1.5em 1.5em;
+      mask-repeat: no-repeat;
+      mask-position: center;
     }
   }
 }
@@ -415,6 +468,7 @@ onUnmounted(() => {
   border-right: 1px solid var(--border-light);
   padding: 10px 0;
   z-index: 1;
+  width: 180px;
   box-shadow: 2px 0 4px 0 rgba(100, 100, 100, 0.1);
   &.float {
     position: fixed; // 改为fixed以确保在滚动时保持位置
@@ -479,9 +533,10 @@ onUnmounted(() => {
     // z-index: 500;
   }
 }
-</style>
+.sys-icon {
+  margin: 4px 0;
+}
 
-<style>
 .main-content {
   position: relative;
   grid-area: main;

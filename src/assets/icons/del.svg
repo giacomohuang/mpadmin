@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="64px" height="64px" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>del</title>
     <g id="del" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <path d="M32,8 C45.254834,8 56,18.745166 56,32 C56,45.254834 45.254834,56 32,56 C18.745166,56 8,45.254834 8,32 C8,18.745166 18.745166,8 32,8 Z M32,11 C20.4020203,11 11,20.4020203 11,32 C11,43.5979797 20.4020203,53 32,53 C43.5979797,53 53,43.5979797 53,32 C53,20.4020203 43.5979797,11 32,11 Z" id="椭圆形" fill="#000000" fill-rule="nonzero"></path>
-        <polygon id="直线-4" fill="#000000" fill-rule="nonzero" transform="translate(31.2929, 32.2929) rotate(-45) translate(-31.2929, -32.2929)" points="44.7928932 30.7928932 44.7928932 33.7928932 17.7928932 33.7928932 17.7928932 30.7928932"></polygon>
-        <polygon id="直线-4" fill="#000000" fill-rule="nonzero" transform="translate(32, 33) rotate(-45) translate(-32, -33)" points="33.5 19.5 33.5 46.5 30.5 46.5 30.5 19.5"></polygon>
+        <circle id="椭圆形" stroke="#000000" stroke-width="2" cx="24" cy="24" r="19"></circle>
+        <line x1="18.5" y1="15.5" x2="29.5" y2="32.5" id="直线-3" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(24, 24) rotate(-12.0948) translate(-24, -24)"></line>
+        <line x1="18.5" y1="15.19518" x2="29.5" y2="32.19518" id="直线-3" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(24, 23.6952) scale(-1, 1) rotate(-12.0948) translate(-24, -23.6952)"></line>
     </g>
 </svg>

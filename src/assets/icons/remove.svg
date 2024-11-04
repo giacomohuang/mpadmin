@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="64px" height="64px" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>remove</title>
-    <g id="remove" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <path d="M53.4435686,7.61020493 C54.2571108,6.79659836 55.5762523,6.79659836 56.3897945,7.61020493 C57.2034018,8.42374639 57.2034018,9.74288669 56.3897945,10.5564281 L34.946291,31.9999775 L56.3897945,53.4435268 C57.2034018,54.2570683 57.2034018,55.5762086 56.3897945,56.3897501 C55.5762523,57.2033566 54.2571108,57.2033566 53.4435686,56.3897501 L32,34.9462658 L10.5564314,56.3897501 C9.75102718,57.1952837 8.45011488,57.2032915 7.63474976,56.4140339 L7.61020548,56.3898152 C6.79659817,55.5762737 6.79659817,54.2571334 7.61020548,53.4435919 L29.053709,31.9999775 L7.61020548,10.5564281 C6.79659817,9.74288669 6.79659817,8.42374639 7.61020548,7.61020493 C8.42374767,6.79659836 9.74288916,6.79659836 10.5564314,7.61020493 L32,29.0536892 L53.4435686,7.61020493 Z" id="路径" fill="#000000" fill-rule="nonzero"></path>
+    <g id="remove" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="10" y1="8" x2="38" y2="38" id="直线" stroke="#000000" stroke-width="4"></line>
+        <line x1="10" y1="8" x2="38" y2="38" id="直线" stroke="#000000" stroke-width="4" transform="translate(24, 23) scale(-1, 1) translate(-24, -23)"></line>
     </g>
 </svg>

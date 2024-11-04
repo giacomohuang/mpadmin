@@ -37,6 +37,12 @@ const permission = {
         url: '/permission/resource/reorder',
         method: 'post'
       })
+    },
+    getMenu() {
+      return fetch({
+        url: '/permission/resource/getMenu',
+        method: 'post'
+      })
     }
   },
   role: {

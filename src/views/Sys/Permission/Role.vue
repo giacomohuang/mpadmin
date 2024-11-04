@@ -4,11 +4,12 @@
       <div class="list flex-1" ref="listRef">
         <RoleList :data="roleTree.children" @toggleCollapse="toggleCollapse" @open="openEditor" @remove="remove" />
       </div>
-      <div class="justify-centerpx-5 flex cursor-pointer py-3">
+      <div class="flex cursor-pointer justify-center px-5 py-3">
         <div class="w-[60px] rounded-md border border-transparent py-1 text-center text-base hover:border-brand-500 hover:text-brand-500" @click="openEditor(roleTree, EDITOR_MODE.ADD)">+</div>
       </div>
     </div>
   </div>
+
   <a-drawer title="角色编辑器" width="650px" :open="roleEditor" @close="roleEditor = false" :destroyOnClose="true">
     <a-form ref="roleFormRef" :model="roleForm" :rules="vRules" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }" @finish="submit">
       <a-form-item label="名称" :wrapper-col="{ span: 8 }" name="name">

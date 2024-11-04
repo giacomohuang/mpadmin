@@ -40,6 +40,8 @@ declare module 'vue' {
     IconSelect: typeof import('./src/components/IconSelect.vue')['default']
     IconX: typeof import('./src/components/IconX.vue')['default']
     MpCheckbox: typeof import('./src/components/mpCheckbox.vue')['default']
+    MpRouter: typeof import('./src/components/mpRouter.vue')['default']
+    MpRouterLink: typeof import('./src/components/mpRouterLink.vue')['default']
     MpSwitch: typeof import('./src/components/mpSwitch.vue')['default']
     PasswordStrength: typeof import('./src/components/PasswordStrength.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

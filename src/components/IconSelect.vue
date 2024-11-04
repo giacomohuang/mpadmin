@@ -1,5 +1,5 @@
 <template>
-  <div class="icon-select" aria-hidden="true">
+  <div class="icon-select">
     <div class="search-bar">
       <a-input v-model:value="keyword" :placeholder="$t('sys.permission.resource.searchIcon')" class="!w-[200px]">
         <template #prefix>
@@ -28,7 +28,8 @@
     <div v-else class="icon-grid">
       <div v-for="icon in filteredCustomIcons" :key="icon._id" class="icon-item" @click="selectIcon(2, icon.path)">
         <div class="del" @click="deleteIcon($event, icon)"></div>
-        <div class="custom-icon" :style="{ maskImage: `url(${customIconUrlPrefix + icon.path})` }" />
+        <Icon :name="icon.path" size="2em" :key="icon.path" />
+        <!-- <div class="custom-icon" :style="{ maskImage: `url(${customIconUrlPrefix + icon.path})` }" /> -->
         <span class="icon-name">{{ icon.name }}</span>
       </div>
     </div>
@@ -225,14 +226,14 @@ const deleteIcon = async (event, icon) => {
     grid-template-columns: repeat(auto-fill, 110px);
     gap: 12px;
 
-    .custom-icon {
-      width: 2em;
-      height: 2em;
-      background-color: var(--text-primary);
-      mask-size: 2em 2em;
-      mask-repeat: no-repeat;
-      mask-position: center;
-    }
+    // .custom-icon {
+    //   width: 2em;
+    //   height: 2em;
+    //   background-color: var(--text-primary);
+    //   mask-size: 2em 2em;
+    //   mask-repeat: no-repeat;
+    //   mask-position: center;
+    // }
 
     .icon-item {
       position: relative;

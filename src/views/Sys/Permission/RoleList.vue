@@ -1,7 +1,7 @@
 <template>
   <ul v-if="data">
     <li v-for="role in data" :key="role.id" draggable="true" class="dragitem" :data-id="role.id" :data-type="role.type" :id="'_MPRES_' + role.id">
-      <div class="item" :style="{ paddingLeft: `${lv * 24 + 12}px` }">
+      <div class="item" :style="{ paddingInlineStart: `${lv * 24 + 12}px` }">
         <div class="role-content" :class="{ gapper: !role.children }">
           <icon v-if="role.children" name="arrow-down" class="collapse-icon" :class="{ '-rotate-90': collapseRoleIds.has(role.id) }" @click.stop="toggleCollapse(role.id)" />
           <div class="role-info">

@@ -28,9 +28,7 @@
 </router>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, inject } from 'vue'
-import mpSwitch from '@/components/mpSwitch.vue'
-import mpCheckbox from '@/components/mpCheckbox.vue'
+import { inject } from 'vue'
 
 const { data, pidEnabled } = defineProps(['data', 'pidEnabled']),
   emits = defineEmits(['toggleCollapse', 'toggleSelect']),
@@ -129,40 +127,4 @@ function copyToClipBoard(ev, text) {
 .data {
   color: var(--c-amber-600);
 }
-
-// li {
-//   &.target {
-//     &:before {
-//       z-index: 100;
-//       content: ' ';
-//       width: 10px;
-//       height: 10px;
-//       margin-left: 20px;
-//       border: 2px solid #1b7ac7;
-//       border-radius: 50%;
-//       bottom: -6px;
-//       position: absolute;
-
-//       // left: 0;
-//     }
-//     &:after {
-//       content: ' ';
-//       width: 400px;
-//       height: 0;
-//       border-bottom: 2px solid #1b7ac7;
-//       margin-left: 29px;
-//       position: absolute;
-//       bottom: -2px;
-//       z-index: 100;
-//     }
-//   }
-//   &.top {
-//     &:before {
-//       top: -5px;
-//     }
-//     &:after {
-//       top: -1px;
-//     }
-//   }
-// }
 </style>

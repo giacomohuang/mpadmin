@@ -80,7 +80,7 @@
           </template>
           <template #dropdownRender="{ menuNode: menu }">
             <v-nodes :vnodes="menu" />
-            <div v-if="routerList.total > 1" style="padding: 16px 0; border-top: 1px solid var(--border-primary)">
+            <div v-if="routerList.total > 1" style="padding: 16px 0; border-top: 1px solid var(--border-light)">
               <a-pagination v-model:current="routerList.page" :total="routerList.total" show-less-items simple @change="changePage" />
             </div>
           </template>
@@ -717,7 +717,7 @@ const handleIconSelect = (icon) => {
         height: 32px;
         width: 224px;
         border-radius: 6px;
-        border: 1px solid var(--border-primary);
+        border: 1px solid var(--border-light);
         background-color: var(--bg-primary);
         padding-left: 32px;
         padding-right: 32px;
@@ -743,7 +743,7 @@ const handleIconSelect = (icon) => {
       top: 0;
     }
     .sidebar {
-      border-right: 1px solid var(--border-primary);
+      border-right: 1px solid var(--border-light);
 
       .nav-item {
         display: flex;

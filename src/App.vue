@@ -1,5 +1,5 @@
 <template>
-  <a-config-provider :theme="{ algorithm: antTheme, token: { colorPrimary: antColorPrimary } }" :locale="antLocale">
+  <a-config-provider :theme="{ algorithm: antTheme, token: { colorPrimary: antColorPrimary, fontFamily: 'inherit' } }" :locale="antLocale">
     <RouterView />
   </a-config-provider>
 </template>
@@ -104,4 +104,22 @@ function setThemeCss(mode) {
 }
 </script>
 
-<style scoped></style>
+<style>
+/* 这里把字体的定义独立出来，解决postcss-rtl插件无法正确处理外部scss的问题 */
+body {
+  font-family:
+    '-apple-system',
+    'BlinkMacSystemFont',
+    'Segoe UI',
+    'PingFang SC',
+    'Hiragino Sans GB',
+    'Microsoft YaHei',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif,
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
+    'Segoe UI Symbol' /*rtl:prepend:'NeoSansArabic','Droid Arabic Kufi','dubai',*/;
+}
+</style>

@@ -38,7 +38,7 @@
             <a-menu @click="onChangeLocale">
               <a-menu-item key="zh-CN"><a-tag color="blue">ZH</a-tag>简体中文</a-menu-item>
               <a-menu-item key="en"><a-tag color="blue">EN</a-tag>English</a-menu-item>
-              <a-menu-item key="ar"><a-tag color="blue">AR</a-tag>العربية</a-menu-item>
+              <a-menu-item key="ar" style="font-family: 'NeoSansArabic', 'Droid Arabic Kufi', dubai"><a-tag color="blue">AR</a-tag>العربية</a-menu-item>
             </a-menu>
           </template>
         </a-dropdown>
@@ -80,7 +80,6 @@
 <script setup>
 import { onMounted, ref, toRefs, provide, watch, onUnmounted, onBeforeMount, computed, nextTick } from 'vue'
 import dynamicRoutes from 'virtual:router'
-import { changeLocale } from '../js/i18n'
 import SubMenu from './SubMenu.vue'
 import { useStore } from '../stores/stores'
 import helper from '../js/helper'

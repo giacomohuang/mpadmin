@@ -1,7 +1,7 @@
 <template>
   <ul v-if="data">
     <li v-for="resource in data" :key="resource.id" v-show="resourceType == 0 || resource.type <= 1 || resourceType == resource.type" :draggable="resource.pid != null" class="dragitem" :data-id="resource.id" :data-type="resource.type" :id="'_MPRES_' + resource.id">
-      <div class="item" :style="{ paddingLeft: `${lv * 24 + 12}px` }">
+      <div class="item" :style="{ paddingInlineStart: `${lv * 24 + 12}px` }">
         <div class="resource-content" :class="{ gapper: !resource.children }">
           <icon v-if="resource.pid > 0 && resource.type == 1 && resource.children" name="arrow-down" class="collapse-icon" :class="{ collapsed: collapseIds.has(resource.id) }" @click="toggleCollapse(resource.id)" />
           <icon :name="RESTYPE[resource.type].type" :class="RESTYPE[resource.type].style"></icon>
@@ -79,7 +79,7 @@ function copyToClipBoard(ev, text) {
   }
 }
 
-/*rtl:ignore:start*/
+/*rtl:begin:ignore*/
 :deep(.checkmark) {
   color: #15803d;
   transition: opacity 150ms ease-in-out;
@@ -97,7 +97,7 @@ function copyToClipBoard(ev, text) {
     }
   }
 }
-/*rtl:ignore:end*/
+/*rtl:end:ignore*/
 
 .item {
   position: relative;

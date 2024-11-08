@@ -25,7 +25,7 @@
           </template>
           <template #dropdownRender="{ menuNode: menu }">
             <v-nodes :vnodes="menu" />
-            <div v-if="userList.total > 1" style="padding: 16px 0; border-top: 1px solid var(--border-primary)">
+            <div v-if="userList.total > 1" style="padding: 16px 0; border-top: 1px solid var(--border-light)">
               <a-pagination v-model:current="userList.page" :total="userList.total" show-less-items simple @change="changePage" />
             </div>
           </template>
@@ -458,6 +458,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+/*rtl:begin:ignore*/
 .main {
   position: relative;
   display: block;
@@ -519,6 +520,7 @@ onUnmounted(() => {
     }
   }
 }
+/*rtl:end:ignore*/
 
 .user-option {
   display: flex;

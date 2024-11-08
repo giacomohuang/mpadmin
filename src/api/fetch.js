@@ -25,6 +25,7 @@ fetch.interceptors.request.use(
     const accesstoken = localStorage.getItem('accessToken')
     // console.log('请求拦截')
     // console.log('refresh:', localStorage.getItem('refreshToken'))
+    config.headers['locale'] = localStorage.getItem('locale')
     if (accesstoken) {
       config.headers['Authorization'] = 'Bearer ' + accesstoken
       config.headers['refreshtoken'] = localStorage.getItem('refreshToken')

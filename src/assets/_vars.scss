@@ -4,13 +4,14 @@ $color-sets: (
   'red': #ef4444,
   'rose': #ff69b4,
   'orange': #f97316,
-  'gold': #ffd700,
   'yellow': #eab308,
+  'amber': #f59e0b,
   'lemon': #fff44f,
-  'grass': #7cfc00,
+  'lime': #84cc16,
   'green': #22c55e,
   'blue': #3b82f6,
   'brand': #2893ff,
+  'sky': #0ea5e9,
   'indigo': #4f46e5,
   'purple': #8b5cf6,
   'gray': #6e7781
@@ -52,8 +53,8 @@ $color-sets: (
 
   // 边框颜色
   --border-light: #f0f0f0;
-  --border-medium: var(--c-gray-300);
-  --border-dark: var(--c-gray-600);
+  --border-medium: #e0e0e0;
+  --border-dark: var(--c-gray-300);
 
   // 阴影颜色
   --shadow-sm: rgba(0, 0, 0, 0.05);
@@ -68,9 +69,9 @@ $color-sets: (
 [data-theme='dark'] {
   // 背景色
   --bg-primary: var(--c-gray-900);
-  --bg-secondary: var(--c-gray-950);
+  --bg-secondary: var(--c-gray-800);
   --bg-tertiary: var(--c-gray-700);
-  --bg-brand: var(--c-brand-950);
+  --bg-brand: var(--c-gray-950);
 
   // 文字颜色
   --text-primary: var(--c-gray-50);
@@ -79,8 +80,8 @@ $color-sets: (
 
   // 边框颜色
   --border-light: var(--c-gray-800);
-  --border-medium: var(--c-gray-700);
-  --border-dark: var(--c-gray-600);
+  --border-medium: var(--c-gray-500);
+  --border-dark: var(--c-gray-400);
 
   // 阴影颜色
   --shadow-sm: rgba(0, 0, 0, 0.2);

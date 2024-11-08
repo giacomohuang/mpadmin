@@ -1,11 +1,11 @@
 <template>
-  <div class="m-8">
-    <div class="w-[500px] flex-col rounded-md border border-primary bg-primary">
-      <div class="list flex-1" ref="listRef">
+  <div class="role-container">
+    <div class="role-wrapper">
+      <div class="list" ref="listRef">
         <RoleList :data="roleTree.children" @toggleCollapse="toggleCollapse" @open="openEditor" @remove="remove" />
       </div>
-      <div class="flex cursor-pointer justify-center px-5 py-3">
-        <div class="w-[60px] rounded-md border border-transparent py-1 text-center text-base hover:border-brand-500 hover:text-brand-500" @click="openEditor(roleTree, EDITOR_MODE.ADD)">+</div>
+      <div class="add-button-wrapper">
+        <div class="add-button" @click="openEditor(roleTree, EDITOR_MODE.ADD)">+</div>
       </div>
     </div>
   </div>
@@ -194,7 +194,19 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
-// 避免在拖拽时触发子级元素事件
+.role-container {
+  margin: 32px;
+}
+
+.role-wrapper {
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  background-color: var(--bg-primary);
+}
+
 .list:has(.dragging) {
   .item * {
     pointer-events: none;
@@ -204,23 +216,45 @@ onBeforeUnmount(() => {
   }
 }
 
+.add-button-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 12px 20px;
+  cursor: pointer;
+}
+
+.add-button {
+  width: 60px;
+  padding: 4px 0;
+  text-align: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 1em;
+
+  &:hover {
+    border-color: var(--c-brand-500);
+    color: var(--c-brand-500);
+  }
+}
+
 ::highlight(search-results) {
-  background-color: #4e9a06;
-  color: white;
+  background-color: var(--c-green-600);
+  color: var(--c-white);
 }
 
 :deep(.blink) {
-  border: 2px dashed #4e9a06;
+  border: 2px dashed var(--c-green-600);
   animation: blink 0.15s 6;
-  @keyframes blink {
-    0%,
-    80%,
-    100% {
-      opacity: 1;
-    }
-    40% {
-      opacity: 0;
-    }
+}
+
+@keyframes blink {
+  0%,
+  80%,
+  100% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0;
   }
 }
 </style>

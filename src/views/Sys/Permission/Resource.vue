@@ -1,34 +1,41 @@
 <template>
-  <div class="m-8">
-    <div class="z-50 mb-3 flex items-center gap-3">
+  <div class="container">
+    <div class="header">
       <a-radio-group v-model:value="resourceType">
         <a-radio-button value="0">{{ $t('sys.permission.resource.all') }}</a-radio-button>
         <a-radio-button value="1">{{ $t('sys.permission.resource.pagesOnly') }}</a-radio-button>
         <a-radio-button value="2">{{ $t('sys.permission.resource.pagesAndFunctions') }}</a-radio-button>
         <a-radio-button value="3">{{ $t('sys.permission.resource.pagesAndData') }}</a-radio-button>
       </a-radio-group>
-      <div class="relative flex items-center">
-        <icon name="search" class="absolute m-2"></icon>
-        <input class="h-8 w-56 rounded-md border border-secondary bg-primary px-8 outline-none duration-300 focus:border-brand-500 focus:ease-in" :placeholder="$t('sys.permission.resource.searchPlaceholder')" v-model="keywords" />
+      <div class="search-wrapper">
+        <icon name="search" class="search-icon"></icon>
+        <input class="search-input" :placeholder="$t('sys.permission.resource.searchPlaceholder')" v-model="keywords" />
       </div>
     </div>
 
-    <div class="flex w-[800px] rounded-md border border-primary bg-primary">
-      <div class="border-r border-primary">
-        <div class="sticky top-0">
+    <div class="content">
+      <div class="sidebar">
+        <div class="sticky-wrap">
           <ul ref="rootsRef">
-            <li v-for="root in roots" :key="root.id" :data-id="root.id" draggable="true" class="flex cursor-pointer justify-center px-5 py-3 text-base" :class="{ 'bg-secondary font-semibold': currentRootId === root.id }" @click="onChange(root.id)">{{ root.name }}</li>
+            <li v-for="root in roots" :key="root.id" :data-id="root.id" draggable="true" class="nav-item" :class="{ active: currentRootId === root.id }" @click="onChange(root.id)">
+              {{ root.name }}
+            </li>
           </ul>
-          <div class="flex cursor-pointer justify-center px-5 py-3">
-            <div class="w-[60px] rounded-md border border-transparent py-1 text-center text-base hover:border-brand-500 hover:text-brand-500" @click="openEditor(null, EDITOR_MODE.ADD)">+</div>
+          <div class="add-button">
+            <div class="button-inner" @click="openEditor(null, EDITOR_MODE.ADD)">+</div>
           </div>
         </div>
       </div>
-      <div class="hl-area relative flex-1" style="overflow-y: auto">
-        <div v-if="keywords && !resourceTree.children" class="p-4 text-secondary">
-          {{ $t('sys.permission.resource.noMatchingData') }}<a href="####" @click="keywords = ''">{{ $t('sys.permission.resource.clearSearchKeywords') }}</a>
+      <div class="main-content hl-area">
+        <div v-if="keywords && !resourceTree.children" class="empty-state">
+          {{ $t('sys.permission.resource.noMatchingData') }}
+          <a href="####" @click="keywords = ''">
+            {{ $t('sys.permission.resource.clearSearchKeywords') }}
+          </a>
         </div>
-        <div class="list" ref="listRef"><ResourceList :data="resourceTree.children" @open="openEditor" @remove="remove" @reorder="reorder" @toggleCollapse="toggleCollapse" v-if="resourceTree"></ResourceList></div>
+        <div class="list" ref="listRef">
+          <ResourceList :data="resourceTree.children" @open="openEditor" @remove="remove" @reorder="reorder" @toggleCollapse="toggleCollapse" v-if="resourceTree"> </ResourceList>
+        </div>
       </div>
     </div>
   </div>
@@ -116,8 +123,6 @@ import { useRouter } from 'vue-router'
 import IconSelect from '@/components/IconSelect.vue'
 
 const { t } = useI18n()
-const customIconUrlPrefix = import.meta.env.VITE_SVGICON_URL_PREFIX
-// console.log(customIconUrlPrefix)
 
 const VNodes = defineComponent({
   props: {
@@ -478,7 +483,7 @@ const submit = async () => {
   if (editorMode === EDITOR_MODE.ADD) {
     nextTick(() => {
       const el = document.getElementById('_MPRES_' + res.id)
-      // 判断节点是不是在可视范围内
+      // 判断节点是不是在可视范围
       const rect = el.getBoundingClientRect()
       const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight
       if (!isVisible) {
@@ -634,7 +639,8 @@ const handleIconSelect = (icon) => {
 
 <style scoped lang="scss">
 .dragging {
-  @apply border-2 border-dashed border-brand-500 bg-brand-50;
+  border: 2px dashed var(--c-brand-500);
+  background-color: var(--c-brand-100);
   > * {
     opacity: 0;
   }
@@ -649,6 +655,7 @@ const handleIconSelect = (icon) => {
   }
 }
 
+/*rtl:begin:ignore*/
 ::highlight(search-results) {
   background-color: #4e9a06;
   color: white;
@@ -668,10 +675,11 @@ const handleIconSelect = (icon) => {
     }
   }
 }
+/*rtl:end:ignore*/
 
 .router-option {
   .path {
-    font-size: 12px;
+    font-size: 0.8em;
     color: #888;
   }
 }
@@ -682,5 +690,112 @@ const handleIconSelect = (icon) => {
   mask-size: 1.5em 1.5em;
   mask-repeat: no-repeat;
   mask-position: center;
+}
+
+// 新增转换的Tailwind类
+.container {
+  margin: 32px;
+
+  .header {
+    z-index: 50;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .search-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      .search-icon {
+        position: absolute;
+        margin: 8px;
+      }
+
+      .search-input {
+        height: 32px;
+        width: 224px;
+        border-radius: 6px;
+        border: 1px solid var(--border-primary);
+        background-color: var(--bg-primary);
+        padding-left: 32px;
+        padding-right: 32px;
+        outline: none;
+        transition: border-color 0.3s;
+
+        &:focus {
+          border-color: var(--c-brand-500);
+        }
+      }
+    }
+  }
+
+  .content {
+    display: flex;
+    width: 800px;
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+    background-color: var(--bg-primary);
+
+    .sticky-wrap {
+      position: sticky;
+      top: 0;
+    }
+    .sidebar {
+      border-right: 1px solid var(--border-primary);
+
+      .nav-item {
+        display: flex;
+        cursor: pointer;
+        justify-content: center;
+        padding: 18px 20px;
+        font-size: 1.2em;
+
+        &.active {
+          background-color: var(--c-brand-100);
+          font-weight: 600;
+        }
+      }
+
+      .add-button {
+        display: flex;
+        cursor: pointer;
+        justify-content: center;
+        padding: 12px 20px;
+
+        .button-inner {
+          width: 60px;
+          border-radius: 6px;
+          border: 1px solid transparent;
+          padding: 4px;
+          text-align: center;
+          font-size: 1.2em;
+
+          &:hover {
+            border-color: var(--c-brand-500);
+            color: var(--c-brand-500);
+          }
+        }
+      }
+    }
+
+    .main-content {
+      position: relative;
+      flex: 1;
+      overflow-y: auto;
+
+      .empty-state {
+        padding: 16px;
+        color: var(--text-secondary);
+      }
+    }
+  }
+}
+
+.custom-icon {
+  width: 24px;
+  height: 24px;
+  mask-size: 24px 24px;
 }
 </style>

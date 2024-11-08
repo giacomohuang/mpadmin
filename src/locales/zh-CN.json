@@ -21,6 +21,9 @@
     "all": "全部",
     "save": "保存",
     "cancel": "取消",
+    "ok": "确定",
+    "upload": "上传",
+    "delete": "删除",
     "components": {
       "pwdstrength": {
         "weak": "很弱",
@@ -30,7 +33,7 @@
         "excellent": "很强"
       }
     },
-    "noSubmenu": "暂无子菜单"
+    "deleteSuccess": "删除成功"
   },
   "workspace": {
     "_title": "工作台",
@@ -87,7 +90,7 @@
       "newpwd": "新密码",
       "pep": "请输入密码",
       "pepa": "请再次输入密码",
-      "pnm": "两输入密码不一致",
+      "pnm": "两��入密码不一致",
       "cpwd": "修改密码",
       "cfpwd": "确认新密码",
       "syaeyps": "强化账户安全，确保使用强度高的密码。",
@@ -130,7 +133,13 @@
       "downloadApp": "点击这里下载",
       "enterVerificationCode": "输入6位验证码",
       "enterVerificationCodeHint": "在下面的框中输入APP中显示的6位验证码来激活你的动态口令验证服务。",
-      "2faWarning": "要使两步验证生效，请先设置手机号码、电子邮件或动态口令其中一项"
+      "2faWarning": "要使两步验证生效，请先设置手机号码、电子邮件或动态口令其中一项",
+      "pwdUpdateSuccess": "密码成功更新!",
+      "pwdUpdateError": "旧密码输入错误，请重试",
+      "sendTooFrequent": "发送过于频繁，请稍后再试",
+      "sendFailed": "发送失败, 请重试",
+      "emailSendFailed": "邮件发送失败, 请重试",
+      "update2FAFailed": "2FA更新失败"
     },
     "profile": {
       "_title": "我的资料"
@@ -176,11 +185,45 @@
         "icon": "图标",
         "selectIcon": "选择图标",
         "iconSelector": "图标选择器",
-        "searchIcon": "搜索图标"
+        "searchIcon": "搜索图标",
+        "autoSelectChildren": "自动勾选子级",
+        "searchKeywords": "输入关键词搜索",
+        "warn": {
+          "cssHighlightNotSupported": "CSS Custom Highlight API 不支持"
+        }
       }
     },
     "org": {
-      "_title": "组织架构"
+      "_title": "组织架构",
+      "department": "部门",
+      "selectLeader": "请选择负责人",
+      "selectRoles": "请至少选择一个角色",
+      "fullname": "全称",
+      "leader": "负责人",
+      "orgRoles": "组织角色",
+      "zoom": {
+        "out": "缩小",
+        "in": "放大",
+        "reset": "重置",
+        "center": "居中"
+      },
+      "roles": "角色"
+    }
+  },
+  "comp": {
+    "iconSelect": {
+      "systemIcons": "系统图标",
+      "customIcons": "自定义图标",
+      "noIcons": "暂无图标",
+      "uploadHint": {
+        "svgOnly": "只能上传 SVG 文件！",
+        "sizeLimit": "文件必须小于 1MB！",
+        "preparing": "准备上传...",
+        "uploading": "上传中... {percent}%",
+        "success": "上传成功！",
+        "failed": "上传失败：{error}"
+      },
+      "confirmContent": "Are you sure you want to delete {name}?"
     }
   }
 }

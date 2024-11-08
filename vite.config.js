@@ -24,9 +24,10 @@ export default defineConfig({
             } else if (id.includes('zxcvbn')) {
               return id.toString().split('node_modules/')[1].split('/')[0].toString()
             } else return 'mod'
-          } else if (id.includes('locales/')) {
-            return 'lo/' + id.toString().split('locales/')[1]
           }
+          // else if (id.includes('locales/')) {
+          //   return 'lo/' + id.toString().split('locales/')[1]
+          // }
         }
       }
     }

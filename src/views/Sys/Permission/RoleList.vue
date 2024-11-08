@@ -1,23 +1,24 @@
 <template>
   <ul v-if="data">
-    <li v-for="role in data" :key="role.id" draggable="true" class="dragitem pl-5" :data-id="role.id" :data-type="role.type" :id="'_MPRES_' + role.id">
-      <div class="item group">
-        <div class="flex gap-1">
-          <icon v-if="role.children" name="arrow-down" class="absolute cursor-pointer transition-transform" :class="{ '-rotate-90': collapseRoleIds.has(role.id) }" @click.stop="toggleCollapse(role.id)" />
-          <!--  -->
-          <div class="ml-6 flex flex-col">
-            <span class="flex text-base"><icon name="role" size="1.4em" class="text-orange-600"></icon>{{ role.name }}</span>
-            <span class="ml-6 py-1 text-tertiary">{{ role.description }}</span>
+    <li v-for="role in data" :key="role.id" draggable="true" class="dragitem" :data-id="role.id" :data-type="role.type" :id="'_MPRES_' + role.id">
+      <div class="item" :style="{ paddingLeft: `${lv * 24 + 12}px` }">
+        <div class="role-content" :class="{ gapper: !role.children }">
+          <icon v-if="role.children" name="arrow-down" class="collapse-icon" :class="{ '-rotate-90': collapseRoleIds.has(role.id) }" @click.stop="toggleCollapse(role.id)" />
+          <div class="role-info">
+            <span class="role-name">
+              <icon name="role" size="1.4rem" class="role-icon"></icon>
+              {{ role.name }}
+            </span>
+            <span class="role-description">{{ role.description }}</span>
           </div>
         </div>
-        <div class="tools flex items-center">
+        <div class="tools">
           <icon name="edit" size="1.8em" class="edit" @click.stop="openEditor(role, EDITOR_MODE.EDIT)" />
           <icon name="add" size="1.8em" class="add" @click.stop="openEditor(role, EDITOR_MODE.ADD)" />
           <icon name="del" size="1.8em" class="del" @click.stop="confirm(role.path)" />
         </div>
       </div>
-
-      <RoleList v-show="!collapseRoleIds.has(role.id)" :data="role.children" @open="openEditor" @remove="confirm" @toggleCollapse="toggleCollapse" />
+      <RoleList v-show="!collapseRoleIds.has(role.id)" :level="lv + 1" :data="role.children" @open="openEditor" @remove="confirm" @toggleCollapse="toggleCollapse" />
     </li>
   </ul>
 </template>
@@ -29,12 +30,14 @@
 </router>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, inject } from 'vue'
+import { inject } from 'vue'
 
 const EDITOR_MODE = { ADD: 1, EDIT: 2 },
-  { data } = defineProps(['data']),
+  { data, level } = defineProps(['data', 'level']),
   emits = defineEmits(['open', 'remove', 'toggleCollapse']),
   collapseRoleIds = inject('collapseRoleIds')
+
+const lv = level || 0
 
 function toggleCollapse(id) {
   emits('toggleCollapse', id)
@@ -52,14 +55,15 @@ function openEditor(parent, mode) {
 
 <style lang="scss" scoped>
 .dragging {
-  @apply border-2 border-dashed border-brand-500 bg-brand-50;
+  border: 2px dashed var(--c-brand-500);
+  background-color: var(--c-brand-50);
+
   > * {
     opacity: 0;
   }
 }
-// 避免在拖拽时触发子级元素事件
+
 .list:has(.dragging) {
-  // pointer-events: none;
   .item * {
     pointer-events: none;
   }
@@ -69,31 +73,92 @@ function openEditor(parent, mode) {
 }
 
 .item {
-  @apply flex h-16 items-center justify-between border-b border-primary py-3;
+  display: flex;
+  // height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-light);
+  padding: 14px 0;
 }
 
 .dragitem[draggable='true'] {
-  @apply cursor-move;
+  cursor: move;
 }
+
 .tools {
-  @apply opacity-0 transition-opacity duration-150 ease-in-out group-hover:opacity-100;
+  opacity: 0;
+  transition: opacity 150ms ease-in-out;
 }
+
+.item:hover .tools {
+  opacity: 1;
+}
+
 .del {
-  @apply mr-2 cursor-pointer text-red-600;
+  margin-right: 12px;
+  cursor: pointer;
+  color: var(--c-red-600);
+
   &:hover {
-    @apply text-red-400;
+    color: var(--c-red-400);
   }
 }
+
 .add {
-  @apply mx-2 cursor-pointer text-brand-600;
+  margin: 0 8px;
+  cursor: pointer;
+  color: var(--c-brand-600);
+
   &:hover {
-    @apply text-brand-400;
+    color: var(--c-brand-400);
   }
 }
+
 .edit {
-  @apply mx-2 cursor-pointer text-green-600;
+  margin: 0 8px;
+  cursor: pointer;
+  color: var(--c-green-600);
+
   &:hover {
-    @apply text-green-400;
+    color: var(--c-green-400);
   }
+}
+
+.role-content {
+  display: flex;
+}
+
+.collapse-icon {
+  // position: absolute;
+  // width: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.role-info {
+  // margin-left: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.role-name {
+  display: flex;
+  align-items: center;
+  font-size: 1.2em;
+}
+
+.role-icon {
+  color: var(--c-orange-600);
+  margin-right: 4px;
+}
+
+.role-description {
+  margin-left: 24px;
+  padding-top: 4px;
+  color: var(--text-tertiary);
+}
+
+.gapper {
+  margin-left: 20px;
 }
 </style>

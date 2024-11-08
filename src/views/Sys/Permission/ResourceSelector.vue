@@ -1,29 +1,34 @@
 <template>
-  <div class="z-50 mb-3 flex items-center gap-3">
+  <div class="options">
     <a-select v-model:value="resourceType" style="width: 100px">
-      <a-select-option value="0">全部资源</a-select-option>
-      <a-select-option value="1">仅页面</a-select-option>
-      <a-select-option value="2">页面+功能</a-select-option>
-      <a-select-option value="3">页面+数据</a-select-option>
+      <a-select-option value="0">{{ $t('sys.permission.resource.all') }}</a-select-option>
+      <a-select-option value="1">{{ $t('sys.permission.resource.pagesOnly') }}</a-select-option>
+      <a-select-option value="2">{{ $t('sys.permission.resource.pagesAndFunctions') }}</a-select-option>
+      <a-select-option value="3">{{ $t('sys.permission.resource.pagesAndData') }}</a-select-option>
     </a-select>
-    <div class="relative flex items-center">
-      <icon name="search" class="absolute m-2"></icon>
-      <input class="h-8 w-56 rounded-md border border-secondary bg-primary px-8 outline-none duration-300 focus:border-brand-500 focus:ease-in" placeholder="输入关键词搜索" v-model="keywords" />
+    <div class="search">
+      <icon name="search"></icon>
+      <input class="inputbox" :placeholder="$t('sys.permission.resource.searchKeywords')" v-model="keywords" />
     </div>
-    <a-checkbox v-model:checked="settings.isRecursive">自动勾选子级</a-checkbox>
+    <a-checkbox v-model:checked="settings.isRecursive">{{ $t('sys.permission.resource.autoSelectChildren') }}</a-checkbox>
   </div>
 
-  <div class="flex min-h-[500px] w-full flex-1 overflow-y-auto rounded-md border border-primary" style="max-height: calc(100vh - 400px)">
-    <div class="border-r border-primary">
-      <div class="sticky top-0">
+  <div class="list" style="max-height: calc(100vh - 400px)">
+    <div class="root-outline">
+      <div class="root-stikcy">
         <ul ref="rootsRef">
-          <li v-for="root in roots" :key="root.id" :data-id="root.id" class="flex cursor-pointer justify-center px-5 py-3 text-base" :class="{ 'bg-secondary font-semibold': currentRootId === root.id }" @click="onChange(root.id)">{{ root.name }}</li>
+          <li v-for="root in roots" :key="root.id" :data-id="root.id" class="root-item" :class="{ cur: currentRootId === root.id }" @click="onChange(root.id)">{{ root.name }}</li>
         </ul>
       </div>
     </div>
-    <div class="hl-area relative flex-1 overflow-y-auto">
-      <div v-if="keywords && !resourceTree.children" class="p-4 text-secondary">没有符合条件的数据。<a href="####" @click="keywords = ''">清除搜索关键词</a></div>
-      <div class="list" ref="listRef"><ResourceSelectorList :data="resourceTree.children" pidEnabled="true" @toggleCollapse="toggleCollapse" @toggleSelect="toggleSelect" v-if="resourceTree"></ResourceSelectorList></div>
+    <div class="items-outline">
+      <div v-if="keywords && !resourceTree.children" class="hint">
+        {{ $t('sys.permission.resource.noMatchingData') }}
+        <a href="####" @click="keywords = ''">{{ $t('sys.permission.resource.clearSearchKeywords') }}</a>
+      </div>
+      <div ref="listRef">
+        <ResourceSelectorList :data="resourceTree.children" pidEnabled="true" @toggleCollapse="toggleCollapse" @toggleSelect="toggleSelect" v-if="resourceTree" />
+      </div>
     </div>
   </div>
 </template>
@@ -39,6 +44,8 @@ import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick, provide, co
 import debounceRef from '@/js/debounceRef'
 import ResourceSelectorList from './ResourceSelectorList.vue'
 import API from '@/api/API'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 const { parentData } = defineProps(['parentData']),
   settings = reactive({ isRecursive: false }),
@@ -127,13 +134,13 @@ watch(resourceType, (val) => {
 
 const highlight = () => {
   if (!CSS.highlights) {
-    warn('CSS Custom Highlight API not supported.')
+    warn(t('sys.permission.resource.warn.cssHighlightNotSupported'))
     return
   }
   // 清除上个高亮
   CSS.highlights.clear()
   if (!resourceTree.value.children || !keywords.value) return
-  const article = document.querySelector('.hl-area')
+  const article = document.querySelector('.items-outline')
   if (!article) return
 
   const treeWalker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT)
@@ -244,8 +251,75 @@ onBeforeUnmount(() => {})
 </script>
 
 <style scoped lang="scss">
-::highlight(search-results) {
-  background-color: #4e9a06;
-  color: white;
+.options {
+  z-index: 50;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  .inputbox {
+    border: 1px solid var(--border-light);
+    background-color: var(--bg-primary);
+    height: 32px;
+    width: 224px;
+    border-radius: 6px;
+    padding-left: 32px;
+    padding-right: 32px;
+    outline: none;
+    transition-duration: 300ms;
+    &:focus {
+      border-color: var(--c-brand);
+      transition-timing-function: ease-in;
+    }
+  }
+}
+
+.list {
+  border: 1px solid var(--border-light);
+  display: flex;
+  min-height: 500px;
+  overflow-y: auto;
+  border-radius: 6px;
+}
+
+.root-outline {
+  border-right: 1px solid var(--border-light);
+}
+.root-stikcy {
+  position: sticky;
+  top: 0;
+}
+
+.root-item {
+  cursor: pointer;
+  justify-content: center;
+  padding: 12px 20px;
+  font-size: 16px;
+
+  &.current {
+    background-color: var(--bg-secondary);
+    font-weight: 600;
+  }
+}
+
+.items-outline {
+  flex: 1;
+  overflow-y: auto;
+
+  ::highlight(search-results) {
+    background: #4e9a06;
+    color: white;
+  }
+}
+
+.hint {
+  color: var(--text-secondary);
+  padding: 12px 20px;
 }
 </style>

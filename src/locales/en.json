@@ -21,6 +21,9 @@
     "all": "All",
     "save": "Save",
     "cancel": "Cancel",
+    "upload": "Upload",
+    "ok": "Confirm",
+    "delete": "Delete",
     "components": {
       "pwdstrength": {
         "weak": "weak",
@@ -29,7 +32,8 @@
         "strong": "strong",
         "excellent": "excellent"
       }
-    }
+    },
+    "deleteSuccess": "Delete successfully"
   },
   "workspace": {
     "_title": "Workspace",
@@ -129,7 +133,13 @@
       "downloadApp": "Click here to download",
       "enterVerificationCode": "Enter 6-digit verification code",
       "enterVerificationCodeHint": "Enter the 6-digit verification code displayed in the APP below to activate your dynamic password verification service.",
-      "2faWarning": "To enable two-factor authentication, please set up at least one of the following: mobile phone number, email, or dynamic password"
+      "2faWarning": "To enable two-factor authentication, please set up at least one of the following: mobile phone number, email, or dynamic password",
+      "pwdUpdateSuccess": "Password updated successfully!",
+      "pwdUpdateError": "Old password is incorrect, please try again",
+      "sendTooFrequent": "Sending too frequent, please try again later",
+      "sendFailed": "Send failed, please try again",
+      "emailSendFailed": "Email send failed, please try again",
+      "update2FAFailed": "2FA update failed"
     },
     "profile": {
       "_title": "My Profile"
@@ -171,11 +181,48 @@
         "target": "Open Mode",
         "currentPage": "Current Page",
         "newPage": "New Page",
-        "isHidden": "Hidden"
+        "isHidden": "Hidden",
+        "iconSelector": "Icon selector",
+        "icon": "icon",
+        "autoSelectChildren": "Auto select children",
+        "searchKeywords": "Enter keywords to search",
+        "warn": {
+          "cssHighlightNotSupported": "CSS Custom Highlight API not supported"
+        },
+        "selectIcon": "Select icon"
       }
     },
     "org": {
-      "_title": "Organization"
+      "_title": "Organization",
+      "department": "department",
+      "selectLeader": "Please select a leader",
+      "selectRoles": "Please select at least one role",
+      "fullname": "Full Name",
+      "leader": "Leader",
+      "orgRoles": "Organization Roles",
+      "zoom": {
+        "out": "Zoom Out",
+        "in": "Zoom In",
+        "reset": "Reset",
+        "center": "Center"
+      },
+      "roles": "Roles"
+    }
+  },
+  "comp": {
+    "iconSelect": {
+      "systemIcons": "System Icons",
+      "customIcons": "Custom Icons",
+      "noIcons": "No Icons",
+      "uploadHint": {
+        "svgOnly": "Can only upload SVG files!",
+        "sizeLimit": "File must be smaller than 1MB!",
+        "preparing": "Preparing upload...",
+        "uploading": "Uploading... {percent}%",
+        "success": "Upload successful!",
+        "failed": "Upload failed: {error}"
+      },
+      "confirmContent": "Are you sure you want to delete {name}?"
     }
   }
 }

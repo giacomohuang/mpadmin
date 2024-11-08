@@ -1,7 +1,10 @@
 import { nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { router } from '../router/router'
-const SUPPORT_LOCALES = ['en', 'zh-CN']
+// 支持的语言
+const SUPPORT_LOCALES = ['en', 'zh-CN', 'ar']
+// 从右到左的语言：阿拉伯语、希伯来语、波斯语、乌尔都语
+const RTL_LOCALES = ['ar', 'he', 'fa', 'ur']
 const sysLocale = navigator.language
 const localeFiles = import.meta.glob('../locales/**/*.json')
 const currentLocale = localStorage.getItem('locale') || (SUPPORT_LOCALES.includes(sysLocale) ? sysLocale : 'en')
@@ -28,6 +31,9 @@ export async function changeLocale(locale) {
   }
   localStorage.setItem('locale', locale)
   document.querySelector('html').setAttribute('lang', locale)
+
+  document.dir = RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'
+
   const title = router.currentRoute.value.meta.title
   // console.log(title)
   if (title) {

@@ -1,23 +1,23 @@
 <template>
   <ul v-if="data">
-    <li v-for="resource in data" :key="resource.id" v-show="resourceType == 0 || resource.type <= 1 || resourceType == resource.type" :draggable="resource.pid != null" class="dragitem pl-4" :data-id="resource.id" :data-type="resource.type" :id="'_MPRES_' + resource.id">
-      <div class="item group">
-        <div class="flex flex-row items-center gap-1" :class="{ 'pl-6': resource.pid > 0 }">
-          <icon v-if="resource.pid > 0 && resource.type === 1 && resource.children" name="arrow-down" class="absolute left-0 cursor-pointer transition-transform" :class="{ '-rotate-90': collapseIds.has(resource.id) }" @click="toggleCollapse(resource.id)" />
+    <li v-for="resource in data" :key="resource.id" v-show="resourceType == 0 || resource.type <= 1 || resourceType == resource.type" :draggable="resource.pid != null" class="dragitem" :data-id="resource.id" :data-type="resource.type" :id="'_MPRES_' + resource.id">
+      <div class="item" :style="{ paddingLeft: `${lv * 24 + 12}px` }">
+        <div class="resource-content" :class="{ gapper: !resource.children }">
+          <icon v-if="resource.pid > 0 && resource.type == 1 && resource.children" name="arrow-down" class="collapse-icon" :class="{ collapsed: collapseIds.has(resource.id) }" @click="toggleCollapse(resource.id)" />
           <icon :name="RESTYPE[resource.type].type" :class="RESTYPE[resource.type].style"></icon>
           <span class="resource-name">{{ resource.name }}</span>
           <span class="tag red">{{ resource.id }}</span>
-          <span v-if="resource.code" class="tag gray clickable-item mr-2 cursor-pointer" :title="$t('sys.permission.resource.copyToClipboard')" @click="copyToClipBoard($event, resource.code)">
+          <span v-if="resource.code" class="tag gray resource-code" :title="$t('sys.permission.resource.copyToClipboard')" @click="copyToClipBoard($event, resource.code)">
             {{ resource.code }}
           </span>
         </div>
-        <div class="tools flex items-center">
+        <div class="tools">
           <icon name="edit" size="1.8em" class="edit" @click="openEditor(resource, EDITOR_MODE.EDIT)" :title="$t('common.edit')" />
           <icon v-if="resource.type === 1" size="1.8em" name="add" class="add" @click="openEditor(resource, EDITOR_MODE.ADD)" :title="$t('sys.permission.resource.addSubResource')" />
           <icon name="del" size="1.8em" class="del" @click="confirm(resource.path, resource.pid)" :title="$t('common.del')" />
         </div>
       </div>
-      <ResourceList v-show="!collapseIds.has(resource.id)" :data="resource.children" @open="openEditor" @remove="confirm" @toggleCollapse="toggleCollapse" />
+      <ResourceList v-show="!collapseIds.has(resource.id)" :level="lv + 1" :data="resource.children" @open="openEditor" @remove="confirm" @toggleCollapse="toggleCollapse" />
     </li>
   </ul>
 </template>
@@ -31,17 +31,19 @@
 <script setup>
 import { inject } from 'vue'
 
-const { data } = defineProps(['data'])
+const { data, level } = defineProps(['data', 'level'])
 const EDITOR_MODE = { ADD: 1, EDIT: 2 }
 const emits = defineEmits(['open', 'remove', 'toggleCollapse'])
 
 const collapseIds = inject('collapseIds')
 const resourceType = inject('resourceType')
 
+const lv = level || 0
+
 const RESTYPE = {
-  1: { type: 'menu', style: 'text-sky-600' },
-  2: { type: 'func', style: 'text-lime-600' },
-  3: { type: 'data', style: 'text-amber-600' }
+  1: { type: 'menu', style: 'menu' },
+  2: { type: 'func', style: 'func' },
+  3: { type: 'data', style: 'data' }
 }
 
 function toggleCollapse(id) {
@@ -70,27 +72,17 @@ function copyToClipBoard(ev, text) {
 
 <style lang="scss" scoped>
 .dragging {
-  @apply border-2 border-dashed border-brand-500 bg-brand-50;
+  border: 2px dashed var(--c-brand-500);
+  background-color: var(--c-brand-100);
   > * {
     opacity: 0;
   }
 }
 
-/*
- * This class applies content-visibility optimization
- * It sets content-visibility to auto for better performance
- * A fixed height and contain-intrinsic-size are specified
- * to help the browser estimate the content size before rendering
- */
-// .content-visibility {
-//   content-visibility: auto;
-//   height: 50px;
-//   contain-intrinsic-size: 50px;
-// }
-
-//保证在js中可以成功调用
+/*rtl:ignore:start*/
 :deep(.checkmark) {
-  @apply text-green-700 transition-opacity duration-150 ease-in-out;
+  color: #15803d;
+  transition: opacity 150ms ease-in-out;
   animation: appear 1s forwards;
   font-size: 10px;
   position: relative;
@@ -105,79 +97,115 @@ function copyToClipBoard(ev, text) {
     }
   }
 }
-
-// .hide {
-//   display: none;
-// }
+/*rtl:ignore:end*/
 
 .item {
-  @apply relative flex h-14 items-center justify-between border-b py-3;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-light);
+  padding: 14px 0;
+  &:hover {
+    .tools {
+      opacity: 1;
+    }
+  }
 }
+
 .dragitem[draggable='true'] {
-  @apply cursor-move;
+  cursor: move;
 }
+
 .tools {
-  @apply opacity-0 transition-opacity duration-150 ease-in-out group-hover:opacity-100;
+  opacity: 0;
+  transition: opacity 150ms ease-in-out;
 }
+
 .del {
-  @apply mr-2 cursor-pointer text-red-600;
+  margin-right: 12px;
+  cursor: pointer;
+  color: var(--c-red-600);
 }
+
 .add {
-  @apply mx-2 cursor-pointer text-brand-600;
+  margin: 0 8px;
+  cursor: pointer;
+  color: var(--c-brand-600);
 }
+
 .edit {
-  @apply mx-2 cursor-pointer text-green-600;
+  margin: 0 8px;
+  cursor: pointer;
+  color: var(--c-green-600);
 }
 
 .tag {
-  @apply rounded-md border px-2 py-[2px] text-xs text-gray-800;
+  border-radius: 6px;
+  border: 1px solid;
+  padding: 2px 8px;
+  font-size: 0.8em;
+  color: var(--text-primary);
+
   &.gray {
-    @apply border-primary bg-gray-50;
+    border-color: var(--c-gray-200);
+    background-color: var(--c-gray-50);
   }
+
   &.green {
-    @apply border-green-300 bg-green-50;
+    border-color: var(--c-green-200);
+    background-color: var(--c-green-50);
   }
+
   &.blue {
-    @apply border-blue-200 bg-blue-50;
+    border-color: var(--c-blue-200);
+    background-color: var(--c-blue-50);
   }
+
   &.red {
-    @apply border-red-200 bg-red-50;
+    border-color: var(--c-red-200);
+    background-color: var(--c-red-50);
   }
 }
 
-// li {
-//   &.target {
-//     &:before {
-//       z-index: 100;
-//       content: ' ';
-//       width: 10px;
-//       height: 10px;
-//       margin-left: 20px;
-//       border: 2px solid #1b7ac7;
-//       border-radius: 50%;
-//       bottom: -6px;
-//       position: absolute;
+.resource-content {
+  // position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
 
-//       // left: 0;
-//     }
-//     &:after {
-//       content: ' ';
-//       width: 400px;
-//       height: 0;
-//       border-bottom: 2px solid #1b7ac7;
-//       margin-left: 29px;
-//       position: absolute;
-//       bottom: -2px;
-//       z-index: 100;
-//     }
-//   }
-//   &.top {
-//     &:before {
-//       top: -5px;
-//     }
-//     &:after {
-//       top: -1px;
-//     }
-//   }
-// }
+  &[data-pid='true'] {
+    padding-left: 24px;
+  }
+
+  .func {
+    color: var(--c-lime-600);
+  }
+  .data {
+    color: var(--c-amber-600);
+  }
+  .menu {
+    color: var(--c-sky-600);
+  }
+}
+.gapper {
+  padding-left: 24px;
+}
+
+.collapse-icon {
+  // position: absolute;
+  // left: -24px;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &.collapsed {
+    transform: rotate(-90deg);
+  }
+}
+
+.resource-code {
+  margin-right: 8px;
+  cursor: pointer;
+}
 </style>

@@ -13,7 +13,6 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
 import enUS from 'ant-design-vue/es/locale/en_US'
-import twConfig from '../tailwind.config'
 
 // 全局主题: [dark, light, system]
 const store = useStore()
@@ -47,7 +46,9 @@ const darkMode = window.matchMedia('(prefers-color-scheme: dark)')
 // antv组件主题
 const antTheme = ref('')
 // antv主色设置为系统的品牌色
-const antColorPrimary = ref(twConfig.theme.extend.colors.brand['500'])
+var r = document.querySelector(':root')
+const styles = getComputedStyle(r)
+const antColorPrimary = ref(styles.getPropertyValue('--c-brand-500'))
 setTheme(theme.value)
 
 darkMode.addEventListener('change', (e) => {

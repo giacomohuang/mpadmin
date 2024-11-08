@@ -1,5 +1,5 @@
 <template>
-  <div class="main" data-simplebar>
+  <div class="main" data-simplebar :data-simplebar-direction="isRTL ? 'rtl' : 'ltr'">
     <div class="canvas">
       <div id="scaler">
         <div id="nodes" ref="orgRef">
@@ -11,10 +11,10 @@
 
   <a-drawer :title="orgForm.name" width="500px" :open="orgEditor" @close="orgEditor = false">
     <a-form ref="orgFormRef" :model="orgForm" :rules="formRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
-      <a-form-item label="全称" name="fullname">
+      <a-form-item :label="$t('sys.org.fullname')" name="fullname">
         <div>{{ orgForm.fullname }}</div>
       </a-form-item>
-      <a-form-item label="负责人" name="leaderId">
+      <a-form-item :label="$t('sys.org.leader')" name="leaderId">
         <a-select v-model:value="orgForm.leaderId" show-search :filter-option="false" @search="getUserList" optionLabelProp="realname" :options="userList.data" :fieldNames="{ label: 'realname', value: '_id' }">
           <template #option="{ realname, avatar, accountname }">
             <div class="user-option">
@@ -34,7 +34,7 @@
           </template>
         </a-select>
       </a-form-item>
-      <a-form-item label="角色" name="roles">
+      <a-form-item :label="$t('sys.org.roles')" name="roles">
         <a-select v-model:value="orgForm.roles" mode="multiple">
           <a-select-option v-for="role in roleList" :value="role.id" :key="role.id">
             {{ role.name }}
@@ -42,8 +42,8 @@
         </a-select>
       </a-form-item>
       <a-form-item :wrapper-col="{ offset: 6, span: 18 }">
-        <a-button type="primary" @click="submitForm">保存</a-button>
-        <a-button style="margin-left: 10px" @click="orgEditor = false">取消</a-button>
+        <a-button type="primary" @click="submitForm">{{ $t('common.save') }}</a-button>
+        <a-button style="margin-left: 10px" @click="orgEditor = false">{{ $t('common.cancel') }}</a-button>
       </a-form-item>
     </a-form>
   </a-drawer>
@@ -63,9 +63,15 @@ import OrgNode from './OrgNode.vue'
 import Drag from '@/js/dragCanvas'
 import API from '@/api/API'
 import 'simplebar'
-import 'simplebar/dist/simplebar.css'
+import '@/assets/simplebar.css'
 import { DnD } from '@/js/DnDTree'
 import { debounce } from 'lodash-es'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
+const isRTL = document.dir === 'rtl'
+
 const VNodes = defineComponent({
   props: {
     vnodes: {
@@ -95,8 +101,8 @@ const userList = reactive({
 })
 
 const formRules = {
-  leaderId: [{ required: true, message: '请选择负责人', trigger: 'change' }],
-  roles: [{ type: 'array', min: 1, message: '请至少选择一个角色', trigger: 'change' }]
+  leaderId: [{ required: true, message: t('sys.org.selectLeader'), trigger: 'change' }],
+  roles: [{ type: 'array', min: 1, message: t('sys.org.selectRoles'), trigger: 'change' }]
 }
 
 // 主数据
@@ -197,7 +203,7 @@ const add = async (item, direction) => {
   const newData = {
     id: null,
     pid: null,
-    name: '部门',
+    name: $t('sys.org.department'),
     type: 0,
     isEntity: false,
     leaderId: null,
@@ -214,7 +220,7 @@ const add = async (item, direction) => {
       newData.pid = item.id
       // newData.level = item.level + 1
       newData.order = item.children?.length === 0 ? 1 : item.children[item.children.length - 1].order + 1
-      newData.fullname = `${item.fullname}-部门`
+      newData.fullname = `${item.fullname}-${t('sys.org.department')}`
       break
     case 'previous':
     case 'next':
@@ -227,7 +233,7 @@ const add = async (item, direction) => {
       newData.pid = item.pid
       // newData.level = item.level
       newData.path = parent.path
-      newData.fullname = `${parent.fullname}-部门`
+      newData.fullname = `${parent.fullname}-${t('sys.org.department')}`
       // 先确定新节点的order：插入位置的前一个节点的order + 1
       if (direction === 'previous') {
         newData.order = insertIndex === 0 ? 1 : siblings[insertIndex - 1].order + 1
@@ -354,7 +360,9 @@ const openEditor = async (item) => {
   // 初始化下拉框
   if (orgForm.leaderId) {
     const user = await API.account.get(orgForm.leaderId)
-    userList.data.push(user)
+    if (user) {
+      userList.data.push(user)
+    }
   }
   // // 获取负责人选项
   // const leadersRes = await API.org.getLeaders()

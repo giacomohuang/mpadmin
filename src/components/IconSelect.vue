@@ -7,7 +7,7 @@
         </template>
       </a-input>
     </div>
-    <div class="my-2">系统图标</div>
+    <div class="title">{{ $t('comp.iconSelect.systemIcons') }}</div>
     <div class="icon-grid">
       <div v-for="icon in filteredIcons" :key="icon" class="icon-item" @click="selectIcon(1, icon)">
         <Icon :name="icon" size="2em" />
@@ -15,15 +15,15 @@
       </div>
     </div>
     <a-divider />
-    <div class="my-2 flex items-center gap-4">
-      <div>自定义图标</div>
+    <div class="title">
+      <div>{{ $t('comp.iconSelect.customIcons') }}</div>
       <a-upload accept=".svg" :show-upload-list="false" :before-upload="handleBeforeUpload" :custom-request="handleCustomUpload">
-        <a-button type="primary"> 上传 </a-button>
+        <a-button type="primary">{{ $t('common.upload') }}</a-button>
       </a-upload>
       <a-tag v-if="uploadStatus.show" :color="uploadStatus.type">{{ uploadStatus.message }}</a-tag>
     </div>
     <div v-if="filteredCustomIcons.length == 0">
-      <div class="text-center text-secondary">暂无图标</div>
+      <div class="no-icon">{{ $t('comp.iconSelect.noIcons') }}</div>
     </div>
     <div v-else class="icon-grid">
       <div v-for="icon in filteredCustomIcons" :key="icon._id" class="icon-item" @click="selectIcon(2, icon.path)">
@@ -46,6 +46,7 @@ import { ref, computed, onMounted, reactive } from 'vue'
 import { message, Modal } from 'ant-design-vue'
 import API from '@/api/API'
 import debounceRef from '@/js/debounceRef'
+import { useI18n } from 'vue-i18n'
 
 const emit = defineEmits(['iconSelect'])
 const customIconUrlPrefix = import.meta.env.VITE_SVGICON_URL_PREFIX
@@ -65,15 +66,17 @@ const pagination = reactive({
   loading: false
 })
 
+const { t } = useI18n()
+
 // 处理上传前的验证
 const handleBeforeUpload = (file) => {
   const isSvg = file.type === 'image/svg+xml'
   if (!isSvg) {
-    message.error('只能上传 SVG 文件！')
+    message.error(t('comp.iconSelect.uploadHint.svgOnly'))
   }
   const isLt2M = file.size / 1024 / 1024 < 1
   if (!isLt2M) {
-    message.error('文件必须小于 1MB！')
+    message.error(t('comp.iconSelect.uploadHint.sizeLimit'))
   }
   return isSvg && isLt2M
 }
@@ -90,7 +93,7 @@ const loadCustomIcons = async (page = 1) => {
     pagination.current = page
     console.log('***pagination', pagination)
   } catch (error) {
-    message.error('加载自定义图标失败：' + error.message)
+    message.error('load custom icon error：' + error.message)
   } finally {
     pagination.loading = false
   }
@@ -100,7 +103,7 @@ const loadCustomIcons = async (page = 1) => {
 const handleCustomUpload = async ({ file, onSuccess, onError }) => {
   try {
     uploadStatus.show = true
-    uploadStatus.message = '准备上传...'
+    uploadStatus.message = t('comp.iconSelect.uploadHint.preparing')
     uploadStatus.type = 'info'
     uploadStatus.percent = 0
 
@@ -114,14 +117,14 @@ const handleCustomUpload = async ({ file, onSuccess, onError }) => {
     // 上传并显示进度
     const res = await API.oss.svgIconUpload(formData, (progress) => {
       uploadStatus.percent = Math.round((progress / file.size) * 100)
-      uploadStatus.message = `上传中... ${uploadStatus.percent}%`
+      uploadStatus.message = t('comp.iconSelect.uploadHint.uploading', { percent: uploadStatus.percent })
     })
 
     // 更新图标列表
     // customIcons.value.push({ name: iconName, url: 'http://localhost:9000/svgicon/' + res.filename })
 
     uploadStatus.show = true
-    uploadStatus.message = '上传成功！'
+    uploadStatus.message = t('comp.iconSelect.uploadHint.success')
     uploadStatus.type = 'success'
     uploadStatus.percent = 100
 
@@ -138,7 +141,7 @@ const handleCustomUpload = async ({ file, onSuccess, onError }) => {
     await loadCustomIcons(1)
   } catch (error) {
     uploadStatus.show = true
-    uploadStatus.message = `上传失败：${error.message}`
+    uploadStatus.message = t('comp.iconSelect.uploadHint.failed', { error: error.message })
     uploadStatus.type = 'error'
     uploadStatus.percent = 0
 
@@ -183,10 +186,10 @@ const deleteIcon = async (event, icon) => {
   event.stopPropagation()
 
   Modal.confirm({
-    title: '确认删除',
-    content: `确定要删除图标 "${icon.name}" 吗？`,
-    okText: '确定',
-    cancelText: '取消',
+    title: t('common.delete'),
+    content: t('comp.iconSelect.confirmContent', { name: icon.name }),
+    okText: t('common.ok'),
+    cancelText: t('common.cancel'),
     onOk: async () => {
       // 调用删除 API
       await API.oss.removeSvgIcon(icon.path)
@@ -211,13 +214,19 @@ const deleteIcon = async (event, icon) => {
         // 否则重新加载当前页
         await loadCustomIcons(pagination.current)
       }
-      message.success('删除成功')
+      message.success(t('common.deleteSuccess'))
     }
   })
 }
 </script>
 
 <style lang="scss" scoped>
+.title {
+  margin: 30px 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .icon-select {
   padding: 12px;
 
@@ -307,5 +316,9 @@ const deleteIcon = async (event, icon) => {
       pointer-events: none;
     }
   }
+}
+.no-icon {
+  text-align: center;
+  color: var(--text-secondary);
 }
 </style>

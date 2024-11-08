@@ -37,7 +37,7 @@ router.beforeEach(async (to, from, next) => {
   // console.log(to.path)
   // console.log(meta)
   // console.log(localStorage.getItem('refreshToken'))
-  await loadLocaleData(getLocale())
+
   setTitle(meta.title)
   // 如果当前页面不需要认证token，直接放行
   if (meta.noAuth) {

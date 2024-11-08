@@ -4,7 +4,7 @@ import App from './App.vue'
 
 import { router } from './router/router'
 import './router/permission'
-import i18n from './js/i18n'
+import i18n, { changeLocale, getLocale } from './js/i18n'
 import './assets/index.scss'
 import './assets/main.scss'
 // import 'virtual:svg-icons-register'
@@ -16,6 +16,7 @@ const app = createApp(App)
 if (!localStorage.getItem('locale')) {
   localStorage.setItem('locale', 'zh-CN')
 }
+changeLocale(getLocale())
 
 // 在应用启动时插入SVG sprite
 // insertSprite()

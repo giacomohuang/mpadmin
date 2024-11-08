@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 const props = defineProps(['data'])
 // function toggle_children(ev) {
 //   const dom = ev.currentTarget.nextElementSibling
@@ -34,11 +34,8 @@ function toggle_children(ev) {
 onMounted(() => {
   //   //默认展开当前路由的子菜单
   const dom = document.querySelector('.submenu .active')
-  console.log(dom)
   if (dom) {
-    // dom.classList.add('expand')
     dom.parentElement.parentElement.classList.add('expand')
-    // dom.nextElementSibling.style.display = 'flex'
   }
 })
 </script>
@@ -66,6 +63,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   height: 36px;
+  width: 180px;
+  overflow-x: hidden;
   padding-left: 12px;
   margin: 0;
   color: var(--text-primary);

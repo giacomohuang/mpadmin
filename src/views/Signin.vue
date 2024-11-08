@@ -1,34 +1,36 @@
 <template>
-  <div class="radial-gradient flex h-screen w-screen items-start justify-center">
+  <div class="signin-container radial-gradient">
     <context-holder />
-    <header class="bg-primary/50 absolute left-0 right-0 z-20 flex h-16 items-center px-3">
-      <div class="shrink-0 flex-grow whitespace-nowrap px-5">
-        <a href="/" class="flex">
-          <img src="@/assets/logo.png" class="mr-4 h-6 w-6" />
-          <div class="text-2xl/none font-semibold text-[var(--text-primary)]">{{ $t('common.appname') }}</div>
+    <header class="header">
+      <div class="logo-container">
+        <a href="/" class="logo-link">
+          <img src="@/assets/logo.svg" />
+          <div class="app-name">{{ $t('common.appname') }}</div>
         </a>
       </div>
 
-      <div class="mx-3">
+      <div class="language-selector">
         <a-dropdown>
-          <a @click.prevent> <Icon name="global" size="2em" /></a>
+          <a @click.prevent> <Icon name="global" /></a>
           <template #overlay>
             <a-menu @click="onChangeLocale">
-              <a-menu-item key="zh-CN">简体中文</a-menu-item>
-              <a-menu-item key="en"> English</a-menu-item>
+              <a-menu-item key="zh-CN"><a-tag color="blue">ZH</a-tag>简体中文</a-menu-item>
+              <a-menu-item key="en"><a-tag color="blue">EN</a-tag>English</a-menu-item>
+              <a-menu-item key="ar"><a-tag color="blue">AR</a-tag>العربية</a-menu-item>
             </a-menu>
           </template>
         </a-dropdown>
       </div>
-      <div class="mr-3 hidden cursor-pointer flex-nowrap text-tertiary md:flex">
-        <Icon name="theme-light" size="2em" class="icon" @click="store.changeTheme('light')" :class="{ 'text-orange-400': store.theme === 'light' }"></Icon>
-        <Icon name="theme-dark" size="2em" class="icon" @click="store.changeTheme('dark')" :class="{ 'text-blue-500': store.theme === 'dark' }"></Icon>
-        <Icon name="theme-system" size="2em" class="icon" @click="store.changeTheme('system')" :class="{ 'text-black': store.theme === 'system' }"></Icon>
+
+      <div class="theme-selector">
+        <Icon name="theme-light" class="icon light" @click="store.changeTheme('light')" :class="{ active: store.theme === 'light' }"></Icon>
+        <Icon name="theme-dark" class="icon dark" @click="store.changeTheme('dark')" :class="{ active: store.theme === 'dark' }"></Icon>
+        <Icon name="theme-system" class="icon system" @click="store.changeTheme('system')" :class="{ active: store.theme === 'system' }"></Icon>
       </div>
     </header>
-    <section class="bg-primary/50 mt-60 block w-[500px] rounded border-primary p-10 backdrop-blur" v-if="state.method === 'pwd'">
+    <section class="form-section" v-if="state.method === 'pwd'">
       <a-form :model="signinForm" @finish="handleSignin" autocomplete="off" :label-col="{ span: 6 }">
-        <h3 class="mx-auto mb-5 text-xl text-primary">{{ $t('signin.title') }}</h3>
+        <h3 class="form-title">{{ $t('signin.title') }}</h3>
         <a-form-item :label="$t('signin.accountname')" name="accountname" :rules="[{ required: true, message: $t('signin.peya') }]">
           <a-input autocomplete="off" size="large" large v-model:value="signinForm.accountname" />
           <!-- placeholder="请填写用于登录的邮箱" -->
@@ -37,26 +39,33 @@
           <a-input-password autocomplete="new-password" size="large" v-model:value="signinForm.password" />
           <!-- placeholder="密码" -->
         </a-form-item>
-        <a-form-item>
-          <a-button type="primary" :loading="state.loading" html-type="submit" style="margin: 0 20px 0 90px"> {{ $t('signin.signin') }} </a-button> <a href="####" @click="state.method = 'resetPwd'">{{ $t('signin.forgotpwd') }}</a>
+        <a-form-item class="form-buttons">
+          <a-button type="primary" :loading="state.loading" html-type="submit" class="primary-btn">
+            {{ $t('signin.signin') }}
+          </a-button>
+          <a href="####" @click="state.method = 'resetPwd'" class="link-btn">{{ $t('signin.forgotpwd') }}</a>
         </a-form-item>
       </a-form>
       <!-- <div style="margin: 0 0 0 90px; font-size: 12px">30天内没有访问将重新登录</div> -->
     </section>
 
-    <section class="bg-primary/50 mt-60 block w-[500px] rounded border-primary p-10 backdrop-blur" v-if="state.method == 'totp'">
-      <h3 class="m-2 flex items-center text-lg font-semibold text-primary">使用动态口令App进行两步验证</h3>
-      <div class="m-3 text-sm/normal text-primary" style="margin-top: 40px">请查看动态口令App中的6位动态数字口令，并在下面的的框中输入</div>
-      <VerifyInput style="width: 100%" class="flex items-center justify-center" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
-      <div class="m-3 text-sm/normal text-primary" style="margin-top: 40px">
-        <template v-if="state.methodBit == 7"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a> </template>
-        <template v-if="state.methodBit == 5"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a></template>
-        <template v-if="state.methodBit == 6"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a></template>
+    <section class="form-section" v-if="state.method == 'totp'">
+      <div class="verify-container">
+        <h3 class="verify-title">使用动态口令App进行两步验证</h3>
+        <div class="verify-desc">请查看动态口令App中的6位动态数字口令，并在下面的的框中输入</div>
+        <div class="verify-input-wrapper">
+          <VerifyInput v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA" />
+        </div>
+        <div class="other-methods">
+          <template v-if="state.methodBit == 7"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a> </template>
+          <template v-if="state.methodBit == 5"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a></template>
+          <template v-if="state.methodBit == 6"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a></template>
+        </div>
       </div>
     </section>
 
-    <section class="bg-primary/50 mt-60 block w-[500px] rounded border-primary p-10 backdrop-blur" v-if="state.method == 'email'">
-      <h3 class="m-2 flex items-center text-lg font-semibold text-primary">使用电子邮件进行两步验证</h3>
+    <section class="form-section" v-if="state.method == 'email'">
+      <h3 class="section-title">使用电子邮件进行两步验证</h3>
       <div class="flex items-center justify-center" style="margin-top: 40px">
         <h4 class="ml-5 p-0 text-lg/none">{{ helper.obfuscate('email', state.email) }}</h4>
         <div v-if="emailState.isCountDown">{{ emailState.countDownTime }}秒后可重新发送</div>
@@ -66,15 +75,15 @@
         <div class="m-3 text-sm/normal text-primary">一封验证邮件已经发送到你的邮箱，请查看邮件中的6位数字验证码，并在下面的的框中输入</div>
         <VerifyInput style="width: 100%" class="flex items-center justify-center" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
       </div>
-      <div class="m-3 text-sm/normal text-primary" style="margin-top: 40px">
+      <div class="section-title">
         <template v-if="state.methodBit == 7"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a> </template>
         <template v-else-if="state.methodBit == 6"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a> </template>
         <template v-else-if="state.methodBit == 3"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('phone')">手机短信验证</a> </template>
       </div>
     </section>
 
-    <section class="bg-primary/50 mt-60 block w-[500px] rounded border-primary p-10 backdrop-blur" v-if="state.method == 'phone'">
-      <h3 class="m-2 flex items-center text-lg font-semibold text-primary">使用手机短信进行两步验证</h3>
+    <section class="form-section" v-if="state.method == 'phone'">
+      <h3 class="section-title">使用手机短信进行两步验证</h3>
       <div class="flex items-center justify-center" style="margin-top: 40px">
         <h4 class="ml-5 p-0 text-lg/none">{{ helper.obfuscate('phone', state.phone) }}</h4>
         <div v-if="phoneState.isCountDown">{{ phoneState.countDownTime }}秒后可重新发送</div>
@@ -84,15 +93,15 @@
         <div class="m-3 text-sm/normal text-primary">已向你的手机发送了一条验证短信，请查看手机短信中的6位数字验证码，并在下面的的框中输入</div>
         <VerifyInput style="width: 100%" class="flex items-center justify-center" v-model:value="state.code" :autofocus="true" :digits="6" @finish="handleSignin2FA"></VerifyInput>
       </div>
-      <div class="m-3 text-sm/normal text-primary" style="margin-top: 40px">
+      <div class="section-title">
         <template v-if="state.methodBit == 7"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a>&nbsp | &nbsp<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a> </template>
         <template v-else-if="state.methodBit == 5"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('totp')">动态口令App验证(推荐)</a> </template>
         <template v-else-if="state.methodBit == 3"> 使用其他方式验证：<a href="####" @click="handleChangeMethod('email')">电子邮件验证</a> </template>
       </div>
     </section>
 
-    <section class="bg-primary/50 mt-60 block w-[500px] rounded border-primary p-10 backdrop-blur" v-if="state.method == 'initPwd'">
-      <h3 class="m-2 flex items-center text-lg font-semibold text-primary">需要更新密码</h3>
+    <section class="form-section" v-if="state.method == 'initPwd'">
+      <h3 class="section-title">需要更新密码</h3>
       <div class="m-3 text-sm/normal text-primary">首次登录或长时间没有修改密码，需要重新设置密码</div>
       <a-form ref="pwdFormRef" style="margin-top: 30px" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" @finish="handleInitPwd">
         <a-form-item has-feedback :label="$t('signin.newpwd')" name="newPassword">
@@ -109,8 +118,8 @@
       </a-form>
     </section>
 
-    <section class="bg-primary/50 mt-60 block w-[500px] rounded border-primary p-10 backdrop-blur" v-if="state.method == 'resetPwd'">
-      <h3 class="m-2 flex items-center text-lg font-semibold text-primary">重置密码</h3>
+    <section class="form-section" v-if="state.method == 'resetPwd'">
+      <h3 class="section-title">重置密码</h3>
       使用以下方式接收临时密码，使用临时密码登录后，再设置新的密码。
       <a-form-item>
         <a-radio-group v-model:value="state.resetPwdMethod">
@@ -387,70 +396,212 @@ if (localStorage.getItem('phoneCDT')) {
 </script>
 
 <style lang="scss" scoped>
-// .title {
-//   font-size: 20px;
-//   font-weight: 400;
-//   color: var(--c-text-main);
-//   margin: 0px auto 20px auto;
-//   text-align: center;
-// }
+.signin-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  align-items: flex-start;
+  justify-content: center;
+}
 
-// .tips {
-//   color: var(--text-secondary);
-//   margin: 12px 0;
-//   font-size: 14px;
-//   line-height: 160%;
-// }
+.header {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  height: 64px;
+  align-items: center;
+  padding: 0 12px;
+  background-color: #ffffff40;
+  gap: 20px;
 
-// section {
-//   display: block;
-//   width: 500px;
-//   padding: 40px;
-//   margin-top: 240px;
-//   // background: var(--bg-layout);
-//   background-color: var(--bg-main-transparent); /* 半透明背景 */
-//   backdrop-filter: blur(10px); /* 背景模糊 */
-//   -webkit-backdrop-filter: blur(10px); /* 兼容老版本 Safari */
-//   border: 1px solid var(--bg-layout);
-//   // border:
-//   border-radius: 4px;
-//   transition: 0.2s;
-//   &:hover {
-//     box-shadow: 0 0 25px 12px var(--bg-shadow);
-//   }
-// }
+  .logo-container {
+    flex-shrink: 0;
+    flex-grow: 1;
+    white-space: nowrap;
+    padding: 0 20px;
 
-// .send {
-//   h4 {
-//     font-size: 18px;
-//     line-height: 100%;
-//     margin: 0 20px 0 0;
+    .logo-link {
+      display: flex;
 
-//     padding: 0;
-//   }
-// }
+      img {
+        margin-right: 16px;
+        height: 24px;
+        width: 24px;
+      }
 
-// .step {
-//   margin: 40px 0 0 0;
-//   .title {
-//     display: flex;
-//     align-items: center;
-//     font-weight: 20px;
-//     color: var(--text-primary);
-//     font-size: 18px;
-//     font-weight: 800;
-//     margin: 5px 0;
-//   }
-//   .hint {
-//     color: var(--text-secondary);
-//     margin-left: 35px;
-//   }
-// }
+      .app-name {
+        font-size: 1.5em;
+        line-height: 1;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+    }
+  }
+
+  .language-selector {
+    margin: 0 12px;
+  }
+
+  .theme-selector {
+    margin-right: 12px;
+    display: none;
+    cursor: pointer;
+    flex-wrap: nowrap;
+    color: var(--text-tertiary);
+    gap: 12px;
+    @media (min-width: 768px) {
+      display: flex;
+    }
+
+    .icon {
+      &:hover {
+        color: var(--c-brand);
+      }
+      &.light {
+        color: var(--c-orange);
+      }
+      &.dark {
+        color: var(--c-blue);
+      }
+      &.system {
+        color: var(--c-black);
+      }
+    }
+  }
+}
+
+.form-section {
+  margin-top: 240px;
+  display: block;
+  width: 500px;
+  border-radius: 4px;
+  padding: 40px;
+  background-color: #ffffffa0;
+  backdrop-filter: blur(8px);
+
+  .section-title {
+    margin: 8px;
+    display: flex;
+    align-items: center;
+    font-size: 1.125em;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .section-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 40px;
+  }
+
+  // 验证相关样式
+  .verify-container {
+    margin-top: 40px;
+
+    .verify-title {
+      font-size: 1.125em;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      margin: 8px;
+    }
+
+    .verify-desc {
+      font-size: 0.875em;
+      line-height: normal;
+      color: var(--text-primary);
+      margin: 12px;
+    }
+
+    .verify-input-wrapper {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  // 发送验证码区域
+  .send-code-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 40px;
+
+    .contact-info {
+      margin-left: 20px;
+      padding: 0;
+      font-size: 1.125em;
+      line-height: 1;
+    }
+
+    .countdown {
+      margin-left: 12px;
+    }
+  }
+
+  // 其他验证方式
+  .other-methods {
+    margin: 12px;
+    font-size: 0.875em;
+    line-height: normal;
+    color: var(--text-primary);
+    margin-top: 40px;
+
+    a {
+      color: var(--c-brand);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // 密码重置表单
+  .pwd-reset-form {
+    margin-top: 30px;
+
+    .pwd-strength {
+      position: absolute;
+      top: -20px;
+    }
+  }
+
+  // 重置密码说明
+  .reset-pwd-desc {
+    margin: 12px 0;
+    font-size: 0.875em;
+    line-height: normal;
+    color: var(--text-primary);
+  }
+
+  // 表单按钮
+  .form-buttons {
+    margin-left: 90px;
+
+    .primary-btn {
+      margin-right: 20px;
+    }
+
+    .link-btn {
+      color: var(--c-brand);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
 
 [data-theme='light'] {
   .radial-gradient {
     --bg-main-transparent: rgba(255, 255, 255, 0.5);
-    --bg-shadow: #00000012;
+    --bg-shadow: rgba(0, 0, 0, 0.07);
     background-color: #a0a4a8;
     background-image: radial-gradient(closest-side, rgb(135, 208, 221), rgba(235, 105, 78, 0)), radial-gradient(closest-side, rgb(7, 62, 92), rgba(243, 11, 164, 0)), radial-gradient(closest-side, rgb(30, 5, 82), rgba(102, 8, 126, 0)), radial-gradient(closest-side, rgb(195, 111, 0), rgba(170, 142, 245, 0));
     background-size:
@@ -471,7 +622,7 @@ if (localStorage.getItem('phoneCDT')) {
 [data-theme='dark'] {
   .radial-gradient {
     --bg-main-transparent: rgba(0, 0, 0, 0.2);
-    --bg-shadow: #00000012;
+    --bg-shadow: rgba(0, 0, 0, 0.07);
     background-color: #443f3f;
     background-image: radial-gradient(closest-side, rgb(7, 46, 66), rgba(235, 105, 78, 0)), radial-gradient(closest-side, rgb(67, 0, 77), rgba(243, 11, 164, 0)), radial-gradient(closest-side, rgb(53, 14, 145), rgba(254, 234, 131, 0)), radial-gradient(closest-side, rgb(89, 50, 0), rgba(170, 142, 245, 0));
     background-size:

@@ -3,7 +3,7 @@
     <header class="header">
       <div class="logo-container">
         <a @click="router.push('/')" class="logo-link">
-          <img src="@/assets/logo.svg" style="width: 2em; height: 2em" class="logo-image" />
+          <img src="@/assets/logo.svg" vvv class="logo-image" />
           <div class="app-name">{{ $t('common.appname') }}</div>
         </a>
       </div>
@@ -36,8 +36,9 @@
           <a @click.prevent> <Icon name="global" /></a>
           <template #overlay>
             <a-menu @click="onChangeLocale">
-              <a-menu-item key="zh-CN">简体中文</a-menu-item>
-              <a-menu-item key="en">English</a-menu-item>
+              <a-menu-item key="zh-CN"><a-tag color="blue">ZH</a-tag>简体中文</a-menu-item>
+              <a-menu-item key="en"><a-tag color="blue">EN</a-tag>English</a-menu-item>
+              <a-menu-item key="ar"><a-tag color="blue">AR</a-tag>العربية</a-menu-item>
             </a-menu>
           </template>
         </a-dropdown>
@@ -47,7 +48,7 @@
         <Icon name="theme-dark" class="icon" @click="store.changeTheme('dark')" :class="{ dark: store.theme === 'dark' }"></Icon>
         <Icon name="theme-system" class="icon" @click="store.changeTheme('system')" :class="{ system: store.theme === 'system' }"></Icon>
       </div>
-      <div class="assist-icon"><img src="@/assets/assist.svg" @click="showAssist = !showAssist" /></div>
+      <div class="assist-icon"><img src="@/assets/assist.svg" style="width: 1.5em; height: 1.5em" @click="showAssist = !showAssist" /></div>
     </header>
     <aside class="menu">
       <div style="display: flex; align-items: center; justify-content: center; margin: 10px">
@@ -56,13 +57,13 @@
       <div v-for="(item, index) in menu" :key="index">
         <div class="wrapper" @click.stop="clickMenuItem(item, index)">
           <div :class="['item', { active: isActiveMenu(item) }]">
-            <Icon class="sys-icon" :name="item.icon || 'func'" :key="item.icon"></Icon>
+            <Icon class="icon" :name="item.icon || 'func'" :key="item.icon"></Icon>
             <span class="text">{{ $t(item.name) }}</span>
           </div>
         </div>
       </div>
     </aside>
-    <aside class="submenu" ref="submenuRef" v-if="submenu?.length > 0">
+    <aside class="submenu" ref="submenuRef" :class="{ hide: submenu?.length == 0 }">
       <SubMenu :data="submenu"></SubMenu>
     </aside>
 
@@ -105,8 +106,10 @@ const menu = ref(dynamicRoutes)
 const submenu = ref(null)
 const currentMenuIdx = ref(-1)
 const onChangeLocale = async ({ key }) => {
-  await changeLocale(key)
+  // await changeLocale(key)
+  localStorage.setItem('locale', key)
   locale.value = key
+  window.location.reload()
 }
 
 // 添加一个变量来跟踪用户点击选中的菜单项
@@ -444,9 +447,9 @@ onUnmounted(() => {
       }
     }
 
-    .item-text {
-      // display: none;
-      display: block;
+    .text {
+      text-align: center;
+      line-height: 1.2;
     }
 
     .custom-icon {
@@ -470,6 +473,8 @@ onUnmounted(() => {
   z-index: 1;
   width: 180px;
   box-shadow: 2px 0 4px 0 rgba(100, 100, 100, 0.1);
+  transition: width 0.15s ease;
+
   &.float {
     position: fixed; // 改为fixed以确保在滚动时保持位置
     left: 98px; // 与mini menu的宽度对应
@@ -479,6 +484,9 @@ onUnmounted(() => {
     border: 1px solid var(--border-light);
     border-radius: 10px;
     box-shadow: 2px 2px 4px 0 rgba(1, 1, 1, 0.3);
+  }
+  &.hide {
+    width: 0;
   }
 }
 
@@ -533,7 +541,7 @@ onUnmounted(() => {
     // z-index: 500;
   }
 }
-.sys-icon {
+.icon {
   margin: 4px 0;
 }
 
@@ -543,5 +551,11 @@ onUnmounted(() => {
   overflow: hidden;
   background-color: var(--bg-brand);
   max-height: calc(100vh - 64px);
+}
+</style>
+
+<style>
+.rtl-test {
+  margin-left: 20px;
 }
 </style>

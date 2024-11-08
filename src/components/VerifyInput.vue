@@ -152,10 +152,10 @@ const onKeyUp = (e) => {
 
 input {
   all: unset;
-  background: var(--bg-input);
+  background: var(--bg-primary);
   height: 50px;
   width: 50px;
-  border: 1px solid var(--color-border-hover);
+  border: 1px solid var(--border-medium);
   border-radius: 20%;
   font-size: 2em;
   font-weight: 600;
@@ -164,8 +164,8 @@ input {
 
   &:focus,
   .active {
-    border-color: var(--c-brand100);
-    box-shadow: 0px 0px 0px 2px var(--c-brand100);
+    border-color: var(--c-brand);
+    box-shadow: 0px 0px 0px 2px var(--c-brand);
   }
   &:disabled {
     color: var(--text-tertiary);

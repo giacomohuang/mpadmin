@@ -148,14 +148,15 @@ function editTitle(ev, item) {
 
 .dragging {
   .node {
-    @apply bg-brand-50 outline-dashed outline-2 outline-brand-500;
+    background: var(--c-brand-50);
+    outline: 2px dashed var(--c-brand-500);
   }
   .node > * {
     opacity: 0;
   }
 }
 
-$border-color: var(--border-tertiary);
+$border-color: var(--border-dark);
 $border-radius: 5px;
 $border-size: 1px;
 .group {
@@ -186,12 +187,12 @@ $border-size: 1px;
   align-items: center;
   position: relative;
 
-  &::before {
+  &:before {
     content: '';
     position: absolute;
     height: 20px;
     border-color: $border-color;
-    border-style: $border-radius;
+    border-style: solid;
   }
 
   // 不止一个子节点，才显示横线
@@ -208,7 +209,9 @@ $border-size: 1px;
       top: -20px;
       left: 50%;
       height: 20px;
-      border-left: $border-size solid $border-color;
+      border-color: $border-color;
+      border-left-width: $border-size;
+      // $border-color;
     }
   }
 
@@ -411,7 +414,7 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
   align-items: center;
   justify-content: center;
 
-  @apply text-brand-600;
+  color: var(--c-brand-600);
   &.top {
     width: 100%;
     height: 15px;
@@ -433,7 +436,8 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
 
   .btn {
     position: absolute;
-    @apply border border-brand-600 bg-primary;
+    border: 1px solid var(--c-brand-600);
+    background: var(--bg-primary);
     border-radius: 50%;
     height: 15px;
     width: 15px;
@@ -451,14 +455,14 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
       width: 11px;
       top: 2px;
       left: 6px;
-      @apply border-l border-brand-600;
+      border-left: 1px solid var(--c-brand-600);
     }
     &:after {
       height: 11px;
       width: 9px;
       top: 6px;
       left: 2px;
-      @apply border-t border-brand-600;
+      border-top: 1px solid var(--c-brand-600);
     }
   }
 }

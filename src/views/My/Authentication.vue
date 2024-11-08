@@ -2,7 +2,7 @@
   <context-holder />
   <div class="main" v-show="!globalLoading">
     <section>
-      <div class="title flex-item-c flex-between flex">
+      <div class="title">
         <h2>{{ $t('my.authentication.pwd') }}</h2>
         <a-button @click.stop="state.toggleChangePwd = !state.toggleChangePwd">{{ state.toggleChangePwd ? $t('my.authentication.hide') : $t('my.authentication.cpwd') }}</a-button>
       </div>
@@ -27,7 +27,7 @@
       </div>
     </section>
     <section>
-      <div class="title flex-item-c flex">
+      <div class="title">
         <h2>{{ $t('my.authentication.mobi') }}</h2>
       </div>
       <div class="tips">{{ $t('my.authentication.enhphone') }}</div>
@@ -43,7 +43,7 @@
             </a-select>
           </a-form-item>
           <a-form-item has-feedback name="phoneNew" :rules="phoneRules">
-            <a-input v-model:value="phoneForm.phoneNew" style="width: 140px" />
+            <a-input v-model:value="phoneForm.phoneNew" style="width: 140px" type="tel" />
           </a-form-item>
           <a-form-item>
             <a-button @click="handleSendSMS" v-if="!phoneState.isCountDown" :loading="state.loading" class="resend" type="link">{{ $t('my.authentication.svcode') }}</a-button>
@@ -58,7 +58,7 @@
     </section>
 
     <section>
-      <div class="title flex-item-c flex">
+      <div class="title">
         <h2>{{ $t('my.authentication.email') }}</h2>
       </div>
       <div class="tips">{{ $t('my.authentication.enhemail') }}</div>
@@ -76,7 +76,7 @@
             <span class="resend resend-hint" v-if="emailState.isCountDown">{{ $t('my.authentication.resendin', emailState.countDownTime) }}</span>
           </a-form-item>
         </a-form>
-        <div class="flex-item-c verifycode flex-col" v-if="emailState.isSend">
+        <div class="verifycode" v-if="emailState.isSend">
           <div class="hint">{{ $t('my.authentication.rsvemail') }}</div>
           <VerifyInput v-model="emailState.verifyCode" :autofocus="true" :digits="6" @finish="handleUpdateEmail"></VerifyInput>
         </div>
@@ -84,7 +84,7 @@
     </section>
 
     <section>
-      <div class="title flex-item-c flex">
+      <div class="title">
         <h2>{{ $t('my.authentication.totp') }}</h2>
       </div>
       <div class="tips">{{ $t('my.authentication.enhtotp') }}</div>
@@ -98,7 +98,7 @@
           <div class="hint">
             {{ $t('my.authentication.scanQRCodeHint') }} <a href="/downauthapp" target="_blank">{{ $t('my.authentication.downloadApp') }}</a>
           </div>
-          <div style="margin-top: 20px" class="flex-item-c flex-col">
+          <div style="margin-top: 20px; display: flex; justify-content: center">
             <div style="border-radius: 8px; width: fit-content; height: fit-content"><a-qrcode v-if="totpState.activationUrl" :value="totpState.activationUrl" /></div>
           </div>
         </div>
@@ -111,7 +111,7 @@
     </section>
 
     <section>
-      <div class="title flex-item-c flex-between flex">
+      <div class="title">
         <h2>{{ $t('my.authentication.2fa') }}</h2>
       </div>
       <div class="tips">{{ $t('my.authentication.enh2fa') }}</div>
@@ -159,7 +159,6 @@ const state = reactive({
 const pwdFormRef = ref()
 const emailFormRef = ref()
 const phoneFormRef = ref()
-const totpFormRef = ref()
 
 const pwdForm = reactive({
   oldPassword: '',
@@ -285,11 +284,11 @@ const handleUpdatePwd = async () => {
   try {
     const resp = await API.account.updatePassword(pwdForm.oldPassword, pwdForm.newPassword)
     if (resp.result) {
-      messageApi.success('密码成功更新!')
+      messageApi.success(t('my.authentication.pwdUpdateSuccess'))
       pwdFormRef.value.resetFields()
       state.toggleChangePwd = !state.toggleChangePwd
     } else {
-      messageApi.success('旧密码输入错误，请重试')
+      messageApi.success(t('my.authentication.pwdUpdateError'))
     }
   } catch (err) {
     console.log(err)
@@ -317,9 +316,9 @@ const handleSendEmail = async () => {
     countDown(emailState, emailForm.emailNew, emailInterval, 'email', store.accountid)
   } catch (err) {
     if (err?.data?.code === 102) {
-      messageApi.warning('发送过于频繁，请稍后再试')
+      messageApi.warning(t('my.authentication.sendTooFrequent'))
     } else {
-      messageApi.error('发送失败, 请重试')
+      messageApi.error(t('my.authentication.emailSendFailed'))
     }
   } finally {
     state.loading = false
@@ -390,9 +389,9 @@ const handleSendSMS = async () => {
     countDown(phoneState, `${phoneForm.areacode}~${phoneForm.phoneNew}`, phoneInterval, 'phone')
   } catch (err) {
     if (err?.data?.code === 104) {
-      messageApi.warning('发送过于频繁，请稍后再试')
+      messageApi.warning(t('my.authentication.sendTooFrequent'))
     } else {
-      messageApi.error('发送失败, 请重试')
+      messageApi.error(t('my.authentication.sendFailed'))
     }
   } finally {
     state.loading = false
@@ -457,7 +456,7 @@ const handleToggle2FA = async () => {
   try {
     const resp = await API.account.update2FA({ enable2FA: state.enable2FA })
     if (!resp.result) {
-      messageApi('error', '2FA更新失败')
+      messageApi('error', t('my.authentication.update2FAFailed'))
       state.enable2FA = !state.enable2FA
     }
   } catch (err) {
@@ -524,7 +523,39 @@ onUnmounted(() => {
 })
 </script>
 <style lang="scss" scoped>
-@use '../../assets/page.scss';
+.main {
+  max-width: 950px;
+  padding: 20px;
+}
+section {
+  margin-bottom: 60px;
+  .title {
+    border-bottom: 1px solid var(--border-medium);
+    padding-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .content {
+    margin: 40px 0;
+  }
+  .tips {
+    color: var(--text-secondary);
+    margin: 12px 0;
+    font-size: 14px;
+  }
+  .item {
+    color: var(--text-primary);
+    margin: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    label {
+      font-weight: 500;
+      // font-size: 14px;
+    }
+  }
+}
 
 .resend {
   font-size: 12px;
@@ -553,7 +584,7 @@ onUnmounted(() => {
   vertical-align: middle;
   font-size: 14px;
   text-align: center;
-  background-color: var(--c-brand2);
+  background-color: var(--c-brand);
   color: var(--c-white);
   font-weight: 600;
 }

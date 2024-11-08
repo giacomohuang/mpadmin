@@ -72,7 +72,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import API from '../../api/API'
 import SimpleBar from 'simplebar'
-import 'simplebar/dist/simplebar.css'
+import '@/assets/simplebar.css'
 
 const { t, locale } = useI18n()
 
@@ -105,9 +105,10 @@ onMounted(async () => {
   pagination.total = result.total
   isLoading.value = false
   const el = document.querySelector('.main-wrap')
-  new SimpleBar(el)
+
+  new SimpleBar(el, { direction: document.dir })
   const eltable = document.querySelector('.ant-table-content')
-  new SimpleBar(eltable)
+  new SimpleBar(eltable, { direction: document.dir })
 })
 
 const handleTableChange = async (p, filters, sorter) => {

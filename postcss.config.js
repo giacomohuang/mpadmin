@@ -1,6 +1,9 @@
 export default {
   plugins: {
-    tailwindcss: {},
+    // tailwindcss: {},
     autoprefixer: {},
-  },
+    'postcss-rtlcss': {
+      safeBothPrefix: true
+    }
+  }
 }

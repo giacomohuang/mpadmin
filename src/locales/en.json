@@ -71,7 +71,7 @@
     "accountlist": {
       "_title": "Account List",
       "accountname": "Account Name",
-      "realname": "Real Name",
+      "realname": "Name",
       "email": "Email",
       "phone": "Mobile Phone",
       "2fa": "2FA"

@@ -153,7 +153,14 @@ const center = () => {
 
   resizeCanvas()
 
-  scrollbar.scrollLeft = (canvas.offsetWidth - scrollbar.clientWidth) / 2
+  // 考虑RTL布局的水平居中
+  if (isRTL) {
+    scrollbar.scrollLeft = -((canvas.offsetWidth - scrollbar.clientWidth) / 2)
+  } else {
+    scrollbar.scrollLeft = (canvas.offsetWidth - scrollbar.clientWidth) / 2
+  }
+
+  // 垂直居中不受RTL影响
   scrollbar.scrollTop = (canvas.offsetHeight - scrollbar.clientHeight) / 2
 }
 

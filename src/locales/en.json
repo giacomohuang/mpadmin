@@ -182,8 +182,9 @@
         "currentPage": "Current Page",
         "newPage": "New Page",
         "isHidden": "Hidden",
-        "iconSelector": "Icon selector",
         "icon": "icon",
+        "iconSelector": "Icon selector",
+        "searchIcon": "Search icon",
         "autoSelectChildren": "Auto select children",
         "searchKeywords": "Enter keywords to search",
         "warn": {

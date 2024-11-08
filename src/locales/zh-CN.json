@@ -183,14 +183,14 @@
         "newPage": "新页面",
         "isHidden": "是否隐藏",
         "icon": "图标",
-        "selectIcon": "选择图标",
         "iconSelector": "图标选择器",
         "searchIcon": "搜索图标",
         "autoSelectChildren": "自动勾选子级",
         "searchKeywords": "输入关键词搜索",
         "warn": {
           "cssHighlightNotSupported": "CSS Custom Highlight API 不支持"
-        }
+        },
+        "selectIcon": "选择图标"
       }
     },
     "org": {

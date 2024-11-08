@@ -182,8 +182,9 @@
         "currentPage": "الصفحة الحالية",
         "newPage": "صفحة جديدة",
         "isHidden": "مخفي",
-        "iconSelector": "محدد الأيقونة",
         "icon": "رمز",
+        "iconSelector": "محدد الأيقونة",
+        "searchIcon": "بحث عن رمز",
         "autoSelectChildren": "تحديد الفروع تلقائياً",
         "searchKeywords": "أدخل الكلمات المفتاحية للبحث",
         "warn": {
@@ -197,6 +198,15 @@
       "department": "قسم",
       "selectLeader": "الرجاء اختيار مسؤول",
       "selectRoles": "الرجاء اختيار دور واحد على الأقل",
+      "fullname": "الاسم الكامل",
+      "leader": "مسؤول",
+      "orgRoles": "دور المؤسسة",
+      "zoom": {
+        "out": "تصغير",
+        "in": "تكبير",
+        "reset": "إعادة تعيين",
+        "center": "المركز"
+      },
       "roles": "دور"
     }
   },

@@ -1,6 +1,6 @@
 <template>
   <div class="i18n-input-wrapper">
-    <a-input v-bind="$attrs" :value="modelValue[locale]" @input="handleInput" class="i18n-input">
+    <a-input v-bind="$attrs" :value="modelValue[locale]" :dir="rtlLanguages.includes(currentLang) ? 'rtl' : 'ltr'" @input="handleInput" class="i18n-input">
       <template #addonAfter>
         <span class="i18n-tag" @click="showEditor">{{ currentLang }}</span>
       </template>
@@ -11,8 +11,8 @@
       <div class="lang-container">
         <a-form-item-rest>
           <div v-for="lang in languages" :key="lang" class="lang-item">
-            <div class="lang-label">{{ getLangLabel(lang) }}</div>
-            <a-input v-model:value="translationData[lang]" />
+            <div class="lang-label" :class="'font-' + lang">{{ getLangLabel(lang) }}</div>
+            <a-input v-model:value="translationData[lang]" :dir="rtlLanguages.includes(lang) ? 'rtl' : 'ltr'" :class="'font-' + lang" />
             <a-button v-if="lang !== currentLang" type="link" size="small" @click="() => autoTranslate(lang)"> 翻译 </a-button>
           </div>
         </a-form-item-rest>
@@ -53,6 +53,8 @@ const langLabels = {
   ja: '日本語',
   ko: '한국어'
 }
+// 添加 RTL 语言列表
+const rtlLanguages = ['ar'] // 阿拉伯语等 RTL 语言的代码
 
 const getLangLabel = (lang) => {
   return langLabels[lang] || lang
@@ -218,5 +220,9 @@ const autoTranslate = async (targetLang) => {
   &:after {
     content: ':';
   }
+}
+
+.font-ar {
+  font-family: 'NeoSansArabic', 'Droid Arabic Kufi', 'dubai', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 }
 </style>

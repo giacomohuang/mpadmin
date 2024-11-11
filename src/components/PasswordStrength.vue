@@ -1,5 +1,5 @@
 <template>
-  <div class="strength" v-if="!loading">
+  <div class="strength">
     <ul>
       <li :class="{ s0: value == 0 }"></li>
       <li :class="{ s1: value == 1 }"></li>
@@ -13,24 +13,24 @@
 <script setup>
 import { onBeforeMount, onMounted, ref, watch } from 'vue'
 import zxcvbn from 'zxcvbn'
-import { mergeCompData } from '../js/i18n'
+// import { mergeCompData } from '../js/i18n'
 import { useI18n } from 'vue-i18n'
 const value = defineModel('value')
 const data = defineProps(['password'])
-const loading = ref(false)
+// const loading = ref(false)
 
 // 载入语言包
 const { locale } = useI18n()
-watch(locale, async () => {
-  loading.value = true
-  await mergeCompData(locale.value, 'pwdstrength')
-  loading.value = false
-})
-onBeforeMount(async () => {
-  loading.value = true
-  await mergeCompData(locale.value, 'pwdstrength')
-  loading.value = false
-})
+// watch(locale, async () => {
+//   loading.value = true
+//   // await mergeCompData(locale.value, 'pwdstrength')
+//   loading.value = false
+// })
+// onBeforeMount(async () => {
+//   loading.value = true
+//   // await mergeCompData(locale.value, 'pwdstrength')
+//   loading.value = false
+// })
 
 onMounted(() => {
   console.log('mounted')

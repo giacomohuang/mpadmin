@@ -40,9 +40,9 @@
     </div>
   </div>
   <a-drawer :title="$t('sys.permission.resource.resourceEditor')" width="500px" :open="resourceEditor" @close="resourceEditor = false">
-    <a-form ref="resourceFormRef" :model="resourceForm" :rules="vRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 20 }" @finish="submit">
+    <a-form ref="resourceFormRef" autocomplete="off" :model="resourceForm" :rules="vRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 20 }" @finish="submit">
       <a-form-item :label="$t('sys.permission.resource.name')" :wrapper-col="{ span: 12 }" name="name">
-        <a-input v-model:value="resourceForm.name" />
+        <I18nInput v-model="resourceForm.name" />
       </a-form-item>
       <a-form-item :label="$t('sys.permission.resource.code')" name="code" required>
         <a-input v-if="editorMode === 1 ? currentResource.code : getCodePrefix(currentResource.code)" v-model:value="resourceForm.code" :addon-before="editorMode === 1 ? currentResource.code + '.' : getCodePrefix(currentResource.code) + '.'" />
@@ -122,7 +122,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import IconSelect from '@/components/IconSelect.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const VNodes = defineComponent({
   props: {
@@ -340,8 +340,8 @@ const remove = async (path, pid) => {
   nextTick(() => highlight())
 }
 
-const openEditor = (item, mode) => {
-  currentResource = item ? item : {}
+const openEditor = async (item, mode) => {
+  currentResource = item ? await API.permission.resource.get(item.id) : {}
   resourceEditor.value = true
   editorMode = mode
   if (item) {
@@ -367,11 +367,12 @@ const openEditor = (item, mode) => {
   }
   // 修改模式
   else if (editorMode === EDITOR_MODE.EDIT) {
-    resourceForm.name = item.name
-    resourceForm.code = item.code.split('.').pop()
-    resourceForm.type = item.type
-    resourceForm.icon = item.icon
-    resourceForm.iconType = item.iconType
+    console.log(currentResource.name)
+    resourceForm.name = currentResource.name
+    resourceForm.code = currentResource.code.split('.').pop()
+    resourceForm.type = currentResource.type
+    resourceForm.icon = currentResource.icon
+    resourceForm.iconType = currentResource.iconType
 
     if (item.type === 1 && currentResource.hasPageChildren) {
       resourceForm.router = null
@@ -380,11 +381,11 @@ const openEditor = (item, mode) => {
       resourceForm.target = 'self'
       resourceForm.isHidden = false
     } else {
-      resourceForm.router = item.router || ''
-      resourceForm.linkType = item.linkType || 1
-      resourceForm.link = item.link || ''
-      resourceForm.target = item.target || 'self'
-      resourceForm.isHidden = item.isHidden || false
+      resourceForm.router = currentResource.router || ''
+      resourceForm.linkType = currentResource.linkType || 1
+      resourceForm.link = currentResource.link || ''
+      resourceForm.target = currentResource.target || 'self'
+      resourceForm.isHidden = currentResource.isHidden || false
     }
   }
 
@@ -393,7 +394,7 @@ const openEditor = (item, mode) => {
   // 如果是页面类型且没有设置 router，尝试根据 name 自动匹配
   if (resourceForm.type === 1 && !resourceForm.router && resourceForm.name) {
     nextTick(() => {
-      const name = resourceForm.name?.toLowerCase()
+      const name = resourceForm.name[locale.value].toLowerCase()
       if (name) {
         // 在所有路由中查找最匹配的路由
         const matchedRoute = routes.find((route) => {

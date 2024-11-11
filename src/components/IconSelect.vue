@@ -49,7 +49,6 @@ import debounceRef from '@/js/debounceRef'
 import { useI18n } from 'vue-i18n'
 
 const emit = defineEmits(['iconSelect'])
-const customIconUrlPrefix = import.meta.env.VITE_SVGICON_URL_PREFIX
 const keyword = debounceRef('', 300)
 const icons = ref([])
 const customIcons = ref([])

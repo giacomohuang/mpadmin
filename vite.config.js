@@ -79,5 +79,14 @@ export default defineConfig({
         api: 'modern-compiler' // or "modern"
       }
     }
+  },
+  server: {
+    proxy: {
+      '/baiduapi': {
+        target: 'http://api.fanyi.baidu.com/api/trans/vip/translate',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/baiduapi/, '')
+      }
+    }
   }
 })

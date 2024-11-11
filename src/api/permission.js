@@ -2,6 +2,14 @@ import fetch from './fetch'
 
 const permission = {
   resource: {
+    get(id, locale = null) {
+      return fetch({
+        data: { id, locale },
+        url: '/permission/resource/get',
+        method: 'post'
+      })
+    },
+
     list(pid, isOneLevel) {
       return fetch({
         data: { pid: pid, isOneLevel },

@@ -36,6 +36,8 @@ declare module 'vue' {
     ATable: typeof import('ant-design-vue/es')['Table']
     ATag: typeof import('ant-design-vue/es')['Tag']
     AUpload: typeof import('ant-design-vue/es')['Upload']
+    I18nEditor: typeof import('./src/components/i18nEditor.vue')['default']
+    I18nInput: typeof import('./src/components/i18nInput.vue')['default']
     Icon: typeof import('./src/components/Icon.vue')['default']
     IconSelect: typeof import('./src/components/IconSelect.vue')['default']
     IconX: typeof import('./src/components/IconX.vue')['default']

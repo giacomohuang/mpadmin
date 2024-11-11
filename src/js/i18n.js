@@ -2,7 +2,7 @@ import { nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { router } from '../router/router'
 // 支持的语言
-const SUPPORT_LOCALES = ['en', 'zh-CN', 'ar']
+const SUPPORT_LOCALES = import.meta.env.VITE_LANGUAGES.split(',')
 // 从右到左的语言：阿拉伯语、希伯来语、波斯语、乌尔都语
 const RTL_LOCALES = ['ar', 'he', 'fa', 'ur']
 const sysLocale = navigator.language
@@ -71,14 +71,14 @@ export async function loadLocaleData(locale) {
 }
 
 // 加载组件中的语言包
-export async function mergeCompData(locale, compName) {
-  const p = `../locales/${locale}/comp/${compName}.json`
-  console.log(p)
-  const localeFile = Object.keys(localeFiles).find((path) => {
-    return path === p
-  })
-  const page = await localeFiles[localeFile]()
-  i18n.global.mergeLocaleMessage(locale, page.default)
-}
+// export async function mergeCompData(locale, compName) {
+//   const p = `../locales/${locale}/comp/${compName}.json`
+//   console.log(p)
+//   const localeFile = Object.keys(localeFiles).find((path) => {
+//     return path === p
+//   })
+//   const page = await localeFiles[localeFile]()
+//   i18n.global.mergeLocaleMessage(locale, page.default)
+// }
 
 export default i18n

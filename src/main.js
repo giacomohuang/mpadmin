@@ -4,8 +4,7 @@ import App from './App.vue'
 
 import { router } from './router/router'
 import './router/permission'
-import i18n, { changeLocale, getLocale } from './js/i18n'
-import vI18n from './directives/v-i18n'
+import i18n, { changeLocale } from './js/i18n'
 
 import './assets/main.scss'
 
@@ -18,9 +17,9 @@ const app = createApp(App)
 if (!localStorage.getItem('locale')) {
   localStorage.setItem('locale', 'zh-CN')
 }
-changeLocale(getLocale())
+changeLocale()
 
 // 在应用启动时插入SVG sprite
 // insertSprite()
 
-app.use(router).use(createPinia()).use(i18n).use(vI18n).component('Icon', Icon).mount('#app')
+app.use(router).use(createPinia()).use(i18n).component('Icon', Icon).mount('#app')

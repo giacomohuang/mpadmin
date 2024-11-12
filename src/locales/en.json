@@ -201,12 +201,6 @@
       "fullname": "Full Name",
       "leader": "Leader",
       "orgRoles": "Organization Roles",
-      "zoom": {
-        "out": "Zoom Out",
-        "in": "Zoom In",
-        "reset": "Reset",
-        "center": "Center"
-      },
       "roles": "Roles"
     }
   },
@@ -215,14 +209,12 @@
       "systemIcons": "System Icons",
       "customIcons": "Custom Icons",
       "noIcons": "No Icons",
-      "uploadHint": {
-        "svgOnly": "Can only upload SVG files!",
-        "sizeLimit": "File must be smaller than 1MB!",
-        "preparing": "Preparing upload...",
-        "uploading": "Uploading... {percent}%",
-        "success": "Upload successful!",
-        "failed": "Upload failed: {error}"
-      },
+      "svgOnly": "Can only upload SVG files!",
+      "sizeLimit": "File must be smaller than 1MB!",
+      "preparing": "Preparing upload...",
+      "uploading": "Uploading... {percent}%",
+      "success": "Upload successful!",
+      "failed": "Upload failed: {error}",
       "confirmContent": "Are you sure you want to delete {name}?"
     }
   }

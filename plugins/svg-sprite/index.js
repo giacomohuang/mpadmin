@@ -3,7 +3,7 @@ import path from 'path'
 import { optimize } from 'svgo'
 
 export default function svgSpritePlugin() {
-  const sourceDir = path.resolve(__dirname, '../../src/assets/icons')
+  const sourceDir = path.resolve(__dirname, '../../src/assets/icons/')
   const symbolCache = new Map()
 
   // SVGO配置

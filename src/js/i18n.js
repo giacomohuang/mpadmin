@@ -2,12 +2,19 @@ import { nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { router } from '../router/router'
 // 支持的语言
-const SUPPORT_LOCALES = import.meta.env.VITE_LANGUAGES.split(',')
+const LANG_SUPPORT = ['zh-CN', 'en', 'ar']
+// 语言标签
+const LANG_LABELS = [
+  { key: 'zh-CN', code: 'ZH', label: '简体中文', baidu: 'zh' },
+  { key: 'en', code: 'EN', label: 'English', baidu: 'en' },
+  { key: 'ar', code: 'AR', label: 'العربية', baidu: 'ara' }
+]
 // 从右到左的语言：阿拉伯语、希伯来语、波斯语、乌尔都语
-const RTL_LOCALES = ['ar', 'he', 'fa', 'ur']
+const RTL_LOCALES = ['ar']
+
 const sysLocale = navigator.language
-const localeFiles = import.meta.glob('../locales/**/*.json')
-const currentLocale = localStorage.getItem('locale') || (SUPPORT_LOCALES.includes(sysLocale) ? sysLocale : 'en')
+// const localeFiles = import.meta.glob('../locales/**/*.json')
+const currentLocale = localStorage.getItem('locale') || (LANG_SUPPORT.includes(sysLocale) ? sysLocale : 'en')
 
 const i18n = createI18n({
   locale: currentLocale,
@@ -23,6 +30,7 @@ const i18n = createI18n({
 export async function changeLocale(locale) {
   // console.log('bbbbb', router.currentRoute.value.path)
   // await loadLocaleData(locale, router.currentRoute.value.path)
+  if (!locale) locale = getLocale()
   await loadLocaleData(locale)
   if (i18n.mode === 'legacy') {
     i18n.global.locale = locale
@@ -82,3 +90,4 @@ export async function loadLocaleData(locale) {
 // }
 
 export default i18n
+export { LANG_SUPPORT, LANG_LABELS }

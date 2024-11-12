@@ -1,8 +1,8 @@
 <template>
   <div class="i18n-input-wrapper">
-    <a-input v-bind="$attrs" :value="modelValue[locale]" :dir="rtlLanguages.includes(currentLang) ? 'rtl' : 'ltr'" @input="handleInput" class="i18n-input">
-      <template #addonAfter>
-        <span class="i18n-tag" @click="showEditor">{{ currentLang }}</span>
+    <a-input v-bind="$attrs" autocomplete="new-password" :value="modelValue[i18n.global.locale.value]" :dir="rtlLanguages.includes(currentLang) ? 'rtl' : 'ltr'" @input="handleInput" class="i18n-input">
+      <template #addonAfter v-if="languages.length > 1">
+        <icon name="lang" class="lang-icon" @click="showEditor" />
       </template>
     </a-input>
 
@@ -12,7 +12,7 @@
         <a-form-item-rest>
           <div v-for="lang in languages" :key="lang" class="lang-item">
             <div class="lang-label" :class="'font-' + lang">{{ getLangLabel(lang) }}</div>
-            <a-input v-model:value="translationData[lang]" :dir="rtlLanguages.includes(lang) ? 'rtl' : 'ltr'" :class="'font-' + lang" />
+            <a-input v-model:value="translationData[lang]" :dir="rtlLanguages.includes(lang) ? 'rtl' : 'ltr'" :class="'font-' + lang" autocomplete="new-password" />
             <a-button v-if="lang !== currentLang" type="link" size="small" @click="() => autoTranslate(lang)"> 翻译 </a-button>
           </div>
         </a-form-item-rest>
@@ -22,12 +22,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { useI18n } from 'vue-i18n'
+import i18n, { LANG_SUPPORT, LANG_LABELS } from '@/js/i18n'
 import CryptoJS from 'crypto-js'
-
-const { locale } = useI18n()
 
 const props = defineProps({
   modelValue: {
@@ -38,32 +36,24 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-// 从环境变量获取支持的语言列表和默认语言
-let languages = import.meta.env.VITE_LANGUAGES?.split(',') || ['zh-CN', 'en']
-const currentLang = locale.value
+const currentLang = i18n.global.locale.value
 
 const editorVisible = ref(false)
 const translationData = ref({ ...props.modelValue })
 
-// 语言标签映射
-const langLabels = {
-  'zh-CN': '简体中文',
-  en: 'English',
-  ar: 'العربية',
-  ja: '日本語',
-  ko: '한국어'
-}
 // 添加 RTL 语言列表
 const rtlLanguages = ['ar'] // 阿拉伯语等 RTL 语言的代码
+const languages = ref([])
 
 const getLangLabel = (lang) => {
-  return langLabels[lang] || lang
+  return LANG_LABELS.find((item) => item.key === lang)?.label || lang
 }
 
 onMounted(() => {
   // 确保每个语言都有对应的属性
-  languages = [currentLang, ...languages.filter((lang) => lang !== currentLang)]
-  languages.forEach((lang) => {
+  languages.value = [currentLang, ...LANG_SUPPORT.filter((lang) => lang !== currentLang)]
+  console.log(languages.value)
+  LANG_LABELS.forEach((lang) => {
     if (!translationData.value[lang]) {
       translationData.value[lang] = ''
     }
@@ -75,7 +65,7 @@ const handleInput = (e) => {
   const value = typeof e === 'string' ? e : e.target.value
   const updatedValue = {
     ...props.modelValue,
-    [locale.value]: value
+    [i18n.global.locale.value]: value
   }
   emit('update:modelValue', updatedValue)
 }
@@ -83,7 +73,7 @@ const handleInput = (e) => {
 const showEditor = () => {
   // 使用父组件传入的多语言数据初始化编辑器
   translationData.value = { ...props.modelValue }
-  languages.forEach((lang) => {
+  LANG_SUPPORT.forEach((lang) => {
     if (!translationData.value[lang]) {
       translationData.value[lang] = ''
     }
@@ -125,17 +115,8 @@ const autoTranslate = async (targetLang) => {
     const str = BAIDU_APP_ID + sourceText + salt + BAIDU_SECRET_KEY
     const sign = MD5(str)
 
-    // 转换语言代码为百度支持的格式
-    const baiduLangMap = {
-      'zh-CN': 'zh',
-      en: 'en',
-      ja: 'jp',
-      ko: 'kor',
-      ar: 'ara'
-    }
-
-    const from = baiduLangMap[currentLang] || 'auto'
-    const to = baiduLangMap[targetLang] || targetLang
+    const from = LANG_LABELS.find((lang) => lang.key === currentLang)?.baidu || 'auto'
+    const to = LANG_LABELS.find((lang) => lang.key === targetLang)?.baidu || targetLang
 
     const params = new URLSearchParams({
       q: sourceText,
@@ -192,17 +173,16 @@ const autoTranslate = async (targetLang) => {
   width: 100%;
 }
 
-.i18n-tag {
-  cursor: pointer;
-}
-
-.i18n-tag:hover {
-  background: #e6f7ff;
-}
-
 .lang-container {
   display: flex;
   flex-direction: column;
+}
+
+.lang-icon {
+  cursor: pointer;
+  &:hover {
+    color: var(--c-brand-500);
+  }
 }
 
 .lang-item {
@@ -220,9 +200,5 @@ const autoTranslate = async (targetLang) => {
   &:after {
     content: ':';
   }
-}
-
-.font-ar {
-  font-family: 'NeoSansArabic', 'Droid Arabic Kufi', 'dubai', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 }
 </style>

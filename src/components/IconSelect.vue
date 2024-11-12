@@ -71,11 +71,11 @@ const { t } = useI18n()
 const handleBeforeUpload = (file) => {
   const isSvg = file.type === 'image/svg+xml'
   if (!isSvg) {
-    message.error(t('comp.iconSelect.uploadHint.svgOnly'))
+    message.error(t('comp.iconSelect.svgOnly'))
   }
   const isLt2M = file.size / 1024 / 1024 < 1
   if (!isLt2M) {
-    message.error(t('comp.iconSelect.uploadHint.sizeLimit'))
+    message.error(t('comp.iconSelect.sizeLimit'))
   }
   return isSvg && isLt2M
 }
@@ -102,7 +102,7 @@ const loadCustomIcons = async (page = 1) => {
 const handleCustomUpload = async ({ file, onSuccess, onError }) => {
   try {
     uploadStatus.show = true
-    uploadStatus.message = t('comp.iconSelect.uploadHint.preparing')
+    uploadStatus.message = t('comp.iconSelect.preparing')
     uploadStatus.type = 'info'
     uploadStatus.percent = 0
 
@@ -116,14 +116,14 @@ const handleCustomUpload = async ({ file, onSuccess, onError }) => {
     // 上传并显示进度
     const res = await API.oss.svgIconUpload(formData, (progress) => {
       uploadStatus.percent = Math.round((progress / file.size) * 100)
-      uploadStatus.message = t('comp.iconSelect.uploadHint.uploading', { percent: uploadStatus.percent })
+      uploadStatus.message = t('comp.iconSelect.uploading', { percent: uploadStatus.percent })
     })
 
     // 更新图标列表
     // customIcons.value.push({ name: iconName, url: 'http://localhost:9000/svgicon/' + res.filename })
 
     uploadStatus.show = true
-    uploadStatus.message = t('comp.iconSelect.uploadHint.success')
+    uploadStatus.message = t('comp.iconSelect.success')
     uploadStatus.type = 'success'
     uploadStatus.percent = 100
 
@@ -140,7 +140,7 @@ const handleCustomUpload = async ({ file, onSuccess, onError }) => {
     await loadCustomIcons(1)
   } catch (error) {
     uploadStatus.show = true
-    uploadStatus.message = t('comp.iconSelect.uploadHint.failed', { error: error.message })
+    uploadStatus.message = t('comp.iconSelect.failed', { error: error.message })
     uploadStatus.type = 'error'
     uploadStatus.percent = 0
 

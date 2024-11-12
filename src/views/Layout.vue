@@ -36,9 +36,10 @@
           <a @click.prevent> <Icon name="global" /></a>
           <template #overlay>
             <a-menu @click="onChangeLocale">
-              <a-menu-item key="zh-CN"><a-tag color="blue">ZH</a-tag>简体中文</a-menu-item>
-              <a-menu-item key="en"><a-tag color="blue">EN</a-tag>English</a-menu-item>
-              <a-menu-item key="ar" style="font-family: 'NeoSansArabic', 'Droid Arabic Kufi', dubai"><a-tag color="blue">AR</a-tag>العربية</a-menu-item>
+              <a-menu-item v-for="lang in LANG_LABELS" :key="lang.key">
+                <a-tag :color="lang.key === i18n.global.locale.value ? 'blue' : 'default'">{{ lang.code }}</a-tag>
+                <span :class="`font-${lang.key}`">{{ lang.label }}</span>
+              </a-menu-item>
             </a-menu>
           </template>
         </a-dropdown>
@@ -85,11 +86,12 @@ import { useStore } from '../stores/stores'
 import helper from '../js/helper'
 import API from '../api/API'
 import { useRouter, useRoute } from 'vue-router'
+import i18n, { LANG_LABELS } from '../js/i18n'
 
 const globalLoading = ref(false)
 provide('globalLoading', globalLoading)
 const store = useStore()
-const { accountname, accountid, realname, locale } = toRefs(store)
+const { accountname, accountid, realname } = toRefs(store)
 const router = useRouter()
 const route = useRoute()
 const showAssist = ref(false)
@@ -107,7 +109,7 @@ const currentMenuIdx = ref(-1)
 const onChangeLocale = async ({ key }) => {
   // await changeLocale(key)
   localStorage.setItem('locale', key)
-  locale.value = key
+  // locale.value = key
   window.location.reload()
 }
 
@@ -169,7 +171,7 @@ function getCurrentMenuPath() {
 }
 
 async function signout() {
-  const resp = await API.account.signout()
+  await API.account.signout()
   store.accountid = undefined
   helper.removeToken()
   router.push('/signin')

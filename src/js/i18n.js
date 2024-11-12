@@ -2,11 +2,14 @@ import { nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { router } from '../router/router'
 // 支持的语言
-const LANG_SUPPORT = ['zh-CN', 'en', 'ar']
+const LANG_SUPPORT = ['zh-CN', 'zh-HK', 'en', 'ja', 'ko', 'ar']
 // 语言标签
 const LANG_LABELS = [
   { key: 'zh-CN', code: 'ZH', label: '简体中文', baidu: 'zh' },
+  { key: 'zh-HK', code: 'ZH', label: '繁体中文', baidu: 'cht' },
   { key: 'en', code: 'EN', label: 'English', baidu: 'en' },
+  { key: 'ja', code: 'JA', label: '日本語', baidu: 'jp' },
+  { key: 'ko', code: 'KO', label: '한국어', baidu: 'kor' },
   { key: 'ar', code: 'AR', label: 'العربية', baidu: 'ara' }
 ]
 // 从右到左的语言：阿拉伯语、希伯来语、波斯语、乌尔都语

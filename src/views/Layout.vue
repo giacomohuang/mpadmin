@@ -5,6 +5,7 @@
         <a @click="router.push('/')" class="logo-link">
           <img src="@/assets/logo.svg" vvv class="logo-image" />
           <div class="app-name">{{ $t('common.appname') }}</div>
+          {{ selectedMenuIndex }},{{ mouseOverMenuIndex }},{{ isHideSubmenu }}
         </a>
       </div>
       <div class="page-title">{{ $t($route.meta.title) }}</div>
@@ -36,7 +37,7 @@
           <a @click.prevent> <Icon name="global" /></a>
           <template #overlay>
             <a-menu @click="onChangeLocale">
-              <a-menu-item v-for="lang in LANG_LABELS" :key="lang.key">
+              <a-menu-item v-for="lang in LANGS" :key="lang.key">
                 <a-tag :color="lang.key === i18n.global.locale.value ? 'blue' : 'default'">{{ lang.code }}</a-tag>
                 <span :class="`font-${lang.key}`">{{ lang.label }}</span>
               </a-menu-item>
@@ -51,12 +52,12 @@
       </div>
       <div class="assist-icon"><img src="@/assets/assist.svg" style="width: 1.5em; height: 1.5em" @click="showAssist = !showAssist" /></div>
     </header>
-    <aside class="menu">
+    <aside class="menu" data-simplebar :data-simplebar-direction="DIR">
       <div style="display: flex; align-items: center; justify-content: center; margin: 10px">
-        <div class="toggle-menu"></div>
+        <div class="toggle-menu" @click="toggleMenu"></div>
       </div>
       <div v-for="(item, index) in menu" :key="index">
-        <div class="wrapper" @click.stop="clickMenuItem(item, index)">
+        <div class="wrapper" @click.stop="clickMenuItem(item, index)" @mouseenter.stop="mouseOverMenuItem(item, index)" @mouseleave.stop="mouseLeaveMenuItem">
           <div :class="['item', { active: isActiveMenu(item) }]">
             <Icon class="icon" :name="item.icon || 'func'" :key="item.icon"></Icon>
             <span class="text">{{ $t(item.name) }}</span>
@@ -64,8 +65,8 @@
         </div>
       </div>
     </aside>
-    <aside class="submenu" ref="submenuRef" :class="{ hide: submenu?.length == 0 }">
-      <SubMenu :data="submenu"></SubMenu>
+    <aside class="submenu" ref="submenuRef" data-simplebar :data-simplebar-direction="DIR" :class="{ hide: submenu?.length == 0 || (isFloat && isHideSubmenu), float: isFloat }" @mouseleave.stop="mouseLeaveSubmenu">
+      <SubMenu :data="submenu" :isFloat="isFloat"></SubMenu>
     </aside>
 
     <div class="main-content">
@@ -86,10 +87,14 @@ import { useStore } from '../stores/stores'
 import helper from '../js/helper'
 import API from '../api/API'
 import { useRouter, useRoute } from 'vue-router'
-import i18n, { LANG_LABELS } from '../js/i18n'
+import i18n, { LANGS } from '../js/i18n'
+import 'simplebar'
+import '@/assets/simplebar.css'
 
 const globalLoading = ref(false)
+const isHideSubmenu = ref(false)
 provide('globalLoading', globalLoading)
+provide('isHideSubmenu', isHideSubmenu)
 const store = useStore()
 const { accountname, accountid, realname } = toRefs(store)
 const router = useRouter()
@@ -102,10 +107,16 @@ accountname.value = accountInfo.accountname
 accountid.value = accountInfo.id
 realname.value = decodeURIComponent(accountInfo.realname)
 let menudata = null
-const currentMenuPath = ref([])
+let currentMenuPath = ''
+
+const DIR = document.dir === 'rtl' ? 'rtl' : 'ltr'
 const menu = ref(dynamicRoutes)
 const submenu = ref(null)
 const currentMenuIdx = ref(-1)
+const mouseOverMenuIndex = ref(-1)
+// 子菜单是否浮动
+const isFloat = ref(false)
+
 const onChangeLocale = async ({ key }) => {
   // await changeLocale(key)
   localStorage.setItem('locale', key)
@@ -118,11 +129,14 @@ const selectedMenuIndex = ref(-1)
 
 const isActiveMenu = (item) => {
   // 如果有用户点击选中的菜单，优先显示该菜单的高亮
+  if (isFloat.value && mouseOverMenuIndex.value !== -1) {
+    return menu.value.indexOf(item) === mouseOverMenuIndex.value
+  }
   if (selectedMenuIndex.value !== -1) {
     return menu.value.indexOf(item) === selectedMenuIndex.value
   }
   // 否则显示当前路由匹配的菜单高亮
-  return currentMenuPath.value.includes(item.id)
+  return currentMenuPath.includes(item.id)
 }
 
 const activeMenuIndex = computed(() => {
@@ -137,12 +151,12 @@ watch(activeMenuIndex, (newIndex) => {
 })
 
 function clickMenuItem(item, index) {
-  selectedMenuIndex.value = index
-
   // 切换子菜单
   if (item.children.length > 0) {
     submenu.value = item.children
+    selectedMenuIndex.value = index
   }
+
   // 路由/外链跳转
   else {
     // 路由跳转
@@ -150,6 +164,7 @@ function clickMenuItem(item, index) {
       // 当前页面打开
       if (item.target === 'self') {
         router.push(item.router)
+        selectedMenuIndex.value = index
       }
       // 新页面打开
       else {
@@ -161,8 +176,62 @@ function clickMenuItem(item, index) {
       window.open(item.link, item.target)
     }
   }
+
+  nextTick(() => {
+    if (isFloat.value) {
+      calcSubmenuTop()
+    }
+  })
 }
 
+function mouseOverMenuItem(item, index) {
+  if (!isFloat.value) return
+  isHideSubmenu.value = false
+  mouseOverMenuIndex.value = index
+
+  if (item.children.length > 0) {
+    submenu.value = item.children
+  }
+  nextTick(() => {
+    calcSubmenuTop()
+  })
+}
+
+function mouseLeaveMenuItem() {
+  // mouseOverMenuIndex.value = -1
+}
+
+function mouseLeaveSubmenu() {
+  isHideSubmenu.value = true
+}
+
+const toggleMenu = () => {
+  console.log('toggleMenu')
+  isFloat.value = !isFloat.value
+  calcSubmenuTop()
+}
+
+const calcSubmenuTop = () => {
+  if (!isFloat.value) {
+    submenuRef.value.style.top = 'auto'
+    submenuRef.value.style.bottom = 'auto'
+    return
+  }
+  const curMenuItem = document.querySelector('.menu .item.active')
+  const menuRect = curMenuItem.getBoundingClientRect()
+  const submenuEl = submenuRef.value
+  let top = menuRect.top
+
+  if (top + submenuEl.offsetHeight > document.documentElement.clientHeight) {
+    submenuEl.style.bottom = '0'
+    submenuEl.style.top = 'auto'
+  } else {
+    submenuEl.style.bottom = 'auto'
+    submenuEl.style.top = `${top}px`
+  }
+}
+
+// 获取当前菜单路径
 function getCurrentMenuPath() {
   const path = route.path
   const item = menudata.find((item) => item.router === path)
@@ -184,7 +253,7 @@ onBeforeMount(async () => {
   menudata = await API.permission.resource.getMenu()
   // 构建树
   menu.value = buildTree(menudata)
-  currentMenuPath.value = getCurrentMenuPath()
+  currentMenuPath = getCurrentMenuPath()
   // console.log('tree', currentMenuPath.value)
 })
 
@@ -404,6 +473,8 @@ onUnmounted(() => {
   width: 100px;
   box-shadow: 0px 0 4px 0 rgba(100, 100, 100, 0.1);
   z-index: 1;
+  max-height: calc(100vh - 64px);
+  overflow-x: hidden;
 
   .wrapper {
     cursor: pointer;
@@ -474,13 +545,14 @@ onUnmounted(() => {
   z-index: 1;
   width: 180px;
   box-shadow: 2px 0 4px 0 rgba(100, 100, 100, 0.1);
-  transition: width 0.15s ease;
+  max-height: calc(100vh - 64px);
+  overflow-x: hidden;
 
   &.float {
     position: fixed; // 改为fixed以确保在滚动时保持位置
     left: 98px; // 与mini menu的宽度对应
     z-index: 1000; // 确保浮动在其他元素之上
-    transition: opacity 0.3s ease;
+    // transition: opacity 0.3s ease;
     height: min-content;
     border: 1px solid var(--border-light);
     border-radius: 10px;
@@ -488,6 +560,7 @@ onUnmounted(() => {
   }
   &.hide {
     width: 0;
+    opacity: 0;
   }
 }
 

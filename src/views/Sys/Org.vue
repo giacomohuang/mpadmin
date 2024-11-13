@@ -1,9 +1,9 @@
 <template>
-  <div class="main" data-simplebar :data-simplebar-direction="isRTL ? 'rtl' : 'ltr'">
+  <div id="org-content" class="main" data-simplebar :data-simplebar-direction="isRTL ? 'rtl' : 'ltr'">
     <div class="canvas">
       <div id="scaler">
         <div id="nodes" ref="orgRef">
-          <OrgNode :data="orgTree" :level="1" @add="add" @edit="edit" @remove="remove" @rename="rename" @openEditor="openEditor"></OrgNode>
+          <OrgNode :data="orgTree" :level="1" @add="add" @remove="remove" @rename="rename" @openEditor="openEditor"></OrgNode>
         </div>
       </div>
     </div>
@@ -139,21 +139,24 @@ const buildTree = () => {
     }
   })
   orgTree.value = tree
-  console.log('tree builded', orgTree.value)
-}
-
-const edit = (id) => {
-  console.log('edit', id)
+  // console.log('tree builded', orgTree.value)
 }
 
 // 重新计算画布大小，并居中内容
 const center = () => {
   let canvas = document.querySelector('.canvas')
-  let scrollbar = document.querySelector('.simplebar-content-wrapper')
+  let scrollbar = document.querySelector('#org-content .simplebar-content-wrapper')
+  let isRTL = document.dir === 'rtl'
 
   resizeCanvas()
 
-  scrollbar.scrollLeft = (canvas.offsetWidth - scrollbar.clientWidth) / 2
+  // 对于 RTL 布局，需要反转水平滚动的计算方式
+  if (isRTL) {
+    scrollbar.scrollLeft = -((canvas.offsetWidth - scrollbar.clientWidth) / 2)
+  } else {
+    scrollbar.scrollLeft = (canvas.offsetWidth - scrollbar.clientWidth) / 2
+  }
+
   scrollbar.scrollTop = (canvas.offsetHeight - scrollbar.clientHeight) / 2
 }
 
@@ -163,7 +166,6 @@ const resizeCanvas = () => {
   let nodes = document.getElementById('nodes')
   canvas.style.width = Math.max(nodes.offsetWidth, document.body.clientWidth) * 1.5 + 'px'
   canvas.style.height = Math.max(nodes.offsetHeight, document.body.clientHeight) * 1.5 + 'px'
-  console.log(canvas.style.width, canvas.style.height)
 }
 
 // 缩放画布
@@ -348,7 +350,6 @@ const rename = async (item) => {
 
 // 打开编辑器
 const openEditor = async (item) => {
-  console.log('打开编辑器')
   orgForm.id = item.id
   orgForm.name = item.name
   orgForm.fullname = item.fullname
@@ -388,7 +389,6 @@ const openEditor = async (item) => {
 
 // 获取账户列表，用于编辑组织负责人
 const getUserList = debounce(async (value) => {
-  console.log(value)
   userList.loading = true
   const res = await API.account.searchByName(value, userList.page, 10)
 
@@ -441,7 +441,7 @@ onMounted(async () => {
   roleList.value = await API.permission.role.list(null)
   buildTree()
   orgDnD.init()
-  dragInstance = new Drag(document.querySelector('.simplebar-content-wrapper'))
+  dragInstance = new Drag(document.querySelector('#org-content .simplebar-content-wrapper'))
   nextTick(() => {
     center()
   })
@@ -475,6 +475,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  transform-origin: center;
 }
 
 #scaler {
@@ -498,17 +499,21 @@ onUnmounted(() => {
 }
 
 #zoom {
-  position: fixed;
+  [dir='rtl'] & {
+    left: auto;
+    right: 50px;
+  }
+  position: absolute;
   display: flex;
   flex-direction: row;
-  left: 280px;
+  left: 50px;
   bottom: 50px;
   background: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
+  border: 1px solid var(--border-medium);
   z-index: 100;
   padding: 8px;
   border-radius: 12px;
-  box-shadow: 2px 2px 4px 0 var(--shadow-primary);
+  box-shadow: 2px 2px 4px 0 var(--border-medium);
   .item {
     user-select: none;
     border-radius: 8px;

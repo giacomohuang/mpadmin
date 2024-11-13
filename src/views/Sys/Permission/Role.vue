@@ -13,10 +13,10 @@
   <a-drawer title="角色编辑器" width="650px" :open="roleEditor" @close="roleEditor = false" :destroyOnClose="true">
     <a-form ref="roleFormRef" :model="roleForm" :rules="vRules" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }" @finish="submit">
       <a-form-item label="名称" :wrapper-col="{ span: 8 }" name="name">
-        <a-input v-model:value="roleForm.name" />
+        <I18nInput v-model="roleForm.name" />
       </a-form-item>
       <a-form-item label="描述" :wrapper-col="{ span: 20 }" name="description">
-        <a-input v-model:value="roleForm.description" />
+        <I18nInput v-model="roleForm.description" />
       </a-form-item>
       <a-form-item label="资源" :wrapper-col="{ span: 22 }" name="resources">
         <a-form-item-rest>
@@ -84,7 +84,6 @@ const buildTree = (data) => {
   const tree = []
   const itemMap = new Map(rsdata.map((item) => [item.id, item]))
   rsdata.forEach((item) => {
-    // console.log(item.name, item.id, item.pid, item.path)
     const parent = item.pid === null ? tree : itemMap.get(item.pid)
     if (!parent.children) {
       parent.children = []
@@ -99,7 +98,7 @@ const buildTree = (data) => {
   return tree
 }
 
-function openEditor(item, mode) {
+async function openEditor(item, mode) {
   roleEditor.value = true
   editorMode = mode
   if (editorMode === EDITOR_MODE.ADD) {
@@ -113,21 +112,20 @@ function openEditor(item, mode) {
     roleForm.path = item.path ?? null
     roleForm.order = item?.children ? item.children.length + 1 : 1
     selectedIds.value = new Set()
-
-    console.log(item, mode, roleForm)
   }
   // 修改模式
   else if (editorMode === EDITOR_MODE.EDIT) {
+    const roleRes = await API.permission.role.get(item.id)
     roleForm.parentData = getParent(item.pid)
-    roleForm.name = item.name
-    roleForm.description = item.description
-    roleForm.resources = item.resources
-    roleForm.id = item.id
-    roleForm.pid = item.pid
-    roleForm.level = item.level
-    roleForm.path = item.path
-    roleForm.order = item.order
-    selectedIds.value = new Set([...item.resources])
+    roleForm.name = roleRes.name
+    roleForm.description = roleRes.description
+    roleForm.resources = roleRes.resources
+    roleForm.id = roleRes.id
+    roleForm.pid = roleRes.pid
+    roleForm.level = roleRes.level
+    roleForm.path = roleRes.path
+    roleForm.order = roleRes.order
+    selectedIds.value = new Set([...roleRes.resources])
   }
 }
 

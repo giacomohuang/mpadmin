@@ -1,34 +1,48 @@
 <template>
-  <RouterLink custom :to="item.router" v-slot="{ isActive, href, navigate }" v-for="(item, index) in props.data" :key="index">
+  <RouterLink custom :to="item.router" v-slot="{ isActive }" v-for="(item, index) in data" :key="index">
     <template v-if="item.children.length > 0">
       <div @click.stop="toggle_children" class="wrapper">
         <div class="item"><span class="arrow"></span> {{ $t(item.name) }}</div>
         <div class="children">
-          <SubMenu :data="item.children"></SubMenu>
+          <SubMenu :data="item.children" :isFloat="isFloat"></SubMenu>
         </div>
       </div>
     </template>
-    <a v-else :class="['item', { active: isActive }]" :href="href" :target="item.target" @click.stop="navigate"> <span class="dot"></span>{{ $t(item.name) }} </a>
+    <div v-else :class="['item', { active: isActive }]" @click.stop="clickMenuItem(item)"><span class="dot"></span>{{ $t(item.name) }}</div>
   </RouterLink>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-const props = defineProps(['data'])
-// function toggle_children(ev) {
-//   const dom = ev.currentTarget.nextElementSibling
-//   if (dom.style.display === '') {
-//     dom.style.display = 'block'
-//     ev.currentTarget.children[0].classList.add('expand')
-//   } else {
-//     dom.style.display = ''
-//     ev.currentTarget.children[0].classList.remove('expand')
-//   }
-// }
+import { onMounted, inject } from 'vue'
+const { data, isFloat } = defineProps(['data', 'isFloat'])
+const isHideSubmenu = inject('isHideSubmenu')
+import { useRouter, useRoute } from 'vue-router'
+const router = useRouter()
 
 function toggle_children(ev) {
   const dom = ev.currentTarget
   dom.classList.toggle('expand')
+}
+
+function clickMenuItem(item) {
+  // 路由跳转
+  if (item.linkType === 1) {
+    // 当前页面打开
+    if (item.target === 'self') {
+      router.push(item.router)
+      // 关闭浮动子菜单
+    }
+    // 新页面打开
+    else {
+      window.open(item.router, item.target)
+    }
+  }
+  // 外链跳转
+  else {
+    window.open(item.link, item.target)
+  }
+  console.log('look here', isFloat)
+  isHideSubmenu.value = true
 }
 
 onMounted(() => {

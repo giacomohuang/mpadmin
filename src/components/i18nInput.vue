@@ -24,7 +24,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import i18n, { LANG_SUPPORT, LANG_LABELS } from '@/js/i18n'
+import i18n, { LANGS } from '@/js/i18n'
 import CryptoJS from 'crypto-js'
 
 const props = defineProps({
@@ -46,14 +46,15 @@ const rtlLanguages = ['ar'] // 阿拉伯语等 RTL 语言的代码
 const languages = ref([])
 
 const getLangLabel = (lang) => {
-  return LANG_LABELS.find((item) => item.key === lang)?.label || lang
+  return LANGS.find((item) => item.key === lang)?.label || lang
 }
 
 onMounted(() => {
   // 确保每个语言都有对应的属性
-  languages.value = [currentLang, ...LANG_SUPPORT.filter((lang) => lang !== currentLang)]
-  console.log(languages.value)
-  LANG_LABELS.forEach((lang) => {
+  // 获取LANGS中的所有key
+  const langs = LANGS.map((lang) => lang.key)
+  languages.value = [currentLang, ...langs.filter((lang) => lang !== currentLang)]
+  languages.value.forEach((lang) => {
     if (!translationData.value[lang]) {
       translationData.value[lang] = ''
     }
@@ -73,7 +74,7 @@ const handleInput = (e) => {
 const showEditor = () => {
   // 使用父组件传入的多语言数据初始化编辑器
   translationData.value = { ...props.modelValue }
-  LANG_SUPPORT.forEach((lang) => {
+  languages.value.forEach((lang) => {
     if (!translationData.value[lang]) {
       translationData.value[lang] = ''
     }
@@ -94,7 +95,6 @@ const handleCancel = () => {
 const BAIDU_API_URL = '/baiduapi'
 const BAIDU_APP_ID = import.meta.env.VITE_BAIDU_APP_ID
 const BAIDU_SECRET_KEY = import.meta.env.VITE_BAIDU_SECRET_KEY
-console.log(BAIDU_APP_ID, BAIDU_SECRET_KEY)
 
 // 添加 MD5 加密函数
 function MD5(string) {
@@ -115,8 +115,8 @@ const autoTranslate = async (targetLang) => {
     const str = BAIDU_APP_ID + sourceText + salt + BAIDU_SECRET_KEY
     const sign = MD5(str)
 
-    const from = LANG_LABELS.find((lang) => lang.key === currentLang)?.baidu || 'auto'
-    const to = LANG_LABELS.find((lang) => lang.key === targetLang)?.baidu || targetLang
+    const from = LANGS.find((lang) => lang.key === currentLang)?.baidu || 'auto'
+    const to = LANGS.find((lang) => lang.key === targetLang)?.baidu || targetLang
 
     const params = new URLSearchParams({
       q: sourceText,

@@ -1,10 +1,9 @@
 import { nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { router } from '../router/router'
+
 // 支持的语言
-const LANG_SUPPORT = ['zh-CN', 'zh-HK', 'en', 'ja', 'ko', 'ar']
-// 语言标签
-const LANG_LABELS = [
+const LANGS = [
   { key: 'zh-CN', code: 'ZH', label: '简体中文', baidu: 'zh' },
   { key: 'zh-HK', code: 'ZH', label: '繁体中文', baidu: 'cht' },
   { key: 'en', code: 'EN', label: 'English', baidu: 'en' },
@@ -12,12 +11,14 @@ const LANG_LABELS = [
   { key: 'ko', code: 'KO', label: '한국어', baidu: 'kor' },
   { key: 'ar', code: 'AR', label: 'العربية', baidu: 'ara' }
 ]
+// 默认语言
+const DEFAULT_LANG = 'zh-CN'
 // 从右到左的语言：阿拉伯语、希伯来语、波斯语、乌尔都语
 const RTL_LOCALES = ['ar']
 
 const sysLocale = navigator.language
 // const localeFiles = import.meta.glob('../locales/**/*.json')
-const currentLocale = localStorage.getItem('locale') || (LANG_SUPPORT.includes(sysLocale) ? sysLocale : 'en')
+const currentLocale = localStorage.getItem('locale') || LANGS.find((lang) => lang.key === sysLocale)?.key || DEFAULT_LANG
 
 const i18n = createI18n({
   locale: currentLocale,
@@ -93,4 +94,4 @@ export async function loadLocaleData(locale) {
 // }
 
 export default i18n
-export { LANG_SUPPORT, LANG_LABELS }
+export { LANGS }

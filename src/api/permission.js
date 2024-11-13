@@ -54,6 +54,13 @@ const permission = {
     }
   },
   role: {
+    get(id) {
+      return fetch({
+        data: { id: id },
+        url: '/permission/role/get',
+        method: 'post'
+      })
+    },
     list(pid) {
       return fetch({
         data: { pid: pid },

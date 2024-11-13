@@ -45,8 +45,10 @@
         <I18nInput v-model="resourceForm.name" />
       </a-form-item>
       <a-form-item :label="$t('sys.permission.resource.code')" name="code" required>
-        <a-input v-if="editorMode === 1 ? currentResource.code : getCodePrefix(currentResource.code)" v-model:value="resourceForm.code" :addon-before="editorMode === 1 ? currentResource.code + '.' : getCodePrefix(currentResource.code) + '.'" />
-        <a-input v-else v-model:value="resourceForm.code" />
+        <div dir="ltr">
+          <a-input v-if="editorMode === 1 ? currentResource.code : getCodePrefix(currentResource.code)" v-model:value="resourceForm.code" :addon-before="editorMode === 1 ? currentResource.code + '.' : getCodePrefix(currentResource.code) + '.'" />
+          <a-input v-else v-model:value="resourceForm.code" />
+        </div>
       </a-form-item>
       <a-form-item :label="$t('sys.permission.resource.type')" name="type" :wrapper-col="{ span: 20 }">
         <a-radio-group v-model:value="resourceForm.type">

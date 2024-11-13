@@ -3,7 +3,7 @@
     <li v-for="role in data" :key="role.id" draggable="true" class="dragitem" :data-id="role.id" :data-type="role.type" :id="'_MPRES_' + role.id">
       <div class="item" :style="{ paddingInlineStart: `${lv * 24 + 12}px` }">
         <div class="role-content" :class="{ gapper: !role.children }">
-          <icon v-if="role.children" name="arrow-down" class="collapse-icon" :class="{ '-rotate-90': collapseRoleIds.has(role.id) }" @click.stop="toggleCollapse(role.id)" />
+          <icon v-if="role.children" name="arrow-down" class="arrow" :class="{ collapse: collapseRoleIds.has(role.id) }" @click.stop="toggleCollapse(role.id)" />
           <div class="role-info">
             <span class="role-name">
               <icon name="role" size="1.4rem" class="role-icon"></icon>
@@ -128,11 +128,13 @@ function openEditor(parent, mode) {
   display: flex;
 }
 
-.collapse-icon {
-  // position: absolute;
-  // width: 16px;
+.arrow {
   cursor: pointer;
   transition: transform 0.2s;
+
+  &.collapse {
+    transform: rotate(-90deg);
+  }
 }
 
 .role-info {

@@ -139,10 +139,9 @@ const buildTree = () => {
     }
   })
   orgTree.value = tree
-  // console.log('tree builded', orgTree.value)
 }
 
-// 重新计算画布大小，并居中内容
+// 重新计算画布大小，并居中内容，并调整滚动条位置
 const center = () => {
   let canvas = document.querySelector('.canvas')
   let scrollbar = document.querySelector('#org-content .simplebar-content-wrapper')
@@ -150,7 +149,7 @@ const center = () => {
 
   resizeCanvas()
 
-  // 对于 RTL 布局，需要反转水平滚动的计算方式
+  // 对于 RTL 布局，需要反转水平滚动条位置的计算方式
   if (isRTL) {
     scrollbar.scrollLeft = -((canvas.offsetWidth - scrollbar.clientWidth) / 2)
   } else {
@@ -162,6 +161,7 @@ const center = () => {
 
 // 重新计算画布大小
 const resizeCanvas = () => {
+  console.log('resizeCanvas')
   let canvas = document.querySelector('.canvas')
   let nodes = document.getElementById('nodes')
   canvas.style.width = Math.max(nodes.offsetWidth, document.body.clientWidth) * 1.5 + 'px'
@@ -229,7 +229,7 @@ const add = async (item, direction) => {
       const siblings = Array.from(orgMap.value.values())
         .filter((node) => node.pid == item.pid)
         .sort((a, b) => a.order - b.order)
-      // 在兄弟节点中找到插入位置的索引
+      // 在兄弟节点中找到插入位置的索��
       const insertIndex = siblings.findIndex((node) => node.id === item.id) + (direction === 'next' ? 1 : 0)
       const parent = orgMap.value.get(item.pid)
       newData.pid = item.pid
@@ -435,6 +435,12 @@ const submitForm = async () => {
 
 let dragInstance = null
 
+// 页面尺寸变化时重新计算画布大小
+const resizeHandler = () => {
+  // 重新计算画布大小
+  resizeCanvas()
+}
+
 onMounted(async () => {
   const orgRes = await API.org.list()
   orgMap.value = new Map(orgRes.map((item) => [item.id, item]))
@@ -442,6 +448,8 @@ onMounted(async () => {
   buildTree()
   orgDnD.init()
   dragInstance = new Drag(document.querySelector('#org-content .simplebar-content-wrapper'))
+  window.addEventListener('resize', resizeHandler)
+
   nextTick(() => {
     center()
   })
@@ -454,11 +462,11 @@ onUnmounted(() => {
   if (dragInstance) {
     dragInstance.destroy()
   }
+  window.removeEventListener('resize', resizeHandler)
 })
 </script>
 
 <style scoped lang="scss">
-/*rtl:begin:ignore*/
 .main {
   position: relative;
   display: block;
@@ -525,7 +533,6 @@ onUnmounted(() => {
     }
   }
 }
-/*rtl:end:ignore*/
 
 .user-option {
   display: flex;

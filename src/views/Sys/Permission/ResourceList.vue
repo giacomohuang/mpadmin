@@ -6,7 +6,7 @@
           <icon v-if="resource.pid > 0 && resource.type == 1 && resource.children" name="arrow-down" class="collapse-icon" :class="{ collapsed: collapseIds.has(resource.id) }" @click="toggleCollapse(resource.id)" />
           <icon :name="RESTYPE[resource.type].type" :class="RESTYPE[resource.type].style"></icon>
           <span class="resource-name">{{ resource.name }}</span>
-          <span class="tag red">{{ resource.id }}</span>
+          <mp-tag size="small" color="red">{{ resource.id }}</mp-tag>
           <span v-if="resource.code" class="tag gray resource-code" :title="$t('sys.permission.resource.copyToClipboard')" @click="copyToClipBoard($event, resource.code)">
             {{ resource.code }}
           </span>
@@ -73,7 +73,7 @@ function copyToClipBoard(ev, text) {
 <style lang="scss" scoped>
 .dragging {
   border: 2px dashed var(--c-brand-500);
-  background-color: var(--c-brand-100);
+  background-color: var(--bg-brand);
   > * {
     opacity: 0;
   }
@@ -138,34 +138,6 @@ function copyToClipBoard(ev, text) {
   margin: 0 8px;
   cursor: pointer;
   color: var(--c-green-600);
-}
-
-.tag {
-  border-radius: 6px;
-  border: 1px solid;
-  padding: 2px 8px;
-  font-size: 0.8em;
-  color: var(--text-primary);
-
-  &.gray {
-    border-color: var(--c-gray-200);
-    background-color: var(--c-gray-50);
-  }
-
-  &.green {
-    border-color: var(--c-green-200);
-    background-color: var(--c-green-50);
-  }
-
-  &.blue {
-    border-color: var(--c-blue-200);
-    background-color: var(--c-blue-50);
-  }
-
-  &.red {
-    border-color: var(--c-red-200);
-    background-color: var(--c-red-50);
-  }
 }
 
 .resource-content {

@@ -109,7 +109,7 @@ let menudata = null
 let currentMenuPath = ''
 
 const DIR = document.dir === 'rtl' ? 'rtl' : 'ltr'
-const menu = ref(dynamicRoutes)
+const menu = ref([])
 const submenu = ref(null)
 const currentMenuIdx = ref(-1)
 const mouseOverMenuIndex = ref(-1)
@@ -622,7 +622,7 @@ onUnmounted(() => {
   position: relative;
   grid-area: main;
   overflow: hidden;
-  background-color: var(--bg-brand);
+  background-color: var(--bg-500);
   max-height: calc(100vh - 64px);
 }
 </style>

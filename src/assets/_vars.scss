@@ -35,16 +35,14 @@ $color-sets: (
   }
   --c-white: #ffffff;
   --c-black: #000000;
-}
 
-/* semantic color variables for this project */
-
-[data-theme='light'] {
+  // ***** 浅色背景 *****
   // 背景色
   --bg-primary: var(--c-white);
   --bg-secondary: var(--c-gray-50);
   --bg-tertiary: var(--c-gray-100);
-  --bg-brand: rgb(244, 247, 249);
+  --bg-500: rgb(244, 247, 249);
+  --bg-brand: var(--c-brand-100);
 
   // 文字颜色s
   --text-primary: var(--c-black);
@@ -64,31 +62,33 @@ $color-sets: (
   // 强调色
   --accent-primary: var(--c-brand-500);
   --accent-secondary: var(--c-indigo-500);
-}
 
-[data-theme='dark'] {
-  // 背景色
-  --bg-primary: var(--c-gray-900);
-  --bg-secondary: var(--c-gray-800);
-  --bg-tertiary: var(--c-gray-700);
-  --bg-brand: var(--c-gray-950);
+  // ***** 深色背景 *****
+  [data-theme='dark'] {
+    // 背景色
+    --bg-primary: var(--c-gray-900);
+    --bg-secondary: var(--c-gray-800);
+    --bg-tertiary: var(--c-gray-700);
+    --bg-500: var(--c-gray-950);
+    --bg-brand: var(--c-brand-950);
 
-  // 文字颜色
-  --text-primary: var(--c-gray-50);
-  --text-secondary: var(--c-gray-300);
-  --text-tertiary: var(--c-gray-500);
+    // 文字颜色
+    --text-primary: var(--c-gray-50);
+    --text-secondary: var(--c-gray-300);
+    --text-tertiary: var(--c-gray-500);
 
-  // 边框颜色
-  --border-light: var(--c-gray-800);
-  --border-medium: var(--c-gray-500);
-  --border-dark: var(--c-gray-400);
+    // 边框颜色
+    --border-light: var(--c-gray-800);
+    --border-medium: var(--c-gray-500);
+    --border-dark: var(--c-gray-400);
 
-  // 阴影颜色
-  --shadow-sm: rgba(0, 0, 0, 0.2);
-  --shadow-md: rgba(0, 0, 0, 0.4);
-  --shadow-lg: rgba(0, 0, 0, 0.6);
+    // 阴影颜色
+    --shadow-sm: rgba(0, 0, 0, 0.2);
+    --shadow-md: rgba(0, 0, 0, 0.4);
+    --shadow-lg: rgba(0, 0, 0, 0.6);
 
-  // 强调色
-  --accent-primary: var(--c-brand-400);
-  --accent-secondary: var(--c-indigo-400);
+    // 强调色
+    --accent-primary: var(--c-brand-400);
+    --accent-secondary: var(--c-indigo-400);
+  }
 }

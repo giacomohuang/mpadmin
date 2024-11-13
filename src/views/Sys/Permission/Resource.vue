@@ -445,7 +445,6 @@ const submit = async () => {
   // 新增模式
   if (editorMode === EDITOR_MODE.ADD) {
     item.id = null
-    item.level = currentResource?.level ? currentResource.level + 1 : 1
     item.pid = currentResource?.id ? currentResource.id : null
     // 这里先传父节点路径，到服务器端获得了节点id后再拼接成完整的path
     item.path = currentResource?.path ? currentResource.path : ''
@@ -465,7 +464,6 @@ const submit = async () => {
     item.code = currentResource.code
     item.pid = currentResource.pid
     item.id = currentResource.id
-    item.level = currentResource.level
     item.order = currentResource.order
     const prefix = getCodePrefix(currentResource.code)
     item.code = prefix ? prefix + '.' + resourceForm.code : resourceForm.code
@@ -642,8 +640,8 @@ const handleIconSelect = (icon) => {
 
 <style scoped lang="scss">
 .dragging {
-  border: 2px dashed var(--c-brand-500);
-  background-color: var(--c-brand-100);
+  outline: 2px dashed var(--c-brand-500);
+  background-color: var(--bg-brand);
   > * {
     opacity: 0;
   }
@@ -756,7 +754,7 @@ const handleIconSelect = (icon) => {
         font-size: 1.2em;
 
         &.active {
-          background-color: var(--c-brand-100);
+          background-color: var(--bg-secondary);
           font-weight: 600;
         }
       }

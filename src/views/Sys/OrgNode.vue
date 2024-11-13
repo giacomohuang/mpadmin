@@ -232,12 +232,6 @@ $border-size: 1px;
   }
 }
 
-.ghost {
-  width: 200px;
-  height: 200px;
-  @apply bg-brand-50 outline-dashed outline-2 outline-brand-500;
-}
-
 .node {
   position: relative;
   border-radius: 8px;
@@ -310,6 +304,8 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
     border-radius: 3px;
 
     input {
+      // position: absolute;
+      height: 22px;
       width: calc(100% - 20px);
       border-radius: 3px;
       border: 0;

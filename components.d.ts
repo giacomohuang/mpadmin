@@ -45,6 +45,7 @@ declare module 'vue' {
     MpRouter: typeof import('./src/components/mpRouter.vue')['default']
     MpRouterLink: typeof import('./src/components/mpRouterLink.vue')['default']
     MpSwitch: typeof import('./src/components/mpSwitch.vue')['default']
+    MpTag: typeof import('./src/components/mpTag.vue')['default']
     PasswordStrength: typeof import('./src/components/PasswordStrength.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

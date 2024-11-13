@@ -12,8 +12,11 @@ import { theme as antdTheme } from 'ant-design-vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
+import zhTW from 'ant-design-vue/es/locale/zh_TW'
 import enUS from 'ant-design-vue/es/locale/en_US'
-
+import arEG from 'ant-design-vue/es/locale/ar_EG'
+import jaJP from 'ant-design-vue/es/locale/ja_JP'
+import koKR from 'ant-design-vue/es/locale/ko_KR'
 // 全局主题: [dark, light, system]
 const store = useStore()
 const { theme } = storeToRefs(store)
@@ -23,8 +26,16 @@ const antLocale = ref(null)
 const setAntLocale = (locale) => {
   if (locale == 'zh-CN') {
     antLocale.value = zhCN
-  } else {
+  } else if (locale == 'zh-HK' || locale == 'zh-TW') {
+    antLocale.value = zhTW
+  } else if (locale == 'en') {
     antLocale.value = enUS
+  } else if (locale == 'ar') {
+    antLocale.value = arEG
+  } else if (locale == 'ja') {
+    antLocale.value = jaJP
+  } else if (locale == 'ko') {
+    antLocale.value = koKR
   }
 }
 

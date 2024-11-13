@@ -1,5 +1,5 @@
 <template>
-  <div class="role-container">
+  <div class="role-container" data-simplebar>
     <div class="role-wrapper">
       <div class="list" ref="listRef">
         <RoleList :data="roleTree.children" @toggleCollapse="toggleCollapse" @open="openEditor" @remove="remove" />
@@ -37,6 +37,8 @@ import ResourceSelector from './ResourceSelector.vue'
 import { DnD } from '@/js/DnD.js'
 import RoleList from './RoleList.vue'
 import API from '@/api/API'
+import 'simplebar'
+import '@/assets/simplebar.css'
 
 // 常量定义
 const EDITOR_MODE = { ADD: 1, EDIT: 2 }
@@ -108,7 +110,6 @@ async function openEditor(item, mode) {
     roleForm.resources = []
     roleForm.id = null
     roleForm.pid = item.id ?? null
-    roleForm.level = item?.level ? item.level + 1 : 1
     roleForm.path = item.path ?? null
     roleForm.order = item?.children ? item.children.length + 1 : 1
     selectedIds.value = new Set()
@@ -122,7 +123,6 @@ async function openEditor(item, mode) {
     roleForm.resources = roleRes.resources
     roleForm.id = roleRes.id
     roleForm.pid = roleRes.pid
-    roleForm.level = roleRes.level
     roleForm.path = roleRes.path
     roleForm.order = roleRes.order
     selectedIds.value = new Set([...roleRes.resources])
@@ -193,7 +193,9 @@ onBeforeUnmount(() => {
 
 <style scoped lang="scss">
 .role-container {
-  margin: 32px;
+  padding: 40px;
+  overflow-x: hidden;
+  max-height: calc(100vh - 64px);
 }
 
 .role-wrapper {

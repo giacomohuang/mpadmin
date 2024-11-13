@@ -5,7 +5,6 @@
         <a @click="router.push('/')" class="logo-link">
           <img src="@/assets/logo.svg" vvv class="logo-image" />
           <div class="app-name">{{ $t('common.appname') }}</div>
-          {{ selectedMenuIndex }},{{ mouseOverMenuIndex }},{{ isHideSubmenu }}
         </a>
       </div>
       <div class="page-title">{{ $t($route.meta.title) }}</div>

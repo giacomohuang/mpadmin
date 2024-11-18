@@ -11,10 +11,10 @@ const { size, color } = defineProps(['size', 'color'])
 <style lang="scss" scoped>
 /*rtl:begin:ignore*/
 .tag {
-  border-radius: 6px;
+  border-radius: 4px;
   border: 1px solid;
   padding: 2px 8px;
-  font-size: 0.8em;
+  font-size: 0.875em;
   color: var(--text-primary);
 
   &.gray {

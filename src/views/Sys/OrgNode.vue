@@ -274,16 +274,26 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
     }
   }
 }
+// 深色模式
+$lv-colors-dark: (#522f2f, #452917, #392b39, #443727, #1d2436, #203233, #1d2e52, #2c3f19, #444422, #292929);
+@each $color in $lv-colors-dark {
+  $i: list.index($lv-colors-dark, $color);
+  [data-theme='dark'] .level#{$i} {
+    background: $color;
+    &.is-hover {
+      box-shadow: 0px 0px 8px 0 $color;
+    }
+  }
+}
 
 .title {
   z-index: 1;
   position: relative;
-  // width: inherit;
   display: flex;
   justify-content: space-between;
   height: 24px;
   margin-bottom: 4px;
-  color: #fff;
+  color: var(--text-primary);
   background: inherit;
 
   &:hover > .tools {
@@ -343,7 +353,7 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
     cursor: pointer;
     z-index: 2;
     &:hover {
-      background: #00000010;
+      background: #00000030;
       svg {
         display: block;
       }
@@ -471,16 +481,17 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
   justify-content: space-between;
   flex-grow: 1;
   padding: 6px 6px;
-  background: #fff;
+  background: var(--bg-primary);
   border-radius: 4px;
   font-size: 12px;
   cursor: pointer;
+  color: var(--text-primary);
 }
 
 .leader {
   display: flex;
   align-items: center;
-  color: #000;
+
   .name {
     overflow: hidden;
     white-space: nowrap;
@@ -488,9 +499,5 @@ $lv-colors: (#f29999, #eda763, #ceb0d2, #c8adad, #b3bcd9, #b0c6cd, #93b9fa, #9fc
     width: 90px;
     margin-left: 4px;
   }
-}
-
-.num {
-  color: #000;
 }
 </style>

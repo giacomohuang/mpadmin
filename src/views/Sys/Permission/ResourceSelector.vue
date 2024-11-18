@@ -302,8 +302,8 @@ onBeforeUnmount(() => {})
   padding: 12px 20px;
   font-size: 16px;
 
-  &.current {
-    background-color: var(--bg-secondary);
+  &.cur {
+    background-color: var(--bg-tertiary);
     font-weight: 600;
   }
 }

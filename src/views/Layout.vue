@@ -546,16 +546,17 @@ onUnmounted(() => {
   box-shadow: 2px 0 4px 0 rgba(100, 100, 100, 0.1);
   max-height: calc(100vh - 64px);
   overflow-x: hidden;
+  transition: width 0.1s ease;
 
   &.float {
     position: fixed; // 改为fixed以确保在滚动时保持位置
     left: 98px; // 与mini menu的宽度对应
     z-index: 1000; // 确保浮动在其他元素之上
-    // transition: opacity 0.3s ease;
+
     height: min-content;
     border: 1px solid var(--border-light);
     border-radius: 10px;
-    box-shadow: 2px 2px 4px 0 rgba(1, 1, 1, 0.3);
+    box-shadow: 1px 1px 2px 0 rgba(100, 100, 100, 0.1);
   }
   &.hide {
     width: 0;

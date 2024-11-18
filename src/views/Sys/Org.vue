@@ -205,7 +205,7 @@ const add = async (item, direction) => {
   const newData = {
     id: null,
     pid: null,
-    name: $t('sys.org.department'),
+    name: t('sys.org.department'),
     type: 0,
     isEntity: false,
     leaderId: null,

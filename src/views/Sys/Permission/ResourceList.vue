@@ -7,9 +7,7 @@
           <icon :name="RESTYPE[resource.type].type" :class="RESTYPE[resource.type].style"></icon>
           <span class="resource-name">{{ resource.name }}</span>
           <mp-tag size="small" color="red">{{ resource.id }}</mp-tag>
-          <span v-if="resource.code" class="tag gray resource-code" :title="$t('sys.permission.resource.copyToClipboard')" @click="copyToClipBoard($event, resource.code)">
-            {{ resource.code }}
-          </span>
+          <mp-tag size="small" color="gray" class="resource-code" :title="$t('sys.permission.resource.copyToClipboard')" @click="copyToClipBoard($event, resource.code)">{{ resource.code }}</mp-tag>
         </div>
         <div class="tools">
           <icon name="edit" size="1.8em" class="edit" @click="openEditor(resource, EDITOR_MODE.EDIT)" :title="$t('common.edit')" />

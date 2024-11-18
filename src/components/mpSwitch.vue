@@ -1,5 +1,5 @@
 <template>
-  <label class="mp-switch" :class="{ checked: checked, disabled: disabled }">
+  <label class="mp-switch" :class="{ checked, disabled }">
     <span class="handle"></span>
   </label>
 </template>

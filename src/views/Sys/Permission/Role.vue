@@ -105,8 +105,8 @@ async function openEditor(item, mode) {
   editorMode = mode
   if (editorMode === EDITOR_MODE.ADD) {
     roleForm.parentData = getParent(item.pid)
-    roleForm.name = null
-    roleForm.description = null
+    roleForm.name = {}
+    roleForm.description = {}
     roleForm.resources = []
     roleForm.id = null
     roleForm.pid = item.id ?? null

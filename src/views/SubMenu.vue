@@ -41,7 +41,7 @@ function clickMenuItem(item) {
   else {
     window.open(item.link, item.target)
   }
-  console.log('look here', isFloat)
+
   isHideSubmenu.value = true
 }
 

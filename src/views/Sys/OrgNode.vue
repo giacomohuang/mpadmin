@@ -9,7 +9,7 @@
           </div>
 
           <div class="name" @click.stop="editTitle($event, item)">
-            <span>{{ item.id }}:{{ item.name }}</span>
+            <span>{{ item.name }}</span>
             <icon name="edit"></icon>
           </div>
 
@@ -293,7 +293,7 @@ $lv-colors-dark: (#522f2f, #452917, #392b39, #443727, #1d2436, #203233, #1d2e52,
   justify-content: space-between;
   height: 24px;
   margin-bottom: 4px;
-  color: var(--text-primary);
+  color: var(--c-white);
   background: inherit;
 
   &:hover > .tools {

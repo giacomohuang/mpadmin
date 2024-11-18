@@ -58,7 +58,7 @@
       <div v-for="(item, index) in menu" :key="index">
         <div class="wrapper" @click.stop="clickMenuItem(item, index)" @mouseenter.stop="mouseOverMenuItem(item, index)" @mouseleave.stop="mouseLeaveMenuItem">
           <div :class="['item', { active: isActiveMenu(item) }]">
-            <Icon class="icon" :name="item.icon || 'func'" :key="item.icon"></Icon>
+            <div class="icon"><Icon :name="item.icon || 'func'" :key="item.icon"></Icon></div>
             <span class="text">{{ $t(item.name) }}</span>
           </div>
         </div>
@@ -80,7 +80,6 @@
 
 <script setup>
 import { onMounted, ref, toRefs, provide, watch, onUnmounted, onBeforeMount, computed, nextTick } from 'vue'
-import dynamicRoutes from 'virtual:router'
 import SubMenu from './SubMenu.vue'
 import { useStore } from '../stores/stores'
 import helper from '../js/helper'
@@ -466,7 +465,7 @@ onUnmounted(() => {
 
 .menu {
   grid-area: menu;
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-primary);
   padding-top: 10px;
   border-right: 1px solid var(--border-light);
   width: 100px;
@@ -477,22 +476,26 @@ onUnmounted(() => {
 
   .wrapper {
     cursor: pointer;
-    &:hover .item:not(.active) {
+    &:hover .item:not(.active) .icon {
       background-color: var(--c-brand-400);
       color: var(--c-white);
       font-weight: 600;
-      .custom-icon {
-        background-color: var(--c-white) !important;
-      }
     }
-    padding: 5px;
+    // padding: 5px;
+  }
+  .icon {
+    margin: 2px 0;
+    padding: 10px;
+    border-radius: 8px;
+    transition:
+      color 0.15s ease,
+      background-color 0.15s ease;
   }
   .item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 6px 0 12px 0;
-    border-radius: 8px;
+    padding: 8px 4px;
 
     color: var(--text-primary);
     border-radius: 10px;
@@ -500,37 +503,21 @@ onUnmounted(() => {
       color 0.2s ease,
       background-color 0.2s ease;
 
-    &.active {
+    &.active .icon {
       background-color: var(--c-brand);
       color: var(--c-white);
       font-weight: 600;
-      .custom-icon {
-        background-color: var(--c-white);
-      }
     }
 
-    &.hover {
+    &.hover .icon {
       background-color: var(--c-brand-400);
       color: var(--c-white);
       font-weight: 600;
-      .custom-icon {
-        background-color: var(--c-white);
-      }
     }
 
     .text {
       text-align: center;
       line-height: 1.2;
-    }
-
-    .custom-icon {
-      width: 2em;
-      height: 2em;
-      margin: 4px 0;
-      background-color: var(--text-primary);
-      mask-size: 1.5em 1.5em;
-      mask-repeat: no-repeat;
-      mask-position: center;
     }
   }
 }
@@ -559,8 +546,8 @@ onUnmounted(() => {
     box-shadow: 1px 1px 2px 0 rgba(100, 100, 100, 0.1);
   }
   &.hide {
+    z-index: 0;
     width: 0;
-    opacity: 0;
   }
 }
 

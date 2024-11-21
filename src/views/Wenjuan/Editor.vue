@@ -35,9 +35,7 @@
 </template>
 
 <script setup>
-import { provide, ref, computed, nextTick, onBeforeMount, onBeforeUnmount } from 'vue'
-import MultiChoice from '@/components/wenjuan/MultiChoice.vue'
-import SingleChoice from '@/components/wenjuan/SingleChoice.vue'
+import { provide, ref, computed, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import XEditer from '@/components/wenjuan/XEditer.vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import 'simplebar'
@@ -102,8 +100,8 @@ function scrollFn(el) {
 }
 
 const TopicComponents = {
-  MultiChoice,
-  SingleChoice
+  MultiChoice: defineAsyncComponent(() => import('@/components/wenjuan/MultiChoice.vue')),
+  SingleChoice: defineAsyncComponent(() => import('@/components/wenjuan/SingleChoice.vue'))
 }
 
 const selectedTopicIndex = ref(0)

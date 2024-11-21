@@ -42,7 +42,7 @@
   <a-drawer :title="$t('sys.permission.resource.resourceEditor')" width="500px" :open="resourceEditor" @close="resourceEditor = false">
     <a-form ref="resourceFormRef" autocomplete="off" :model="resourceForm" :rules="vRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 20 }" @finish="submit">
       <a-form-item :label="$t('sys.permission.resource.name')" :wrapper-col="{ span: 12 }" name="name">
-        <I18nInput v-model="resourceForm.name" />
+        <mpInputI18n v-model="resourceForm.name" />
       </a-form-item>
       <a-form-item :label="$t('sys.permission.resource.code')" name="code" required>
         <div dir="ltr">
@@ -154,7 +154,7 @@ const resourceEditor = ref(false)
 const resourceFormRef = ref()
 const resourceForm = reactive({
   type: 1,
-  name: null,
+  name: {},
   router: null,
   link: null,
   linkType: 1,
@@ -174,8 +174,8 @@ const rootsRef = ref(null)
 const listRef = ref(null)
 
 // DnD 实例
-const dndResource = new DnD(listRef, (ids) => reorder(ids))
-const dndRoot = new DnD(rootsRef, (ids) => reorder(ids))
+const dndResource = new DnD(listRef, { onReorder: (ids) => reorder(ids), allowNesting: false })
+const dndRoot = new DnD(rootsRef, { onReorder: (ids) => reorder(ids), allowNesting: false })
 
 // 非响应式状态
 let editorMode

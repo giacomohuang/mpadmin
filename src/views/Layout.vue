@@ -484,7 +484,7 @@ onUnmounted(() => {
     // padding: 5px;
   }
   .icon {
-    margin: 2px 0;
+    margin: 0 0 2px 0;
     padding: 10px;
     border-radius: 8px;
     transition:

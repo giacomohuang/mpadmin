@@ -7,13 +7,13 @@
     </a-input>
 
     <!-- 编辑器模态框 -->
-    <a-modal v-model:open="editorVisible" :title="'多语言编辑'" @ok="handleOk" @cancel="handleCancel">
+    <a-modal v-model:open="editorVisible" :title="$t('comp.mpInputI18n.editorTitle')" @ok="handleOk" @cancel="handleCancel">
       <div class="lang-container">
         <a-form-item-rest>
           <div v-for="lang in languages" :key="lang" class="lang-item">
             <div class="lang-label" :class="'font-' + lang">{{ getLangLabel(lang) }}</div>
             <a-input v-model:value="translationData[lang]" :dir="rtlLanguages.includes(lang) ? 'rtl' : 'ltr'" :class="'font-' + lang" autocomplete="new-password" />
-            <a-button v-if="lang !== currentLang" type="link" size="small" @click="() => autoTranslate(lang)"> 翻译 </a-button>
+            <a-button v-if="lang !== currentLang" type="link" size="small" @click="() => autoTranslate(lang)"> {{ $t('comp.mpInputI18n.translate') }} </a-button>
           </div>
         </a-form-item-rest>
       </div>
@@ -187,7 +187,7 @@ const autoTranslate = async (targetLang) => {
 
 .lang-item {
   display: grid;
-  grid-template-columns: 100px 1fr 40px;
+  grid-template-columns: 100px 1fr 50px;
 
   align-items: center;
   margin-bottom: 16px;

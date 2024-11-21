@@ -2,7 +2,7 @@ import permission from './permission'
 import account from './account'
 import oss from './oss'
 import org from './org'
-
+import wenjuan from './wenjuan'
 import verification from './verification'
 
 const API = {
@@ -10,6 +10,7 @@ const API = {
   account,
   verification,
   oss,
-  org
+  org,
+  wenjuan
 }
 export default API

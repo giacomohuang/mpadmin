@@ -193,6 +193,7 @@
         "selectIcon": "아이콘 선택"
       }
     },
+
     "org": {
       "_title": "조직 구조",
       "department": "부서",
@@ -202,6 +203,11 @@
       "leader": "책임자",
       "orgRoles": "조직 역할",
       "roles": "역할"
+    }
+  },
+  "wenjuan": {
+    "editor": {
+      "_title": "설문조사"
     }
   },
   "comp": {
@@ -216,6 +222,10 @@
       "success": "업로드 성공!",
       "failed": "업로드 실패: {error}",
       "confirmContent": "{name}을(를) 삭제하시겠습니까?"
+    },
+    "mpInputI18n": {
+      "editorTitle": "다국어 편집기",
+      "translate": "번역하다"
     }
   }
 }

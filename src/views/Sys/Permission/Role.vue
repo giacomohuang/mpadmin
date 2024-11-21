@@ -13,10 +13,10 @@
   <a-drawer title="角色编辑器" width="650px" :open="roleEditor" @close="roleEditor = false" :destroyOnClose="true">
     <a-form ref="roleFormRef" :model="roleForm" :rules="vRules" :label-col="{ span: 3 }" :wrapper-col="{ span: 21 }" @finish="submit">
       <a-form-item label="名称" :wrapper-col="{ span: 8 }" name="name">
-        <I18nInput v-model="roleForm.name" />
+        <mpInputI18n v-model="roleForm.name" />
       </a-form-item>
       <a-form-item label="描述" :wrapper-col="{ span: 20 }" name="description">
-        <I18nInput v-model="roleForm.description" />
+        <mpInputI18n v-model="roleForm.description" />
       </a-form-item>
       <a-form-item label="资源" :wrapper-col="{ span: 22 }" name="resources">
         <a-form-item-rest>
@@ -60,7 +60,7 @@ provide('collapseRoleIds', collapseRoleIds)
 provide('selectedIds', selectedIds)
 
 // 拖拽实例
-const dragAndDrop = new DnD(listRef, reorder)
+const dragAndDrop = new DnD(listRef, { onReorder: (ids) => reorder(ids), allowNesting: false })
 
 // 表单验证规则
 const vRules = {

@@ -204,6 +204,11 @@
       "roles": "دور"
     }
   },
+  "wenjuan": {
+    "editor": {
+      "_title": "الاستبيانات"
+    }
+  },
   "comp": {
     "iconSelect": {
       "systemIcons": "رمز النظام",
@@ -215,6 +220,10 @@
       "uploading": "جاري التحميل... {percent}%",
       "success": "تم التحميل بنجاح!",
       "confirmContent": "هل أنت متأكد أنك تريد حذف {name}؟"
+    },
+    "mpInputI18n": {
+      "editorTitle": "محرر متعدد اللغات",
+      "translate": "يترجم"
     }
   }
 }

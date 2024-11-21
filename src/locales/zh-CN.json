@@ -204,6 +204,11 @@
       "roles": "角色"
     }
   },
+  "wenjuan": {
+    "editor": {
+      "_title": "问卷"
+    }
+  },
   "comp": {
     "iconSelect": {
       "systemIcons": "系统图标",
@@ -216,6 +221,10 @@
       "success": "上传成功！",
       "failed": "上传失败：{error}",
       "confirmContent": "Are you sure you want to delete {name}?"
+    },
+    "mpInputI18n": {
+      "editorTitle": "多语言编辑器",
+      "translate": "翻译"
     }
   }
 }

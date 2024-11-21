@@ -204,6 +204,11 @@
       "roles": "Roles"
     }
   },
+  "wenjuan": {
+    "editor": {
+      "_title": "Questionnaire"
+    }
+  },
   "comp": {
     "iconSelect": {
       "systemIcons": "System Icons",
@@ -216,6 +221,10 @@
       "success": "Upload successful!",
       "failed": "Upload failed: {error}",
       "confirmContent": "Are you sure you want to delete {name}?"
+    },
+    "mpInputI18n": {
+      "editorTitle": "Multilingual editor",
+      "translate": "translate"
     }
   }
 }

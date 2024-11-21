@@ -26,3 +26,4 @@ _docs
 *.sln
 *.sw?
 server/.env
+components.d.ts

@@ -204,6 +204,11 @@
       "roles": "ロール"
     }
   },
+  "wenjuan": {
+    "editor": {
+      "_title": "アンケート"
+    }
+  },
   "comp": {
     "iconSelect": {
       "systemIcons": "システムアイコン",
@@ -216,6 +221,10 @@
       "success": "アップロード成功！",
       "failed": "アップロード失敗: {error}",
       "confirmContent": "{name}を削除してもよろしいですか？"
+    },
+    "mpInputI18n": {
+      "editorTitle": "多言語エディター",
+      "translate": "翻訳する"
     }
   }
 }

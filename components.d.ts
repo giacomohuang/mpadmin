@@ -15,6 +15,7 @@ declare module 'vue' {
     AMenuItem: typeof import('ant-design-vue/es')['MenuItem']
     ARadio: typeof import('ant-design-vue/es')['Radio']
     ARadioGroup: typeof import('ant-design-vue/es')['RadioGroup']
+    AResult: typeof import('ant-design-vue/es')['Result']
     ASelect: typeof import('ant-design-vue/es')['Select']
     ASelectOption: typeof import('ant-design-vue/es')['SelectOption']
     ASpin: typeof import('ant-design-vue/es')['Spin']

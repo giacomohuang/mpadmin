@@ -1,13 +1,13 @@
 <template>
   <div>
     <bubble-menu :editor="editor" :tippy-options="{ duration: 100 }" v-if="editor" class="toolbar">
-      <button @click="editor.chain().focus().toggleBold().run()" :class="{ active: editor.isActive('bold') }">粗体</button>
-      <button @click="editor.chain().focus().toggleItalic().run()" :class="{ active: editor.isActive('italic') }">斜体</button>
-      <button @click="editor.chain().focus().toggleUnderline().run()" :class="{ active: editor.isActive('underline') }">下划线</button>
-      <button @click="editor.chain().focus().toggleStrike().run()" :class="{ active: editor.isActive('strike') }">删除线</button>
-      <button @click="editor.chain().focus().setTextAlign('left').run()" :class="{ active: editor.isActive({ textAlign: 'left' }) }">左对齐</button>
-      <button @click="editor.chain().focus().setTextAlign('center').run()" :class="{ active: editor.isActive({ textAlign: 'center' }) }">居中</button>
-      <button @click="editor.chain().focus().setTextAlign('right').run()" :class="{ active: editor.isActive({ textAlign: 'right' }) }">右对齐</button>
+      <button @click="editor.chain().focus().toggleBold().run()" :class="{ active: editor.isActive('bold') }"><icon name="bold" /></button>
+      <button @click="editor.chain().focus().toggleItalic().run()" :class="{ active: editor.isActive('italic') }"><icon name="italic" /></button>
+      <button @click="editor.chain().focus().toggleUnderline().run()" :class="{ active: editor.isActive('underline') }"><icon name="underline" /></button>
+      <button @click="editor.chain().focus().toggleStrike().run()" :class="{ active: editor.isActive('strike') }"><icon name="strike" /></button>
+      <button @click="editor.chain().focus().setTextAlign('left').run()" :class="{ active: editor.isActive({ textAlign: 'left' }) }"><icon name="align-left" /></button>
+      <button @click="editor.chain().focus().setTextAlign('center').run()" :class="{ active: editor.isActive({ textAlign: 'center' }) }"><icon name="align-center" /></button>
+      <button @click="editor.chain().focus().setTextAlign('right').run()" :class="{ active: editor.isActive({ textAlign: 'right' }) }"><icon name="align-right" /></button>
     </bubble-menu>
     <editor-content :editor="editor" class="editor" />
   </div>
@@ -38,19 +38,38 @@ onMounted(() => {
   editor.value = new Editor({
     content: props.modelValue,
     autofocus: props.autofocus || false,
-    extensions: [StarterKit.configure({ dropcursor: false, hardBreak: false }), Underline, TextAlign.configure({ types: ['heading', 'paragraph'] })],
+    extensions: [
+      StarterKit.configure({
+        dropcursor: false,
+        hardBreak: false
+      }),
+      Underline,
+      TextAlign.configure({
+        types: ['heading', 'paragraph']
+      })
+    ],
     onUpdate: () => {
       emits('update:modelValue', editor.value.getHTML())
+    },
+
+    onDrop: () => {
+      return false
+    },
+    onPaste: (view, event) => {
+      event.preventDefault()
+      const text = event.clipboardData?.getData('text/plain')
+      if (text) {
+        view.dispatch(view.state.tr.insertText(text))
+      }
+      return true
     }
-    // autofocus: false
   })
-  // editor.value.setEditable(false);
 })
 </script>
 <style scoped lang="scss">
 .toolbar {
   border: 1px solid #e3e3e3;
-  border-radius: 4px;
+  border-radius: 8px;
   background: #fff;
   padding: 2px;
   box-shadow: 0px 4px 16px rgb(0 0 0 / 8%);
@@ -61,9 +80,14 @@ button {
   background: #fff;
   border: 0px;
   padding: 0px;
+  .iconfont {
+    font-size: 1.6em;
+    color: var(--text-primary);
+    opacity: 0.2;
+    transition: all 0.15s ease;
+  }
 
-  &.active .icon {
-    color: #2d8ac7;
+  &.active .iconfont {
     opacity: 1;
   }
 

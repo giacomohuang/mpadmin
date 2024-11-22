@@ -2,40 +2,39 @@
   <div class="main">
     <aside class="q-types" width="200">
       <VueDraggable v-model="QTYPES" tag="ul" animation="100" ghostClass="dragging" :group="{ name: 'group', pull: 'clone', put: false }" :clone="onClone" :sort="false">
-        <li v-for="item in QTYPES" :key="item.id" @click="addTopic(item)">{{ item.name }}</li>
+        <li v-for="item in QTYPES" :key="item.id" @click="addItem(item)">{{ item.title }}</li>
       </VueDraggable>
     </aside>
     <main class="q-items" data-simplebar>
       <div class="tips" v-if="!qItems || qItems.length == 0">请点击题型按钮或将题型拖动到这里</div>
-      <VueDraggable v-model="qItems" tag="ul" animation="100" group="group" ghostClass="dragging" @end="onDropped" @add="onDropped">
-        <li v-for="(item, index) in qItems" class="q-item" :id="item.id" :key="item.id" :class="index == selectedTopicIndex ? 'selected' : ''" @mouseup="changeEditingTopic(index)">
+      <VueDraggable v-model="qItems" tag="ul" style="min-height: 100px" animation="100" group="group" ghostClass="dragging" @end="onDropped" @add="onDropped">
+        <li v-for="(item, index) in qItems" class="q-item" :id="item.id" :key="item.id" :class="index == currentItemIndex ? 'selected' : ''" @mouseup="changeEditingItem(index)">
           <div class="number"><span class="required" :class="{ visible: item.required }">*</span>{{ index + 1 }}.&nbsp;&nbsp;</div>
           <div class="wrap">
             <div class="title">
               <XEditer class="text" v-model="qItems[index].title"></XEditer>
               <div class="opr">
-                <a-tooltip title="移动" placement="top">
-                  <icon name="menu" class="handle items" />
-                </a-tooltip>
                 <a-tooltip title="复制" placement="top">
-                  <icon name="data" class="items" @click="duplicateTopic(index)" />
+                  <icon name="copy" class="items" @click="duplicateItem(index)" />
                 </a-tooltip>
                 <a-tooltip title="删除" placement="top">
-                  <icon name="del" class="items" @click="removeTopic(index)" />
+                  <icon name="remove" class="items" @click="removeItem(index)" />
                 </a-tooltip>
               </div>
             </div>
-            <component :is="TopicComponents[item.type]" :index="index" :key="item.id"></component>
+            <component :is="QtypeComponents[item.type]" :qItemIndex="index" :key="item.id"></component>
           </div>
         </li>
       </VueDraggable>
     </main>
-    <aside class="settings" width="300" id="settings"></aside>
+    <aside class="settings" width="300">
+      <div id="__WENJUAN_SETTINGS"></div>
+    </aside>
   </div>
 </template>
 
 <script setup>
-import { provide, ref, computed, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent } from 'vue'
+import { provide, ref, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import XEditer from '@/components/wenjuan/XEditer.vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import 'simplebar'
@@ -44,49 +43,43 @@ import API from '@/api/API'
 import { customAlphabet } from 'nanoid'
 import 'simplebar'
 import '@/assets/simplebar.css'
-const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 8)
+const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 12)
 
 const QTYPES = ref([
   {
     id: '1',
-    name: '多选题',
+    title: '多选题',
     type: 'MultiChoice',
     // default data
     title: '多选题',
     required: true,
     options: [
-      { name: '选项1', value: 0, id: nanoid(), fill: { isShow: true, length: 20, type: 'text' } },
-      { name: '选项2', value: 1, id: nanoid(), fill: { isShow: false, length: 20, type: 'text' } },
-      { name: '选项3', value: 2, id: nanoid(), fill: { isShow: false, length: 20, type: 'text' } }
+      { text: '选项1', value: 0, id: nanoid(), fill: { isShow: true, length: 20, type: 'text' } },
+      { text: '选项2', value: 1, id: nanoid(), fill: { isShow: false, length: 20, type: 'text' } },
+      { text: '选项3', value: 2, id: nanoid(), fill: { isShow: false, length: 20, type: 'text' } }
     ]
   },
   {
     id: '2',
-    name: '单选题',
+    title: '单选题',
     type: 'SingleChoice'
   },
   {
     id: '3',
-    name: '下拉选择',
+    title: '下拉选择',
     type: 'DropDown'
   },
   {
     id: '4',
-    name: '图片选择',
+    title: '图片选择',
     type: 'ImageChoice'
   },
   {
     id: '5',
-    name: '评分',
+    title: '评分',
     type: 'RankChoice'
   }
 ])
-
-// import XEditor from '../components/XEditer.vue'
-// import Utils from '@/base/utils'
-
-// const qItemsRef = ref(null)
-// const qTypesRef = ref(null)
 
 function onClone(data) {
   const d = JSON.parse(JSON.stringify(data))
@@ -94,53 +87,50 @@ function onClone(data) {
   d.id = id
   return d
 }
-
-function scrollFn(el) {
-  console.log(el)
-}
-
-const TopicComponents = {
+const QtypeComponents = {
   MultiChoice: defineAsyncComponent(() => import('@/components/wenjuan/MultiChoice.vue')),
-  SingleChoice: defineAsyncComponent(() => import('@/components/wenjuan/SingleChoice.vue'))
+  SingleChoice: defineAsyncComponent(() => import('@/components/wenjuan/SingleChoice.vue')),
+  DropDown: defineAsyncComponent(() => import('@/components/wenjuan/DropDown.vue')),
+  FillBlank: defineAsyncComponent(() => import('@/components/wenjuan/FillBlank.vue'))
+  // ImageChoice: defineAsyncComponent(() => import('@/components/wenjuan/ImageChoice.vue')),
+  // RankChoice: defineAsyncComponent(() => import('@/components/wenjuan/RankChoice.vue'))
 }
 
-const selectedTopicIndex = ref(0)
+const currentItemIndex = ref(0)
 const qItems = ref([])
-const selectedOptionIndex = ref(-1)
 const settings = ref(null)
 
 provide('qItems', qItems)
-provide('selectedOptionIndex', selectedOptionIndex)
-provide('selectedTopicIndex', selectedTopicIndex)
+provide('currentItemIndex', currentItemIndex)
 
 // 数据初始化
 
-function addTopic(payload) {
+function addItem(payload) {
   const data = JSON.parse(JSON.stringify(payload))
 
   data.id = nanoid()
   qItems.value.push(data)
-  selectedTopicIndex.value = qItems.value.length - 1
+  currentItemIndex.value = qItems.value.length - 1
   nextTick(() => {
     const el = document.getElementById(data.id)
     el.scrollIntoView({ block: 'nearest' })
   })
 }
 
-function removeTopic(index) {
+function removeItem(index) {
   qItems.value.splice(index, 1)
   if (qItems.value.length == 1) {
-    selectedTopicIndex.value = 0
+    currentItemIndex.value = 0
   } else {
-    selectedTopicIndex.value = index - 1
+    currentItemIndex.value = index - 1
   }
 }
 
-function duplicateTopic(index) {
+function duplicateItem(index) {
   console.log(index)
   qItems.value.splice(index, 0, JSON.parse(JSON.stringify(qItems.value[index])))
   qItems.value[index + 1].id = nanoid()
-  selectedTopicIndex.value = index + 1
+  currentItemIndex.value = index + 1
   nextTick(() => {
     const el = document.getElementById(qItems.value[index + 1].id)
     el.scrollIntoView({ block: 'nearest' })
@@ -148,12 +138,11 @@ function duplicateTopic(index) {
 }
 
 function onDropped(e) {
-  selectedTopicIndex.value = e.newIndex
+  currentItemIndex.value = e.newIndex
 }
 
-function changeEditingTopic(index) {
-  console.log('click')
-  selectedTopicIndex.value = index
+function changeEditingItem(index) {
+  currentItemIndex.value = index
 }
 
 onBeforeMount(async () => {
@@ -176,6 +165,7 @@ onBeforeUnmount(() => {
 
 <style scoped lang="scss">
 .main {
+  position: relative;
   display: grid;
   grid-template-areas: 'q-types q-items settings';
   grid-template-columns: 200px 1fr 300px;
@@ -213,17 +203,6 @@ onBeforeUnmount(() => {
   }
 }
 
-.tips {
-  // position: absolute;
-  top: 50px;
-  padding: 10px;
-  margin: 10px;
-  border: 1px solid var(--border-medium);
-  border-radius: 4px;
-  text-align: center;
-  color: #333;
-}
-
 .q-items {
   position: relative;
   min-width: 400px;
@@ -231,6 +210,26 @@ onBeforeUnmount(() => {
   overflow-x: hidden;
   max-height: calc(100vh - 64px);
   background: var(--bg-secondary);
+
+  .tips {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    width: 100%;
+
+    height: 40px;
+    padding: 10px;
+    top: 20px;
+    left: 20px;
+    right: 300px;
+    border: 1px solid var(--border-medium);
+    background: var(--bg-primary);
+    border-radius: 4px;
+    color: #333;
+  }
 
   .selected {
     border: 2px solid var(--c-brand-500);
@@ -245,6 +244,11 @@ onBeforeUnmount(() => {
     > * {
       opacity: 0;
     }
+  }
+
+  ul {
+    position: relative;
+    z-index: 2;
   }
 
   li {

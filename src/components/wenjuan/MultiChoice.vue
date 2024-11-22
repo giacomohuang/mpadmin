@@ -186,7 +186,8 @@ h4 {
     border: 2px solid transparent;
     &:hover {
       .text {
-        border: 1px dashed var(--c-brand);
+        border: 1px dashed var(--border-dark);
+        // background-color: var(--bg-secondary);
       }
       .remove {
         opacity: 1;
@@ -236,7 +237,9 @@ h4 {
   transition: border 0.15s ease-in-out;
 }
 .focus .text {
-  border: 1px solid var(--c-brand) !important;
+  // border: 1px solid var(--c-brand) !important;
+  border-color: transparent !important;
+  background-color: var(--bg-tertiary);
 }
 
 .add-option {

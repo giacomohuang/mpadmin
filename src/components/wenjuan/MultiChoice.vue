@@ -3,8 +3,8 @@
     <li v-for="(item, index) in qItems[qItemIndex].options" :id="item.id" :key="item.id" class="item" @click.stop="clickOption($event, index)">
       <icon name="handle" class="q-handle" />
       <span class="checkbox"></span>
-      <XEditer class="text" v-model="item.text" :autofocus="index == autoFocusIndex ? true : false"></XEditer>
-      <!-- <div v-if="item.fill?.isShow" class="fillbox"></div> -->
+      <XEditer class="text" :class="{ fillbox: item.fill?.show }" v-model="item.text" :autofocus="index == autoFocusIndex ? true : false"></XEditer>
+
       <icon name="del" class="ico remove" size="1.5em" title="删除" @click.stop="removeOption(index)"></icon>
     </li>
   </VueDraggable>
@@ -12,7 +12,7 @@
   <div @click.stop="addOption" class="add-option"><icon name="plus" />添加选项</div>
 
   <!-- 选项设置 -->
-  <Teleport to="#__WENJUAN_SETTINGS" v-if="currentItemIndex === qItemIndex">
+  <Teleport to="#__WENJUAN_SETTINGS_CONTENT" v-if="currentItemIndex === qItemIndex">
     <div class="num">{{ qItemIndex + 1 }}. 多选题</div>
     <a-tabs v-model:activeKey="tabName" type="card" class="tabs">
       <!-- Tabs:题目设置 -->
@@ -40,8 +40,14 @@
       <!-- Tabs:选项设置 -->
       <a-tab-pane v-if="currentOptionIndex >= 0" :key="'option'" :tab="'第' + (currentOptionIndex + 1) + '项设置'">
         <div class="prop-item">
-          <h4>选项内容</h4>
-          <XEditer style="width: 200px" class="text" v-model="qItems[qItemIndex].options[currentOptionIndex].text"></XEditer>
+          <h4>选项填空</h4>
+          <a-switch v-model:checked="qItems[qItemIndex].options[currentOptionIndex].fill.show" size="small" />
+        </div>
+        <div class="prop-item">
+          <h4>填空长度限制</h4>
+          <a-input-number v-model:value="qItems[qItemIndex].options[currentOptionIndex].fill.length" min="0" max="500" style="width: 100px" size="small">
+            <template #addonAfter>字符</template>
+          </a-input-number>
         </div>
       </a-tab-pane>
     </a-tabs>
@@ -75,7 +81,7 @@ watch(currentOptionIndex, () => {
 })
 
 function addOption() {
-  qItems.value[qItemIndex].options.push({ text: '', id: nanoid(), fill: { isShow: false } })
+  qItems.value[qItemIndex].options.push({ text: '', id: nanoid(), fill: { show: false } })
   currentOptionIndex.value = qItems.value[qItemIndex].options.length - 1
   autoFocusIndex.value = currentOptionIndex.value
 }
@@ -138,6 +144,13 @@ onBeforeMount(() => {
   if (!qItems.value[qItemIndex].options) {
     qItems.value[qItemIndex].options = [{ text: '选项1' }]
   }
+  qItems.value[qItemIndex].options.forEach((option) => {
+    if (!option.fill) {
+      option.fill = {
+        show: false
+      }
+    }
+  })
   setTab()
 })
 
@@ -152,6 +165,18 @@ function fixMaxRange() {
     qItems.value[qItemIndex].maxRange = qItems.value[qItemIndex].minRange
   }
 }
+
+// function handleFillChange(checked) {
+//   if (!qItems.value[qItemIndex].options[currentOptionIndex.value].fill) {
+//     qItems.value[qItemIndex].options[currentOptionIndex.value].fill = {
+//       show: checked,
+//       length: 20,
+//       type: 'text'
+//     }
+//   } else {
+//     qItems.value[qItemIndex].options[currentOptionIndex.value].fill.show = checked
+//   }
+// }
 </script>
 
 <style scoped lang="scss">
@@ -296,13 +321,16 @@ h4 {
   border-left: 0px;
 }
 
-.fillbox {
-  width: 40px;
-  height: 20px;
-  background: var(--bg-primary);
-  border-radius: 4px;
-  margin-left: 6px;
-  border: 1px solid var(--border-medium);
+.fillbox :deep(.ProseMirror) p:last-child {
+  &:after {
+    content: ' ';
+    display: inline-block;
+    width: 80px;
+    height: 20px;
+    // border-radius: 4px;
+    margin-left: 6px;
+    border-bottom: 1px solid var(--border-dark);
+  }
 }
 
 pre {

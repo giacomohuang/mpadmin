@@ -7,7 +7,7 @@
     </aside>
     <main class="q-items" data-simplebar>
       <div class="tips" v-if="!qItems || qItems.length == 0">请点击题型按钮或将题型拖动到这里</div>
-      <VueDraggable v-model="qItems" tag="ul" style="min-height: 100px" animation="100" group="group" ghostClass="dragging" @end="onDropped" @add="onDropped">
+      <VueDraggable v-model="qItems" tag="ul" animation="100" group="group" ghostClass="dragging" @end="onDropped" @add="onDropped">
         <li v-for="(item, index) in qItems" class="q-item" :id="item.id" :key="item.id" :class="index == currentItemIndex ? 'selected' : ''" @mouseup="changeEditingItem(index)">
           <div class="number"><span class="required" :class="{ visible: item.required }">*</span>{{ index + 1 }}.&nbsp;&nbsp;</div>
           <div class="wrap">
@@ -27,8 +27,8 @@
         </li>
       </VueDraggable>
     </main>
-    <aside class="settings" width="300">
-      <div id="__WENJUAN_SETTINGS"></div>
+    <aside class="settings" width="300" id="__WENJUAN_SETTINGS">
+      <div id="__WENJUAN_SETTINGS_CONTENT"></div>
     </aside>
   </div>
 </template>
@@ -54,9 +54,9 @@ const QTYPES = ref([
     title: '多选题',
     required: true,
     options: [
-      { text: '选项1', value: 0, id: nanoid(), fill: { isShow: true, length: 20, type: 'text' } },
-      { text: '选项2', value: 1, id: nanoid(), fill: { isShow: false, length: 20, type: 'text' } },
-      { text: '选项3', value: 2, id: nanoid(), fill: { isShow: false, length: 20, type: 'text' } }
+      { text: '选项1', value: 0, id: nanoid(), fill: { show: true, length: 20, type: 'text' } },
+      { text: '选项2', value: 1, id: nanoid(), fill: { show: false, length: 20, type: 'text' } },
+      { text: '选项3', value: 2, id: nanoid(), fill: { show: false, length: 20, type: 'text' } }
     ]
   },
   {
@@ -203,6 +203,25 @@ onBeforeUnmount(() => {
   }
 }
 
+.tips {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  padding: 12px;
+  margin: 20px;
+  border: 1px dashed var(--border-dark);
+  background: var(--bg-primary);
+  border-radius: 4px;
+  &:hover {
+    border-color: var(--c-brand-500);
+  }
+}
+
 .q-items {
   position: relative;
   min-width: 400px;
@@ -211,29 +230,8 @@ onBeforeUnmount(() => {
   max-height: calc(100vh - 64px);
   background: var(--bg-secondary);
 
-  .tips {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-    width: 100%;
-
-    height: 40px;
-    padding: 10px;
-    top: 20px;
-    left: 20px;
-    right: 300px;
-    border: 1px solid var(--border-medium);
-    background: var(--bg-primary);
-    border-radius: 4px;
-    color: #333;
-  }
-
   .selected {
     border: 2px solid var(--c-brand-500);
-    // box-shadow: 0 0 0 2px var(--c-brand-200);
   }
   .dragging {
     /* display: none; */
@@ -249,6 +247,7 @@ onBeforeUnmount(() => {
   ul {
     position: relative;
     z-index: 2;
+    min-height: 80px;
   }
 
   li {

@@ -1,33 +1,56 @@
 <template>
-  <div class="main-wrap">
-    <div style="margin-top: 20px">
-      <div class="dragarea" :class="{ over: state.dragover }" @click="handleSelectFiles" @dragover.prevent @dragover.native="state.dragover = true" @dragleave.native="state.dragover = false" @drop="handleDropFiles">
-        <div class="dd" v-if="files.length === 0">Drag & Drops files here.</div>
-        <ul class="uploadlist">
-          <li v-for="file in files" key="file.name">
-            <div class="filename">{{ file.originalName }}</div>
-            <div style="display: flex; flex-direction: row; align-items: center">
-              <div style="font-size: 12px; padding-right: 8px">SHA1:</div>
-              <div class="progress"><a-progress :percent="file.checksumPercent" size="small" :steps="10" /></div>
-              <div class="progress" style="width: 60%"><a-progress :percent="file.percent" size="small" :status="file.status" /></div>
-            </div>
-          </li>
-        </ul>
+  <div :style="{ height: props.height, width: props.width }">
+    <!-- 图片预览区域 -->
+    <div v-if="modelValue" class="preview-container">
+      <img :src="prefixURL + modelValue" class="preview-image" @click.stop="handleSelectFiles" />
+    </div>
+
+    <!-- 上传区域 -->
+    <div v-else class="dragarea" :class="{ over: state.dragover }" @click.stop="handleSelectFiles" @dragover.prevent @dragover.native="state.dragover = true" @dragleave.native="state.dragover = false" @drop="handleDropFiles">
+      <div v-if="!modelValue">拖拽文件到此处或点击上传</div>
+
+      <div class="progress" v-if="uploading">
+        <a-progress type="line" :percent="files[0].percent" :width="20" :status="files[0].status" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import CryptoJS from 'crypto-js'
-// import SparkMD5 from 'spark-md5'
-import API from '../../api/API'
+import API from '../api/API'
 import pLimit from 'p-limit'
+
+const props = defineProps({
+  // 允许的文件类型数组，例如 ['.jpg', '.png']
+  type: {
+    type: Array,
+    default: () => ['jpg', 'png', 'jpeg', 'gif', 'bmp', 'webp']
+  },
+  modelValue: {
+    type: String,
+    default: ''
+  },
+  width: {
+    type: String,
+    default: '100px'
+  },
+  height: {
+    type: String,
+    default: '100px'
+  }
+})
+
+const prefixURL = import.meta.env.VITE_UPLOAD_URL_PREFIX
+
+const emit = defineEmits(['update:modelValue', 'uploaded'])
+
 const state = reactive({
   dragover: false
 })
 const files = ref([])
+const uploading = ref(false)
 
 const calculatePartSize = (size) => {
   // 最大单个文件5TB
@@ -55,38 +78,73 @@ const calculatePartSize = (size) => {
 const handleDropFiles = async (e) => {
   e.preventDefault()
   state.dragover = false
-  const fileHandlesPromises = [...e.dataTransfer.items].filter((item) => item.kind === 'file').map((item) => item.getAsFileSystemHandle())
-  for await (const handle of fileHandlesPromises) {
-    if (handle.kind === 'directory') {
-      console.log(`Directory: ${handle.name}`)
-    } else {
-      console.log(`File: ${handle.name}`)
+
+  const items = [...e.dataTransfer.items].filter((item) => item.kind === 'file')
+
+  // 检查文件类型
+  if (props.type.length > 0) {
+    const invalidFiles = items.filter((item) => {
+      const fileType = item.type.toLowerCase()
+      const fileName = item.getAsFile().name.toLowerCase()
+      return !props.type.some((type) => {
+        const allowedType = type.toLowerCase()
+        // 检查文件类型或文件扩展名
+        return fileType.endsWith(allowedType.replace('.', '')) || fileName.endsWith(allowedType)
+      })
+    })
+    if (invalidFiles.length > 0) {
+      alert('存在不支持的文件类型')
+      return
     }
   }
+
+  // 检查文件数量
+  if (items.length > props.max) {
+    alert(`最多只能上传${props.max}个文件`)
+    return
+  }
+
+  const fileHandlesPromises = items.map((item) => item.getAsFileSystemHandle())
+  const handles = []
+  for await (const handle of fileHandlesPromises) {
+    if (handle.kind === 'file') {
+      handles.push(handle)
+    }
+  }
+
+  if (handles.length > 0) {
+    await uploadFiles(handles)
+  }
 }
+
 const handleSelectFiles = async () => {
   try {
-    const handles = await window.showOpenFilePicker({
-      // types: [
-      //   {
-      //     description: 'Images',
-      //     accept: {
-      //       'image/*': ['.png', '.gif', '.jpeg', '.jpg']
-      //     }
-      //   }
-      // ],
-      // excludeAcceptAllOption: true,
-      multiple: true
-    })
-    // files.value = new Array(handles.length).fill({})
+    const pickerOptions = {
+      multiple: false,
+      types: [
+        {
+          description: 'Images',
+          accept: {
+            'image/*': ['.jpg', '.png', '.jpeg', '.gif', '.bmp', '.webp']
+          }
+        }
+      ],
+      excludeAcceptAllOption: true
+    }
+
+    const handles = await window.showOpenFilePicker(pickerOptions)
+
     await uploadFiles(handles)
   } catch (err) {
-    console.log(err)
+    if (err.name !== 'AbortError') {
+      console.error('文件选择错误:', err)
+    }
   }
 }
 
 const uploadFiles = async (handles) => {
   files.value = []
+  uploading.value = true
   const tasks = []
   const limit = pLimit(3)
   for (const [index, handle] of handles.entries()) {
@@ -98,15 +156,25 @@ const uploadFiles = async (handles) => {
     const chunks = await chunkFile(file, chunkSize)
     const task = limit(async () => {
       await checksumSHA1(file, (loaded, total) => (files.value[index].checksumPercent = Math.round((loaded / total) * 100)))
-      await uploadParts(chunks, index, uploadId, oldTags)
+      const result = await uploadParts(chunks, index, uploadId, oldTags)
+      if (result) {
+        // 上传成功后更新modelValue和触发事件
+        emit('update:modelValue', newFilename)
+        emit('uploaded', {
+          originalName: file.name,
+          name: newFilename,
+          url: import.meta.env.VITE_UPLOAD_URL_PREFIX + newFilename
+        })
+      }
     })
     tasks.push(task)
   }
-  await Promise.all(tasks)
+  await Promise.all(tasks).finally(() => {
+    uploading.value = false
+  })
 }
 
 const checksumSHA1 = async (file, onProgress, chunkSize = 5 * 1024 * 1024) => {
-  const chunks = []
   let loaded = 0
   let sha256 = CryptoJS.algo.SHA1.create()
   const total = file.size
@@ -210,77 +278,52 @@ const calcProgress = (chunksProgress) => {
   return chunksProgress.reduce((acc, val) => acc + val, 0)
 }
 
-// function hexToBase64(hexStr) {
-//   const bytes = new Uint8Array(hexStr.length / 2)
-//   for (let i = 0; i < hexStr.length; i += 2) {
-//     bytes[i / 2] = parseInt(hexStr.substr(i, 2), 16)
-//   }
-//   return btoa(String.fromCharCode.apply(null, bytes))
-// }
-
-// async function chunkFileMD5(file, chunkSize = 5 * 1024 * 1024, updateProgress) {
-//   const chunks = []
-//   const spark = new SparkMD5.ArrayBuffer()
-//   let loaded = 0
-//   const total = file.size
-//   return new Promise((resolve, reject) => {
-//     const reader = new FileReader()
-//     let partNumber = 0
-//     // 使用requestIdleCallback来确保UI线程不会被阻塞
-//     const processNextChunk = () => {
-//       if (loaded >= total) {
-//         resolve(chunks)
-//         return
-//       }
-
-//       const start = loaded
-//       const end = Math.min(start + chunkSize, total)
-//       const chunk = file.slice(start, end)
-
-//       reader.onloadend = () => {
-//         spark.append(reader.result)
-//         const hash = hexToBase64(spark.end())
-//         chunks.push({ file: chunk, hash, partNumber })
-//         partNumber++
-//         loaded = end
-//         updateProgress(loaded / total)
-//         requestIdleCallback(processNextChunk)
-//       }
-
-//       reader.onerror = reject
-//       reader.readAsArrayBuffer(chunk)
-//     }
-//     requestIdleCallback(processNextChunk)
-//   })
-// }
+// 处理移除图片
+const handleRemove = () => {
+  emit('update:modelValue', '')
+}
 </script>
 <style lang="scss" scoped>
+.preview-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+
+  &:hover .preview-mask {
+    opacity: 1;
+  }
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.dragarea {
+  height: 100%;
+  width: 100%;
+  // border-radius: 4px;
+  padding: 12px;
+  display: flex;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
 .main-wrap {
   padding: 20px 0 0 20px;
   display: block;
 }
 .dragarea {
-  background-color: var(--bg-list-striped);
-  height: fit-content;
-  width: 400px;
-  // padding: 20px;
-  border-radius: 5px;
-  border: 1px solid #eeeeee;
-  margin-top: 8px;
-  color: #666;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-.dd {
-  margin: 20px;
-  cursor: pointer;
-}
-
-.over {
-  background-color: #f1f1f1;
-  border: 1px dashed #666;
-  transition: all 0.2s;
-  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .uploadlist {
@@ -292,5 +335,16 @@ const calcProgress = (chunksProgress) => {
   li:nth-child(even) {
     background: var(--bg-main);
   }
+}
+
+.progress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.progress-label {
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 </style>

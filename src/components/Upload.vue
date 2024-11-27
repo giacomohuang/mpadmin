@@ -1,10 +1,12 @@
 <template>
   <div class="main-wrap">
-    <div style="margin-top: 20px">
+    <div>
       <div class="dragarea" :class="{ over: state.dragover }" @click="handleSelectFiles" @dragover.prevent @dragover.native="state.dragover = true" @dragleave.native="state.dragover = false" @drop="handleDropFiles">
-        <div class="dd" v-if="files.length === 0">Drag & Drops files here.</div>
+        <div class="dd" v-if="files.length === 0">
+          <slot>拖拽文件到此处或点击上传</slot>
+        </div>
         <ul class="uploadlist">
-          <li v-for="file in files" key="file.name">
+          <li v-for="file in files" :key="file.name">
             <div class="filename">{{ file.originalName }}</div>
             <div style="display: flex; flex-direction: row; align-items: center">
               <div style="font-size: 12px; padding-right: 8px">SHA1:</div>
@@ -19,11 +21,31 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import CryptoJS from 'crypto-js'
-// import SparkMD5 from 'spark-md5'
-import API from '../../api/API'
+import API from '../api/API'
 import pLimit from 'p-limit'
+
+const props = defineProps({
+  // 允许的文件类型数组，例如 ['.jpg', '.png']
+  type: {
+    type: Array,
+    default: () => []
+  },
+  // 是否允许多文件上传
+  multiple: {
+    type: Boolean,
+    default: false
+  },
+  // 最大上传数量
+  max: {
+    type: Number,
+    default: 1
+  }
+})
+
+const emit = defineEmits(['uploaded'])
+
 const state = reactive({
   dragover: false
 })
@@ -55,33 +77,132 @@ const calculatePartSize = (size) => {
 const handleDropFiles = async (e) => {
   e.preventDefault()
   state.dragover = false
-  const fileHandlesPromises = [...e.dataTransfer.items].filter((item) => item.kind === 'file').map((item) => item.getAsFileSystemHandle())
-  for await (const handle of fileHandlesPromises) {
-    if (handle.kind === 'directory') {
-      console.log(`Directory: ${handle.name}`)
-    } else {
-      console.log(`File: ${handle.name}`)
+
+  const items = [...e.dataTransfer.items].filter((item) => item.kind === 'file')
+
+  // 检查文件类型
+  if (props.type.length > 0) {
+    const invalidFiles = items.filter((item) => {
+      const fileType = item.type.toLowerCase()
+      const fileName = item.getAsFile().name.toLowerCase()
+      return !props.type.some((type) => {
+        const allowedType = type.toLowerCase()
+        // 检查文件类型或文件扩展名
+        return fileType.endsWith(allowedType.replace('.', '')) || fileName.endsWith(allowedType)
+      })
+    })
+    if (invalidFiles.length > 0) {
+      alert('存在不支持的文件类型')
+      return
     }
   }
+
+  // 检查文件数量
+  if (items.length > props.max) {
+    alert(`最多只能上传${props.max}个文件`)
+    return
+  }
+
+  const fileHandlesPromises = items.map((item) => item.getAsFileSystemHandle())
+  const handles = []
+  for await (const handle of fileHandlesPromises) {
+    if (handle.kind === 'file') {
+      handles.push(handle)
+    }
+  }
+
+  if (handles.length > 0) {
+    await uploadFiles(handles)
+  }
 }
+
 const handleSelectFiles = async () => {
   try {
-    const handles = await window.showOpenFilePicker({
-      // types: [
-      //   {
-      //     description: 'Images',
-      //     accept: {
-      //       'image/*': ['.png', '.gif', '.jpeg', '.jpg']
-      //     }
-      //   }
-      // ],
-      // excludeAcceptAllOption: true,
-      multiple: true
-    })
-    // files.value = new Array(handles.length).fill({})
+    const pickerOptions = {
+      multiple: props.multiple
+    }
+
+    // 如果��置了文件类型限制
+    if (props.type.length > 0) {
+      // 根据文件扩展名推断MIME类型
+      const mimeTypes = {
+        // 图片
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.svg': 'image/svg+xml',
+        // 文档
+        '.pdf': 'application/pdf',
+        '.doc': 'application/msword',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        '.xls': 'application/vnd.ms-excel',
+        '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        '.ppt': 'application/vnd.ms-powerpoint',
+        '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        // 文本
+        '.txt': 'text/plain',
+        '.csv': 'text/csv',
+        '.json': 'application/json',
+        '.xml': 'application/xml',
+        // 压缩文件
+        '.zip': 'application/zip',
+        '.rar': 'application/x-rar-compressed',
+        '.7z': 'application/x-7z-compressed',
+        // 音频
+        '.mp3': 'audio/mpeg',
+        '.wav': 'audio/wav',
+        '.ogg': 'audio/ogg',
+        // 视频
+        '.mp4': 'video/mp4',
+        '.webm': 'video/webm',
+        '.avi': 'video/x-msvideo'
+      }
+
+      // 根据扩展名分组文件类型
+      const typeGroups = {}
+      props.type.forEach((ext) => {
+        const mime = mimeTypes[ext.toLowerCase()] || 'application/octet-stream'
+        const baseType = mime.split('/')[0]
+        if (!typeGroups[baseType]) {
+          typeGroups[baseType] = {
+            extensions: [],
+            mimes: new Set()
+          }
+        }
+        typeGroups[baseType].extensions.push(ext)
+        typeGroups[baseType].mimes.add(mime)
+      })
+
+      // 构建文件选择器的类型配置
+      pickerOptions.types = Object.entries(typeGroups).map(([baseType, group]) => {
+        const accept = {}
+        Array.from(group.mimes).forEach((mime) => {
+          accept[mime] = group.extensions
+        })
+        return {
+          description: `${baseType.charAt(0).toUpperCase() + baseType.slice(1)} files`,
+          accept
+        }
+      })
+
+      pickerOptions.excludeAcceptAllOption = true
+    }
+
+    const handles = await window.showOpenFilePicker(pickerOptions)
+
+    // 检查文件数量限制
+    if (handles.length > props.max) {
+      alert(`最多只能上传${props.max}个文件`)
+      return
+    }
+
     await uploadFiles(handles)
   } catch (err) {
-    console.log(err)
+    if (err.name !== 'AbortError') {
+      console.error('文件选择错误:', err)
+    }
   }
 }
 
@@ -98,7 +219,14 @@ const uploadFiles = async (handles) => {
     const chunks = await chunkFile(file, chunkSize)
     const task = limit(async () => {
       await checksumSHA1(file, (loaded, total) => (files.value[index].checksumPercent = Math.round((loaded / total) * 100)))
-      await uploadParts(chunks, index, uploadId, oldTags)
+      const result = await uploadParts(chunks, index, uploadId, oldTags)
+      // 上传完成后触发事件
+      if (result) {
+        emit('uploaded', {
+          originalName: file.name,
+          name: newFilename
+        })
+      }
     })
     tasks.push(task)
   }
@@ -260,14 +388,14 @@ const calcProgress = (chunksProgress) => {
   display: block;
 }
 .dragarea {
-  background-color: var(--bg-list-striped);
+  // background-color: var(--bg-list-striped);
   height: fit-content;
   width: 400px;
   // padding: 20px;
   border-radius: 5px;
-  border: 1px solid #eeeeee;
+  border: 1px solid var(--border-medium);
   margin-top: 8px;
-  color: #666;
+  color: var(--text-secondary);
   transition: all 0.2s;
   cursor: pointer;
 }
@@ -277,10 +405,10 @@ const calcProgress = (chunksProgress) => {
 }
 
 .over {
-  background-color: #f1f1f1;
-  border: 1px dashed #666;
+  background-color: var(--bg-main);
+  border: 1px dashed var(--border-medium);
   transition: all 0.2s;
-  color: #000;
+  color: var(--text-primary);
 }
 
 .uploadlist {

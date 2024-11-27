@@ -1,7 +1,7 @@
 <template>
   <div class="main">
     <aside class="q-types" width="200">
-      <VueDraggable v-model="QTYPES" tag="ul" animation="100" ghostClass="dragging" :group="{ name: 'group', pull: 'clone', put: false }" :clone="onClone" :sort="false">
+      <VueDraggable v-model="QTYPES" tag="ul" animation="100" :group="{ name: 'group', pull: 'clone', put: false }" :clone="onClone" :sort="false">
         <li v-for="item in QTYPES" :key="item.id" @click="addItem(item)">{{ item.title }}</li>
       </VueDraggable>
     </aside>
@@ -9,19 +9,19 @@
       <div class="tips" v-if="!qItems || qItems.length == 0">请点击题型按钮或将题型拖动到这里</div>
       <VueDraggable v-model="qItems" tag="ul" animation="100" group="group" ghostClass="dragging" @end="onDropped" @add="onDropped">
         <li v-for="(item, index) in qItems" class="q-item" :id="item.id" :key="item.id" :class="index == currentItemIndex ? 'selected' : ''" @mouseup="changeEditingItem(index)">
-          <div class="number"><span class="required" :class="{ visible: item.required }">*</span>{{ index + 1 }}.&nbsp;&nbsp;</div>
-          <div class="wrap">
-            <div class="title">
-              <XEditer class="text" v-model="qItems[index].title"></XEditer>
-              <div class="opr">
-                <a-tooltip title="复制" placement="top">
-                  <icon name="copy" class="items" @click="duplicateItem(index)" />
-                </a-tooltip>
-                <a-tooltip title="删除" placement="top">
-                  <icon name="remove" class="items" @click="removeItem(index)" />
-                </a-tooltip>
-              </div>
+          <div class="title">
+            <div class="number"><span class="required" :class="{ visible: item.required }">*</span>{{ index + 1 }}.&nbsp;&nbsp;</div>
+            <XEditer class="text" v-model="qItems[index].title"></XEditer>
+            <div class="opr">
+              <a-tooltip title="复制" placement="top">
+                <icon name="copy" class="items" @click="duplicateItem(index)" />
+              </a-tooltip>
+              <a-tooltip title="删除" placement="top">
+                <icon name="remove" class="items" @click="removeItem(index)" />
+              </a-tooltip>
             </div>
+          </div>
+          <div class="content">
             <component :is="QtypeComponents[item.type]" :qItemIndex="index" :key="item.id"></component>
           </div>
         </li>
@@ -35,7 +35,7 @@
 
 <script setup>
 import { provide, ref, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent } from 'vue'
-import XEditer from '@/components/wenjuan/XEditer.vue'
+import XEditer from '@/components/XEditer.vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import 'simplebar'
 import '@/assets/simplebar.css'
@@ -46,39 +46,13 @@ import '@/assets/simplebar.css'
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 12)
 
 const QTYPES = ref([
-  {
-    id: '1',
-    title: '多选题',
-    type: 'MultiChoice',
-    // default data
-    title: '多选题',
-    required: true,
-    options: [
-      { text: '选项1', value: 0, id: nanoid(), fill: { show: true, length: 20, type: 'text' } },
-      { text: '选项2', value: 1, id: nanoid(), fill: { show: false, length: 20, type: 'text' } },
-      { text: '选项3', value: 2, id: nanoid(), fill: { show: false, length: 20, type: 'text' } }
-    ]
-  },
-  {
-    id: '2',
-    title: '单选题',
-    type: 'SingleChoice'
-  },
-  {
-    id: '3',
-    title: '下拉选择',
-    type: 'DropDown'
-  },
-  {
-    id: '4',
-    title: '图片选择',
-    type: 'ImageChoice'
-  },
-  {
-    id: '5',
-    title: '评分',
-    type: 'RankChoice'
-  }
+  { id: '0', title: '填空题', type: 'FillBlank' },
+  { id: '1', title: '多选题', type: 'MultiChoice' },
+  { id: '2', title: '单选题', type: 'SingleChoice' },
+  { id: '4', title: '图片选择', type: 'ImageChoice' },
+  { id: '5', title: '评分题', type: 'Rate' },
+  { id: '6', title: '量表题', type: 'Scale' },
+  { id: '7', title: 'NPS', type: 'NPS' }
 ])
 
 function onClone(data) {
@@ -90,9 +64,10 @@ function onClone(data) {
 const QtypeComponents = {
   MultiChoice: defineAsyncComponent(() => import('@/components/wenjuan/MultiChoice.vue')),
   SingleChoice: defineAsyncComponent(() => import('@/components/wenjuan/SingleChoice.vue')),
-  DropDown: defineAsyncComponent(() => import('@/components/wenjuan/DropDown.vue')),
-  FillBlank: defineAsyncComponent(() => import('@/components/wenjuan/FillBlank.vue'))
-  // ImageChoice: defineAsyncComponent(() => import('@/components/wenjuan/ImageChoice.vue')),
+  FillBlank: defineAsyncComponent(() => import('@/components/wenjuan/FillBlank.vue')),
+  ImageChoice: defineAsyncComponent(() => import('@/components/wenjuan/ImageChoice.vue')),
+  Rate: defineAsyncComponent(() => import('@/components/wenjuan/Rate.vue')),
+  NPS: defineAsyncComponent(() => import('@/components/wenjuan/NPS.vue'))
   // RankChoice: defineAsyncComponent(() => import('@/components/wenjuan/RankChoice.vue'))
 }
 
@@ -234,14 +209,15 @@ onBeforeUnmount(() => {
     border: 2px solid var(--c-brand-500);
   }
   .dragging {
-    /* display: none; */
+    content-visibility: hidden;
+    content: '';
     border: 2px dashed var(--c-brand-500);
     // border: 0;
     box-shadow: none;
     background-color: var(--bg-brand);
-    > * {
-      opacity: 0;
-    }
+    // > * {
+    //   opacity: 0;
+    // }
   }
 
   ul {
@@ -251,29 +227,32 @@ onBeforeUnmount(() => {
   }
 
   li {
+    // display: flex;
+    // flex-direction: row;
     margin: 20px;
-    display: flex;
-    padding: 20px;
+    // display: flex;
+    padding: 20px 0;
     border-radius: 5px;
     border: 1px solid var(--border-light);
     background: var(--bg-primary);
     box-shadow: 1px 3px 5px 2px var(--border-light);
-
-    .wrap {
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
+    &:hover {
+      .opr {
+        opacity: 1;
+      }
     }
+
     .title {
       display: flex;
+      flex-direction: row;
       align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 14px;
     }
 
     .number {
       font-size: 16px;
-      padding-top: 10px;
+      margin-top: 11px;
+      width: 80px;
+      text-align: right;
       .required {
         color: red;
         margin-right: 4px;
@@ -293,33 +272,37 @@ onBeforeUnmount(() => {
         padding: 8px;
       }
       :deep(.editor) {
-        border: 1px solid #ffffff00;
+        border: 1px solid transparent;
         border-radius: 4px;
       }
       &:hover {
-        :deep(.editor) {
-          border: 1px dashed #68cef8;
+        :deep(.editor:not(:focus-within)) {
+          border: 1px dashed var(--border-dark);
         }
       }
       &:focus-within {
         :deep(.editor) {
-          border: 1px solid #68cef8;
+          // border: 1px dashed var(--border-dark);
+          background: var(--bg-tertiary);
         }
       }
     }
 
     .opr {
       display: flex;
+      opacity: 0;
       flex-direction: row;
       align-items: center;
       cursor: pointer;
       justify-content: flex-end;
-      margin-left: 50px;
+      margin: 0 12px;
       padding: 8px 0;
+      transition: opacity 0.15s ease;
 
       .items {
         opacity: 0.5;
         margin-right: 8px;
+        transition: opacity 0.15s ease;
         &:hover,
         &:active {
           opacity: 1;
@@ -327,6 +310,9 @@ onBeforeUnmount(() => {
       }
     }
   }
+}
+.content {
+  margin: 20px 20px 0px 50px;
 }
 
 :has(.dragging) {

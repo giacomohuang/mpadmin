@@ -41,6 +41,7 @@ $color-sets: (
   --bg-primary: var(--c-white);
   --bg-secondary: var(--c-gray-50);
   --bg-tertiary: var(--c-gray-100);
+  --bg-0: var(--c-white);
   --bg-500: rgb(244, 247, 249);
   --bg-brand: var(--c-brand-100);
 
@@ -69,7 +70,9 @@ $color-sets: (
     --bg-primary: var(--c-gray-900);
     --bg-secondary: var(--c-gray-800);
     --bg-tertiary: var(--c-gray-700);
+    --bg-0: var(--c-black);
     --bg-500: var(--c-gray-950);
+
     --bg-brand: var(--c-brand-950);
 
     // 文字颜色

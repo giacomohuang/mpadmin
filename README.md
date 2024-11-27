@@ -48,6 +48,34 @@ brew install minio/stable/minio
 minio server ~/minio_data
 ```
 
+### access policy
+
+- 设置访问策略：允许直接从URL下载文件
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": ["*"]
+      },
+      "Action": ["s3:GetObject", "s3:ListBucket"],
+      "Resource": ["arn:aws:s3:::mpadmin", "arn:aws:s3:::mpadmin/*"]
+    },
+    {
+      "Effect": "Deny",
+      "Principal": {
+        "AWS": ["*"]
+      },
+      "Action": ["s3:DeleteBucketPolicy", "s3:DeleteObject", "s3:PutBucketPolicy", "s3:PutLifecycleConfiguration", "s3:PutObject"],
+      "Resource": ["arn:aws:s3:::mpadmin", "arn:aws:s3:::mpadmin/*"]
+    }
+  ]
+}
+```
+
 # Run App
 
 ```

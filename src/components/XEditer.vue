@@ -1,6 +1,6 @@
 <template>
   <div>
-    <bubble-menu :editor="editor" :tippy-options="{ duration: 100 }" v-if="editor" class="toolbar">
+    <bubble-menu :editor="editor" :tippy-options="{ duration: 100 }" :should-show="shouldShow" v-if="editor" class="toolbar">
       <button @click="editor.chain().focus().toggleBold().run()" :class="{ active: editor.isActive('bold') }"><icon name="bold" /></button>
       <button @click="editor.chain().focus().toggleItalic().run()" :class="{ active: editor.isActive('italic') }"><icon name="italic" /></button>
       <button @click="editor.chain().focus().toggleUnderline().run()" :class="{ active: editor.isActive('underline') }"><icon name="underline" /></button>
@@ -8,8 +8,15 @@
       <button @click="editor.chain().focus().setTextAlign('left').run()" :class="{ active: editor.isActive({ textAlign: 'left' }) }"><icon name="align-left" /></button>
       <button @click="editor.chain().focus().setTextAlign('center').run()" :class="{ active: editor.isActive({ textAlign: 'center' }) }"><icon name="align-center" /></button>
       <button @click="editor.chain().focus().setTextAlign('right').run()" :class="{ active: editor.isActive({ textAlign: 'right' }) }"><icon name="align-right" /></button>
+      <button @click="showImageUpload = true" :class="{ active: editor.isActive('image') }"><icon name="image" /></button>
+      <button @click="setLink" :class="{ active: editor.isActive('link') }"><icon name="link" /></button>
     </bubble-menu>
     <editor-content :editor="editor" class="editor" />
+
+    <!-- 图片上传对话框 -->
+    <a-modal :open="showImageUpload" title="上传图片" @ok="handleImageUploadOk" @cancel="handleImageUploadCancel" :destroyOnClose="true">
+      <Upload :type="['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']" :multiple="false" :max="1" @uploaded="handleImageUploaded"> 点击或拖拽图片到此处上传 </Upload>
+    </a-modal>
   </div>
 </template>
 
@@ -19,9 +26,15 @@ import { BubbleMenu, Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
+import ImageResize from 'tiptap-extension-resize-image'
+import Link from '@tiptap/extension-link'
+import Upload from './Upload.vue'
+
 const props = defineProps(['modelValue', 'autofocus'])
 const emits = defineEmits(['update:modelValue'])
 const editor = ref(null)
+const showImageUpload = ref(false)
+const uploadedImageUrl = ref('')
 
 watch(
   () => props.modelValue,
@@ -41,17 +54,32 @@ onMounted(() => {
     extensions: [
       StarterKit.configure({
         dropcursor: false,
-        hardBreak: false
+        hardBreak: false,
+        image: {
+          HTMLAttributes: {
+            class: 'resize-image'
+          }
+        }
+      }),
+      ImageResize.configure({
+        // 配置图片调整大小的选项
+        resizeDirections: ''
       }),
       Underline,
       TextAlign.configure({
         types: ['heading', 'paragraph']
+      }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          target: '_blank',
+          rel: 'noopener noreferrer nofollow'
+        }
       })
     ],
     onUpdate: () => {
       emits('update:modelValue', editor.value.getHTML())
     },
-
     onDrop: () => {
       return false
     },
@@ -65,19 +93,54 @@ onMounted(() => {
     }
   })
 })
+
+const shouldShow = ({ editor, view, state, oldState, from, to }) => {
+  return true
+}
+
+const handleImageUploaded = (fileInfo) => {
+  console.log('handleImageUploaded', fileInfo)
+  uploadedImageUrl.value = import.meta.env.VITE_UPLOAD_URL_PREFIX + fileInfo.name
+}
+
+const handleImageUploadOk = () => {
+  console.log('handleImageUploadOk', uploadedImageUrl.value)
+  if (uploadedImageUrl.value) {
+    editor.value.chain().focus().setImage({ src: uploadedImageUrl.value }).run()
+  }
+  showImageUpload.value = false
+  uploadedImageUrl.value = ''
+}
+
+const handleImageUploadCancel = () => {
+  showImageUpload.value = false
+  uploadedImageUrl.value = ''
+}
+
+const setLink = () => {
+  const previousUrl = editor.value.getAttributes('link').href
+  const url = window.prompt('URL', previousUrl)
+  if (url === '') {
+    editor.value.chain().focus().extendMarkRange('link').unsetLink().run()
+    return
+  } else {
+    editor.value.chain().focus().setLink({ href: url }).run()
+  }
+}
 </script>
 <style scoped lang="scss">
 .toolbar {
-  border: 1px solid #e3e3e3;
+  border: 1px solid var(--border-medium);
   border-radius: 8px;
-  background: #fff;
-  padding: 2px;
+  background: var(--bg-0);
+  // padding: 2px;
   box-shadow: 0px 4px 16px rgb(0 0 0 / 8%);
   display: flex;
   list-style-type: none;
 }
 button {
-  background: #fff;
+  background: var(--bg-0);
+  border-radius: 8px;
   border: 0px;
   padding: 0px;
   .iconfont {
@@ -98,12 +161,6 @@ button {
       opacity: 1;
     }
   }
-}
-
-.icon {
-  color: #000;
-  font-size: 20px;
-  opacity: 0.5;
 }
 </style>
 <style lang="scss">

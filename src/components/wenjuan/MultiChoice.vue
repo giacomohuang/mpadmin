@@ -40,11 +40,17 @@
       <!-- Tabs:选项设置 -->
       <a-tab-pane v-if="currentOptionIndex >= 0" :key="'option'" :tab="'第' + (currentOptionIndex + 1) + '项设置'">
         <div class="prop-item">
-          <h4>选项填空</h4>
-          <a-switch v-model:checked="qItems[qItemIndex].options[currentOptionIndex].fill.show" size="small" />
+          <h4>在选项后添加填空</h4>
+          <a-switch v-model:checked="qItems[qItemIndex].options[currentOptionIndex].fill.show" size="small" @change="handleFillChange" />
         </div>
-        <div class="prop-item">
-          <h4>填空长度限制</h4>
+        <div class="prop-item" v-if="qItems[qItemIndex].options[currentOptionIndex].fill.show">
+          <h4>填空必答</h4>
+          <a-switch v-model:checked="qItems[qItemIndex].options[currentOptionIndex].fill.required" size="small" />
+        </div>
+        <div class="prop-item" v-if="qItems[qItemIndex].options[currentOptionIndex].fill.show">
+          <h4>
+            填空长度限制<a-tooltip title="为空或填0时，不限字数" placement="top"><icon name="help" class="help" /></a-tooltip>
+          </h4>
           <a-input-number v-model:value="qItems[qItemIndex].options[currentOptionIndex].fill.length" min="0" max="500" style="width: 100px" size="small">
             <template #addonAfter>字符</template>
           </a-input-number>
@@ -76,7 +82,7 @@ const maxRangeArray = computed(() => {
 })
 
 watch(currentOptionIndex, () => {
-  console.log('currentOptionIndex', currentOptionIndex.value)
+  // console.log('currentOptionIndex', currentOptionIndex.value)
   setTab()
 })
 
@@ -102,10 +108,8 @@ function removeOption(index) {
 }
 
 function clickOption(ev, index) {
-  // ev.stopPropagation()
   currentOptionIndex.value = index
   const el = ev.currentTarget
-  // console.log(el)
   el.classList.add('focus')
   document.addEventListener('mouseup', clickOutSide)
 
@@ -117,7 +121,6 @@ function clickOption(ev, index) {
     if (inside || el.contains(targetEl)) {
       return
     } else {
-      console.log('outside')
       callback(el)
     }
   }
@@ -147,7 +150,10 @@ onBeforeMount(() => {
   qItems.value[qItemIndex].options.forEach((option) => {
     if (!option.fill) {
       option.fill = {
-        show: false
+        show: false,
+        length: null,
+        type: 'text',
+        required: false
       }
     }
   })
@@ -166,17 +172,13 @@ function fixMaxRange() {
   }
 }
 
-// function handleFillChange(checked) {
-//   if (!qItems.value[qItemIndex].options[currentOptionIndex.value].fill) {
-//     qItems.value[qItemIndex].options[currentOptionIndex.value].fill = {
-//       show: checked,
-//       length: 20,
-//       type: 'text'
-//     }
-//   } else {
-//     qItems.value[qItemIndex].options[currentOptionIndex.value].fill.show = checked
-//   }
-// }
+function handleFillChange(checked) {
+  if (!checked) {
+    qItems.value[qItemIndex].options[currentOptionIndex.value].fill.length = null
+    qItems.value[qItemIndex].options[currentOptionIndex.value].fill.type = 'text'
+    qItems.value[qItemIndex].options[currentOptionIndex.value].fill.required = false
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -184,6 +186,8 @@ h4 {
   margin: 0;
   padding: 0;
   line-height: 100%;
+  font-weight: 400;
+  // vertical-align: middle;
 }
 
 :has(.ghost-opt) {
@@ -203,7 +207,7 @@ h4 {
 
 .options {
   padding: 0;
-
+  position: relative;
   .item {
     display: flex;
     margin-bottom: 8px;
@@ -216,6 +220,9 @@ h4 {
       }
       .remove {
         opacity: 1;
+      }
+      .q-handle {
+        display: block;
       }
     }
     &.ghost-opt {
@@ -233,11 +240,13 @@ h4 {
 }
 
 .q-handle {
+  // position: absolute;
   cursor: pointer;
-  opacity: 0.5;
+  opacity: 0;
   color: var(--text-primary);
-  margin-top: 1px;
+  margin-top: 2px;
   flex-shrink: 0;
+  // left: 20px;
   &:hover,
   &:active {
     opacity: 1;
@@ -246,16 +255,16 @@ h4 {
 
 .checkbox {
   flex-shrink: 0;
-  border: 1px solid #ccc;
-  border-radius: 2px;
+  border: 1px solid var(--border-dark);
+  border-radius: 4px;
   width: 15px;
   height: 15px;
-  margin-left: 10px;
-  margin-top: 4px;
+  margin-left: 4px;
+  margin-top: 5px;
 }
 .text {
   flex-grow: 1;
-  border: 1px solid #ffffff00;
+  border: 1px solid transparent;
   border-radius: 4px;
   padding: 4px;
   margin-left: 6px;
@@ -273,7 +282,7 @@ h4 {
   color: var(--c-brand);
   padding: 4px 16px;
   border-radius: 4px;
-  margin-left: 14px;
+  margin-left: 8px;
   &:hover {
     color: var(--c-brand);
     outline: 1px solid var(--c-brand);
@@ -283,10 +292,10 @@ h4 {
 .ico {
   // padding-top: 6px;
   cursor: pointer;
-  color: #888;
+  color: var(--text-secondary);
   &:link,
   &:visited {
-    color: #888;
+    color: var(--text-secondary);
   }
   opacity: 0;
   transition: opacity 0.15s ease-in-out;
@@ -297,7 +306,7 @@ h4 {
   margin-left: 6px;
   &:hover,
   &:active {
-    color: #f56c6c;
+    color: var(--c-red);
   }
 }
 
@@ -314,11 +323,10 @@ h4 {
   align-items: center;
   margin-top: 10px;
   font-size: 12px;
-}
-
-/* 添加 Ant Design 相关样式覆盖 */
-:deep(.ant-tabs-card) {
-  border-left: 0px;
+  .help {
+    margin-left: 4px;
+    color: var(--text-secondary);
+  }
 }
 
 .fillbox :deep(.ProseMirror) p:last-child {
@@ -326,19 +334,19 @@ h4 {
     content: ' ';
     display: inline-block;
     width: 80px;
-    height: 20px;
+    // height: 20px;
     // border-radius: 4px;
     margin-left: 6px;
     border-bottom: 1px solid var(--border-dark);
   }
 }
 
-pre {
-  background: var(--bg-secondary);
-  padding: 12px;
-  border-radius: 4px;
-  font-family: monospace;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
+// pre {
+//   background: var(--bg-secondary);
+//   padding: 12px;
+//   border-radius: 4px;
+//   font-family: monospace;
+//   white-space: pre-wrap;
+//   word-wrap: break-word;
+// }
 </style>

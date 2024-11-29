@@ -9,8 +9,8 @@
         </div>
       </div>
       <div v-if="qItems[qItemIndex].showLabels" class="nps-labels">
-        <span class="min-label">{{ qItems[qItemIndex].minLabel || '不可能' }}</span>
-        <span class="max-label">{{ qItems[qItemIndex].maxLabel || '一定会' }}</span>
+        <span class="min-label">{{ qItems[qItemIndex].minLabel }}</span>
+        <span class="max-label">{{ qItems[qItemIndex].maxLabel }}</span>
       </div>
     </div>
   </div>

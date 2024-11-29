@@ -1,6 +1,6 @@
 <template>
   <div class="i18n-input-wrapper">
-    <a-input v-bind="$attrs" autocomplete="new-password" :value="modelValue[i18n.global.locale.value]" :dir="rtlLanguages.includes(currentLang) ? 'rtl' : 'ltr'" @input="handleInput" class="i18n-input">
+    <a-input v-bind="$attrs" autocomplete="new-password" :value="modelValue[i18n.global.locale.value] || ''" :dir="RTL_LANGS.includes(currentLang) ? 'rtl' : 'ltr'" @input="handleInput" class="i18n-input">
       <template #addonAfter v-if="languages.length > 1">
         <icon name="lang" class="lang-icon" @click="showEditor" />
       </template>
@@ -12,7 +12,7 @@
         <a-form-item-rest>
           <div v-for="lang in languages" :key="lang" class="lang-item">
             <div class="lang-label" :class="'font-' + lang">{{ getLangLabel(lang) }}</div>
-            <a-input v-model:value="translationData[lang]" :dir="rtlLanguages.includes(lang) ? 'rtl' : 'ltr'" :class="'font-' + lang" autocomplete="new-password" />
+            <a-input v-model:value="translationData[lang]" :dir="RTL_LANGS.includes(lang) ? 'rtl' : 'ltr'" :class="'font-' + lang" autocomplete="new-password" />
             <a-button v-if="lang !== currentLang" type="link" size="small" @click="() => autoTranslate(lang)"> {{ $t('comp.mpInputI18n.translate') }} </a-button>
           </div>
         </a-form-item-rest>
@@ -24,13 +24,19 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import i18n, { LANGS } from '@/js/i18n'
+import i18n, { LANGS, RTL_LANGS } from '@/js/i18n'
 import CryptoJS from 'crypto-js'
 
 const props = defineProps({
   modelValue: {
     type: Object,
-    default: () => ({})
+    default: () => {
+      const defaultValue = {}
+      LANGS.forEach((lang) => {
+        defaultValue[lang.key] = ''
+      })
+      return defaultValue
+    }
   }
 })
 
@@ -41,8 +47,6 @@ const currentLang = i18n.global.locale.value
 const editorVisible = ref(false)
 const translationData = ref({ ...props.modelValue })
 
-// 添加 RTL 语言列表
-const rtlLanguages = ['ar'] // 阿拉伯语等 RTL 语言的代码
 const languages = ref([])
 
 const getLangLabel = (lang) => {
@@ -62,12 +66,17 @@ onMounted(() => {
 })
 
 const handleInput = (e) => {
-  // 修改事件处理函数，从事件对象中获取值
   const value = typeof e === 'string' ? e : e.target.value
+  const currentLocale = i18n.global.locale.value
   const updatedValue = {
     ...props.modelValue,
-    [i18n.global.locale.value]: value
+    [currentLocale]: value
   }
+  LANGS.forEach((lang) => {
+    if (!(lang.key in updatedValue)) {
+      updatedValue[lang.key] = ''
+    }
+  })
   emit('update:modelValue', updatedValue)
 }
 

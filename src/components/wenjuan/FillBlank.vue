@@ -3,13 +3,13 @@
     <!-- 单项填空模式 -->
     <div v-if="!qItems[qItemIndex].multiMode" class="single-blank">
       <div class="user-blank">
-        {{ qItems[qItemIndex].blanks[0].placeholder || '请填写' }}
+        {{ qItems[qItemIndex].options[0].placeholder || '请填写' }}
       </div>
     </div>
 
     <!-- 多项填空模式 -->
-    <VueDraggable v-else v-model="qItems[qItemIndex].blanks" tag="ul" handle=".q-handle" class="blanks" ghostClass="ghost-blank">
-      <li v-for="(item, index) in qItems[qItemIndex].blanks" :key="item.id" class="item" @click.stop="clickBlank($event, index)">
+    <VueDraggable v-else v-model="qItems[qItemIndex].options" tag="ul" handle=".q-handle" class="options" ghostClass="ghost-blank">
+      <li v-for="(item, index) in qItems[qItemIndex].options" :key="item.id" class="item" @click.stop="clickBlank($event, index)">
         <icon name="handle" class="q-handle" />
         <div class="content">
           <XEditer class="text" v-model="item.text" :autofocus="index == autoFocusIndex ? true : false"></XEditer>
@@ -37,25 +37,25 @@
         <template v-if="!qItems[qItemIndex].multiMode">
           <div class="prop-item">
             <h4>本题必答</h4>
-            <a-switch v-model:checked="qItems[qItemIndex].blanks[0].required" size="small" />
+            <a-switch v-model:checked="qItems[qItemIndex].options[0].required" size="small" />
           </div>
           <div class="prop-item">
             <h4>占位文字</h4>
-            <a-input v-model:value="qItems[qItemIndex].blanks[0].placeholder" size="small" style="width: 200px" />
+            <a-input v-model:value="qItems[qItemIndex].options[0].placeholder" size="small" style="width: 200px" />
           </div>
           <div class="prop-item">
             <h4>
               字数限制<a-tooltip title="0或空为不限制"><icon name="help" /></a-tooltip>
             </h4>
             <div class="range-input">
-              <a-input-number v-model:value="qItems[qItemIndex].blanks[0].maxLength" size="small" :min="0" :max="2000" style="width: 150px">
+              <a-input-number v-model:value="qItems[qItemIndex].options[0].maxLength" size="small" :min="0" :max="2000" style="width: 150px">
                 <template #addonAfter>字</template>
               </a-input-number>
             </div>
           </div>
           <div class="prop-item">
             <h4>格式限制</h4>
-            <a-select v-model:value="qItems[qItemIndex].blanks[0].format" size="small" style="width: 150px">
+            <a-select v-model:value="qItems[qItemIndex].options[0].format" size="small" style="width: 150px">
               <a-select-option value="text">文字</a-select-option>
               <a-select-option value="number">数字</a-select-option>
               <a-select-option value="email">Email</a-select-option>
@@ -69,23 +69,23 @@
       <a-tab-pane v-if="currentBlankIndex >= 0 && qItems[qItemIndex].multiMode" key="blank" :tab="'第' + (currentBlankIndex + 1) + '项设置'">
         <div class="prop-item">
           <h4>本题必答</h4>
-          <a-switch v-model:checked="qItems[qItemIndex].blanks[currentBlankIndex].required" size="small" />
+          <a-switch v-model:checked="qItems[qItemIndex].options[currentBlankIndex].required" size="small" />
         </div>
         <div class="prop-item">
           <h4>占位文字</h4>
-          <a-input v-model:value="qItems[qItemIndex].blanks[currentBlankIndex].placeholder" size="small" style="width: 200px" />
+          <a-input v-model:value="qItems[qItemIndex].options[currentBlankIndex].placeholder" size="small" style="width: 200px" />
         </div>
         <div class="prop-item">
           <h4>字数限制</h4>
           <div class="range-input">
-            <a-input-number v-model:value="qItems[qItemIndex].blanks[currentBlankIndex].maxLength" size="small" :min="0" :max="2000" style="width: 80px">
+            <a-input-number v-model:value="qItems[qItemIndex].options[currentBlankIndex].maxLength" size="small" :min="0" :max="2000" style="width: 80px">
               <template #addonAfter>字</template>
             </a-input-number>
           </div>
         </div>
         <div class="prop-item">
           <h4>格式限制</h4>
-          <a-select v-model:value="qItems[qItemIndex].blanks[currentBlankIndex].format" size="small" style="width: 200px">
+          <a-select v-model:value="qItems[qItemIndex].options[currentBlankIndex].format" size="small" style="width: 200px">
             <a-select-option value="text">文字</a-select-option>
             <a-select-option value="number">数字</a-select-option>
             <a-select-option value="email">Email</a-select-option>
@@ -118,27 +118,27 @@ const autoFocusIndex = ref(-1)
 const tabName = ref('item')
 
 function addBlank() {
-  if (!qItems.value[qItemIndex].blanks) {
-    qItems.value[qItemIndex].blanks = []
+  if (!qItems.value[qItemIndex].options) {
+    qItems.value[qItemIndex].options = []
   }
-  qItems.value[qItemIndex].blanks.push({
+  qItems.value[qItemIndex].options.push({
     id: nanoid(),
-    text: '题目' + (qItems.value[qItemIndex].blanks.length + 1),
+    text: '题目' + (qItems.value[qItemIndex].options.length + 1),
     placeholder: '',
     required: false,
     maxLength: 0,
     format: 'text'
   })
-  currentBlankIndex.value = qItems.value[qItemIndex].blanks.length - 1
+  currentBlankIndex.value = qItems.value[qItemIndex].options.length - 1
   autoFocusIndex.value = currentBlankIndex.value
 }
 
 function removeBlank(index) {
-  if (qItems.value[qItemIndex].blanks.length <= 1) {
-    qItems.value[qItemIndex].blanks[0].text = ''
+  if (qItems.value[qItemIndex].options.length <= 1) {
+    qItems.value[qItemIndex].options[0].text = ''
     return
   }
-  qItems.value[qItemIndex].blanks.splice(index, 1)
+  qItems.value[qItemIndex].options.splice(index, 1)
   currentBlankIndex.value = -1
 }
 
@@ -180,11 +180,11 @@ function clickBlank(ev, index) {
 }
 
 function handleModeChange(checked) {
-  if (checked && !qItems.value[qItemIndex].blanks?.length) {
+  if (checked && !qItems.value[qItemIndex].options?.length) {
     addBlank()
   } else if (!checked) {
-    if (qItems.value[qItemIndex].blanks?.length > 1) {
-      qItems.value[qItemIndex].blanks.splice(1)
+    if (qItems.value[qItemIndex].options?.length > 1) {
+      qItems.value[qItemIndex].options.splice(1)
     }
     currentBlankIndex.value = 0
   }
@@ -193,7 +193,7 @@ function handleModeChange(checked) {
 onBeforeMount(() => {
   // 初始化默认值
   qItems.value[qItemIndex].multiMode ??= false
-  if (!qItems.value[qItemIndex].blanks) {
+  if (!qItems.value[qItemIndex].options) {
     addBlank()
   }
   setTab()
@@ -213,7 +213,7 @@ onBeforeMount(() => {
   color: var(--text-secondary);
 }
 
-.blanks {
+.options {
   .item {
     display: flex;
     margin-bottom: 12px;

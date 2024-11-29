@@ -22,6 +22,8 @@ class Drag {
   }
 
   mouseDown(e) {
+    console.log('mouseDown', e)
+    e.preventDefault()
     this.isDown = true
     this._x = e.pageX - this.element.offsetLeft
     this._y = e.pageY - this.element.offsetTop
@@ -39,9 +41,11 @@ class Drag {
 
   mouseMove(e) {
     if (!this.isDown) return
+    // console.log('mouseMove', e)
     e.preventDefault()
     const x = e.pageX - this.element.offsetLeft
     const y = e.pageY - this.element.offsetTop
+    // console.log(x, y)
     const walkX = (x - this._x) * 1
     const walkY = (y - this._y) * 1
     this.element.scrollLeft = this._scrollLeft - walkX
@@ -56,5 +60,4 @@ class Drag {
     this.element = null
   }
 }
-
 export default Drag

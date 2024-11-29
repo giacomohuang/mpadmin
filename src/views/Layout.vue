@@ -611,7 +611,6 @@ onUnmounted(() => {
   grid-area: main;
   overflow: hidden;
   background-color: var(--bg-500);
-  max-height: calc(100vh - 64px);
 }
 </style>
 

@@ -14,7 +14,7 @@ const LANGS = [
 // 默认语言
 const DEFAULT_LANG = 'zh-CN'
 // 从右到左的语言：阿拉伯语、希伯来语、波斯语、乌尔都语
-const RTL_LOCALES = ['ar']
+const RTL_LANGS = ['ar']
 
 const sysLocale = navigator.language
 // const localeFiles = import.meta.glob('../locales/**/*.json')
@@ -44,7 +44,7 @@ export async function changeLocale(locale) {
   localStorage.setItem('locale', locale)
   document.querySelector('html').setAttribute('lang', locale)
 
-  document.dir = RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'
+  document.dir = RTL_LANGS.includes(locale) ? 'rtl' : 'ltr'
 
   const title = router.currentRoute.value.meta.title
   // console.log(title)
@@ -94,4 +94,4 @@ export async function loadLocaleData(locale) {
 // }
 
 export default i18n
-export { LANGS }
+export { LANGS, RTL_LANGS }

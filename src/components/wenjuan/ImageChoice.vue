@@ -25,9 +25,6 @@
       </a-tab-pane>
     </a-tabs>
   </Teleport>
-  <Teleport to=".assist">
-    <pre>{{ JSON.stringify(qItems, null, 2) }}</pre>
-  </Teleport>
 </template>
 <script setup>
 import { inject, ref, onMounted, watch, computed, onBeforeMount } from 'vue'

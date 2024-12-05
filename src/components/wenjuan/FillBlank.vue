@@ -97,11 +97,6 @@
       </a-tab-pane>
     </a-tabs>
   </Teleport>
-  <Teleport to=".assist">
-    {{ tabName }}
-    {{ currentBlankIndex }}
-    <pre>{{ JSON.stringify(qItems, null, 2) }}</pre>
-  </Teleport>
 </template>
 
 <script setup>

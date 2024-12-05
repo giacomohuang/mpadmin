@@ -22,7 +22,7 @@ class Drag {
   }
 
   mouseDown(e) {
-    console.log('mouseDown', e)
+    // console.log('mouseDown', e)
     e.preventDefault()
     this.isDown = true
     this._x = e.pageX - this.element.offsetLeft

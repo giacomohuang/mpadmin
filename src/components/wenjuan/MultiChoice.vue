@@ -145,7 +145,7 @@ onBeforeMount(() => {
   qItems.value[qItemIndex].minRange = qItems.value[qItemIndex].minRange || 0
   qItems.value[qItemIndex].maxRange = qItems.value[qItemIndex].maxRange || 0
   if (!qItems.value[qItemIndex].options) {
-    qItems.value[qItemIndex].options = [{ text: '选项1' }]
+    qItems.value[qItemIndex].options = [{ text: '选项1', id: nanoid() }]
   }
   qItems.value[qItemIndex].options.forEach((option) => {
     if (!option.fill) {

@@ -1,6 +1,12 @@
 <template>
   <div class="main">
     <aside class="q-types" width="200">
+      <div class="editor-model">
+        <a-radio-group v-model:value="editorModel">
+          <a-radio-button value="editor">编辑</a-radio-button>
+          <a-radio-button value="logic">逻辑</a-radio-button>
+        </a-radio-group>
+      </div>
       <VueDraggable v-model="QTYPES" tag="ul" animation="100" :group="{ name: 'group', pull: 'clone', put: false }" :clone="onClone" :sort="false">
         <li v-for="item in QTYPES" :key="item.id" @click="addItem(item)">{{ item.title }}</li>
       </VueDraggable>
@@ -31,10 +37,16 @@
       <div id="__WENJUAN_SETTINGS_CONTENT"></div>
     </aside>
   </div>
+  <Teleport to="body">
+    <div class="drawer" v-if="logicDrawer">
+      <div class="close" @click="logicDrawer = false"><icon name="remove" /></div>
+      <Logic />
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
-import { provide, ref, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent } from 'vue'
+import { provide, ref, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent, watch } from 'vue'
 import XEditer from '@/components/XEditer.vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import 'simplebar'
@@ -43,6 +55,7 @@ import API from '@/api/API'
 import { customAlphabet } from 'nanoid'
 import 'simplebar'
 import '@/assets/simplebar.css'
+import Logic from './Logic.vue'
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 12)
 
 const QTYPES = ref([
@@ -68,14 +81,16 @@ const QtypeComponents = {
   ImageChoice: defineAsyncComponent(() => import('@/components/wenjuan/ImageChoice.vue')),
   Rate: defineAsyncComponent(() => import('@/components/wenjuan/Rate.vue')),
   NPS: defineAsyncComponent(() => import('@/components/wenjuan/NPS.vue'))
-  // RankChoice: defineAsyncComponent(() => import('@/components/wenjuan/RankChoice.vue'))
 }
 
 const currentItemIndex = ref(0)
 const qItems = ref([])
 const settings = ref(null)
-
+const editorModel = ref('editor')
+const logicDrawer = ref(false)
+const logics = ref([])
 provide('qItems', qItems)
+provide('logics', logics)
 provide('currentItemIndex', currentItemIndex)
 
 // 数据初始化
@@ -100,6 +115,18 @@ function removeItem(index) {
     currentItemIndex.value = index - 1
   }
 }
+
+watch(editorModel, (v) => {
+  if (v == 'logic') {
+    logicDrawer.value = true
+  }
+})
+
+watch(logicDrawer, (v) => {
+  if (v == false) {
+    editorModel.value = 'editor'
+  }
+})
 
 function duplicateItem(index) {
   console.log(index)
@@ -147,6 +174,14 @@ onBeforeUnmount(() => {
   background: var(--bg-primary);
   height: calc(100vh - 64px);
   overflow: hidden;
+}
+
+.editor-model {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .q-types {
@@ -327,5 +362,24 @@ onBeforeUnmount(() => {
   background: var(--bg-primary);
   overflow-y: auto;
   border-left: 1px solid var(--border-light);
+}
+
+.drawer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  background: var(--bg-primary);
+  z-index: 1000;
+  overflow: hidden;
+  .close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 1001;
+    cursor: pointer;
+  }
 }
 </style>

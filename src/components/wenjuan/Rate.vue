@@ -100,9 +100,6 @@
       <IconSelect @iconSelect="handleIconSelect" />
     </a-modal>
   </Teleport>
-  <Teleport to=".assist">
-    <pre>{{ JSON.stringify(qItems, null, 2) }}</pre>
-  </Teleport>
 </template>
 
 <script setup>

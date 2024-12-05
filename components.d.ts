@@ -51,6 +51,8 @@ declare module 'vue' {
     IconX: typeof import('./src/components/IconX.vue')['default']
     ImageChoice: typeof import('./src/components/wenjuan/ImageChoice.vue')['default']
     ImgUpload: typeof import('./src/components/ImgUpload.vue')['default']
+    Logic: typeof import('./src/components/wenjuan/Logic.vue')['default']
+    Logic_backup: typeof import('./src/components/wenjuan/Logic_backup.vue')['default']
     MpCheckbox: typeof import('./src/components/mpCheckbox.vue')['default']
     MpInputI18n: typeof import('./src/components/mpInputI18n.vue')['default']
     MpRouterLink: typeof import('./src/components/mpRouterLink.vue')['default']

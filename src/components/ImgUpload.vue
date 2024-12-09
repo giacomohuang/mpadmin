@@ -10,7 +10,7 @@
       <div v-if="!modelValue">拖拽文件到此处或点击上传</div>
 
       <div class="progress" v-if="uploading">
-        <a-progress type="line" :percent="files[0].percent" :width="20" :status="files[0].status" />
+        <a-progress type="line" :percent="files[0]?.percent" :width="20" :status="files[0]?.status" />
       </div>
     </div>
   </div>

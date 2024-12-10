@@ -43,6 +43,10 @@
       <Logic />
     </div>
   </Teleport>
+
+  <!-- <div style="position: absolute; width: 400px; height: 80%; top: 0; right: 0; bottom: 0; z-index: 1000; overflow: auto; background: white">
+    <pre><code>{{ JSON.stringify(qItems, null, 2) }}</code></pre>
+  </div> -->
 </template>
 
 <script setup>
@@ -93,6 +97,23 @@ provide('qItems', qItems)
 provide('logics', logics)
 provide('currentItemIndex', currentItemIndex)
 
+// 检查并清理不合理的逻辑连接
+function checkAndCleanLogicConnections() {
+  // 遍历所有带有logic属性的题目
+  qItems.value.forEach((item) => {
+    if (item.logic && item.logic.connections) {
+      // 获取当前题目的索引
+      const currentIndex = qItems.value.findIndex((q) => q.id === item.id)
+
+      // 过滤出合理的连接（只保留连接到更大索引题目的连接）
+      item.logic.connections = item.logic.connections.filter((conn) => {
+        const targetIndex = qItems.value.findIndex((q) => q.id === conn.toLogicId)
+        return targetIndex > currentIndex
+      })
+    }
+  })
+}
+
 // 数据初始化
 
 function addItem(payload) {
@@ -114,6 +135,8 @@ function removeItem(index) {
   } else {
     currentItemIndex.value = index - 1
   }
+  // 检查并清理逻辑连接
+  checkAndCleanLogicConnections()
 }
 
 watch(editorModel, (v) => {
@@ -141,6 +164,8 @@ function duplicateItem(index) {
 
 function onDropped(e) {
   currentItemIndex.value = e.newIndex
+  // 检查并清理逻辑连接
+  checkAndCleanLogicConnections()
 }
 
 function changeEditingItem(index) {

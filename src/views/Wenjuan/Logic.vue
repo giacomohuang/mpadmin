@@ -17,14 +17,14 @@
       <div class="logics">
         <div class="logic" v-for="(item, index) in logics" :data-id="item.id" :key="item.id" draggable="true" :style="{ left: item.logic.x + 'px', top: item.logic.y + 'px' }" @click.stop="setCurrentLogic($event, index)" :class="{ current: currentLogicIdx === index }">
           <div class="title">
-            <span>{{ qItems.findIndex((itm) => itm.id === item.id) + 1 }}. {{ item.title }}</span>
+            <span class="title-text">{{ qItems.findIndex((itm) => itm.id === item.id) + 1 }}. {{ getPlainText(item.title) }}</span>
             <!-- <a-tag>x:{{ logic.x }}</a-tag> <a-tag>y:{{ logic.y }}</a-tag> -->
             <icon name="remove" size="1em" class="remove" @click.stop="removeLogic(item.id)" />
           </div>
           <div class="port input" @mousedown.stop="handlePortDragStart($event, item.id, 'input', 'input')"></div>
           <div class="body">
             <div v-for="option in item.options" :key="option.id" class="condition">
-              <div class="name">{{ option.text }}</div>
+              <div class="name">{{ getPlainText(option.text) }}</div>
               <div class="port output" :data-port-id="option.id" @mousedown.stop="handlePortDragStart($event, item.id, option.id, 'output')"></div>
             </div>
           </div>
@@ -40,12 +40,9 @@
   </div>
 
   <div class="questions" data-simplebar>
-    <div class="question" v-for="(item, index) in qItems" :class="{ disabled: item._canDrag === false }" :key="item.id" :draggable="item._canDrag !== false" @dragstart="handleQuestionDragStart($event, item)">
-      <div class="title">{{ index + 1 }}. {{ item.title }}</div>
-    </div>
+    <div class="question" v-for="(item, index) in qItems" :class="{ disabled: item._canDrag === false }" :key="item.id" :draggable="item._canDrag !== false" @dragstart="handleQuestionDragStart($event, item)">{{ index + 1 }}. {{ getPlainText(item.title) }}</div>
   </div>
   <!-- <div style="border: 1px solid #ccc; padding: 10px; border-radius: 10px; height: 80%; width: 400px; position: absolute; right: 40px; top: 20px; z-index: 1000; overflow: auto">
-    {{ mouse.x }},{{ mouse.y }}
     <pre><code>{{ JSON.stringify(qItems, null, 2) }}</code></pre>
   </div> -->
   <!-- 
@@ -67,19 +64,7 @@ import { calculateSnap } from '@/js/snapHelper'
 const currentLogicIdx = ref(-1)
 const lines = ref([])
 const tempLine = ref(null)
-// const settingsDrawer = ref(false)
 const draggingLine = ref(false)
-// const mouse = ref({
-//   x: 0,
-//   y: 0
-// })
-
-// window.addEventListener('mousemove', (ev) => {
-//   mouse.value = {
-//     x: ev.clientX,
-//     y: ev.clientY
-//   }
-// })
 
 const qItems = inject('qItems')
 const logics = computed(() => qItems.value.filter((item) => item.logic))
@@ -88,50 +73,36 @@ console.log(logics.value)
 let dragInstance
 let isDragging = false
 
-// 在 data 部分添加辅助线相关的状态
 const guideLines = ref({
-  x: [], // 存储垂直辅助线
-  y: [] // 存储水平辅助线
+  x: [],
+  y: []
 })
 
-// 设置当前逻辑节点
 const setCurrentLogic = (event, index) => {
   event.preventDefault()
   event.stopPropagation()
   currentLogicIdx.value = index
-  // settingsDrawer.value = true
 
   document.addEventListener('mouseup', closeSettings)
   function closeSettings(ev) {
     if (ev.target.closest('.logic') || ev.target.closest('.port') || ev.target.closest('.line-wrap') || draggingLine.value) {
       return
     }
-    // else {
-    //   const box = document.querySelector('.settings-drawer').getBoundingClientRect()
-    //   if (ev.clientX > box.left && ev.clientX < box.right && ev.clientY > box.top && ev.clientY < box.bottom) {
-    //     return
-    //   }
-    // }
     currentLogicIdx.value = -1
-    // settingsDrawer.value = false
     document.removeEventListener('mouseup', closeSettings)
   }
 }
 
-// 生成连接线路径
 const generatePath = (line) => {
   const dx = line.endX - line.startX
   const dy = line.endY - line.startY
   const distance = Math.sqrt(dx * dx + dy * dy)
 
-  // 如果距离很小(比如小于100px)，使用直线或简单的曲线
   if (distance < 100) {
-    // 如果高度差很小，使用水平直线
     if (Math.abs(dy) < 20) {
       return `M ${line.startX} ${line.startY} L ${line.endX} ${line.endY}`
     }
 
-    // 使用简单的曲线，控制点距离更小
     const controlPointOffset = distance * 0.3
     const startControlX = line.startX + controlPointOffset
     const endControlX = line.endX - controlPointOffset
@@ -139,7 +110,6 @@ const generatePath = (line) => {
     return `M ${line.startX} ${line.startY} C ${startControlX} ${line.startY}, ${endControlX} ${line.endY}, ${line.endX} ${line.endY}`
   }
 
-  // 原有的长距离连接线逻辑
   let controlPointOffset = Math.min(Math.abs(dx), distance * 0.5)
   controlPointOffset = Math.max(50, Math.min(controlPointOffset, 200))
 
@@ -162,7 +132,6 @@ const generatePath = (line) => {
   return `M ${line.startX} ${line.startY} C ${startControlX} ${startControlY}, ${endControlX} ${endControlY}, ${line.endX} ${line.endY}`
 }
 
-// 获取端口位置
 const getPortPosition = (element) => {
   if (!element) return { x: 0, y: 0 }
 
@@ -182,7 +151,6 @@ const getPortPosition = (element) => {
   }
 }
 
-// 查找端口
 const findPort = (event) => {
   const elements = document.elementsFromPoint(event.clientX, event.clientY)
   for (const element of elements) {
@@ -199,37 +167,47 @@ const findPort = (event) => {
   return null
 }
 
-// 修改连接验证函数
 const isValidConnection = (fromPort, toPort) => {
-  console.log('isValidConnection', fromPort, toPort)
-  // 确保两个端口都存在, 端口类型不同, 节点不同
   if (!fromPort || !toPort || fromPort.type === toPort.type || fromPort.id === toPort.id) {
     return false
   }
 
-  // 检查输出端口是否已经连接
   const outputPort = fromPort.type === 'output' ? fromPort : toPort
   const existingConnection = lines.value.find((line) => {
     const result = (line.from.id === outputPort.id && line.from.portId === outputPort.portId) || (line.to.id === outputPort.id && line.to.portId === outputPort.portId)
     return result
   })
 
+  const fromIndex = qItems.value.findIndex((item) => item.id === fromPort.id)
+  const toIndex = qItems.value.findIndex((item) => item.id === toPort.id)
+
+  // 如果是output到input的连接,检查索引关系
+  if (fromPort.type === 'output' && toPort.type === 'input') {
+    if (fromIndex > toIndex) {
+      return false // 不允许从大索引连接到小索引
+    }
+  }
+  // 如果是从input到output的连接,检查索引关系
+  else if (fromPort.type === 'input' && toPort.type === 'output') {
+    if (toIndex > fromIndex) {
+      return false // 不允许从大索引连接到小索引
+    }
+  }
+
   return !existingConnection
 }
 
 // 处理端口拖拽开始
 const handlePortDragStart = (event, id, portId, type) => {
-  // console.log('handlePortDragStart')
   event.preventDefault()
   event.stopPropagation()
   draggingLine.value = true
   const portElement = event.target
   const portPos = getPortPosition(portElement)
 
-  // 根据端口类���设置不同的偏移量
+  // 根据端口类型设置不同的偏移量
   const xOffset = type === 'input' ? -10 : 10
 
-  // 置临时连接线的初始状态
   tempLine.value = {
     startX: type === 'output' ? portPos.x + xOffset : portPos.x + xOffset,
     startY: portPos.y,
@@ -238,8 +216,8 @@ const handlePortDragStart = (event, id, portId, type) => {
     from: type === 'output' ? { id, portId, type } : null,
     to: type === 'output' ? null : { id, portId, type }
   }
+  console.log(tempLine.value)
 
-  // 添加全局事件监听
   window.addEventListener('mousemove', handlePortDragMove)
   window.addEventListener('mouseup', handlePortDragEnd)
 }
@@ -254,6 +232,7 @@ const handlePortDragMove = (event) => {
   const canvas = document.querySelector('.canvas')
   const canvasRect = canvas.getBoundingClientRect()
 
+  // 计算鼠标位置，移除缩放因素
   const mouseX = event.clientX - canvasRect.left
   const mouseY = event.clientY - canvasRect.top
 
@@ -273,7 +252,6 @@ const handlePortDragMove = (event) => {
 const handlePortDragEnd = (event) => {
   event.preventDefault()
   event.stopPropagation()
-  console.log('handlePortDragEnd')
   draggingLine.value = false
   if (!tempLine.value) return
 
@@ -334,7 +312,7 @@ const handleLogicDrag = (event) => {
 
   const id = targetEl.getAttribute('data-id')
 
-  // 记录初始位置
+  // 记录初始位置，移除缩放因素
   const startX = event.clientX
   const startY = event.clientY
   const initialLeft = targetEl.offsetLeft
@@ -345,10 +323,12 @@ const handleLogicDrag = (event) => {
   document.addEventListener('mouseup', onMouseUp)
 
   function onMove(event) {
-    // 计算移动距离
+    event.stopPropagation()
+    event.preventDefault()
+
+    // 计算移动距离，移除缩放因素
     const deltaX = event.clientX - startX
     const deltaY = event.clientY - startY
-    console.log('deltaX', deltaX, deltaY)
 
     // 只有移动距离超过5像素认为是拖拽
     if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
@@ -390,6 +370,7 @@ const handleLogicDrag = (event) => {
           height: rect.height
         }
       })
+
     // 计算吸附位置和辅助线
     const { snapX, snapY, guideLines: newGuideLines } = calculateSnap(currentLogic, otherLogics)
 
@@ -423,7 +404,7 @@ const handleLogicDrag = (event) => {
     if (isDragging) {
       event.preventDefault()
       event.stopPropagation()
-      // 阻后续的click事件
+      // 阻止后续的click事件
       const clickHandler = (e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -439,11 +420,12 @@ const handleLogicDrag = (event) => {
 
 // 调整画布大小
 const resizeCanvas = () => {
+  console.log('resizeCanvas')
   // 获取canvas元素
   const canvas = document.querySelector('.canvas')
   if (!canvas) return
 
-  // 取当前画布尺寸
+  // 取当前画尺寸
   const currentWidth = parseInt(canvas.style.width) || 2000
   const currentHeight = parseInt(canvas.style.height) || 2000
 
@@ -451,12 +433,14 @@ const resizeCanvas = () => {
   let maxX = 2000 // 保持最小宽度
   let maxY = 2000 // 保持最小高度
 
-  logics.value.forEach((logic) => {
-    const rightEdge = logic.x + 200 // 200是节点宽度
-    const bottomEdge = logic.y + 100 // 预估节点高度
+  logics.value.forEach((item) => {
+    const logicBox = document.querySelector(`.logic[data-id="${item.id}"]`).getBoundingClientRect()
+    const rightEdge = item.logic.x + logicBox.width
+    const bottomEdge = item.logic.y + logicBox.height
+    console.log(rightEdge, bottomEdge)
 
-    maxX = Math.max(maxX, rightEdge + 100) // 额外留出100px边距
-    maxY = Math.max(maxY, bottomEdge + 100)
+    maxX = Math.max(maxX, rightEdge + 200)
+    maxY = Math.max(maxY, bottomEdge + 200)
   })
 
   // 使用当前尺寸和计算尺寸中的较大值
@@ -497,7 +481,7 @@ const updateLinesPosition = (id) => {
       }
     }
 
-    // 如果置有更新，则更新连接线
+    // 如果置有更新，则更新接线
     if (needsUpdate) {
       lines.value[index] = updatedLine
     }
@@ -514,7 +498,7 @@ const removeLogic = (id) => {
   delete item.logic
 
   // 删除与该节点相关的所有连接
-  console.log(id)
+  // console.log(id)
   logics.value.forEach((item) => {
     if (item.logic.connections) {
       item.logic.connections = item.logic.connections.filter((conn) => conn.toLogicId !== id)
@@ -553,7 +537,7 @@ const handleQuestionDragStart = (event, qItem) => {
   function drop(ev) {
     ev.preventDefault()
     // ev.stopPropagation()
-    console.log('drop', ev.clientX, ev.clientY)
+    // console.log('drop', ev.clientX, ev.clientY)
     if (ev.clientX > window.innerWidth || ev.clientY > window.innerHeight || ev.clientX < 0 || ev.clientY < 0) {
       return
     }
@@ -596,12 +580,12 @@ const initializeLines = () => {
   lines.value = []
 
   // 遍历所有逻辑节点
-  logics.value.forEach((logic) => {
-    // 检查节点是否有连接关系数据
-    if (logic.connections) {
-      logic.connections.forEach((connection) => {
+  logics.value.forEach((item) => {
+    // 检查节点是否连接关数据
+    if (item.logic.connections) {
+      item.logic.connections.forEach((connection) => {
         // 获取起始端口元素
-        const fromElement = document.querySelector(`.logic[data-id="${logic.id}"] .port.output[data-port-id="${connection.fromPortId}"]`)
+        const fromElement = document.querySelector(`.logic[data-id="${item.id}"] .port.output[data-port-id="${connection.fromPortId}"]`)
 
         // 获取目标端口元素
         const toElement = document.querySelector(`.logic[data-id="${connection.toLogicId}"] .port.input`)
@@ -617,7 +601,7 @@ const initializeLines = () => {
             endX: toPos.x - 10,
             endY: toPos.y,
             from: {
-              id: logic.id,
+              id: item.id,
               portId: connection.fromPortId,
               type: 'output'
             },
@@ -647,30 +631,34 @@ const handleLineRemove = (index) => {
   lines.value.splice(index, 1)
 }
 
+// 移除HTML标记，获取纯文本
+const getPlainText = (html) => {
+  // 移除HTML标记，获取纯文本
+  const plainText = html.replace(/<[^>]*>?/gm, '')
+  return plainText
+}
+
 onMounted(async () => {
   await nextTick()
   const logicsEl = document.querySelector('.logics')
   logicsEl.addEventListener('mousedown', handleLogicDrag)
+
   dragInstance = new Drag(document.querySelector('.viewport .simplebar-content-wrapper'))
 
   // 初始化连接线
   initializeLines()
 
   // 初始化时滚动到画布中心
-  const viewport = document.querySelector('.viewport')
-  const scrollContainer = viewport?.querySelector('.simplebar-content-wrapper')
-  if (viewport && scrollContainer) {
-    // 计算需要滚动的位置
-    const viewportWidth = viewport.clientWidth
-    const viewportHeight = viewport.clientHeight
-    const canvasWidth = 2000 // 画布初始宽度
-    const canvasHeight = 2000 // 画布初始高度
+  const scrollContainer = document.querySelector('.viewport .simplebar-content-wrapper')
+  if (scrollContainer) {
+    const viewportWidth = scrollContainer.clientWidth
+    const viewportHeight = scrollContainer.clientHeight
+    const canvasWidth = 2000
+    const canvasHeight = 2000
 
-    // 计算滚动位置，使画布中心对齐视口中心
     const scrollLeft = (canvasWidth - viewportWidth) / 2
     const scrollTop = (canvasHeight - viewportHeight) / 2
 
-    // 设置滚动位置
     scrollContainer.scrollLeft = scrollLeft
     scrollContainer.scrollTop = scrollTop
   }
@@ -706,6 +694,8 @@ onUnmounted(() => {
   width: fit-content;
   height: fit-content;
   margin: auto;
+  transform-origin: center center;
+  will-change: transform;
 }
 
 .logic {
@@ -721,6 +711,7 @@ onUnmounted(() => {
   z-index: 2;
   transform-origin: center;
   transition: transform 0.1s ease;
+  will-change: transform;
 
   &.current {
     border-color: var(--c-brand);
@@ -739,6 +730,13 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    .title-text {
+      flex: 1;
+      width: 100%;
+      text-wrap: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   .remove {
@@ -778,6 +776,9 @@ onUnmounted(() => {
     }
     .name {
       padding: 0 8px;
+      text-wrap: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 }
@@ -882,6 +883,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  will-change: transform;
 }
 
 /* 添加箭头样式 */
@@ -923,9 +925,8 @@ onUnmounted(() => {
   position: absolute;
   top: 20px;
   left: 20px;
-  bottom: 50%;
+  max-height: 50%;
   width: 200px;
-
   border: 1px solid var(--border-medium);
   border-radius: 4px;
   background: var(--bg-primary);
@@ -934,11 +935,10 @@ onUnmounted(() => {
   // padding: 8px;
 
   .question {
-    // margin: 4px;
     padding: 12px 8px;
-    flex: 1;
+    // min-width: 0;
+
     border-radius: 4px;
-    // border-bottom: 1px solid var(--border-medium);
     text-wrap: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

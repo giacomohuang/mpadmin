@@ -72,7 +72,7 @@
       <a-spin :spinning="globalLoading" style="margin: 20px"></a-spin>
       <router-view />
     </div>
-    <aside class="assist" v-show="showAssist">
+    <aside class="assist" id="__ASSIST" v-show="showAssist">
       <div class="assist-header"></div>
     </aside>
   </div>
@@ -134,7 +134,7 @@ const isActiveMenu = (item) => {
     return menu.value.indexOf(item) === selectedMenuIndex.value
   }
   // 否则显示当前路由匹配的菜单高亮
-  return currentMenuPath.includes(item.id)
+  return currentMenuPath?.includes(item.id)
 }
 
 const activeMenuIndex = computed(() => {

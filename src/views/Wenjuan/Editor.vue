@@ -1,12 +1,19 @@
 <template>
+  <div class="header">
+    <div class="q-name">
+      <a-tag color="blue" v-if="qPublished && !qDraft">草稿</a-tag>
+      <a-tag color="green" v-if="qPublished">问卷收集中</a-tag>
+      <!-- <a-tag color="red">已结束</a-tag> -->
+      <span class="text" @click.stop="editQName">{{ qName }}</span>
+      <icon class="icon-edit" name="edit" />
+    </div>
+    <div class="actions">
+      <a-button @click="preview">预览</a-button>
+      <a-button @click="publish">发布</a-button>
+    </div>
+  </div>
   <div class="main">
     <aside class="q-types" width="200">
-      <div class="editor-model">
-        <a-radio-group v-model:value="editorModel">
-          <a-radio-button value="editor">编辑</a-radio-button>
-          <a-radio-button value="logic">逻辑</a-radio-button>
-        </a-radio-group>
-      </div>
       <VueDraggable v-model="QTYPES" tag="ul" animation="100" :group="{ name: 'group', pull: 'clone', put: false }" :clone="onClone" :sort="false">
         <li v-for="item in QTYPES" :key="item.id" @click="addItem(item)">{{ item.title }}</li>
       </VueDraggable>
@@ -18,6 +25,7 @@
           <div class="title">
             <div class="number"><span class="required" :class="{ visible: item.required }">*</span>{{ index + 1 }}.&nbsp;&nbsp;</div>
             <XEditer class="text" v-model="qItems[index].title"></XEditer>
+            <div class="logic-tag" @click="logicDrawer = true" :class="{ enabled: item.logic?.connections?.length > 0 }">逻辑</div>
             <div class="opr">
               <a-tooltip title="复制" placement="top">
                 <icon name="copy" class="items" @click="duplicateItem(index)" />
@@ -37,30 +45,49 @@
       <div id="__WENJUAN_SETTINGS_CONTENT"></div>
     </aside>
   </div>
+  <div class="footer">
+    <div class="saved-time" v-if="savedTime">已自动保存: {{ savedTime }}</div>
+  </div>
+  <a-modal v-model:open="editNameModal" title="编辑问卷名称">
+    <template #footer>
+      <a-button @click.stop="editNameModal = false">取消</a-button>
+      <a-button type="primary" @click.stop="updateQName">确定</a-button>
+    </template>
+    <a-input v-model:value="qNameInput" size="large" placeholder="请输入问卷名称" style="margin: 40px 0" />
+  </a-modal>
   <Teleport to="body">
     <div class="drawer" v-if="logicDrawer">
       <div class="close" @click="logicDrawer = false"><icon name="remove" /></div>
       <Logic />
     </div>
   </Teleport>
-
-  <!-- <div style="position: absolute; width: 400px; height: 80%; top: 0; right: 0; bottom: 0; z-index: 1000; overflow: auto; background: white">
-    <pre><code>{{ JSON.stringify(qItems, null, 2) }}</code></pre>
-  </div> -->
+  <a-modal v-model:open="previewModal" :footer="null" width="428px" wrapClassName="preview-modal">
+    <template #closeIcon>
+      <div class="preview-close"><icon name="remove" /></div>
+    </template>
+    <Preview v-if="previewModal" />
+  </a-modal>
 </template>
 
+<router lang="json">
+{
+  "param": "/:id?"
+}
+</router>
+
 <script setup>
-import { provide, ref, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent, watch } from 'vue'
+import { provide, ref, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent, watch, onMounted } from 'vue'
 import XEditer from '@/components/XEditer.vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import 'simplebar'
 import '@/assets/simplebar.css'
 import API from '@/api/API'
 import { customAlphabet } from 'nanoid'
-import 'simplebar'
-import '@/assets/simplebar.css'
 import Logic from './Logic.vue'
+import { router } from '@/router/router'
+import Preview from './Preview.vue'
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 12)
+import { debounce } from 'lodash-es'
 
 const QTYPES = ref([
   { id: '0', title: '填空题', type: 'FillBlank' },
@@ -68,8 +95,7 @@ const QTYPES = ref([
   { id: '2', title: '单选题', type: 'SingleChoice' },
   { id: '4', title: '图片选择', type: 'ImageChoice' },
   { id: '5', title: '评分题', type: 'Rate' },
-  { id: '6', title: '量表题', type: 'Scale' },
-  { id: '7', title: 'NPS', type: 'NPS' }
+  { id: '6', title: 'NPS', type: 'NPS' }
 ])
 
 function onClone(data) {
@@ -89,12 +115,22 @@ const QtypeComponents = {
 
 const currentItemIndex = ref(0)
 const qItems = ref([])
-const settings = ref(null)
-const editorModel = ref('editor')
+const qName = ref('')
+const qId = ref(null)
+// 是否是发布状态
+const qPublished = ref(false)
+// 是否是草稿
+const qDraft = ref(false)
+const qSettings = ref(null)
 const logicDrawer = ref(false)
 const logics = ref([])
+const editNameModal = ref(false)
+const savedTime = ref('')
+const qNameInput = ref('')
+const previewModal = ref(false)
 provide('qItems', qItems)
 provide('logics', logics)
+provide('qName', qName)
 provide('currentItemIndex', currentItemIndex)
 
 // 检查并清理不合理的逻辑连接
@@ -112,6 +148,18 @@ function checkAndCleanLogicConnections() {
       })
     }
   })
+}
+
+async function updateQName() {
+  qName.value = qNameInput.value
+  editNameModal.value = false
+  await API.wenjuan.update({ _id: qId.value, name: qName.value })
+  savedTime.value = new Date().toLocaleString()
+}
+
+function editQName() {
+  editNameModal.value = true
+  qNameInput.value = qName.value
 }
 
 // 数据初始化
@@ -139,18 +187,6 @@ function removeItem(index) {
   checkAndCleanLogicConnections()
 }
 
-watch(editorModel, (v) => {
-  if (v == 'logic') {
-    logicDrawer.value = true
-  }
-})
-
-watch(logicDrawer, (v) => {
-  if (v == false) {
-    editorModel.value = 'editor'
-  }
-})
-
 function duplicateItem(index) {
   console.log(index)
   qItems.value.splice(index, 0, JSON.parse(JSON.stringify(qItems.value[index])))
@@ -172,18 +208,57 @@ function changeEditingItem(index) {
   currentItemIndex.value = index
 }
 
-onBeforeMount(async () => {
-  const id = 12
-  let t = await API.wenjuan.get(id).then((res) => {
-    return res
-  })
-  qItems.value = t.data
-  // console.log(qItems.value)
-  settings.value = t.settings
+function preview() {
+  previewModal.value = true
+}
 
-  // dndQItems.init()
-  // dndQTypes.init()
+function saveDraft() {
+  console.log('saveDraft')
+}
+
+function save() {
+  console.log('save')
+}
+
+function publish() {
+  console.log('publish')
+}
+
+const debouncedSave = debounce(async (data) => {
+  if (!qId.value) return
+  await API.wenjuan.update({ _id: qId.value, ...data })
+  savedTime.value = new Date().toLocaleString()
+}, 1000)
+
+onBeforeMount(async () => {
+  const id = router.currentRoute.value.params.id
+  let t = {}
+  if (!id) {
+    t = { _id: null, published: false, name: '未命名问卷', qSettings: {}, data: [] }
+    let res = await API.wenjuan.update(t) // console.res
+    t._id = res._id
+    qId.value = res._id
+    router.replace(`/wenjuan/editor/${res._id}`)
+  } else {
+    t = await API.wenjuan.get(id)
+  }
+  qId.value = t._id
+  qName.value = t.name
+  qItems.value = t.data
+  qPublished.value = t.published
+  qSettings.value = t.settings
+
+  watch(
+    qItems,
+    (newValue) => {
+      debouncedSave({ data: newValue })
+      qDraft.value = true
+    },
+    { deep: true }
+  )
 })
+
+onMounted(() => {})
 
 onBeforeUnmount(() => {
   // dndQItems.destroy()
@@ -191,22 +266,84 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
+.header {
+  display: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 54px;
+  background: var(--bg-primary);
+  max-width: 100%;
+  border-bottom: 1px solid var(--border-medium);
+  .q-name {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    &:hover {
+      .icon-edit {
+        opacity: 1;
+      }
+    }
+    .text {
+      cursor: pointer;
+      font-size: 1.25em;
+      font-weight: 500;
+      max-width: 400px;
+      // flex-wrap: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .icon-edit {
+      cursor: pointer;
+      opacity: 0;
+      color: var(--text-secondary);
+      transition: opacity 0.15s ease;
+    }
+  }
+  .actions {
+    display: flex;
+    gap: 5px;
+  }
+}
 .main {
   position: relative;
   display: grid;
   grid-template-areas: 'q-types q-items settings';
   grid-template-columns: 200px 1fr 300px;
   background: var(--bg-primary);
-  height: calc(100vh - 64px);
+  //撑满高度
+  height: calc(100vh - 142px);
   overflow: hidden;
 }
 
-.editor-model {
+.footer {
+  height: 24px;
+  padding: 0 16px;
   display: flex;
-  flex-direction: row;
-  justify-content: center;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border-light);
+  align-items: center;
+  justify-content: flex-end;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-medium);
+  gap: 12px;
+  .saved-time {
+    color: var(--text-secondary);
+    &.blink {
+      animation: blink 0.15s 6;
+    }
+  }
+}
+
+@keyframes blink {
+  0%,
+  80%,
+  100% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0;
+  }
 }
 
 .q-types {
@@ -262,7 +399,7 @@ onBeforeUnmount(() => {
   min-width: 400px;
   grid-area: q-items;
   overflow-x: hidden;
-  max-height: calc(100vh - 64px);
+  max-height: calc(100vh - 142px);
   background: var(--bg-secondary);
 
   .selected {
@@ -289,6 +426,7 @@ onBeforeUnmount(() => {
   li {
     // display: flex;
     // flex-direction: row;
+    position: relative;
     margin: 20px;
     // display: flex;
     padding: 20px 0;
@@ -405,6 +543,57 @@ onBeforeUnmount(() => {
     right: 12px;
     z-index: 1001;
     cursor: pointer;
+  }
+}
+
+.logic-tag {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 40px;
+  height: 24px;
+  font-size: 12px;
+  padding: 0;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--c-white);
+  background: var(--c-gray-300);
+  border-radius: 5px 0 3px 0;
+  cursor: pointer;
+  &:hover:not(.enabled) {
+    background: var(--c-gray-600);
+  }
+  &:hover.enabled {
+    background: var(--c-brand-600);
+  }
+  &.enabled {
+    background: var(--c-brand);
+  }
+}
+
+.preview-close {
+  position: absolute;
+  cursor: pointer;
+  background: var(--bg-primary);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &:hover {
+    background: var(--bg-secondary);
+  }
+}
+</style>
+
+<style>
+.preview-modal {
+  .ant-modal-content {
+    background: transparent;
+    box-shadow: none;
   }
 }
 </style>

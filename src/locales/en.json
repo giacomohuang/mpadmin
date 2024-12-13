@@ -207,6 +207,10 @@
   "wenjuan": {
     "editor": {
       "_title": "Questionnaire"
+    },
+    "_title": "Questionnaire",
+    "project": {
+      "_title": "Questionnaire"
     }
   },
   "comp": {

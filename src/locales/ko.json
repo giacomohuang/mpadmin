@@ -193,7 +193,6 @@
         "selectIcon": "아이콘 선택"
       }
     },
-
     "org": {
       "_title": "조직 구조",
       "department": "부서",
@@ -208,6 +207,10 @@
   "wenjuan": {
     "editor": {
       "_title": "설문조사"
+    },
+    "_title": "설문지",
+    "project": {
+      "_title": "설문지"
     }
   },
   "comp": {

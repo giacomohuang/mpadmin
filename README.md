@@ -1,56 +1,71 @@
-# Installation
+# MPAdmin
 
-## MongoDB
+MPAdmin 是一个现代化的管理系统前端框架，基于 Vue 3 和 Ant Design Vue 构建。
 
-**install**
+## 技术栈
 
-```
+- 前端框架：Vue 3
+- UI 组件库：Ant Design Vue 4.x
+- 状态管理：Pinia
+- 路由管理：Vue Router 4
+- 构建工具：Vite
+- CSS 框架：TailwindCSS
+- 富文本编辑器：Tiptap
+- 国际化：Vue I18n
+- 工具库：dayjs, axios, js-cookie 等
+
+## 系统要求
+
+在开始之前，请确保你的系统已安装以下软件：
+
+- Node.js (推荐使用最新 LTS 版本)
+- MongoDB
+- Redis
+- Minio (用于对象存储)
+
+## 环境搭建
+
+### MongoDB 安装
+
+```bash
+# 安装
 brew tap mongodb/brew
 brew update
 brew install mongodb-community
 brew services start mongodb-community
-```
 
-**stop**
+# 停止服务
 brew services stop mongodb-community
 
-**cli**
-`mongosh`
-
-## redis
-
-**install**
-
+# 进入命令行
+mongosh
 ```
-brew ibstall redis
+
+### Redis 安装
+
+```bash
+# 安装
+brew install redis
 brew services start redis
-```
 
-**stop**
+# 停止服务
 brew services stop redis
 
-**cli**
-`redis-cli`
-
-## NodeJS
-
-```
-brew install node
-npm install -g nodemon
+# 进入命令行
+redis-cli
 ```
 
-## Minio
+### Minio 安装
 
-**install**
-
-```
+```bash
+# 安装
 brew install minio/stable/minio
 minio server ~/minio_data
 ```
 
-### access policy
+#### Minio 访问策略配置
 
-- 设置访问策略：允许直接从URL下载文件
+允许直接从 URL 下载文件的策略配置：
 
 ```json
 {
@@ -76,33 +91,66 @@ minio server ~/minio_data
 }
 ```
 
-# Run App
+## 项目设置
 
-```
+1. 克隆项目
 
+```bash
 git clone https://github.com/giacomohuang/mpadmin.git
-
 ```
 
-**client side**
+2. 安装依赖并启动前端开发服务器
 
-```
-
+```bash
 cd mpadmin
 npm install
 npm run dev
-
 ```
 
-**server side**
+3. 安装依赖并启动后端服务器
 
-```
-
-cd mpadmin/server
+```bash
+cd mpadmin/serve
 npm install
 npm run dev
+```
+
+## 开发
+
+### 可用的脚本命令
+
+- `npm run dev` - 启动开发服务器
+- `npm run build` - 构建生产版本
+- `npm run preview` - 预览生产构建
+- `npm run serve` - 使用 Nginx 服务
+- `npm run lint` - 运行代码检查
+
+## 推荐的 IDE 设置
+
+### VSCode
+
+推荐安装以下插件：
+
+- Vue Language Features (Volar)
+- ESLint
+- Prettier
+- Tailwind CSS IntelliSense
+
+## 项目结构
 
 ```
+mpadmin/
+├── src/              # 源代码
+├── public/           # 静态资源
+├── plugins/          # 插件目录
+├── serve/            # 服务端代码
+├── dist/             # 构建输出目录
+└── _docs/           # 项目文档
+```
+
+## 许可证
+
+[MIT License](LICENSE)
 
 ```
 

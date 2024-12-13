@@ -39,6 +39,15 @@
     </div>
   </div>
 
+  <div class="minimap-canvas">
+    <div class="minimap-content">
+      <div class="mini-logics">
+        <div class="mini-logic" v-for="item in logics" :key="item.id" :style="{ left: item.logic.x + 'px', top: item.logic.y + 'px' }"></div>
+      </div>
+    </div>
+    <div class="mini-viewport"></div>
+  </div>
+
   <div class="questions" data-simplebar>
     <div class="question" v-for="(item, index) in qItems" :class="{ disabled: item._canDrag === false }" :key="item.id" :draggable="item._canDrag !== false" @dragstart="handleQuestionDragStart($event, item)">{{ index + 1 }}. {{ getPlainText(item.title) }}</div>
   </div>
@@ -248,7 +257,7 @@ const handlePortDragMove = (event) => {
   }
 }
 
-// 修改端口拖拽结束函数
+// 改端口拖拽结束函数
 const handlePortDragEnd = (event) => {
   event.preventDefault()
   event.stopPropagation()
@@ -404,7 +413,7 @@ const handleLogicDrag = (event) => {
     if (isDragging) {
       event.preventDefault()
       event.stopPropagation()
-      // 阻止后续的click事件
+      // 止后续的click事件
       const clickHandler = (e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -420,7 +429,6 @@ const handleLogicDrag = (event) => {
 
 // 调整画布大小
 const resizeCanvas = () => {
-  console.log('resizeCanvas')
   // 获取canvas元素
   const canvas = document.querySelector('.canvas')
   if (!canvas) return
@@ -437,15 +445,14 @@ const resizeCanvas = () => {
     const logicBox = document.querySelector(`.logic[data-id="${item.id}"]`).getBoundingClientRect()
     const rightEdge = item.logic.x + logicBox.width
     const bottomEdge = item.logic.y + logicBox.height
-    console.log(rightEdge, bottomEdge)
-
     maxX = Math.max(maxX, rightEdge + 200)
     maxY = Math.max(maxY, bottomEdge + 200)
   })
+  console.log(maxX, maxY)
 
-  // 使用当前尺寸和计算尺寸中的较大值
-  maxX = Math.max(maxX, currentWidth)
-  maxY = Math.max(maxY, currentHeight)
+  // // 使用当前尺寸和计算尺寸中的较大值
+  // maxX = Math.max(maxX, currentWidth)
+  // maxY = Math.max(maxY, currentHeight)
 
   canvas.style.width = `${maxX}px`
   canvas.style.height = `${maxY}px`
@@ -528,7 +535,7 @@ const handleQuestionDragStart = (event, qItem) => {
   canvasEl.addEventListener('dragover', dragOver)
   canvasEl.addEventListener('drop', drop)
 
-  // 添加画布拖拽相关处理函数
+  // 加画布拖拽相关处理函数
   function dragOver(ev) {
     ev.preventDefault()
     ev.dataTransfer.dropEffect = 'copy'
@@ -548,13 +555,16 @@ const handleQuestionDragStart = (event, qItem) => {
     const scrollContainer = document.querySelector('.viewport .simplebar-content-wrapper')
     const scrollLeft = scrollContainer?.scrollLeft || 0
     const scrollTop = scrollContainer?.scrollTop || 0
+    const canvasRect = canvasEl.getBoundingClientRect()
+    const canvasOffsetX = canvasRect.left
+    const canvasOffsetY = canvasRect.top
 
     // 考虑滚动条
     const deltaX = ev.clientX - startX + scrollLeft
     const deltaY = ev.clientY - startY + scrollTop
 
     // 计算放置位置
-    const dropX = initialLeft + deltaX
+    const dropX = initialLeft + deltaX - canvasOffsetX
     const dropY = initialTop + deltaY
 
     // 创建新节点,只保存问题ID和位置信息
@@ -579,7 +589,7 @@ const initializeLines = () => {
   // 清空现有连接线
   lines.value = []
 
-  // 遍历所有逻辑节点
+  // 历所有逻辑节点
   logics.value.forEach((item) => {
     // 检查节点是否连接关数据
     if (item.logic.connections) {
@@ -621,7 +631,7 @@ const initializeLines = () => {
 const handleLineRemove = (index) => {
   const line = lines.value[index]
 
-  // 从源节点的 connections 数组中删除对应的连接
+  // 从源节点的 connections 数组中删除对的连接
   const sourceItem = logics.value.find((l) => l.id === line.from.id)
   if (sourceItem && sourceItem.logic.connections) {
     sourceItem.logic.connections = sourceItem.logic.connections.filter((conn) => !(conn.fromPortId === line.from.portId && conn.toLogicId === line.to.id))
@@ -638,15 +648,133 @@ const getPlainText = (html) => {
   return plainText
 }
 
+const handleResizeWindow = () => {
+  resizeMinimap()
+}
+
+const resizeMinimap = () => {
+  const viewport = document.querySelector('.viewport .simplebar-content-wrapper')
+  const canvas = document.querySelector('.canvas')
+  const minimap = document.querySelector('.minimap-canvas')
+  const minimapViewport = document.querySelector('.mini-viewport')
+  const minimapContent = document.querySelector('.minimap-content')
+
+  if (!viewport || !canvas || !minimap || !minimapViewport || !minimapContent) return
+
+  // 计算缩放比
+  const scaleX = minimap.clientWidth / canvas.offsetWidth
+  const scaleY = minimap.clientHeight / canvas.offsetHeight
+  const scale = Math.min(scaleX, scaleY)
+
+  // 设置minimap内容尺寸和缩放
+  minimapContent.style.width = canvas.offsetWidth + 'px'
+  minimapContent.style.height = canvas.offsetHeight + 'px'
+  minimapContent.style.transform = `scale(${scale})`
+  minimapContent.style.transformOrigin = '0 0'
+
+  // 计算居中位置
+  const scaledWidth = canvas.offsetWidth * scale
+  const scaledHeight = canvas.offsetHeight * scale
+  const leftOffset = (minimap.clientWidth - scaledWidth) / 2
+  const topOffset = (minimap.clientHeight - scaledHeight) / 2
+
+  minimapContent.style.left = `${leftOffset}px`
+  minimapContent.style.top = `${topOffset}px`
+
+  // 更新视口位置和大小
+  minimapViewport.style.width = viewport.clientWidth * scale + 'px'
+  minimapViewport.style.height = viewport.clientHeight * scale + 'px'
+  minimapViewport.style.left = viewport.scrollLeft * scale + leftOffset + 'px'
+  minimapViewport.style.top = viewport.scrollTop * scale + topOffset + 'px'
+}
+
+// 修改 initMinimapDrag 函数
+const initMinimapDrag = () => {
+  const minimap = document.querySelector('.minimap-canvas')
+  const minimapViewport = document.querySelector('.mini-viewport')
+  const viewport = document.querySelector('.viewport .simplebar-content-wrapper')
+  const canvas = document.querySelector('.canvas')
+  const minimapContent = document.querySelector('.minimap-content')
+
+  if (!minimap || !minimapViewport || !viewport || !canvas || !minimapContent) return
+
+  let isDragging = false
+  let startX = 0
+  let startY = 0
+  let startScrollLeft = 0
+  let startScrollTop = 0
+
+  const onMouseDown = (e) => {
+    isDragging = true
+    const minimapRect = minimap.getBoundingClientRect()
+    const scale = minimap.clientWidth / canvas.offsetWidth
+
+    // 计算偏移量
+    const leftOffset = parseFloat(minimapContent.style.left) || 0
+    const topOffset = parseFloat(minimapContent.style.top) || 0
+
+    // 记录起始位置和滚动位置
+    startX = e.clientX
+    startY = e.clientY
+    startScrollLeft = viewport.scrollLeft
+    startScrollTop = viewport.scrollTop
+
+    // 如果点击的是 minimap 而不是 viewport，直接跳转到点击位置
+    if (e.target === minimap) {
+      const targetX = (e.clientX - minimapRect.left - leftOffset) / scale - viewport.clientWidth / 2
+      const targetY = (e.clientY - minimapRect.top - topOffset) / scale - viewport.clientHeight / 2
+
+      viewport.scrollLeft = targetX
+      viewport.scrollTop = targetY
+
+      // 更新起始位置
+      startScrollLeft = viewport.scrollLeft
+      startScrollTop = viewport.scrollTop
+    }
+
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+  }
+
+  const onMouseMove = (e) => {
+    if (!isDragging) return
+    e.preventDefault()
+
+    const scale = minimap.clientWidth / canvas.offsetWidth
+    const deltaX = (e.clientX - startX) / scale
+    const deltaY = (e.clientY - startY) / scale
+
+    // 基于起始滚动位置计算新的滚动位置
+    viewport.scrollLeft = startScrollLeft + deltaX
+    viewport.scrollTop = startScrollTop + deltaY
+  }
+
+  const onMouseUp = () => {
+    isDragging = false
+    document.removeEventListener('mousemove', onMouseMove)
+    document.removeEventListener('mouseup', onMouseUp)
+  }
+
+  minimap.addEventListener('mousedown', onMouseDown)
+}
+
+// 监听滚动事件更新minimap
+const initMinimapScroll = () => {
+  const viewport = document.querySelector('.viewport .simplebar-content-wrapper')
+  if (!viewport) return
+
+  viewport.addEventListener('scroll', () => {
+    resizeMinimap()
+  })
+}
+
 onMounted(async () => {
   await nextTick()
   const logicsEl = document.querySelector('.logics')
   logicsEl.addEventListener('mousedown', handleLogicDrag)
+  window.addEventListener('resize', handleResizeWindow)
 
   dragInstance = new Drag(document.querySelector('.viewport .simplebar-content-wrapper'))
-
-  // 初始化连接线
-  initializeLines()
 
   // 初始化时滚动到画布中心
   const scrollContainer = document.querySelector('.viewport .simplebar-content-wrapper')
@@ -662,6 +790,12 @@ onMounted(async () => {
     scrollContainer.scrollLeft = scrollLeft
     scrollContainer.scrollTop = scrollTop
   }
+  // 初始化连接线
+  initializeLines()
+  // 初始化minimap
+  resizeMinimap()
+  initMinimapDrag()
+  initMinimapScroll()
 })
 
 onUnmounted(() => {
@@ -678,16 +812,14 @@ onUnmounted(() => {
   width: 100vw;
   position: relative;
   cursor: grab;
-  background-image: radial-gradient(circle, var(--border-dark) 0.5px, transparent 0.5px);
-  background-size: 15px 15px;
-  background-position: 20px 20px;
+  background: var(--bg-secondary);
   overflow: auto;
   display: flex;
-  justify-content: center;
   align-items: center;
 }
 
 .canvas {
+  display: block;
   position: relative;
   min-width: 2000px;
   min-height: 2000px;
@@ -695,7 +827,12 @@ onUnmounted(() => {
   height: fit-content;
   margin: auto;
   transform-origin: center center;
+  background-image: radial-gradient(circle, var(--border-dark) 0.5px, transparent 0.5px);
+  background-size: 15px 15px;
+  background-position: 20px 20px;
+  background-color: var(--bg-primary);
   will-change: transform;
+  border: 1px solid var(--border-medium);
 }
 
 .logic {
@@ -915,7 +1052,6 @@ onUnmounted(() => {
   stroke-width: 1;
   pointer-events: none;
   shape-rendering: crispEdges;
-  // stroke-dasharray: 4 2;
 }
 
 .questions {
@@ -956,5 +1092,49 @@ onUnmounted(() => {
       cursor: not-allowed;
     }
   }
+}
+
+.minimap-canvas {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 200px;
+  height: 150px;
+  border: 1px solid var(--border-medium);
+  border-radius: 4px;
+  background: var(--bg-primary);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.minimap-content {
+  position: absolute;
+  transform-origin: 0 0;
+  will-change: transform;
+  background: var(--bg-tertiary);
+}
+
+.mini-logics {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mini-logic {
+  position: absolute;
+  width: 160px;
+  height: 40px;
+  background: var(--c-brand);
+}
+
+.mini-viewport {
+  position: absolute;
+  background: var(--bg-brand);
+  opacity: 0.5;
+  border: 1px solid var(--c-brand);
+  pointer-events: none;
 }
 </style>

@@ -98,12 +98,14 @@ function generateRoutes(files, layoutDir) {
     const content = fs.readFileSync(fullPath, 'utf-8')
     const routerRegex = /<router\s+lang="json">([\s\S]*?)<\/router>/
     const match = content.match(routerRegex)
+    let param = ''
 
     if (match) {
       const routerJson = JSON.parse(match[1])
       if (routerJson.isRouter === false) {
         return // 跳过这个文件，不生成路由
       }
+      param = routerJson.param
     }
 
     let path = file.replace('.vue', '').toLowerCase()
@@ -115,7 +117,7 @@ function generateRoutes(files, layoutDir) {
       currentPath += '/' + part
       if (!map[currentPath]) {
         let route = {
-          path: currentPath,
+          path: currentPath + param,
           name: parts.slice(0, index + 1).join('-'),
           meta: { title: parts.slice(0, index + 1).join('.') + '._title' }
         }

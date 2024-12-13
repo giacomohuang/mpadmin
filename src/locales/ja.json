@@ -207,6 +207,10 @@
   "wenjuan": {
     "editor": {
       "_title": "アンケート"
+    },
+    "_title": "アンケート",
+    "project": {
+      "_title": "アンケート"
     }
   },
   "comp": {

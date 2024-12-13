@@ -207,6 +207,10 @@
   "wenjuan": {
     "editor": {
       "_title": "الاستبيانات"
+    },
+    "_title": "استبيان",
+    "project": {
+      "_title": "استبيان"
     }
   },
   "comp": {
@@ -219,7 +223,8 @@
       "preparing": "جاري التحضير للتحميل...",
       "uploading": "جاري التحميل... {percent}%",
       "success": "تم التحميل بنجاح!",
-      "confirmContent": "هل أنت متأكد أنك تريد حذف {name}؟"
+      "confirmContent": "هل أنت متأكد أنك تريد حذف {name}؟",
+      "failed": "فشل التحميل: {error}"
     },
     "mpInputI18n": {
       "editorTitle": "محرر متعدد اللغات",

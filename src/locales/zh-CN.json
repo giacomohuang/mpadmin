@@ -205,7 +205,11 @@
     }
   },
   "wenjuan": {
+    "_title": "问卷",
     "editor": {
+      "_title": "问卷"
+    },
+    "project": {
       "_title": "问卷"
     }
   },

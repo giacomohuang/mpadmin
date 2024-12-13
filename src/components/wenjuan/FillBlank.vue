@@ -68,7 +68,7 @@
       </a-tab-pane>
       <a-tab-pane v-if="currentBlankIndex >= 0 && qItems[qItemIndex].multiMode" key="blank" :tab="'第' + (currentBlankIndex + 1) + '项设置'">
         <div class="prop-item">
-          <h4>本题必答</h4>
+          <h4>本项必答</h4>
           <a-switch v-model:checked="qItems[qItemIndex].options[currentBlankIndex].required" size="small" />
         </div>
         <div class="prop-item">

@@ -4,12 +4,11 @@
       <!-- 手机状态栏 -->
       <div class="status-bar">
         <span class="time">{{ currentTime }}</span>
-        <div class="right-icons">
-          <span class="signal">📶</span>
-          <span class="wifi">📡</span>
-          <span class="battery">🔋</span>
-        </div>
+        <div class="right-icons"></div>
       </div>
+
+      <!-- Dynamic Island -->
+      <div class="dynamic-island"></div>
 
       <div class="preview-container" data-simplebar>
         <!-- 问卷标题 -->
@@ -166,50 +165,67 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  // background: #f5f5f5;
 }
 
 .mobile-frame {
-  width: 375px;
-  height: 600px;
+  width: 402px; // iPhone 16 Pro 宽度
+  height: 874px; // iPhone 16 Pro 高度
   background: white;
-  border-radius: 40px;
+  border-radius: 55px; // 更大的圆角
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  border: 4px solid #333;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+  border: 12px solid #1a1a1a; // 深色边框
 
-  &::before {
+  // 移除原有的 before 伪元素
+  &::after {
     content: '';
     position: absolute;
-    top: 0;
+    bottom: 8px;
     left: 50%;
     transform: translateX(-50%);
-    width: 150px;
-    height: 20px;
-    background: #333;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    width: 134px;
+    height: 5px;
+    background: #000;
+    border-radius: 100px;
+    z-index: 100;
   }
 }
 
+.dynamic-island {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 126px;
+  height: 37px;
+  background: #000;
+  border-radius: 20px;
+  z-index: 100;
+}
+
 .status-bar {
-  height: 24px;
-  background: #fff;
+  height: 44px; // 更高的状态栏
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  font-size: 12px;
-  color: #333;
+  padding: 0 20px;
+  font-size: 14px;
+  color: #000;
+  position: relative;
+  z-index: 101;
 
   .right-icons {
     display: flex;
-    gap: 4px;
+    gap: 6px;
   }
 }
 
 .preview-container {
-  height: calc(100% - 24px);
+  height: calc(100% - 44px); // 调整内容区域高度
+  padding-top: 20px; // 为 Dynamic Island 留出空间
   overflow-y: auto;
   max-width: 100%;
   margin: 0;
@@ -307,11 +323,12 @@ onMounted(() => {
 .nps-scores {
   display: flex;
   justify-content: space-between;
-  gap: 4px;
 
   .score-item {
-    width: 36px;
-    height: 36px;
+    width: 25px;
+    height: 25px;
+    flex-shrink: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;

@@ -576,15 +576,21 @@ onBeforeUnmount(() => {
 .preview-close {
   position: absolute;
   cursor: pointer;
-  background: var(--bg-primary);
+  background: none;
+  border: 1px solid var(--c-white);
   border-radius: 50%;
   width: 24px;
   height: 24px;
+  padding: 4px;
+  top: -10px;
+  right: -10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--c-white);
   &:hover {
     background: var(--bg-secondary);
+    color: var(--c-brand);
   }
 }
 </style>
@@ -594,6 +600,12 @@ onBeforeUnmount(() => {
   .ant-modal-content {
     background: transparent;
     box-shadow: none;
+  }
+  .ant-modal-close {
+    background: none;
+    &:hover {
+      background: none;
+    }
   }
 }
 </style>

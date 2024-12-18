@@ -8,8 +8,7 @@ MPAdmin 是一个现代化的管理系统前端框架，基于 Vue 3 和 Ant Des
 - UI 组件库：Ant Design Vue 4.x
 - 状态管理：Pinia
 - 路由管理：Vue Router 4
-- 构建工具：Vite
-- CSS 框架：TailwindCSS
+- 构建工具：Vite 6
 - 富文本编辑器：Tiptap
 - 国际化：Vue I18n
 - 工具库：dayjs, axios, js-cookie 等
@@ -99,18 +98,10 @@ minio server ~/minio_data
 git clone https://github.com/giacomohuang/mpadmin.git
 ```
 
-2. 安装依赖并启动前端开发服务器
+2. 安装依赖并启动前端应用服务器
 
 ```bash
 cd mpadmin
-npm install
-npm run dev
-```
-
-3. 安装依赖并启动后端服务器
-
-```bash
-cd mpadmin/serve
 npm install
 npm run dev
 ```
@@ -119,10 +110,10 @@ npm run dev
 
 ### 可用的脚本命令
 
-- `npm run dev` - 启动开发服务器
+- `npm run dev` - 启动开发环境服务器
 - `npm run build` - 构建生产版本
 - `npm run preview` - 预览生产构建
-- `npm run serve` - 使用 Nginx 服务
+- `npm run serve` - 启动生产环境服务器(Nginx)
 - `npm run lint` - 运行代码检查
 
 ## 推荐的 IDE 设置
@@ -143,7 +134,7 @@ mpadmin/
 ├── src/              # 源代码
 ├── public/           # 静态资源
 ├── plugins/          # 插件目录
-├── serve/            # 服务端代码
+├── serve/            # Nginx配置
 ├── dist/             # 构建输出目录
 └── _docs/           # 项目文档
 ```

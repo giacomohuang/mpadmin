@@ -396,7 +396,7 @@ const openEditor = async (item, mode) => {
   // 如果是页面类型且没有设置 router，尝试根据 name 自动匹配
   if (resourceForm.type === 1 && !resourceForm.router && resourceForm.name) {
     nextTick(() => {
-      const name = resourceForm.name[locale.value].toLowerCase()
+      const name = resourceForm.name?.[locale.value]?.toLowerCase()
       if (name) {
         // 在所有路由中查找最匹配的路由
         const matchedRoute = routes.find((route) => {

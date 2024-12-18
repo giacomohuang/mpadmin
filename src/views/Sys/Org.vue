@@ -497,7 +497,7 @@ onUnmounted(() => {
   display: block;
   margin: 0;
   padding: 0;
-  background: red;
+  // background: red;x
 }
 
 #nodes {

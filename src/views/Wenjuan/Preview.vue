@@ -169,14 +169,16 @@ onMounted(() => {
 }
 
 .mobile-frame {
-  width: 402px; // iPhone 16 Pro 宽度
-  height: 874px; // iPhone 16 Pro 高度
+  flex-shrink: 0;
+  box-sizing: content-box;
+  width: 430px; // iPhone 16 Pro 宽度
+  height: 932px; // iPhone 16 Pro 高度
   background: white;
   border-radius: 55px; // 更大的圆角
   position: relative;
   overflow: hidden;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
-  border: 12px solid #1a1a1a; // 深色边框
+  border: 8px solid #1a1a1a; // 深色边框
 
   // 移除原有的 before 伪元素
   &::after {

@@ -25,7 +25,7 @@
           <div class="title">
             <div class="number"><span class="required" :class="{ visible: item.required }">*</span>{{ index + 1 }}.&nbsp;&nbsp;</div>
             <XEditer class="text" v-model="qItems[index].title"></XEditer>
-            <div class="logic-tag" @click="logicDrawer = true" :class="{ enabled: item.logic?.connections?.length > 0 }">逻辑</div>
+            <div class="logic-tag" @click="logicDrawer = true" :class="{ enabled: item.logic?.conditions?.length > 0 }">逻辑</div>
             <div class="opr">
               <a-tooltip title="复制" placement="top">
                 <icon name="copy" class="items" @click="duplicateItem(index)" />
@@ -61,7 +61,7 @@
       <Logic />
     </div>
   </Teleport>
-  <a-modal v-model:open="previewModal" :footer="null" width="428px" wrapClassName="preview-modal">
+  <a-modal v-model:open="previewModal" :footer="null" width="500px" wrapClassName="preview-modal">
     <template #closeIcon>
       <div class="preview-close"><icon name="remove" /></div>
     </template>
@@ -134,17 +134,23 @@ provide('qName', qName)
 provide('currentItemIndex', currentItemIndex)
 
 // 检查并清理不合理的逻辑连接
-function checkAndCleanLogicConnections() {
+function cleanupLogic() {
   // 遍历所有带有logic属性的题目
   qItems.value.forEach((item) => {
-    if (item.logic && item.logic.connections) {
+    if (item.logic && item.logic.conditions) {
       // 获取当前题目的索引
       const currentIndex = qItems.value.findIndex((q) => q.id === item.id)
 
       // 过滤出合理的连接（只保留连接到更大索引题目的连接）
-      item.logic.connections = item.logic.connections.filter((conn) => {
+      item.logic.conditions = item.logic.conditions.filter((conn) => {
         const targetIndex = qItems.value.findIndex((q) => q.id === conn.toLogicId)
         return targetIndex > currentIndex
+      })
+    }
+    if (item.logic?.optionsSelect) {
+      // console.log('hit')
+      item.logic.optionsSelect = item.logic.optionsSelect.filter((option) => {
+        return item.options.find((q) => q.id === option.id)
       })
     }
   })
@@ -183,12 +189,10 @@ function removeItem(index) {
   } else {
     currentItemIndex.value = index - 1
   }
-  // 检查并清理逻辑连接
-  checkAndCleanLogicConnections()
 }
 
 function duplicateItem(index) {
-  console.log(index)
+  // console.log(index)
   qItems.value.splice(index, 0, JSON.parse(JSON.stringify(qItems.value[index])))
   qItems.value[index + 1].id = nanoid()
   currentItemIndex.value = index + 1
@@ -200,8 +204,6 @@ function duplicateItem(index) {
 
 function onDropped(e) {
   currentItemIndex.value = e.newIndex
-  // 检查并清理逻辑连接
-  checkAndCleanLogicConnections()
 }
 
 function changeEditingItem(index) {
@@ -216,8 +218,11 @@ function saveDraft() {
   console.log('saveDraft')
 }
 
-function save() {
-  console.log('save')
+async function save(data) {
+  // 保存前先清理失效的逻辑选项
+  cleanupLogic()
+  await API.wenjuan.update({ _id: qId.value, ...data })
+  savedTime.value = new Date().toLocaleString()
 }
 
 function publish() {
@@ -226,8 +231,7 @@ function publish() {
 
 const debouncedSave = debounce(async (data) => {
   if (!qId.value) return
-  await API.wenjuan.update({ _id: qId.value, ...data })
-  savedTime.value = new Date().toLocaleString()
+  save(data)
 }, 1000)
 
 onBeforeMount(async () => {
@@ -403,12 +407,12 @@ onBeforeUnmount(() => {
   background: var(--bg-secondary);
 
   .selected {
-    border: 2px solid var(--c-brand-500);
+    outline: 2px solid var(--c-brand-500);
   }
   .dragging {
     content-visibility: hidden;
     content: '';
-    border: 2px dashed var(--c-brand-500);
+    outline: 2px dashed var(--c-brand-500);
     // border: 0;
     box-shadow: none;
     background-color: var(--bg-brand);
@@ -434,6 +438,7 @@ onBeforeUnmount(() => {
     border: 1px solid var(--border-light);
     background: var(--bg-primary);
     box-shadow: 1px 3px 5px 2px var(--border-light);
+    box-sizing: border-box;
     &:hover {
       .opr {
         opacity: 1;
@@ -548,8 +553,8 @@ onBeforeUnmount(() => {
 
 .logic-tag {
   position: absolute;
-  bottom: 0px;
-  right: 0px;
+  bottom: -1px;
+  right: -1px;
   width: 40px;
   height: 24px;
   font-size: 12px;

@@ -1,6 +1,6 @@
 <template>
   <div class="i18n-input-wrapper">
-    <a-input v-bind="$attrs" autocomplete="new-password" :value="modelValue[i18n.global.locale.value] || ''" :dir="RTL_LANGS.includes(currentLang) ? 'rtl' : 'ltr'" @input="handleInput" class="i18n-input">
+    <a-input v-bind="$attrs" autocomplete="new-password" :value="modelValue?.[i18n.global.locale.value] || ''" :dir="RTL_LANGS.includes(currentLang) ? 'rtl' : 'ltr'" @input="handleInput" class="i18n-input">
       <template #addonAfter v-if="languages.length > 1">
         <icon name="lang" class="lang-icon" @click="showEditor" />
       </template>

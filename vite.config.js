@@ -18,11 +18,13 @@ export default defineConfig({
           return 'assets/[name]-[hash].js'
         },
         manualChunks(id) {
-          if (id.includes('node_modules')) {
+          if (id.includes('node_modules/.pnpm/')) {
             if (id.includes('ant-design-vue')) {
-              return id.toString().split('node_modules/')[1].split('/')[0].toString()
+              return 'ant-design-vue'
             } else if (id.includes('zxcvbn')) {
-              return id.toString().split('node_modules/')[1].split('/')[0].toString()
+              return 'zxcvbn'
+            } else if (id.includes('vue')) {
+              return 'vue'
             } else return 'mod'
           }
           // else if (id.includes('locales/')) {

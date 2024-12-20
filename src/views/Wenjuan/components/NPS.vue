@@ -2,9 +2,11 @@
   <div class="nps-inner">
     <div class="nps-score-container">
       <div class="nps-scores">
-        <div v-for="score in 11" :key="score - 1" class="score-item" :class="{ active: qItems[qItemIndex].value === score - 1 }" @click="qItems[qItemIndex].value = score - 1">
+        <div v-for="score in qItems[qItemIndex].maxScore - qItems[qItemIndex].minScore + 1" :key="score - 1"
+          class="score-item" :class="{ active: qItems[qItemIndex].value === score - 1 + qItems[qItemIndex].minScore }"
+          @click="qItems[qItemIndex].value = score - 1 + qItems[qItemIndex].minScore">
           <a-tooltip :title="qItems[qItemIndex].tips[score - 1]?.text">
-            {{ score - 1 }}
+            {{ score - 1 + qItems[qItemIndex].minScore }}
           </a-tooltip>
         </div>
       </div>
@@ -22,6 +24,22 @@
     <div class="prop-item">
       <h4>此题必答</h4>
       <a-switch v-model:checked="qItems[qItemIndex].required" size="small" />
+    </div>
+
+    <div class="prop-item">
+      <h4>最低分</h4>
+      <a-input-number v-model:value="qItems[qItemIndex].minScore" :min="0" :max="qItems[qItemIndex].maxScore"
+        size="small" style="width: 100px" @change="handleMinScoreChange">
+        <template #addonAfter>分</template>
+      </a-input-number>
+    </div>
+
+    <div class="prop-item">
+      <h4>最高分</h4>
+      <a-input-number v-model:value="qItems[qItemIndex].maxScore" :min="qItems[qItemIndex].minScore" :max="10"
+        size="small" style="width: 100px" @change="handleMaxScoreChange">
+        <template #addonAfter>分</template>
+      </a-input-number>
     </div>
 
     <div class="prop-item">
@@ -45,7 +63,9 @@
       <h4>评分提示</h4>
       <div class="tips-list">
         <div v-for="(tip, index) in qItems[qItemIndex].tips" :key="index" class="tip-item">
-          <a-input-number v-model:value="tip.score" :min="0" :max="10" @change="(val) => handleScoreChange(val, index)" class="tip-score" size="small">
+          <a-input-number v-model:value="tip.score" :min="qItems[qItemIndex].minScore"
+            :max="qItems[qItemIndex].maxScore" @change="(val) => handleTipScoreChange(val, index)" class="tip-score"
+            size="small">
             <template #addonAfter>分</template>
           </a-input-number>
           <a-input v-model:value="tip.text" size="small" placeholder="请输入分数描述" />
@@ -57,17 +77,28 @@
   </Teleport>
 </template>
 
+<router lang="json">{
+  "isRouter": false
+}</router>
+
 <script setup>
 import { inject, onBeforeMount, watch } from 'vue'
 import { message } from 'ant-design-vue'
+import { cleanupScoreRanges, cleanupConditions } from '../cleanup'
 
 const props = defineProps(['qItemIndex'])
+
 const qItems = inject('qItems')
 const currentItemIndex = inject('currentItemIndex')
 
-function handleScoreChange(newScore, currentIndex) {
+const cleanup = () => {
+  cleanupScoreRanges(qItems.value)
+  cleanupConditions(qItems.value)
+}
+
+function handleTipScoreChange(newScore, currentIndex) {
   if (newScore === null || newScore === undefined) {
-    qItems.value[props.qItemIndex].tips[currentIndex].score = 0
+    qItems.value[props.qItemIndex].tips[currentIndex].score = qItems.value[props.qItemIndex].minScore
     return
   }
 
@@ -75,8 +106,11 @@ function handleScoreChange(newScore, currentIndex) {
   const duplicateIndex = tips.findIndex((tip, index) => tip.score === newScore && index !== currentIndex)
 
   if (duplicateIndex !== -1) {
-    let availableScore = 0
-    while (availableScore <= 10) {
+    const minScore = qItems.value[props.qItemIndex].minScore
+    const maxScore = qItems.value[props.qItemIndex].maxScore
+    let availableScore = minScore
+
+    while (availableScore <= maxScore) {
       if (!tips.some((tip) => tip.score === availableScore)) {
         qItems.value[props.qItemIndex].tips[currentIndex].score = availableScore
         return
@@ -93,10 +127,12 @@ function handleScoreChange(newScore, currentIndex) {
 
 function addTip() {
   const tips = qItems.value[props.qItemIndex].tips
-  let score = 0
+  const minScore = qItems.value[props.qItemIndex].minScore
+  let score = minScore
+
   while (tips.some((tip) => tip.score === score)) {
     score++
-    if (score > 10) {
+    if (score > qItems.value[props.qItemIndex].maxScore) {
       message.warning('已经没有可用的分数')
       return
     }
@@ -112,6 +148,36 @@ function removeTip(index) {
   qItems.value[props.qItemIndex].tips.splice(index, 1)
 }
 
+function handleMinScoreChange(value) {
+  if (value > qItems.value[props.qItemIndex].maxScore) {
+    qItems.value[props.qItemIndex].minScore = qItems.value[props.qItemIndex].maxScore
+  }
+  cleanup()
+}
+
+function handleMaxScoreChange(value) {
+  if (value < qItems.value[props.qItemIndex].minScore) {
+    qItems.value[props.qItemIndex].maxScore = qItems.value[props.qItemIndex].minScore
+  }
+  cleanup()
+}
+
+// 监听分数范围变化
+watch(
+  () => [qItems.value[props.qItemIndex].minScore, qItems.value[props.qItemIndex].maxScore],
+  ([newMin, newMax]) => {
+    // 清理超出范围的提示
+    qItems.value[props.qItemIndex].tips = qItems.value[props.qItemIndex].tips.filter((tip) => tip.score >= newMin && tip.score <= newMax)
+
+    // 调整当前值到合法范围
+    if (qItems.value[props.qItemIndex].value < newMin) {
+      qItems.value[props.qItemIndex].value = newMin
+    } else if (qItems.value[props.qItemIndex].value > newMax) {
+      qItems.value[props.qItemIndex].value = newMax
+    }
+  }
+)
+
 onBeforeMount(() => {
   // 初始化默认值
   const item = qItems.value[props.qItemIndex]
@@ -121,6 +187,8 @@ onBeforeMount(() => {
   item.showLabels ??= true
   item.minLabel ??= '不可能'
   item.maxLabel ??= '一定会'
+  item.minScore ??= 0
+  item.maxScore ??= 10
 })
 </script>
 
@@ -217,6 +285,7 @@ onBeforeMount(() => {
     flex-shrink: 0;
     cursor: pointer;
     color: var(--text-secondary);
+
     &:hover {
       color: var(--c-red);
     }

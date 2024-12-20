@@ -99,6 +99,12 @@
   </Teleport>
 </template>
 
+<router lang="json">
+  {
+    "isRouter": false
+  }
+  </router>
+
 <script setup>
 import { inject, ref, onBeforeMount, watch } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
@@ -106,6 +112,7 @@ import { customAlphabet } from 'nanoid'
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6)
 const { qItemIndex } = defineProps(['qItemIndex'])
+
 const qItems = inject('qItems')
 const currentItemIndex = inject('currentItemIndex')
 const currentBlankIndex = ref(-1)

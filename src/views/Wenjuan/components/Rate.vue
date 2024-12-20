@@ -4,7 +4,9 @@
     <div class="rate-content">
       <template v-if="qItems[qItemIndex].maxScore <= 10">
         <div class="rate-inner">
-          <a-rate v-model:value="qItems[qItemIndex].value" :count="qItems[qItemIndex].maxScore" :allow-half="qItems[qItemIndex].step === 0.5" :tooltips="qItems[qItemIndex].tips.map((tip) => tip.text)" v-bind="rateProps" />
+          <a-rate v-model:value="qItems[qItemIndex].value" :count="qItems[qItemIndex].maxScore"
+            :allow-half="qItems[qItemIndex].step === 0.5" :tooltips="qItems[qItemIndex].tips.map((tip) => tip.text)"
+            v-bind="rateProps" />
           <div v-if="qItems[qItemIndex].showLabels" class="rate-labels">
             <span class="min-label">{{ qItems[qItemIndex].minLabel }}</span>
             <span class="max-label">{{ qItems[qItemIndex].maxLabel }}</span>
@@ -13,7 +15,8 @@
       </template>
       <template v-else>
         <div class="slider-inner">
-          <a-slider v-model:value="qItems[qItemIndex].value" :min="qItems[qItemIndex].minScore" :max="qItems[qItemIndex].maxScore" :step="qItems[qItemIndex].step" />
+          <a-slider v-model:value="qItems[qItemIndex].value" :min="qItems[qItemIndex].minScore"
+            :max="qItems[qItemIndex].maxScore" :step="qItems[qItemIndex].step" />
           <div v-if="qItems[qItemIndex].showLabels" class="slider-labels">
             <span class="min-label">{{ qItems[qItemIndex].minLabel || qItems[qItemIndex].minScore }}</span>
             <span class="max-label">{{ qItems[qItemIndex].maxLabel || qItems[qItemIndex].maxScore }}</span>
@@ -33,13 +36,15 @@
     </div>
     <div class="prop-item">
       <h4>最低分</h4>
-      <a-input-number v-model:value="qItems[qItemIndex].minScore" :min="0" :max="qItems[qItemIndex].maxScore" size="small" style="width: 100px">
+      <a-input-number v-model:value="qItems[qItemIndex].minScore" :min="0" :max="qItems[qItemIndex].maxScore"
+        size="small" style="width: 100px" @change="handleMinScoreChange">
         <template #addonAfter>分</template>
       </a-input-number>
     </div>
     <div class="prop-item">
       <h4>最高分</h4>
-      <a-input-number v-model:value="qItems[qItemIndex].maxScore" :min="1" :max="100" size="small" style="width: 100px">
+      <a-input-number v-model:value="qItems[qItemIndex].maxScore" :min="qItems[qItemIndex].minScore" :max="100"
+        size="small" style="width: 100px" @change="handleMaxScoreChange">
         <template #addonAfter>分</template>
       </a-input-number>
     </div>
@@ -85,7 +90,9 @@
       <h4>评分提示</h4>
       <div class="tips-list">
         <div v-for="(tip, index) in qItems[qItemIndex].tips" :key="index" class="tip-item">
-          <a-input-number v-model:value="tip.score" :min="qItems[qItemIndex].minScore" :max="qItems[qItemIndex].maxScore" @change="(val) => handleScoreChange(val, index)" class="tip-score" size="small">
+          <a-input-number v-model:value="tip.score" :min="qItems[qItemIndex].minScore"
+            :max="qItems[qItemIndex].maxScore" @change="(val) => handleTipScoreChange(val, index)" class="tip-score"
+            size="small">
             <template #addonAfter>分</template>
           </a-input-number>
           <a-input v-model:value="tip.text" size="small" placeholder="请输入分数描述" />
@@ -102,13 +109,19 @@
   </Teleport>
 </template>
 
+<router lang="json">{
+  "isRouter": false
+}</router>
+
 <script setup>
 import { inject, computed, onBeforeMount, watch, ref, h } from 'vue'
 import { message } from 'ant-design-vue'
-import IconSelect from '../IconSelect.vue'
-import Icon from '../Icon.vue'
+import IconSelect from '@/components/IconSelect.vue'
+import Icon from '@/components/Icon.vue'
+import { cleanupScoreRanges, cleanupConditions } from '../cleanup'
 
 const props = defineProps(['qItemIndex'])
+
 const qItems = inject('qItems')
 const currentItemIndex = inject('currentItemIndex')
 const showIconSelect = ref(false)
@@ -129,6 +142,11 @@ const rateProps = computed(() => {
   return {}
 })
 
+const cleanup = () => {
+  cleanupScoreRanges(qItems.value)
+  cleanupConditions(qItems.value)
+}
+
 // 处理图标选择
 function handleIconSelect({ iconType, icon }) {
   qItems.value[props.qItemIndex].customIcon = {
@@ -140,29 +158,7 @@ function handleIconSelect({ iconType, icon }) {
   }, 0)
 }
 
-const getCurrentTip = computed(() => {
-  const currentValue = Math.floor(qItems.value[props.qItemIndex].value)
-  const tips = qItems.value[props.qItemIndex].tips
-  if (!tips.length) return ''
-
-  const validTips = tips.filter((tip) => tip.score !== null && tip.score !== undefined)
-  if (!validTips.length) return ''
-
-  validTips.sort((a, b) => a.score - b.score)
-  let closestTip = validTips[0]
-
-  for (const tip of validTips) {
-    if (tip.score <= currentValue) {
-      closestTip = tip
-    } else {
-      break
-    }
-  }
-
-  return closestTip.text
-})
-
-function handleScoreChange(newScore, currentIndex) {
+function handleTipScoreChange(newScore, currentIndex) {
   if (newScore === null || newScore === undefined) {
     qItems.value[props.qItemIndex].tips[currentIndex].score = qItems.value[props.qItemIndex].minScore
     return
@@ -200,7 +196,7 @@ function addTip() {
   const tips = qItems.value[props.qItemIndex].tips
   const minScore = qItems.value[props.qItemIndex].minScore
 
-  // 找到一个未使用的分数
+  // 找到一个未使用���分数
   let score = minScore
   while (tips.some((tip) => tip.score === score)) {
     score++
@@ -256,6 +252,20 @@ function clearIcon(e) {
   e.stopPropagation()
   qItems.value[props.qItemIndex].customIcon = null
 }
+
+function handleMinScoreChange(value) {
+  if (value > qItems.value[props.qItemIndex].maxScore) {
+    qItems.value[props.qItemIndex].minScore = qItems.value[props.qItemIndex].maxScore
+  }
+  cleanup()
+}
+
+function handleMaxScoreChange(value) {
+  if (value < qItems.value[props.qItemIndex].minScore) {
+    qItems.value[props.qItemIndex].maxScore = qItems.value[props.qItemIndex].minScore
+  }
+  cleanup()
+}
 </script>
 
 <style scoped lang="scss">
@@ -281,6 +291,7 @@ function clearIcon(e) {
   align-items: center;
   margin-top: 10px;
   font-size: 12px;
+
   &.column {
     margin-top: 12px;
 
@@ -288,6 +299,7 @@ function clearIcon(e) {
     align-items: flex-start;
     gap: 12px;
   }
+
   .help {
     margin-left: 4px;
     color: var(--text-secondary);
@@ -315,11 +327,13 @@ function clearIcon(e) {
     flex-shrink: 0;
     cursor: pointer;
     color: var(--text-secondary);
+
     &:hover {
       color: var(--c-red);
     }
   }
 }
+
 .num {
   margin: 18px 8px;
   font-size: 16px;
@@ -398,6 +412,7 @@ function clearIcon(e) {
   position: absolute;
   left: 0;
 }
+
 .max-label {
   position: absolute;
   right: 0;

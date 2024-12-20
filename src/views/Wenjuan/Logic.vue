@@ -4,91 +4,115 @@
       <svg class="svg-container" ref="svgContainer">
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-            <polyline transform="translate(8, 1) rotate(45) " points="-2 2 4 2 4 8" stroke="#666" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round"></polyline>
+            <polyline transform="translate(8, 1) rotate(45) " points="-2 2 4 2 4 8" stroke="#666" stroke-width="1"
+              fill="none" fill-rule="evenodd" stroke-linecap="round"></polyline>
           </marker>
         </defs>
-        <g class="line-wrap" v-for="(line, index) in lines" :key="'line-' + index" @click.stop="handleLineRemove(index)" :class="{ dragging: draggingLine }">
-          <path class="line" :d="generatePath(line)" marker-end="url(#arrow)" :class="{ active: currentLogicIdx !== -1 && (line.from.id === logics[currentLogicIdx]?.id || line.to.id === logics[currentLogicIdx]?.id) }" />
+        <g class="line-wrap" v-for="(line, index) in lines" :key="'line-' + index" @click.stop="handleLineRemove(index)"
+          :class="{ dragging: draggingLine }">
+          <path class="line" :d="generatePath(line)" marker-end="url(#arrow)"
+            :class="{ active: currentLogicIdx !== -1 && (line.from.id === logics[currentLogicIdx]?.id || line.to.id === logics[currentLogicIdx]?.id) }" />
           <path class="line-h" :d="generatePath(line)" />
         </g>
-        <path v-if="tempLine" class="line" :d="generatePath(tempLine)" fill="none" stroke-width="2" stroke-dasharray="5,5" />
+        <path v-if="tempLine" class="line" :d="generatePath(tempLine)" fill="none" stroke-width="2"
+          stroke-dasharray="5,5" />
       </svg>
 
       <div class="logics">
-        <div class="logic" v-for="(item, index) in logics" :data-id="item.id" :key="item.id" draggable="true" :style="{ left: item.logic.x + 'px', top: item.logic.y + 'px' }" @click.stop="setCurrentLogic($event, index)" :class="{ current: currentLogicIdx === index }">
+        <div class="logic" v-for="(item, index) in logics" :data-id="item.id" :key="item.id" draggable="true"
+          :style="{ left: item.logic.x + 'px', top: item.logic.y + 'px' }" @click.stop="setCurrentLogic($event, index)"
+          :class="{ current: currentLogicIdx === index }">
           <div class="title">
-            <span class="title-text" :title="getPlainText(item.title)">{{ qItems.findIndex((itm) => itm.id === item.id) + 1 }}. {{ getPlainText(item.title) }}</span>
+            <span class="title-text" :title="getPlainText(item.title)">{{ qItems.findIndex((itm) => itm.id === item.id)
+              + 1 }}. {{ getPlainText(item.title) }}</span>
             <!-- <a-tag>x:{{ logic.x }}</a-tag> <a-tag>y:{{ logic.y }}</a-tag> -->
-            <icon name="remove" size="1em" class="remove" @click.stop="removeLogic(item.id)" />
+            <icon name="remove" size="1em" class="remove" @click.stop="removeLogic(item)" />
           </div>
 
           <div class="body">
             <div class="item action">
               <div class="name">跳转到本题</div>
-              <div class="port input" :data-port-id="item.id + '-in-jump'" @mousedown.stop="handlePortDragStart($event, item.id, item.id + '-in-jump', 'input')"></div>
+              <div class="port input" data-port-id="jump"
+                @mousedown.stop="handlePortDragStart($event, item.id, 'jump', 'input')"></div>
             </div>
             <div class="item action">
               <div class="name">显示本题</div>
-              <div class="port input" :data-port-id="item.id + 'in--show'" @mousedown.stop="handlePortDragStart($event, item.id, item.id + '-in-show', 'input')"></div>
+              <div class="port input" data-port-id="show"
+                @mousedown.stop="handlePortDragStart($event, item.id, 'show', 'input')"></div>
             </div>
             <div class="item action">
               <div class="name">隐藏本题</div>
-              <div class="port input" :data-port-id="item.id + 'in-hide'" @mousedown.stop="handlePortDragStart($event, item.id, item.id + '-in-hide', 'input')"></div>
+              <div class="port input" data-port-id="hide"
+                @mousedown.stop="handlePortDragStart($event, item.id, 'hide', 'input')"></div>
             </div>
             <div class="split-line"></div>
 
             <!------output--------->
             <div class="item condition">
               <div class="name">本题显示</div>
-              <div class="port output" :data-port-id="item.id + '-out-show'" @mousedown.stop="handlePortDragStart($event, item.id, item.id + '-out-show', 'output')"></div>
+              <div class="port output" data-port-id="show"
+                @mousedown.stop="handlePortDragStart($event, item.id, 'show', 'output')"></div>
             </div>
             <div class="item condition">
               <div class="name">本题隐藏</div>
-              <div class="port output" :data-port-id="item.id + '-out-hide'" @mousedown.stop="handlePortDragStart($event, item.id, item.id + '-out-hide', 'output')"></div>
+              <div class="port output" data-port-id="hide"
+                @mousedown.stop="handlePortDragStart($event, item.id, 'hide', 'output')"></div>
             </div>
             <div class="item condition">
               <div class="name">本题已答</div>
-              <div class="port output" :data-port-id="item.id + '-out-answered'" @mousedown.stop="handlePortDragStart($event, item.id, item.id + '-out-answered', 'output')"></div>
+              <div class="port output" data-port-id="answered"
+                @mousedown.stop="handlePortDragStart($event, item.id, 'answered', 'output')"></div>
             </div>
             <div class="item condition">
               <div class="name">本题未答</div>
-              <div class="port output" :data-port-id="item.id + '-out-unanswered'" @mousedown.stop="handlePortDragStart($event, item.id, item.id + '-out-unanswered', 'output')"></div>
+              <div class="port output" data-port-id="unanswered"
+                @mousedown.stop="handlePortDragStart($event, item.id, 'unanswered', 'output')"></div>
             </div>
             <div class="split-line"></div>
 
             <!-- 评分题、NPS题 -->
-            <div v-if="['Rate', 'NPS'].includes(item.type)">
+            <template v-if="['Rate', 'NPS'].includes(item.type)">
               <!-- 添加评分范围配置界面 -->
-              <div v-for="range in item.logic.scoreRanges" :key="range.id" class="item">
+              <div v-for="range in item.scoreRanges" :key="range.id" class="item">
                 <div class="score-range-item">
-                  <a-input-number v-model:value="range.min" :min="item.minScore" :max="range.max" size="small" style="width: 60px" @change="(value) => handleRangeChange(item.id, item.logic, range.id, 'min', value, item.minScore, item.maxScore)" />
+                  <a-input-number v-model:value="range.min" :min="item.minScore" :max="range.max" size="small"
+                    style="width: 60px" @change="(value) => handleRangeChange(item, range.id, 'min', value)" />
                   <span class="score-range-separator">-</span>
-                  <a-input-number v-model:value="range.max" :min="range.min" :max="item.maxScore" size="small" style="width: 60px" @change="(value) => handleRangeChange(item.id, item.logic, range.id, 'max', value, item.minScore, item.maxScore)" />
+                  <a-input-number v-model:value="range.max" :min="range.min" :max="item.maxScore" size="small"
+                    style="width: 60px" @change="(value) => handleRangeChange(item.id, range.id, 'max', value)" />
                   <span class="score-range-separator">分</span>
-                  <icon name="remove" size="1em" class="remove-range" @click="removeScoreRange(item.id, item.logic, range.id)" />
+                  <icon name="remove" size="1em" class="remove-range" @click="removeScoreRange(item, range.id)" />
                 </div>
-                <div class="port output" :data-port-id="range.id" @mousedown.stop="handlePortDragStart($event, item.id, range.id, 'output')"></div>
+                <div class="port output" :data-port-id="range.id"
+                  @mousedown.stop="handlePortDragStart($event, item.id, range.id, 'output')"></div>
               </div>
 
-              <a-button style="margin: 8px 0" type="link" size="small" block @click.stop="addScoreRange(item.id, item.logic, item.minScore, item.maxScore)" :disabled="!canAddRange(item.logic, item.minScore, item.maxScore)">添加评分范围</a-button>
-            </div>
+              <a-button style="margin: 8px 0" type="link" size="small" block @click.stop="addScoreRange(item)"
+                :disabled="!canAddRange(item)">添加评分范围</a-button>
+            </template>
 
             <!-- 单选、多选、图片单选 -->
-            <div v-if="['SingleChoice', 'MultiChoice', 'ImageChoice'].includes(item.type)" v-for="option in item.options" :key="option.id" class="item condition">
-              <div class="name">
-                <a-tag v-if="item.logic.optionsSelect?.find((itm) => itm.id === option.id)?.select == false" color="red" @click.stop="toggleOptionSelection(item.logic, option.id)">未选</a-tag>
-                <a-tag v-else color="blue" @click.stop="toggleOptionSelection(item.logic, option.id)">选择</a-tag>
-                <span class="option-text" :title="getPlainText(option.text)">{{ getPlainText(option.text) }}</span>
+            <template v-if="['SingleChoice', 'MultiChoice', 'ImageChoice'].includes(item.type)">
+              <div v-for="option in item.options" :key="option.id" class="item condition">
+                <div class="name">
+                  <a-tag v-if="option.select == false" color="red"
+                    @click.stop="toggleOptionSelection(option)">未选</a-tag>
+                  <a-tag v-else color="blue" @click.stop="toggleOptionSelection(option)">选择</a-tag>
+                  <span class="option-text" :title="getPlainText(option.text)">{{ getPlainText(option.text) }}</span>
+                </div>
+                <div class="port output" :data-port-id="option.id"
+                  @mousedown.stop="handlePortDragStart($event, item.id, option.id, 'output')"></div>
               </div>
-              <div class="port output" :data-port-id="option.id" @mousedown.stop="handlePortDragStart($event, item.id, option.id, 'output')"></div>
-            </div>
+            </template>
           </div>
         </div>
       </div>
       <svg class="guide-line-container">
         <g>
-          <line v-for="(line, index) in guideLines.x" :key="'x-' + index" class="guide-line vertical" :x1="line.position" :y1="line.start" :x2="line.position" :y2="line.end" />
-          <line v-for="(line, index) in guideLines.y" :key="'y-' + index" class="guide-line horizontal" :x1="line.start" :y1="line.position" :x2="line.end" :y2="line.position" />
+          <line v-for="(line, index) in guideLines.x" :key="'x-' + index" class="guide-line vertical"
+            :x1="line.position" :y1="line.start" :x2="line.position" :y2="line.end" />
+          <line v-for="(line, index) in guideLines.y" :key="'y-' + index" class="guide-line horizontal" :x1="line.start"
+            :y1="line.position" :x2="line.end" :y2="line.position" />
         </g>
       </svg>
     </div>
@@ -97,36 +121,24 @@
   <div class="minimap-canvas">
     <div class="minimap-content">
       <div class="mini-logics">
-        <div class="mini-logic" v-for="item in logics" :key="item.id" :style="{ left: item.logic.x + 'px', top: item.logic.y + 'px' }"></div>
+        <div class="mini-logic" v-for="item in logics" :key="item.id"
+          :style="{ left: item.logic.x + 'px', top: item.logic.y + 'px' }"></div>
       </div>
     </div>
     <div class="mini-viewport"></div>
   </div>
 
   <div class="questions" data-simplebar>
-    <div class="question" v-for="(item, index) in qItems" :class="{ disabled: item._canDrag === false }" :key="item.id" :draggable="item._canDrag !== false" @dragstart="handleQuestionDragStart($event, item)">{{ index + 1 }}. {{ getPlainText(item.title) }}</div>
+    <div class="question" v-for="(item, index) in qItems" :class="{ disabled: item._canDrag === false }" :key="item.id"
+      :draggable="item._canDrag !== false" @dragstart="handleQuestionDragStart($event, item)">{{ index + 1 }}. {{
+        getPlainText(item.title) }}</div>
   </div>
-  <div style="border: 1px solid #ccc; padding: 10px; background-color: #fff; border-radius: 10px; height: 80%; width: 400px; position: absolute; right: 40px; top: 20px; z-index: 1000; overflow: auto">
+  <div
+    style="border: 1px solid #ccc; padding: 10px; background-color: #fff; border-radius: 10px; height: 80%; width: 400px; position: absolute; right: 40px; top: 20px; z-index: 1000; overflow: auto">
     {{ currentLogicIdx }}
     <pre><code>{{ JSON.stringify(qItems, null, 2) }}</code></pre>
+    <pre><code>{{ JSON.stringify(qItems, null, 2) }}</code></pre>
   </div>
-
-  <!-- <a-modal v-model:open="conditionModal" title="条件设置">
-    <a-select v-model:value="currentCondition.conditionType">
-      <a-select-option value="select">选择</a-select-option>
-      <a-select-option value="notselect">未选择</a-select-option>
-    </a-select>
-    <a-checkbox-group v-model:value="currentCondition.conditionValue">
-      <a-checkbox v-for="option in qItems[currentLogicIdx].options" :key="option.id" :value="option.id">{{ option.text }}</a-checkbox>
-    </a-checkbox-group>
-  </a-modal> -->
-  <!-- 
-  <a-drawer v-model:open="settingsDrawer" :mask="false" class="settings-drawer">
-    <div class="logic-settings" v-if="currentLogicIdx !== -1">
-      <div class="question-title">{{ qItems.find((item) => item.id === logics[currentLogicIdx].id)?.title }}</div>
-    </div>
-  </a-drawer> -->
-  <!-- <button class="add-logic" @click="addLogic">��加节点</button> -->
 </template>
 
 <script setup>
@@ -244,13 +256,21 @@ const findPort = (event) => {
   return null
 }
 
-const isValidConnection = (fromPort, toPort) => {
+const isValidCondition = (fromPort, toPort) => {
   if (!fromPort || !toPort || fromPort.type === toPort.type || fromPort.id === toPort.id) {
     return false
   }
-
   const outputPort = fromPort.type === 'output' ? fromPort : toPort
   const inputPort = fromPort.type === 'input' ? fromPort : toPort
+
+  // 检查output端口是否已经连接到其他input端口
+  const existingOutput = lines.value.find((line) => {
+    return line.from.id === outputPort.id && line.from.portId === outputPort.portId
+  })
+
+  if (existingOutput) {
+    return false // 如果output端口已经有连接，则不允许再连接
+  }
 
   // 检查是否已存在相同的连接
   const existingConnection = lines.value.find((line) => {
@@ -272,7 +292,6 @@ const isValidConnection = (fromPort, toPort) => {
       return false // 不允许从大索引连接到小索引
     }
   }
-
   return !existingConnection
 }
 
@@ -358,7 +377,7 @@ const handlePortDragEnd = (event) => {
     const fromPort = tempLine.value.from || targetPort
     const toPort = tempLine.value.from ? targetPort : tempLine.value.to
 
-    if (isValidConnection(fromPort, toPort)) {
+    if (isValidCondition(fromPort, toPort)) {
       // 获取正确的端口元素
       const fromElement = fromPort.type === 'input' ? document.querySelector(`.logic[data-id="${fromPort.id}"] .port.input[data-port-id="${fromPort.portId}"]`) : document.querySelector(`.logic[data-id="${fromPort.id}"] .port.output[data-port-id="${fromPort.portId}"]`)
 
@@ -556,7 +575,7 @@ const updateLinesPosition = (id) => {
     // 更新起点（如果连接线从该节点开始）
     if (line.from.id === id) {
       // 修改选择器以精确匹配端口ID
-      const fromElement = document.querySelector(`.logic[data-id="${id}"] .port[data-port-id="${line.from.portId}"]`)
+      const fromElement = document.querySelector(`.logic[data-id="${id}"] .${line.from.type}.port[data-port-id="${line.from.portId}"]`)
 
       if (fromElement) {
         const pos = getPortPosition(fromElement)
@@ -566,10 +585,10 @@ const updateLinesPosition = (id) => {
       }
     }
 
-    // 更新���点（如果连接线连到该节点）
+    // 更新点（如果连接线连到该节点）
     if (line.to.id === id) {
       // 修改选择器以精确匹配端口ID
-      const toElement = document.querySelector(`.logic[data-id="${id}"] .port[data-port-id="${line.to.portId}"]`)
+      const toElement = document.querySelector(`.logic[data-id="${id}"] .${line.to.type}.port[data-port-id="${line.to.portId}"]`)
 
       if (toElement) {
         const pos = getPortPosition(toElement)
@@ -587,23 +606,29 @@ const updateLinesPosition = (id) => {
 }
 
 // 删除逻辑节点
-const removeLogic = (id) => {
+const removeLogic = (qItem) => {
   currentLogicIdx.value = -1
   // 删除与该节点相关的所有连接线
-  lines.value = lines.value.filter((line) => line.from.id !== id && line.to.id !== id)
+  lines.value = lines.value.filter((line) => line.from.id !== qItem.id && line.to.id !== qItem.id)
   // 删除节点
-  const item = qItems.value.find((item) => item.id === id)
-  item._canDrag = true
-  delete item.logic
+  qItem._canDrag = true
 
-  // 删除与该节点相关的所有连接
-  // console.log(id)
+  // 删除逻辑节点数据
+  delete qItem.logic
+  // 删除评分范围选项
+  delete qItem.scoreRanges
+  // 删除连接到该节点的condition
   logics.value.forEach((item) => {
     if (item.logic.conditions) {
-      item.logic.conditions = item.logic.conditions.filter((conn) => conn.toLogicId !== id)
+      item.logic.conditions = item.logic.conditions.filter((conn) => conn.toLogicId !== qItem.id)
     }
   })
-
+  // 删除options中的select
+  if (qItem.options) {
+    qItem.options.forEach((option) => {
+      delete option.select
+    })
+  }
   // 更新画布大小
   nextTick(() => {
     resizeCanvas()
@@ -648,8 +673,8 @@ const handleQuestionDragStart = (event, qItem) => {
     const scrollLeft = scrollContainer?.scrollLeft || 0
     const scrollTop = scrollContainer?.scrollTop || 0
     const canvasRect = canvasEl.getBoundingClientRect()
-    const canvasOffsetX = canvasRect.left
-    const canvasOffsetY = canvasRect.top
+    const canvasOffsetX = canvasRect.left > 0 ? canvasRect.left : 0
+    console.log('canvasOffsetX', canvasOffsetX)
 
     // 考虑滚动条
     const deltaX = ev.clientX - startX + scrollLeft
@@ -676,16 +701,11 @@ const handleQuestionDragStart = (event, qItem) => {
   }
 }
 
-const toggleOptionSelection = (logic, optionId) => {
-  // console.log(logic, optionId)
-  if (!logic.optionsSelect) {
-    logic.optionsSelect = []
-  }
-  const option = logic.optionsSelect.find((itm) => itm.id === optionId)
-  if (option) {
-    option.select = !option.select
+const toggleOptionSelection = (option) => {
+  if (option.select == null) {
+    option.select = false
   } else {
-    logic.optionsSelect.push({ id: optionId, select: false })
+    option.select = !option.select
   }
 }
 
@@ -873,14 +893,14 @@ const initMinimapScroll = () => {
   })
 }
 
-const addScoreRange = (qId, logic, minScore, maxScore) => {
-  if (!logic.scoreRanges) {
-    logic.scoreRanges = []
+const addScoreRange = (qItem) => {
+  if (!qItem.scoreRanges) {
+    qItem.scoreRanges = []
   }
 
   // 找到未覆盖的区间
-  const coveredRanges = logic.scoreRanges.sort((a, b) => a.min - b.min)
-  let start = minScore
+  const coveredRanges = qItem.scoreRanges.sort((a, b) => a.min - b.min)
+  let start = qItem.minScore
 
   for (const range of coveredRanges) {
     if (range.min > start) {
@@ -888,19 +908,19 @@ const addScoreRange = (qId, logic, minScore, maxScore) => {
       const newRange = {
         id: nanoid(), // 添加唯一id
         min: start,
-        max: Math.min(range.min - 1, maxScore)
+        max: Math.min(range.min - 1, qItem.maxScore)
       }
-      logic.scoreRanges.push(newRange)
-      logic.scoreRanges.sort((a, b) => a.min - b.min) // 保持有序
+      qItem.scoreRanges.push(newRange)
+      qItem.scoreRanges.sort((a, b) => a.min - b.min) // 保持有序
 
       // 确保 conditions 数组存在
-      if (!logic.conditions) {
-        logic.conditions = []
+      if (!qItem.conditions) {
+        qItem.conditions = []
       }
 
       nextTick(() => {
         // 等待 DOM 更新后再更新连接线位置
-        updateLinesPosition(qId)
+        updateLinesPosition(qItem.id)
       })
       return
     }
@@ -908,23 +928,23 @@ const addScoreRange = (qId, logic, minScore, maxScore) => {
   }
 
   // 如果还有剩余空间
-  if (start <= maxScore) {
+  if (start <= qItem.maxScore) {
     const newRange = {
       id: nanoid(), // 添加唯一id
       min: start,
-      max: maxScore
+      max: qItem.maxScore
     }
-    logic.scoreRanges.push(newRange)
-    logic.scoreRanges.sort((a, b) => a.min - b.min) // 保持有序
+    qItem.scoreRanges.push(newRange)
+    qItem.scoreRanges.sort((a, b) => a.min - b.min) // 保持有序
 
     // 确保 conditions 数组存在
-    if (!logic.conditions) {
-      logic.conditions = []
+    if (!qItem.conditions) {
+      qItem.conditions = []
     }
 
     nextTick(() => {
       // 等待 DOM 更新后再更新连接线位置
-      updateLinesPosition(qId)
+      updateLinesPosition(qItem.id)
     })
   }
 }
@@ -932,14 +952,6 @@ const addScoreRange = (qId, logic, minScore, maxScore) => {
 // 检查范围是否重叠
 const isRangeOverlap = (range1, range2) => {
   return !(range1.max < range2.min || range1.min > range2.max)
-}
-
-// 检查新范围是否与其他范围重叠
-const checkRangeOverlap = (ranges, newRange, excludeId = null) => {
-  return ranges.some((range) => {
-    if (range.id === excludeId) return false
-    return isRangeOverlap(range, newRange)
-  })
 }
 
 // 验证并调整范围值
@@ -969,59 +981,53 @@ const validateRange = (range, ranges, minScore, maxScore, excludeId = null) => {
   return { min, max }
 }
 
-const removeScoreRange = (qId, logic, rangeId) => {
-  // 找到要删除的连接线
-  const rangeToRemove = logic.scoreRanges.find((range) => range.id === rangeId)
-  if (rangeToRemove) {
-    // 删除与该评分范围相关的conditions
-    logic.conditions = logic.conditions?.filter((conn) => conn.fromPortId !== rangeId)
-
-    // 删除实际的连接线
-    lines.value = lines.value.filter((line) => line.from.portId !== rangeId)
-  }
-
-  logic.scoreRanges = logic.scoreRanges.filter((range) => range.id !== rangeId)
+const removeScoreRange = (qItem, rangeId) => {
+  // 删除与该评分范围相关的conditions
+  qItem.logic.conditions = qItem.logic.conditions.filter((condition) => condition.fromPortId !== rangeId)
+  // 删除实际的连接线
+  lines.value = lines.value.filter((line) => line.from.portId !== rangeId)
+  qItem.scoreRanges = qItem.scoreRanges.filter((range) => range.id !== rangeId)
   nextTick(() => {
-    updateLinesPosition(qId)
+    updateLinesPosition(qItem.id)
   })
 }
 
-const canAddRange = (logic, minScore, maxScore) => {
-  if (!logic.scoreRanges || logic.scoreRanges.length === 0) return true
+const canAddRange = (qItem) => {
+  if (!qItem.scoreRanges || qItem.scoreRanges.length === 0) return true
 
   // 检查是否还有未覆盖的区间
-  const coveredRanges = logic.scoreRanges.sort((a, b) => a.min - b.min)
-  let start = minScore
+  const coveredRanges = qItem.scoreRanges.sort((a, b) => a.min - b.min)
+  let start = qItem.minScore
 
   for (const range of coveredRanges) {
     if (range.min > start) return true
     start = range.max + 1
   }
 
-  return start <= maxScore
+  return start <= qItem.maxScore
 }
 
 // 处理范围变化
-const handleRangeChange = (qId, logic, rangeId, type, value, minScore, maxScore) => {
-  const range = logic.scoreRanges.find((r) => r.id === rangeId)
+const handleRangeChange = (qItem, rangeId, type, value) => {
+  const range = qItem.scoreRanges?.find((r) => r.id === rangeId)
   if (!range) return
 
   const newRange = { ...range }
   newRange[type] = value
 
   // 验证并调整范围
-  const validatedRange = validateRange(newRange, logic.scoreRanges, minScore, maxScore, rangeId)
+  const validatedRange = validateRange(newRange, qItem.scoreRanges, qItem.minScore, qItem.maxScore, rangeId)
 
   // 更新范围值
   range.min = validatedRange.min
   range.max = validatedRange.max
 
   // 重新排序范围
-  logic.scoreRanges.sort((a, b) => a.min - b.min)
+  qItem.scoreRanges.sort((a, b) => a.min - b.min)
 
   // 更新连接线位置
   nextTick(() => {
-    updateLinesPosition(qId)
+    updateLinesPosition(qItem.id)
   })
 }
 
@@ -1110,6 +1116,7 @@ onUnmounted(() => {
   &.current {
     border-color: var(--c-brand);
     z-index: 10;
+
     .title {
       background: var(--bg-brand);
       border-bottom: 1px solid var(--c-brand);
@@ -1124,6 +1131,7 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     .title-text {
       flex: 1;
       width: 100%;
@@ -1139,11 +1147,13 @@ onUnmounted(() => {
     // border-radius: 50%;
     // border: 1px solid transparent;
     transition: all 0.15s ease;
+
     &:hover {
       color: var(--text-primary);
       // border-color: var(--c-r);
     }
   }
+
   .body {
     display: flex;
     flex-direction: column;
@@ -1151,26 +1161,32 @@ onUnmounted(() => {
     .item {
       position: relative;
       padding: 8px 12px;
+
       &:not(:last-child) {
         border-bottom: 1px solid var(--border-medium);
       }
     }
+
     .score-range-separator {
       margin: 0 8px;
       color: var(--text-secondary);
     }
+
     .score-range-item {
       display: flex;
       align-items: center;
     }
+
     .action {
       font-style: italic;
     }
+
     .name {
       display: flex;
       align-items: center;
       // padding: 0 8px;
     }
+
     .option-text {
       flex: 1;
       width: 100%;
@@ -1178,6 +1194,7 @@ onUnmounted(() => {
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .split-line {
       border-bottom: 1px solid var(--border-medium);
       height: 4px;
@@ -1220,9 +1237,11 @@ onUnmounted(() => {
   &.input {
     left: -6px;
     top: 50%;
+
     &:hover {
       background: #2196f3;
     }
+
     &.port-hover {
       background: #2196f3;
       transform: translateY(-50%) scale(1.2);
@@ -1233,9 +1252,11 @@ onUnmounted(() => {
   &.output {
     right: -6px;
     top: 50%;
+
     &:hover {
       background: #4caf50;
     }
+
     &.port-hover {
       background: #4caf50;
       transform: translateY(-50%) scale(1.2);
@@ -1262,6 +1283,7 @@ onUnmounted(() => {
     }
   }
 }
+
 .line {
   stroke: #666;
   stroke-width: 2;
@@ -1311,6 +1333,7 @@ onUnmounted(() => {
   from {
     stroke-dashoffset: 10;
   }
+
   to {
     stroke-dashoffset: 0;
   }
@@ -1358,10 +1381,12 @@ onUnmounted(() => {
     overflow: hidden;
     text-overflow: ellipsis;
     background: var(--bg-secondary);
+
     &:hover:not(&.disabled) {
       cursor: grab;
       background: var(--bg-brand);
     }
+
     &:active:not(&.disabled) {
       cursor: grabbing;
     }

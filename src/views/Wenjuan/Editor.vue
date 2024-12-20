@@ -14,30 +14,32 @@
   </div>
   <div class="main">
     <aside class="q-types" width="200">
-      <VueDraggable v-model="QTYPES" tag="ul" animation="100" :group="{ name: 'group', pull: 'clone', put: false }" :clone="onClone" :sort="false">
+      <VueDraggable v-model="QTYPES" tag="ul" animation="100" :group="{ name: 'group', pull: 'clone', put: false }"
+        :clone="onClone" :sort="false">
         <li v-for="item in QTYPES" :key="item.id" @click="addItem(item)">{{ item.title }}</li>
       </VueDraggable>
     </aside>
     <main class="q-items" data-simplebar>
       <div class="tips" v-if="!qItems || qItems.length == 0">请点击题型按钮或将题型拖动到这里</div>
-      <VueDraggable v-model="qItems" tag="ul" animation="100" group="group" ghostClass="dragging" @end="onDropped" @add="onDropped">
+      <VueDraggable v-model="qItems" tag="ul" handle=".handle" animation="100" group="group" ghostClass="dragging" @end="onDropped"@add="onDropped">
         <li v-for="(item, index) in qItems" class="q-item" :id="item.id" :key="item.id" :class="index == currentItemIndex ? 'selected' : ''" @mouseup="changeEditingItem(index)">
+
           <div class="title">
-            <div class="number"><span class="required" :class="{ visible: item.required }">*</span>{{ index + 1 }}.&nbsp;&nbsp;</div>
+            
+            <div class="number">
+              <icon name="handle" class="handle"></icon>
+              <span class="required" :class="{ visible: item.required }">*</span>
+              {{ index + 1 }}.&nbsp;&nbsp;
+            </div>
             <XEditer class="text" v-model="qItems[index].title"></XEditer>
-            <div class="logic-tag" @click="logicDrawer = true" :class="{ enabled: item.logic?.conditions?.length > 0 }">逻辑</div>
+            <!-- <div class="text">sdfhsdfhskdfgdfghjdgfjhsdfgjksh ghjsdfg jhsdfgjhsd gfjhsg dfjhsgdfjdfhsjdf</div> -->
             <div class="opr">
-              <a-tooltip title="复制" placement="top">
-                <icon name="copy" class="items" @click="duplicateItem(index)" />
-              </a-tooltip>
-              <a-tooltip title="删除" placement="top">
-                <icon name="remove" class="items" @click="removeItem(index)" />
-              </a-tooltip>
+              <a-tooltip title="复制" placement="top"><icon name="copy" class="items" @click="duplicateItem(index)" /></a-tooltip>
+              <a-tooltip title="删除" placement="top"><icon name="remove" class="items" @click="removeItem(index)" /></a-tooltip>
             </div>
           </div>
-          <div class="content">
-            <component :is="QtypeComponents[item.type]" :qItemIndex="index" :key="item.id"></component>
-          </div>
+          <div class="content"><component :is="QtypeComponents[item.type]" :qItemIndex="index" :key="item.id"></component></div>
+          <div class="logic-tag" @click="logicDrawer = true" :class="hasLogic(item) ? 'enabled' : ''">逻辑</div>
         </li>
       </VueDraggable>
     </main>
@@ -57,23 +59,25 @@
   </a-modal>
   <Teleport to="body">
     <div class="drawer" v-if="logicDrawer">
-      <div class="close" @click="logicDrawer = false"><icon name="remove" /></div>
+      <div class="close" @click="logicDrawer = false">
+        <icon name="remove" />
+      </div>
       <Logic />
     </div>
   </Teleport>
   <a-modal v-model:open="previewModal" :footer="null" width="500px" wrapClassName="preview-modal">
     <template #closeIcon>
-      <div class="preview-close"><icon name="remove" /></div>
+      <div class="preview-close">
+        <icon name="remove" />
+      </div>
     </template>
     <Preview v-if="previewModal" />
   </a-modal>
 </template>
 
-<router lang="json">
-{
+<router lang="json">{
   "param": "/:id?"
-}
-</router>
+}</router>
 
 <script setup>
 import { provide, ref, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent, watch, onMounted } from 'vue'
@@ -88,6 +92,7 @@ import { router } from '@/router/router'
 import Preview from './Preview.vue'
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 12)
 import { debounce } from 'lodash-es'
+import { cleanupConditions } from './cleanup'
 
 const QTYPES = ref([
   { id: '0', title: '填空题', type: 'FillBlank' },
@@ -105,12 +110,12 @@ function onClone(data) {
   return d
 }
 const QtypeComponents = {
-  MultiChoice: defineAsyncComponent(() => import('@/components/wenjuan/MultiChoice.vue')),
-  SingleChoice: defineAsyncComponent(() => import('@/components/wenjuan/SingleChoice.vue')),
-  FillBlank: defineAsyncComponent(() => import('@/components/wenjuan/FillBlank.vue')),
-  ImageChoice: defineAsyncComponent(() => import('@/components/wenjuan/ImageChoice.vue')),
-  Rate: defineAsyncComponent(() => import('@/components/wenjuan/Rate.vue')),
-  NPS: defineAsyncComponent(() => import('@/components/wenjuan/NPS.vue'))
+  MultiChoice: defineAsyncComponent(() => import('./components/MultiChoice.vue')),
+  SingleChoice: defineAsyncComponent(() => import('./components/SingleChoice.vue')),
+  FillBlank: defineAsyncComponent(() => import('./components/FillBlank.vue')),
+  ImageChoice: defineAsyncComponent(() => import('./components/ImageChoice.vue')),
+  Rate: defineAsyncComponent(() => import('./components/Rate.vue')),
+  NPS: defineAsyncComponent(() => import('./components/NPS.vue'))
 }
 
 const currentItemIndex = ref(0)
@@ -123,38 +128,16 @@ const qPublished = ref(false)
 const qDraft = ref(false)
 const qSettings = ref(null)
 const logicDrawer = ref(false)
-const logics = ref([])
+
 const editNameModal = ref(false)
 const savedTime = ref('')
 const qNameInput = ref('')
 const previewModal = ref(false)
 provide('qItems', qItems)
-provide('logics', logics)
 provide('qName', qName)
 provide('currentItemIndex', currentItemIndex)
 
-// 检查并清理不合理的逻辑连接
-function cleanupLogic() {
-  // 遍历所有带有logic属性的题目
-  qItems.value.forEach((item) => {
-    if (item.logic && item.logic.conditions) {
-      // 获取当前题目的索引
-      const currentIndex = qItems.value.findIndex((q) => q.id === item.id)
 
-      // 过滤出合理的连接（只保留连接到更大索引题目的连接）
-      item.logic.conditions = item.logic.conditions.filter((conn) => {
-        const targetIndex = qItems.value.findIndex((q) => q.id === conn.toLogicId)
-        return targetIndex > currentIndex
-      })
-    }
-    if (item.logic?.optionsSelect) {
-      // console.log('hit')
-      item.logic.optionsSelect = item.logic.optionsSelect.filter((option) => {
-        return item.options.find((q) => q.id === option.id)
-      })
-    }
-  })
-}
 
 async function updateQName() {
   qName.value = qNameInput.value
@@ -180,15 +163,23 @@ function addItem(payload) {
     const el = document.getElementById(data.id)
     el.scrollIntoView({ block: 'nearest' })
   })
+  cleanupConditions(qItems.value)
 }
 
 function removeItem(index) {
+  // // 如果item存在于其他logic的connection中，则需要删除这些connection
+  // logics.value.forEach((logic) => {
+  //   logic.conditions = logic.conditions.filter((conn) => {
+  //     return conn.toLogicId !== qItems.value[index].id
+  //   })
+  // })
   qItems.value.splice(index, 1)
   if (qItems.value.length == 1) {
     currentItemIndex.value = 0
   } else {
     currentItemIndex.value = index - 1
   }
+  cleanupConditions(qItems.value)
 }
 
 function duplicateItem(index) {
@@ -200,10 +191,12 @@ function duplicateItem(index) {
     const el = document.getElementById(qItems.value[index + 1].id)
     el.scrollIntoView({ block: 'nearest' })
   })
+  cleanupConditions(qItems.value)
 }
 
 function onDropped(e) {
   currentItemIndex.value = e.newIndex
+  cleanupConditions(qItems.value)
 }
 
 function changeEditingItem(index) {
@@ -218,9 +211,18 @@ function saveDraft() {
   console.log('saveDraft')
 }
 
+// 判断本题是否有关联逻辑
+function hasLogic(item) {
+  if (item.logic?.conditions?.length > 0) {
+    return true
+  } else {
+    return qItems.value.some((itm) => itm.logic?.conditions?.some((cond) => cond.toLogicId === item.id))
+  }
+}
+
 async function save(data) {
   // 保存前先清理失效的逻辑选项
-  cleanupLogic()
+  console.log('trigger save')
   await API.wenjuan.update({ _id: qId.value, ...data })
   savedTime.value = new Date().toLocaleString()
 }
@@ -252,6 +254,7 @@ onBeforeMount(async () => {
   qPublished.value = t.published
   qSettings.value = t.settings
 
+
   watch(
     qItems,
     (newValue) => {
@@ -262,7 +265,7 @@ onBeforeMount(async () => {
   )
 })
 
-onMounted(() => {})
+onMounted(() => { })
 
 onBeforeUnmount(() => {
   // dndQItems.destroy()
@@ -280,25 +283,28 @@ onBeforeUnmount(() => {
   background: var(--bg-primary);
   max-width: 100%;
   border-bottom: 1px solid var(--border-medium);
+
   .q-name {
     display: flex;
     align-items: center;
     gap: 5px;
+
     &:hover {
       .icon-edit {
         opacity: 1;
       }
     }
+
     .text {
       cursor: pointer;
       font-size: 1.25em;
       font-weight: 500;
       max-width: 400px;
-      // flex-wrap: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
     .icon-edit {
       cursor: pointer;
       opacity: 0;
@@ -306,11 +312,13 @@ onBeforeUnmount(() => {
       transition: opacity 0.15s ease;
     }
   }
+
   .actions {
     display: flex;
     gap: 5px;
   }
 }
+
 .main {
   position: relative;
   display: grid;
@@ -331,8 +339,10 @@ onBeforeUnmount(() => {
   background: var(--bg-primary);
   border-top: 1px solid var(--border-medium);
   gap: 12px;
+
   .saved-time {
     color: var(--text-secondary);
+
     &.blink {
       animation: blink 0.15s 6;
     }
@@ -340,11 +350,13 @@ onBeforeUnmount(() => {
 }
 
 @keyframes blink {
+
   0%,
   80%,
   100% {
     opacity: 1;
   }
+
   40% {
     opacity: 0;
   }
@@ -364,6 +376,7 @@ onBeforeUnmount(() => {
     padding: 15px;
     cursor: pointer;
   }
+
   li {
     width: 80px;
     list-style: none;
@@ -373,6 +386,7 @@ onBeforeUnmount(() => {
     text-align: center;
     padding: 8px 2px;
     margin: 5px 0px;
+
     &:hover {
       border-color: #1890ff;
     }
@@ -393,6 +407,7 @@ onBeforeUnmount(() => {
   border: 1px dashed var(--border-dark);
   background: var(--bg-primary);
   border-radius: 4px;
+
   &:hover {
     border-color: var(--c-brand-500);
   }
@@ -400,7 +415,7 @@ onBeforeUnmount(() => {
 
 .q-items {
   position: relative;
-  min-width: 400px;
+  // min-width: 400px;
   grid-area: q-items;
   overflow-x: hidden;
   max-height: calc(100vh - 142px);
@@ -409,6 +424,7 @@ onBeforeUnmount(() => {
   .selected {
     outline: 2px solid var(--c-brand-500);
   }
+
   .dragging {
     content-visibility: hidden;
     content: '';
@@ -416,20 +432,22 @@ onBeforeUnmount(() => {
     // border: 0;
     box-shadow: none;
     background-color: var(--bg-brand);
+    cursor: grabbing;
     // > * {
     //   opacity: 0;
     // }
   }
 
   ul {
+    min-width: 400px;
     position: relative;
     z-index: 2;
     min-height: 80px;
+    // display: flex;
+    // flex-direction: column;
   }
 
   li {
-    // display: flex;
-    // flex-direction: row;
     position: relative;
     margin: 20px;
     // display: flex;
@@ -439,50 +457,87 @@ onBeforeUnmount(() => {
     background: var(--bg-primary);
     box-shadow: 1px 3px 5px 2px var(--border-light);
     box-sizing: border-box;
+
     &:hover {
       .opr {
         opacity: 1;
+      }
+      .handle {
+        opacity: 1;
+      }
+    }
+
+    .handle {
+      position: absolute;
+      top: 7px;
+      left: 0px;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      cursor: grab;
+      color: var(--text-secondary);
+
+      &:hover {
+        color: var(--c-text-primary);
+        cursor: grab;
+      }
+
+      &:active {
+        cursor: grabbing;
       }
     }
 
     .title {
       display: flex;
       flex-direction: row;
-      align-items: flex-start;
+      position: relative;
+      // justify-content: flex-start;
+      // align-items: flex-start;
+      // min-width: 100px;
     }
 
     .number {
       font-size: 16px;
       margin-top: 11px;
-      width: 80px;
+      width: 60px;
+      flex-grow: 0;
+      flex-shrink: 0;
       text-align: right;
+
       .required {
         color: red;
         margin-right: 4px;
         visibility: hidden;
       }
+
       .visible {
         visibility: visible;
       }
     }
+
     .text {
+      flex-grow: 1;
       padding-top: 2px;
       font-size: 16px;
       white-space: normal;
-      width: 100%;
+      // width: 100%;
+      // max-width: 400px;
       position: relative;
+
       :deep(.ProseMirror) {
         padding: 8px;
       }
+
       :deep(.editor) {
         border: 1px solid transparent;
         border-radius: 4px;
       }
+
       &:hover {
         :deep(.editor:not(:focus-within)) {
           border: 1px dashed var(--border-dark);
         }
       }
+
       &:focus-within {
         :deep(.editor) {
           // border: 1px dashed var(--border-dark);
@@ -492,12 +547,12 @@ onBeforeUnmount(() => {
     }
 
     .opr {
+      flex-shrink: 0;
+      flex-grow: 0;
       display: flex;
       opacity: 0;
       flex-direction: row;
-      align-items: center;
       cursor: pointer;
-      justify-content: flex-end;
       margin: 0 12px;
       padding: 8px 0;
       transition: opacity 0.15s ease;
@@ -506,6 +561,7 @@ onBeforeUnmount(() => {
         opacity: 0.5;
         margin-right: 8px;
         transition: opacity 0.15s ease;
+
         &:hover,
         &:active {
           opacity: 1;
@@ -514,6 +570,7 @@ onBeforeUnmount(() => {
     }
   }
 }
+
 .content {
   margin: 20px 20px 0px 50px;
 }
@@ -542,6 +599,7 @@ onBeforeUnmount(() => {
   background: var(--bg-primary);
   z-index: 1000;
   overflow: hidden;
+
   .close {
     position: absolute;
     top: 12px;
@@ -567,12 +625,15 @@ onBeforeUnmount(() => {
   background: var(--c-gray-300);
   border-radius: 5px 0 3px 0;
   cursor: pointer;
+
   &:hover:not(.enabled) {
     background: var(--c-gray-600);
   }
+
   &:hover.enabled {
     background: var(--c-brand-600);
   }
+
   &.enabled {
     background: var(--c-brand);
   }
@@ -593,6 +654,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   color: var(--c-white);
+
   &:hover {
     background: var(--bg-secondary);
     color: var(--c-brand);
@@ -606,8 +668,10 @@ onBeforeUnmount(() => {
     background: transparent;
     box-shadow: none;
   }
+
   .ant-modal-close {
     background: none;
+
     &:hover {
       background: none;
     }

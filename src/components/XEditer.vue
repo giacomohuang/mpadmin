@@ -1,21 +1,45 @@
 <template>
   <div>
-    <bubble-menu :editor="editor" :tippy-options="{ duration: 100 }" :should-show="shouldShow" v-if="editor" class="toolbar">
-      <button @click="editor.chain().focus().toggleBold().run()" :class="{ active: editor.isActive('bold') }"><icon name="bold" /></button>
-      <button @click="editor.chain().focus().toggleItalic().run()" :class="{ active: editor.isActive('italic') }"><icon name="italic" /></button>
-      <button @click="editor.chain().focus().toggleUnderline().run()" :class="{ active: editor.isActive('underline') }"><icon name="underline" /></button>
-      <button @click="editor.chain().focus().toggleStrike().run()" :class="{ active: editor.isActive('strike') }"><icon name="strike" /></button>
-      <button @click="editor.chain().focus().setTextAlign('left').run()" :class="{ active: editor.isActive({ textAlign: 'left' }) }"><icon name="align-left" /></button>
-      <button @click="editor.chain().focus().setTextAlign('center').run()" :class="{ active: editor.isActive({ textAlign: 'center' }) }"><icon name="align-center" /></button>
-      <button @click="editor.chain().focus().setTextAlign('right').run()" :class="{ active: editor.isActive({ textAlign: 'right' }) }"><icon name="align-right" /></button>
-      <button @click="showImageUpload = true" :class="{ active: editor.isActive('image') }"><icon name="image" /></button>
-      <button @click="setLink" :class="{ active: editor.isActive('link') }"><icon name="link" /></button>
+    <bubble-menu :editor="editor" :tippy-options="{ duration: 100 }" :should-show="shouldShow" v-if="editor"
+      class="toolbar">
+      <button @click="editor.chain().focus().toggleBold().run()" :class="{ active: editor.isActive('bold') }">
+        <icon name="bold" />
+      </button>
+      <button @click="editor.chain().focus().toggleItalic().run()" :class="{ active: editor.isActive('italic') }">
+        <icon name="italic" />
+      </button>
+      <button @click="editor.chain().focus().toggleUnderline().run()" :class="{ active: editor.isActive('underline') }">
+        <icon name="underline" />
+      </button>
+      <button @click="editor.chain().focus().toggleStrike().run()" :class="{ active: editor.isActive('strike') }">
+        <icon name="strike" />
+      </button>
+      <button @click="editor.chain().focus().setTextAlign('left').run()"
+        :class="{ active: editor.isActive({ textAlign: 'left' }) }">
+        <icon name="align-left" />
+      </button>
+      <button @click="editor.chain().focus().setTextAlign('center').run()"
+        :class="{ active: editor.isActive({ textAlign: 'center' }) }">
+        <icon name="align-center" />
+      </button>
+      <button @click="editor.chain().focus().setTextAlign('right').run()"
+        :class="{ active: editor.isActive({ textAlign: 'right' }) }">
+        <icon name="align-right" />
+      </button>
+      <button @click="showImageUpload = true" :class="{ active: editor.isActive('image') }">
+        <icon name="image" />
+      </button>
+      <button @click="setLink" :class="{ active: editor.isActive('link') }">
+        <icon name="link" />
+      </button>
     </bubble-menu>
     <editor-content :editor="editor" class="editor" />
 
     <!-- 图片上传对话框 -->
-    <a-modal :open="showImageUpload" title="上传图片" @ok="handleImageUploadOk" @cancel="handleImageUploadCancel" :destroyOnClose="true">
-      <Upload :type="['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']" :multiple="false" :max="1" @uploaded="handleImageUploaded"> 点击或拖拽图片到此处上传 </Upload>
+    <a-modal :open="showImageUpload" title="上传图片" @ok="handleImageUploadOk" @cancel="handleImageUploadCancel"
+      :destroyOnClose="true">
+      <Upload :type="['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']" :multiple="false" :max="1"
+        @uploaded="handleImageUploaded"> 点击或拖拽图片到此处上传 </Upload>
     </a-modal>
   </div>
 </template>
@@ -138,11 +162,13 @@ const setLink = () => {
   display: flex;
   list-style-type: none;
 }
+
 button {
   background: var(--bg-0);
   border-radius: 8px;
   border: 0px;
   padding: 0px;
+
   .iconfont {
     font-size: 1.6em;
     color: var(--text-primary);
@@ -157,6 +183,7 @@ button {
   &:hover,
   &:active {
     cursor: pointer;
+
     .icon {
       opacity: 1;
     }
@@ -187,11 +214,14 @@ button {
 // }
 
 /* Basic editor styles */
+
 .ProseMirror {
   p {
     line-height: 100%;
+    word-break: break-all;
   }
 }
+
 //   > * + * {
 //     margin-top: 0.75em;
 //   }
@@ -237,5 +267,4 @@ button {
 //     border-top: 2px solid rgba(#0d0d0d, 0.1);
 //     margin: 2rem 0;
 //   }
-// }
-</style>
+// }</style>

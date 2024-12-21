@@ -11,14 +11,25 @@ const cleanupScoreRanges = (qItems) => {
         return item.scoreRanges?.some((range) => range.id === conn.fromPortId)
       })
     }
+  })
+}
 
+const cleanupOptions = (qItems) => {
+  qItems.forEach((item) => {
+    if (item.options?.length > 0) {
+      item.logic.conditions = item.logic.conditions.filter((conn) => {
+        return item.options?.some((opt) => opt.id == conn.fromPortId)
+      })
+    }
   })
 }
 
 const cleanupConditions = (qItems) => {
   console.log('cleanupConditions')
-  qItems.forEach((item,index) => {
+  qItems.forEach((item, index) => {
     if (!item.logic || !item.logic.conditions) return
+    // 删除conditions中不存在的fromPortId
+
     // 删除conditions中不合理的连接, 只保留连接到更大索引题目的连接
     item.logic.conditions = item.logic.conditions.filter((conn) => {
       const targetIndex = qItems.findIndex((q) => q.id === conn.toLogicId)
@@ -27,4 +38,4 @@ const cleanupConditions = (qItems) => {
   })
 }
 
-export { cleanupScoreRanges, cleanupConditions }
+export { cleanupScoreRanges, cleanupConditions, cleanupOptions }

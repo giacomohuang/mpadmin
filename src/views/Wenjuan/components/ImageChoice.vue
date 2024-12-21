@@ -27,19 +27,17 @@
   </Teleport>
 </template>
 
-
 <router lang="json">
-  {
-    "isRouter": false
-  }
+{
+  "isRouter": false
+}
 </router>
-
 
 <script setup>
 import { inject, ref, onMounted, watch, computed, onBeforeMount } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { customAlphabet } from 'nanoid'
-
+import { cleanupOptions } from '../cleanup'
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6)
 const { qItemIndex } = defineProps(['qItemIndex'])
 
@@ -70,6 +68,7 @@ function removeOption(index) {
   }
   qItems.value[qItemIndex].options.splice(index, 1)
   currentOptionIndex.value = -1
+  cleanupOptions(qItems.value)
 }
 
 function clickOption(ev, index) {

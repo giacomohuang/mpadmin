@@ -61,17 +61,16 @@
 </template>
 
 <router lang="json">
-  {
-    "isRouter": false
-  }
+{
+  "isRouter": false
+}
 </router>
-
 
 <script setup>
 import { inject, ref, onMounted, watch, computed, onBeforeMount } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { customAlphabet } from 'nanoid'
-import { cleanupConditions } from '../cleanup'
+import { cleanupOptions } from '../cleanup'
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6)
 const { qItemIndex } = defineProps(['qItemIndex'])
@@ -118,7 +117,7 @@ function removeOption(index) {
     qItems.value[qItemIndex].maxRange = qItems.value[qItemIndex].options.length
   }
   currentOptionIndex.value = -1
-  cleanupConditions(qItems.value)
+  cleanupOptions(qItems.value)
 }
 
 function clickOption(ev, index) {

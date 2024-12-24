@@ -64,15 +64,16 @@
         </div>
       </div>
     </aside>
+
     <aside class="submenu" ref="submenuRef" data-simplebar :data-simplebar-direction="DIR" :class="{ hide: submenu?.length == 0 || (isFloat && isHideSubmenu), float: isFloat }" @mouseleave.stop="mouseLeaveSubmenu">
       <SubMenu :data="submenu" :isFloat="isFloat"></SubMenu>
     </aside>
 
     <div class="main-content">
       <a-spin :spinning="globalLoading" style="margin: 20px"></a-spin>
-      <router-view />
+      <router-view v-if="isRouterAlive" />
     </div>
-    <aside class="assist" id="__ASSIST" v-show="showAssist">
+    <aside class="assist" v-show="showAssist">
       <div class="assist-header"></div>
     </aside>
   </div>
@@ -89,10 +90,20 @@ import i18n, { LANGS } from '../js/i18n'
 import 'simplebar'
 import '@/assets/simplebar.css'
 
+const isRouterAlive = ref(true)
 const globalLoading = ref(false)
 const isHideSubmenu = ref(false)
 provide('globalLoading', globalLoading)
 provide('isHideSubmenu', isHideSubmenu)
+
+const reload = () => {
+  isRouterAlive.value = false
+  nextTick(() => {
+    isRouterAlive.value = true
+  })
+}
+provide('pageReload', reload)
+
 const store = useStore()
 const { accountname, accountid, realname } = toRefs(store)
 const router = useRouter()
@@ -232,9 +243,19 @@ const calcSubmenuTop = () => {
 // 获取当前菜单路径
 function getCurrentMenuPath() {
   const path = route.path
-  const item = menudata.find((item) => item.router === path)
+
+  const item = menudata.find((item) => getRootPath(path) == getRootPath(item.router))
   const fullpath = item?.path
   return fullpath ? fullpath.split('-').map(Number) : null
+}
+
+function getRootPath(path) {
+  try {
+    const match = path.match(/^\/[^/]+\//)
+    return match ? match[0] : '/'
+  } catch (e) {
+    return '/'
+  }
 }
 
 async function signout() {
@@ -294,7 +315,7 @@ function buildTree(items) {
   return tree
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   // 初始化当前活动菜单
   if (activeMenuIndex.value !== -1) {
     currentMenuIdx.value = activeMenuIndex.value
@@ -609,7 +630,7 @@ onUnmounted(() => {
 .main-content {
   position: relative;
   grid-area: main;
-  overflow: hidden;
+  overflow: auto;
   background-color: var(--bg-500);
 }
 </style>

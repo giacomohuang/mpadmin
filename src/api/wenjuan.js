@@ -20,6 +20,7 @@ const wenjuan = {
     })
   },
   update(data) {
+    console.log('update API', data)
     return fetch({
       baseURL: baseUrl.wenjuan,
       method: 'post',

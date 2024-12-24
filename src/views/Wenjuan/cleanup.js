@@ -16,8 +16,8 @@ const cleanupScoreRanges = (qItems) => {
 
 const cleanupOptions = (qItems) => {
   qItems.forEach((item) => {
-    if (item.options?.length > 0) {
-      item.logic.conditions = item.logic.conditions.filter((conn) => {
+    if (item.options?.length > 0 && item.logic?.conditions) {
+      item.logic.conditions = item.logic?.conditions?.filter((conn) => {
         return item.options?.some((opt) => opt.id == conn.fromPortId)
       })
     }
@@ -31,7 +31,7 @@ const cleanupConditions = (qItems) => {
     // 删除conditions中不存在的fromPortId
 
     // 删除conditions中不合理的连接, 只保留连接到更大索引题目的连接
-    item.logic.conditions = item.logic.conditions.filter((conn) => {
+    item.logic.conditions = item.logic?.conditions?.filter((conn) => {
       const targetIndex = qItems.findIndex((q) => q.id === conn.toLogicId)
       return targetIndex > index
     })

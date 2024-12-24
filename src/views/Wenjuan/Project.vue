@@ -1,5 +1,10 @@
 <template>
   <div class="project">
+    <div class="header">
+      <div class="left">
+        <div class="title">项目</div>
+      </div>
+    </div>
     <ul class="list">
       <li class="item" v-for="item in wenjuan" :key="item._id" @click="handleEdit(item._id)">
         <icon name="remove" class="ico-remove" @click.stop="handleRemove(item._id)" />
@@ -75,6 +80,17 @@ onMounted(() => {
   padding: 20px;
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.title {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
 .list {
   position: relative;
   display: flex;
@@ -121,10 +137,11 @@ onMounted(() => {
   top: -10px;
   right: -10px;
   background: var(--bg-primary);
-  border: 1px solid var(--c-gray-300);
+  border: 1px solid var(--c-brand);
   border-radius: 50%;
   padding: 3px;
   cursor: pointer;
+  color: var(--c-brand);
   &:hover {
     border-color: var(--c-red);
     color: var(--c-red);

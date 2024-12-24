@@ -100,10 +100,10 @@
 </template>
 
 <router lang="json">
-  {
-    "isRouter": false
-  }
-  </router>
+{
+  "isRouter": false
+}
+</router>
 
 <script setup>
 import { inject, ref, onBeforeMount, watch } from 'vue'

@@ -1,30 +1,24 @@
 <template>
+  <div class="header"><icon name="logic" size="1.2em" />逻辑编辑器</div>
   <div class="viewport" data-simplebar>
     <div class="canvas">
       <svg class="svg-container" ref="svgContainer">
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-            <polyline transform="translate(8, 1) rotate(45) " points="-2 2 4 2 4 8" stroke="#666" stroke-width="1"
-              fill="none" fill-rule="evenodd" stroke-linecap="round"></polyline>
+            <polyline transform="translate(8, 1) rotate(45) " points="-2 2 4 2 4 8" stroke="#666" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round"></polyline>
           </marker>
         </defs>
-        <g class="line-wrap" v-for="(line, index) in lines" :key="'line-' + index" @click.stop="handleLineRemove(index)"
-          :class="{ dragging: draggingLine }">
-          <path class="line" :d="generatePath(line)" marker-end="url(#arrow)"
-            :class="{ active: currentLogicIdx !== -1 && (line.from.id === logics[currentLogicIdx]?.id || line.to.id === logics[currentLogicIdx]?.id) }" />
+        <g class="line-wrap" v-for="(line, index) in lines" :key="'line-' + index" @click.stop="handleLineRemove(index)" :class="{ dragging: draggingLine }">
+          <path class="line" :d="generatePath(line)" marker-end="url(#arrow)" :class="{ active: currentLogicIdx !== -1 && (line.from.id === logics[currentLogicIdx]?.id || line.to.id === logics[currentLogicIdx]?.id) }" />
           <path class="line-h" :d="generatePath(line)" />
         </g>
-        <path v-if="tempLine" class="line" :d="generatePath(tempLine)" fill="none" stroke-width="2"
-          stroke-dasharray="5,5" />
+        <path v-if="tempLine" class="line" :d="generatePath(tempLine)" fill="none" stroke-width="2" stroke-dasharray="5,5" />
       </svg>
 
       <div class="logics">
-        <div class="logic" v-for="(item, index) in logics" :data-id="item.id" :key="item.id" draggable="true"
-          :style="{ left: item.logic.x + 'px', top: item.logic.y + 'px' }" @click.stop="setCurrentLogic($event, index)"
-          :class="{ current: currentLogicIdx === index }">
+        <div class="logic" v-for="(item, index) in logics" :data-id="item.id" :key="item.id" draggable="true" :style="{ left: item.logic.x + 'px', top: item.logic.y + 'px' }" @click.stop="setCurrentLogic($event, index)" :class="{ current: currentLogicIdx === index }">
           <div class="title">
-            <span class="title-text" :title="getPlainText(item.title)">{{ qItems.findIndex((itm) => itm.id === item.id)
-              + 1 }}. {{ getPlainText(item.title) }}</span>
+            <span class="title-text" :title="getPlainText(item.title)">{{ qItems.findIndex((itm) => itm.id === item.id) + 1 }}. {{ getPlainText(item.title) }}</span>
             <!-- <a-tag>x:{{ logic.x }}</a-tag> <a-tag>y:{{ logic.y }}</a-tag> -->
             <icon name="remove" size="1em" class="remove" @click.stop="removeLogic(item)" />
           </div>
@@ -32,41 +26,34 @@
           <div class="body">
             <div class="item action">
               <div class="name">跳转到本题</div>
-              <div class="port input" data-port-id="jump"
-                @mousedown.stop="handlePortDragStart($event, item.id, 'jump', 'input')"></div>
+              <div class="port input" data-port-id="jump" @mousedown.stop="handlePortDragStart($event, item.id, 'jump', 'input')"></div>
             </div>
             <div class="item action">
               <div class="name">显示本题</div>
-              <div class="port input" data-port-id="show"
-                @mousedown.stop="handlePortDragStart($event, item.id, 'show', 'input')"></div>
+              <div class="port input" data-port-id="show" @mousedown.stop="handlePortDragStart($event, item.id, 'show', 'input')"></div>
             </div>
             <div class="item action">
               <div class="name">隐藏本题</div>
-              <div class="port input" data-port-id="hide"
-                @mousedown.stop="handlePortDragStart($event, item.id, 'hide', 'input')"></div>
+              <div class="port input" data-port-id="hide" @mousedown.stop="handlePortDragStart($event, item.id, 'hide', 'input')"></div>
             </div>
             <div class="split-line"></div>
 
             <!------output--------->
             <div class="item condition">
               <div class="name">本题显示</div>
-              <div class="port output" data-port-id="show"
-                @mousedown.stop="handlePortDragStart($event, item.id, 'show', 'output')"></div>
+              <div class="port output" data-port-id="show" @mousedown.stop="handlePortDragStart($event, item.id, 'show', 'output')"></div>
             </div>
             <div class="item condition">
               <div class="name">本题隐藏</div>
-              <div class="port output" data-port-id="hide"
-                @mousedown.stop="handlePortDragStart($event, item.id, 'hide', 'output')"></div>
+              <div class="port output" data-port-id="hide" @mousedown.stop="handlePortDragStart($event, item.id, 'hide', 'output')"></div>
             </div>
             <div class="item condition">
               <div class="name">本题已答</div>
-              <div class="port output" data-port-id="answered"
-                @mousedown.stop="handlePortDragStart($event, item.id, 'answered', 'output')"></div>
+              <div class="port output" data-port-id="answered" @mousedown.stop="handlePortDragStart($event, item.id, 'answered', 'output')"></div>
             </div>
             <div class="item condition">
               <div class="name">本题未答</div>
-              <div class="port output" data-port-id="unanswered"
-                @mousedown.stop="handlePortDragStart($event, item.id, 'unanswered', 'output')"></div>
+              <div class="port output" data-port-id="unanswered" @mousedown.stop="handlePortDragStart($event, item.id, 'unanswered', 'output')"></div>
             </div>
             <div class="split-line"></div>
 
@@ -75,33 +62,27 @@
               <!-- 添加评分范围配置界面 -->
               <div v-for="range in item.scoreRanges" :key="range.id" class="item">
                 <div class="score-range-item">
-                  <a-input-number v-model:value="range.min" :min="item.minScore" :max="range.max" size="small"
-                    style="width: 60px" @change="(value) => handleRangeChange(item, range.id, 'min', value)" />
+                  <a-input-number v-model:value="range.min" :min="item.minScore" :max="range.max" size="small" style="width: 60px" @change="(value) => handleRangeChange(item, range.id, 'min', value)" />
                   <span class="score-range-separator">-</span>
-                  <a-input-number v-model:value="range.max" :min="range.min" :max="item.maxScore" size="small"
-                    style="width: 60px" @change="(value) => handleRangeChange(item.id, range.id, 'max', value)" />
+                  <a-input-number v-model:value="range.max" :min="range.min" :max="item.maxScore" size="small" style="width: 60px" @change="(value) => handleRangeChange(item.id, range.id, 'max', value)" />
                   <span class="score-range-separator">分</span>
                   <icon name="remove" size="1em" class="remove-range" @click="removeScoreRange(item, range.id)" />
                 </div>
-                <div class="port output" :data-port-id="range.id"
-                  @mousedown.stop="handlePortDragStart($event, item.id, range.id, 'output')"></div>
+                <div class="port output" :data-port-id="range.id" @mousedown.stop="handlePortDragStart($event, item.id, range.id, 'output')"></div>
               </div>
 
-              <a-button style="margin: 8px 0" type="link" size="small" block @click.stop="addScoreRange(item)"
-                :disabled="!canAddRange(item)">添加评分范围</a-button>
+              <a-button style="margin: 8px 0" type="link" size="small" block @click.stop="addScoreRange(item)" :disabled="!canAddRange(item)">添加评分范围</a-button>
             </template>
 
             <!-- 单选、多选、图片单选 -->
             <template v-if="['SingleChoice', 'MultiChoice', 'ImageChoice'].includes(item.type)">
               <div v-for="option in item.options" :key="option.id" class="item condition">
                 <div class="name">
-                  <a-tag v-if="option.select == false" color="red"
-                    @click.stop="toggleOptionSelection(option)">未选</a-tag>
+                  <a-tag v-if="option.select == false" color="red" @click.stop="toggleOptionSelection(option)">未选</a-tag>
                   <a-tag v-else color="blue" @click.stop="toggleOptionSelection(option)">选择</a-tag>
                   <span class="option-text" :title="getPlainText(option.text)">{{ getPlainText(option.text) }}</span>
                 </div>
-                <div class="port output" :data-port-id="option.id"
-                  @mousedown.stop="handlePortDragStart($event, item.id, option.id, 'output')"></div>
+                <div class="port output" :data-port-id="option.id" @mousedown.stop="handlePortDragStart($event, item.id, option.id, 'output')"></div>
               </div>
             </template>
           </div>
@@ -109,10 +90,8 @@
       </div>
       <svg class="guide-line-container">
         <g>
-          <line v-for="(line, index) in guideLines.x" :key="'x-' + index" class="guide-line vertical"
-            :x1="line.position" :y1="line.start" :x2="line.position" :y2="line.end" />
-          <line v-for="(line, index) in guideLines.y" :key="'y-' + index" class="guide-line horizontal" :x1="line.start"
-            :y1="line.position" :x2="line.end" :y2="line.position" />
+          <line v-for="(line, index) in guideLines.x" :key="'x-' + index" class="guide-line vertical" :x1="line.position" :y1="line.start" :x2="line.position" :y2="line.end" />
+          <line v-for="(line, index) in guideLines.y" :key="'y-' + index" class="guide-line horizontal" :x1="line.start" :y1="line.position" :x2="line.end" :y2="line.position" />
         </g>
       </svg>
     </div>
@@ -121,24 +100,20 @@
   <div class="minimap-canvas">
     <div class="minimap-content">
       <div class="mini-logics">
-        <div class="mini-logic" v-for="item in logics" :key="item.id"
-          :style="{ left: item.logic.x + 'px', top: item.logic.y + 'px' }"></div>
+        <div class="mini-logic" v-for="item in logics" :key="item.id" :style="{ left: item.logic.x + 'px', top: item.logic.y + 'px' }"></div>
       </div>
     </div>
     <div class="mini-viewport"></div>
   </div>
 
   <div class="questions" data-simplebar>
-    <div class="question" v-for="(item, index) in qItems" :class="{ disabled: item._canDrag === false }" :key="item.id"
-      :draggable="item._canDrag !== false" @dragstart="handleQuestionDragStart($event, item)">{{ index + 1 }}. {{
-        getPlainText(item.title) }}</div>
+    <div class="question" v-for="(item, index) in qItems" :class="{ disabled: item._canDrag === false }" :key="item.id" :draggable="item._canDrag !== false" @dragstart="handleQuestionDragStart($event, item)">{{ index + 1 }}. {{ getPlainText(item.title) }}</div>
   </div>
-  <div
-    style="border: 1px solid #ccc; padding: 10px; background-color: #fff; border-radius: 10px; height: 80%; width: 400px; position: absolute; right: 40px; top: 20px; z-index: 1000; overflow: auto">
+  <!-- <div style="border: 1px solid #ccc; padding: 10px; background-color: #fff; border-radius: 10px; height: 80%; width: 400px; position: absolute; right: 40px; top: 20px; z-index: 1000; overflow: auto">
     {{ currentLogicIdx }}
     <pre><code>{{ JSON.stringify(qItems, null, 2) }}</code></pre>
     <pre><code>{{ JSON.stringify(qItems, null, 2) }}</code></pre>
-  </div>
+  </div> -->
 </template>
 
 <script setup>
@@ -1068,6 +1043,23 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+.header {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  z-index: 1000;
+  width: 100%;
+  gap: 4px;
+  text-align: center;
+  font-size: 1.2em;
+  background-image: radial-gradient(transparent 1px, var(--bg-secondary) 1px);
+  background-size: 4px 4px;
+  backdrop-filter: saturate(50%) blur(4px);
+  border-bottom: 1px solid var(--border-medium);
+}
+
 .viewport {
   padding: 0;
   margin: 0;
@@ -1089,6 +1081,7 @@ onUnmounted(() => {
   width: fit-content;
   height: fit-content;
   margin: auto;
+  // margin-left: 200px;
   transform-origin: center center;
   background-image: radial-gradient(circle, var(--border-dark) 0.5px, transparent 0.5px);
   background-size: 15px 15px;
@@ -1102,7 +1095,7 @@ onUnmounted(() => {
   position: absolute;
   left: 0;
   top: 0;
-  width: 200px;
+  width: 250px;
   background: white;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -1361,15 +1354,19 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 4px;
   position: absolute;
-  top: 20px;
-  left: 20px;
-  max-height: 50%;
+  top: 44px;
+  left: 0;
+  // max-height: 50%;
+  height: calc(100% - 44px);
   width: 200px;
-  border: 1px solid var(--border-medium);
-  border-radius: 4px;
-  background: var(--bg-primary);
+  border-right: 1px solid var(--border-medium);
+  // border-radius: 4px;
+  background-image: radial-gradient(transparent 1px, var(--bg-secondary) 1px);
+  background-size: 4px 4px;
+  backdrop-filter: saturate(50%) blur(4px);
   user-select: none;
   box-shadow: 1px 1px 2px 2px var(--border-light);
+
   // padding: 8px;
 
   .question {
@@ -1380,7 +1377,7 @@ onUnmounted(() => {
     text-wrap: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    background: var(--bg-secondary);
+    // background: var(--bg-secondary);
 
     &:hover:not(&.disabled) {
       cursor: grab;
@@ -1401,7 +1398,7 @@ onUnmounted(() => {
 .minimap-canvas {
   position: absolute;
   bottom: 20px;
-  left: 20px;
+  left: 220px;
   width: 200px;
   height: 150px;
   border: 1px solid var(--border-medium);

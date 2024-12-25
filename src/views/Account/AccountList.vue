@@ -3,36 +3,36 @@
     <a-table
       :scroll="{ x: 1200 }"
       :columns="[
-        { title: $t('account.accountlist.accountname'), dataIndex: 'accountname', key: 'accountname', fixed: 'left' },
-        { title: $t('account.accountlist.realname'), dataIndex: 'realname', key: 'realname', fixed: 'left' },
-        { title: $t('account.accountlist.email'), dataIndex: 'email', key: 'email' },
-        { title: $t('account.accountlist.phone'), dataIndex: 'phone', key: 'phone' },
+        { title: t('account.accountlist.accountname'), dataIndex: 'accountname', key: 'accountname', fixed: 'left' },
+        { title: t('account.accountlist.realname'), dataIndex: 'realname', key: 'realname', fixed: 'left' },
+        { title: t('account.accountlist.email'), dataIndex: 'email', key: 'email' },
+        { title: t('account.accountlist.phone'), dataIndex: 'phone', key: 'phone' },
         {
-          title: $t('account.accountlist.2fa'),
+          title: t('account.accountlist.2fa'),
           dataIndex: 'enable2FA',
           key: 'enable2FA',
           align: 'center',
           filters: [
-            { text: $t('common.enabled'), value: true },
-            { text: $t('common.disabled'), value: false }
+            { text: t('common.enabled'), value: true },
+            { text: t('common.disabled'), value: false }
           ],
           filterMultiple: false
         },
 
         {
-          title: $t('common.status'),
+          title: t('common.status'),
           dataIndex: 'status',
           key: 'status',
           align: 'center',
           defaultFilteredValue: defaultFilters['status'],
           filters: [
-            { text: $t('common.enabled'), value: 1 },
-            { text: $t('common.disabled'), value: 0 }
+            { text: t('common.enabled'), value: 1 },
+            { text: t('common.disabled'), value: 0 }
           ],
           filterMultiple: false,
           width: 80
         },
-        { title: $t('common.action'), key: 'action', width: 128, align: 'center', fixed: 'right' }
+        { title: t('common.action'), key: 'action', width: 128, align: 'center', fixed: 'right' }
       ]"
       :dataSource="accounts"
       :pagination="pagination"
@@ -48,12 +48,12 @@
           <a-tag :color="record.enable2FA ? 'green' : 'red'">{{ record.enable2FA ? '已开启' : '未开启' }}</a-tag>
         </template>
         <template v-else-if="column.key === 'action'">
-          <a @click="handleEdit(record._id)" href="####">{{ $t('common.edit') }}</a>
+          <a @click="handleEdit(record._id)" href="####">{{ t('common.edit') }}</a>
           <a-divider type="vertical" />
-          <a href="####">{{ $t('common.disable') }}</a>
+          <a href="####">{{ t('common.disable') }}</a>
         </template>
         <template v-else-if="column.key === 'status'">
-          <a-tag :color="record.status ? 'green' : 'red'">{{ record.status ? $t('common.enabled') : $t('common.disabled') }}</a-tag>
+          <a-tag :color="record.status ? 'green' : 'red'">{{ record.status ? t('common.enabled') : t('common.disabled') }}</a-tag>
         </template>
       </template>
     </a-table>

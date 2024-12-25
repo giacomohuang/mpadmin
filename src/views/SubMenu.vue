@@ -2,13 +2,13 @@
   <RouterLink custom :to="item.router" v-slot="{ isActive }" v-for="(item, index) in data" :key="index">
     <template v-if="item.children.length > 0">
       <div @click.stop="toggle_children" class="wrapper">
-        <div class="item"><span class="arrow"></span> {{ $t(item.name) }}</div>
+        <div class="item"><span class="arrow"></span> {{ t(item.name) }}</div>
         <div class="children">
           <SubMenu :data="item.children" :isFloat="isFloat"></SubMenu>
         </div>
       </div>
     </template>
-    <div v-else :class="['item', { active: isActive }]" @click.stop="clickMenuItem(item)"><span class="dot"></span>{{ $t(item.name) }}</div>
+    <div v-else :class="['item', { active: isActive }]" @click.stop="clickMenuItem(item)"><span class="dot"></span>{{ t(item.name) }}</div>
   </RouterLink>
 </template>
 
@@ -18,6 +18,8 @@ const { data, isFloat } = defineProps(['data', 'isFloat'])
 const isHideSubmenu = inject('isHideSubmenu')
 import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 function toggle_children(ev) {
   const dom = ev.currentTarget

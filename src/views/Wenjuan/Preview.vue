@@ -13,12 +13,12 @@
       <div class="preview-container" data-simplebar>
         <!-- 问卷标题 -->
         <div class="header">
-          <div class="title">{{ qName }}</div>
+          <div class="title">{{ Q.name }}</div>
         </div>
 
         <!-- 问卷题目列表 -->
         <div class="main">
-          <div v-for="(item, index) in qItems" :key="item.id" class="q-item">
+          <div v-for="(item, index) in Q.data" :key="item.id" class="q-item">
             <!-- 题目标题 -->
             <div class="title">
               <span class="required" v-if="item.required">*</span>
@@ -125,8 +125,7 @@ import Icon from '@/components/Icon.vue'
 import 'simplebar'
 import '@/assets/simplebar.css'
 
-const qItems = inject('qItems')
-const qName = inject('qName')
+const Q = inject('Q')
 const answers = ref({})
 const submitting = ref(false)
 const currentTime = ref('')
@@ -135,7 +134,7 @@ const OSS_PREFIX = import.meta.env.VITE_UPLOAD_URL_PREFIX
 // 提交答案
 async function submit() {
   // 验证必答题是否已答
-  for (const item of qItems.value) {
+  for (const item of Q.data) {
     if (item.required && !answers.value[item.id]) {
       console.log('第', item.index + 1, '题为必答题')
       message.warning(`第${item.index + 1}题为必答题`)

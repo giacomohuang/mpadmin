@@ -1,6 +1,6 @@
 <template>
-  <VueDraggable v-model="qItems[qItemIndex].options" tag="ul" handle=".q-handle" class="options" ghostClass="ghost-opt">
-    <li v-for="(item, index) in qItems[qItemIndex].options" :id="item.id" :key="item.id" class="item" @click.stop="clickOption($event, index)">
+  <VueDraggable v-model="Q.data[qItemIndex].options" tag="ul" handle=".q-handle" class="options" ghostClass="ghost-opt">
+    <li v-for="(item, index) in Q.data[qItemIndex].options" :id="item.id" :key="item.id" class="item" @click="clickOption($event, index)">
       <icon name="handle" class="q-handle" />
       <span class="checkbox"></span>
       <XEditer class="text" :class="{ fillbox: item.fill?.show }" v-model="item.text" :autofocus="index == autoFocusIndex ? true : false"></XEditer>
@@ -19,18 +19,18 @@
       <a-tab-pane key="item" tab="题目设置">
         <div class="prop-item">
           <h4>本题必答</h4>
-          <a-switch v-model:checked="qItems[qItemIndex].required" size="small" />
+          <a-switch v-model:checked="Q.data[qItemIndex].required" size="small" />
         </div>
         <div class="prop-item">
           <h4>可选范围</h4>
           <div style="display: flex; flex-direction: row; align-items: center">
             <div style="margin-right: 4px">最少</div>
-            <a-select v-model:value="qItems[qItemIndex].minRange" placeholder="请选择" size="small" style="width: 70px" @change="fixMaxRange">
+            <a-select v-model:value="Q.data[qItemIndex].minRange" placeholder="请选择" size="small" style="width: 70px" @change="fixMaxRange">
               <a-select-option :value="0">不限</a-select-option>
-              <a-select-option v-for="i in qItems[qItemIndex].options.length" :key="i" :value="i"> {{ i }}项 </a-select-option>
+              <a-select-option v-for="i in Q.data[qItemIndex].options.length" :key="i" :value="i"> {{ i }}项 </a-select-option>
             </a-select>
             <div style="margin: 0 4px 0 12px">最多</div>
-            <a-select v-model:value="qItems[qItemIndex].maxRange" placeholder="请选择" size="small" style="width: 70px">
+            <a-select v-model:value="Q.data[qItemIndex].maxRange" placeholder="请选择" size="small" style="width: 70px">
               <a-select-option :value="0">不限</a-select-option>
               <a-select-option v-for="i in maxRangeArray" :key="i" :value="i"> {{ i }}项 </a-select-option>
             </a-select>
@@ -41,17 +41,17 @@
       <a-tab-pane v-if="currentOptionIndex >= 0" :key="'option'" :tab="'第' + (currentOptionIndex + 1) + '项设置'">
         <div class="prop-item">
           <h4>在选项后添加填空</h4>
-          <a-switch v-model:checked="qItems[qItemIndex].options[currentOptionIndex].fill.show" size="small" @change="handleFillChange" />
+          <a-switch v-model:checked="Q.data[qItemIndex].options[currentOptionIndex].fill.show" size="small" @change="handleFillChange" />
         </div>
-        <div class="prop-item" v-if="qItems[qItemIndex].options[currentOptionIndex].fill.show">
+        <div class="prop-item" v-if="Q.data[qItemIndex].options[currentOptionIndex].fill.show">
           <h4>填空必答</h4>
-          <a-switch v-model:checked="qItems[qItemIndex].options[currentOptionIndex].fill.required" size="small" />
+          <a-switch v-model:checked="Q.data[qItemIndex].options[currentOptionIndex].fill.required" size="small" />
         </div>
-        <div class="prop-item" v-if="qItems[qItemIndex].options[currentOptionIndex].fill.show">
+        <div class="prop-item" v-if="Q.data[qItemIndex].options[currentOptionIndex].fill.show">
           <h4>
             填空长度限制<a-tooltip title="为空或填0时，不限字数" placement="top"><icon name="help" class="help" /></a-tooltip>
           </h4>
-          <a-input-number v-model:value="qItems[qItemIndex].options[currentOptionIndex].fill.length" min="0" max="500" style="width: 100px" size="small">
+          <a-input-number v-model:value="Q.data[qItemIndex].options[currentOptionIndex].fill.length" min="0" max="500" style="width: 100px" size="small">
             <template #addonAfter>字符</template>
           </a-input-number>
         </div>
@@ -74,7 +74,7 @@ import { cleanupOptions } from '../cleanup'
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6)
 const { qItemIndex } = defineProps(['qItemIndex'])
-const qItems = inject('qItems')
+const Q = inject('Q')
 const currentItemIndex = inject('currentItemIndex')
 const currentOptionIndex = ref(-1)
 // const hoveredOptionIndex = ref(-1)
@@ -83,7 +83,7 @@ const tabName = ref('')
 
 const maxRangeArray = computed(() => {
   var arr = []
-  for (let i = qItems.value[qItemIndex].minRange; i <= qItems.value[qItemIndex].options.length; i++) {
+  for (let i = Q.data[qItemIndex].minRange; i <= Q.data[qItemIndex].options.length; i++) {
     if (i) arr.push(i)
   }
   return arr
@@ -95,29 +95,29 @@ watch(currentOptionIndex, () => {
 })
 
 function addOption() {
-  qItems.value[qItemIndex].options.push({
-    text: '选项' + (qItems.value[qItemIndex].options.length + 1),
+  Q.data[qItemIndex].options.push({
+    text: '选项' + (Q.data[qItemIndex].options.length + 1),
     id: nanoid(),
     fill: { show: false }
   })
-  currentOptionIndex.value = qItems.value[qItemIndex].options.length - 1
+  currentOptionIndex.value = Q.data[qItemIndex].options.length - 1
   autoFocusIndex.value = currentOptionIndex.value
 }
 
 function removeOption(index) {
-  if (qItems.value[qItemIndex].options.length <= 1) {
-    qItems.value[qItemIndex].options[0].text = ''
+  if (Q.data[qItemIndex].options.length <= 1) {
+    Q.data[qItemIndex].options[0].text = ''
     return
   }
-  qItems.value[qItemIndex].options.splice(index, 1)
-  if (qItems.value[qItemIndex].minRange > qItems.value[qItemIndex].options.length) {
-    qItems.value[qItemIndex].minRange = qItems.value[qItemIndex].options.length
+  Q.data[qItemIndex].options.splice(index, 1)
+  if (Q.data[qItemIndex].minRange > Q.data[qItemIndex].options.length) {
+    Q.data[qItemIndex].minRange = Q.data[qItemIndex].options.length
   }
-  if (qItems.value[qItemIndex].maxRange > qItems.value[qItemIndex].minRange) {
-    qItems.value[qItemIndex].maxRange = qItems.value[qItemIndex].options.length
+  if (Q.data[qItemIndex].maxRange > Q.data[qItemIndex].minRange) {
+    Q.data[qItemIndex].maxRange = Q.data[qItemIndex].options.length
   }
   currentOptionIndex.value = -1
-  cleanupOptions(qItems.value)
+  cleanupOptions(Q.data)
 }
 
 function clickOption(ev, index) {
@@ -127,11 +127,12 @@ function clickOption(ev, index) {
   document.addEventListener('mouseup', clickOutSide)
 
   function clickOutSide(event) {
-    event.stopPropagation()
     const targetEl = event.target
     const settingsWrapBox = document.getElementById('__WENJUAN_SETTINGS').getBoundingClientRect()
     const inside = event.clientX > settingsWrapBox.left && event.clientX < settingsWrapBox.right && event.clientY > settingsWrapBox.top && event.clientY < settingsWrapBox.bottom
+
     if (inside || el.contains(targetEl)) {
+      console.log('inside', inside)
       return
     } else {
       callback(el)
@@ -139,6 +140,7 @@ function clickOption(ev, index) {
   }
 
   function callback(element) {
+    console.log('callback', element)
     element.classList.remove('focus')
     document.removeEventListener('mouseup', clickOutSide)
     currentOptionIndex.value = -1
@@ -155,21 +157,22 @@ function setTab() {
 }
 
 onBeforeMount(() => {
-  qItems.value[qItemIndex].minRange = qItems.value[qItemIndex].minRange || 0
-  qItems.value[qItemIndex].maxRange = qItems.value[qItemIndex].maxRange || 0
-  if (!qItems.value[qItemIndex].options) {
-    qItems.value[qItemIndex].options = [{ text: '选项1', id: nanoid() }]
+  // console.log('qItems', Q.data)
+  // Q.data[qItemIndex].minRange = Q.data[qItemIndex].minRange || 0
+  // Q.data[qItemIndex].maxRange = Q.data[qItemIndex].maxRange || 0
+  if (!Q.data[qItemIndex].options) {
+    Q.data[qItemIndex].options = [{ text: '选项1', id: nanoid(), fill: { show: false, length: null, type: 'text', required: false } }]
   }
-  qItems.value[qItemIndex].options.forEach((option) => {
-    if (!option.fill) {
-      option.fill = {
-        show: false,
-        length: null,
-        type: 'text',
-        required: false
-      }
-    }
-  })
+  // qItems[qItemIndex].options.forEach((option) => {
+  //   if (!option.fill) {
+  //     option.fill = {
+  //       show: false,
+  //       length: null,
+  //       type: 'text',
+  //       required: false
+  //     }
+  //   }
+  // })
   setTab()
 })
 
@@ -180,16 +183,16 @@ onMounted(() => {})
 
 // 可选范围-根据最小值的选择修正最大值
 function fixMaxRange() {
-  if (qItems.value[qItemIndex].maxRange < qItems.value[qItemIndex].minRange && qItems.value[qItemIndex].maxRange != 0) {
-    qItems.value[qItemIndex].maxRange = qItems.value[qItemIndex].minRange
+  if (Q.data[qItemIndex].maxRange < Q.data[qItemIndex].minRange && Q.data[qItemIndex].maxRange != 0) {
+    Q.data[qItemIndex].maxRange = Q.data[qItemIndex].minRange
   }
 }
 
 function handleFillChange(checked) {
   if (!checked) {
-    qItems.value[qItemIndex].options[currentOptionIndex.value].fill.length = null
-    qItems.value[qItemIndex].options[currentOptionIndex.value].fill.type = 'text'
-    qItems.value[qItemIndex].options[currentOptionIndex.value].fill.required = false
+    Q.data[qItemIndex].options[currentOptionIndex.value].fill.length = null
+    Q.data[qItemIndex].options[currentOptionIndex.value].fill.type = 'text'
+    Q.data[qItemIndex].options[currentOptionIndex.value].fill.required = false
   }
 }
 </script>

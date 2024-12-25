@@ -1,16 +1,16 @@
 <template>
   <div class="options">
     <a-select v-model:value="resourceType" style="width: 100px">
-      <a-select-option value="0">{{ $t('sys.permission.resource.all') }}</a-select-option>
-      <a-select-option value="1">{{ $t('sys.permission.resource.pagesOnly') }}</a-select-option>
-      <a-select-option value="2">{{ $t('sys.permission.resource.pagesAndFunctions') }}</a-select-option>
-      <a-select-option value="3">{{ $t('sys.permission.resource.pagesAndData') }}</a-select-option>
+      <a-select-option value="0">{{ t('sys.permission.resource.all') }}</a-select-option>
+      <a-select-option value="1">{{ t('sys.permission.resource.pagesOnly') }}</a-select-option>
+      <a-select-option value="2">{{ t('sys.permission.resource.pagesAndFunctions') }}</a-select-option>
+      <a-select-option value="3">{{ t('sys.permission.resource.pagesAndData') }}</a-select-option>
     </a-select>
     <div class="search">
       <icon name="search"></icon>
-      <input class="inputbox" :placeholder="$t('sys.permission.resource.searchKeywords')" v-model="keywords" />
+      <input class="inputbox" :placeholder="t('sys.permission.resource.searchKeywords')" v-model="keywords" />
     </div>
-    <a-checkbox v-model:checked="settings.isRecursive">{{ $t('sys.permission.resource.autoSelectChildren') }}</a-checkbox>
+    <a-checkbox v-model:checked="settings.isRecursive">{{ t('sys.permission.resource.autoSelectChildren') }}</a-checkbox>
   </div>
 
   <div class="list" style="max-height: calc(100vh - 400px)">
@@ -23,8 +23,8 @@
     </div>
     <div class="items-outline">
       <div v-if="keywords && !resourceTree.children" class="hint">
-        {{ $t('sys.permission.resource.noMatchingData') }}
-        <a href="####" @click="keywords = ''">{{ $t('sys.permission.resource.clearSearchKeywords') }}</a>
+        {{ t('sys.permission.resource.noMatchingData') }}
+        <a href="####" @click="keywords = ''">{{ t('sys.permission.resource.clearSearchKeywords') }}</a>
       </div>
       <div ref="listRef">
         <ResourceSelectorList :data="resourceTree.children" pidEnabled="true" @toggleCollapse="toggleCollapse" @toggleSelect="toggleSelect" v-if="resourceTree" />

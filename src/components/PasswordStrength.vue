@@ -7,7 +7,7 @@
       <li :class="{ s3: value == 3 }"></li>
       <li :class="{ s4: value == 4 }"></li>
     </ul>
-    <label>{{ $t(strength[value]) }}</label>
+    <label>{{ t(strength[value]) }}</label>
   </div>
 </template>
 <script setup>

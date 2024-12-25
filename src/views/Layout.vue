@@ -4,10 +4,10 @@
       <div class="logo-container">
         <a @click="router.push('/')" class="logo-link">
           <img src="@/assets/logo.svg" vvv class="logo-image" />
-          <div class="app-name">{{ $t('common.appname') }}</div>
+          <div class="app-name">{{ t('common.appname') }}</div>
         </a>
       </div>
-      <div class="page-title">{{ $t($route.meta.title) }}</div>
+      <div class="page-title">{{ t($route.meta.title) }}</div>
       <div class="user-dropdown">
         <a-dropdown>
           <a @click.prevent class="user-info">
@@ -22,10 +22,10 @@
           <template #overlay>
             <a-menu>
               <a-menu-item>
-                <a @click="router.push('/my/profile')">{{ $t('my.profile._title') }}</a>
+                <a @click="router.push('/my/profile')">{{ t('my.profile._title') }}</a>
               </a-menu-item>
               <a-menu-item>
-                <a @click="signout">{{ $t('signout._title') }}</a>
+                <a @click="signout">{{ t('signout._title') }}</a>
               </a-menu-item>
             </a-menu>
           </template>
@@ -59,7 +59,7 @@
         <div class="wrapper" @click.stop="clickMenuItem(item, index)" @mouseenter.stop="mouseOverMenuItem(item, index)" @mouseleave.stop="mouseLeaveMenuItem">
           <div :class="['item', { active: isActiveMenu(item) }]">
             <div class="icon"><Icon :name="item.icon || 'func'" :key="item.icon"></Icon></div>
-            <span class="text">{{ $t(item.name) }}</span>
+            <span class="text">{{ t(item.name) }}</span>
           </div>
         </div>
       </div>
@@ -87,9 +87,11 @@ import helper from '../js/helper'
 import API from '../api/API'
 import { useRouter, useRoute } from 'vue-router'
 import i18n, { LANGS } from '../js/i18n'
+import { useI18n } from 'vue-i18n'
 import 'simplebar'
 import '@/assets/simplebar.css'
 
+const { t } = useI18n()
 const isRouterAlive = ref(true)
 const globalLoading = ref(false)
 const isHideSubmenu = ref(false)

@@ -18,7 +18,7 @@
       <div class="logics">
         <div class="logic" v-for="(item, index) in logics" :data-id="item.id" :key="item.id" draggable="true" :style="{ left: item.logic.x + 'px', top: item.logic.y + 'px' }" @click.stop="setCurrentLogic($event, index)" :class="{ current: currentLogicIdx === index }">
           <div class="title">
-            <span class="title-text" :title="getPlainText(item.title)">{{ qItems.findIndex((itm) => itm.id === item.id) + 1 }}. {{ getPlainText(item.title) }}</span>
+            <span class="title-text" :title="getPlainText(item.title)">{{ Q.data.findIndex((itm) => itm.id === item.id) + 1 }}. {{ getPlainText(item.title) }}</span>
             <!-- <a-tag>x:{{ logic.x }}</a-tag> <a-tag>y:{{ logic.y }}</a-tag> -->
             <icon name="remove" size="1em" class="remove" @click.stop="removeLogic(item)" />
           </div>
@@ -107,7 +107,7 @@
   </div>
 
   <div class="questions" data-simplebar>
-    <div class="question" v-for="(item, index) in qItems" :class="{ disabled: item._canDrag === false }" :key="item.id" :draggable="item._canDrag !== false" @dragstart="handleQuestionDragStart($event, item)">{{ index + 1 }}. {{ getPlainText(item.title) }}</div>
+    <div class="question" v-for="(item, index) in Q.data" :class="{ disabled: item._canDrag === false }" :key="item.id" :draggable="item._canDrag !== false" @dragstart="handleQuestionDragStart($event, item)">{{ index + 1 }}. {{ getPlainText(item.title) }}</div>
   </div>
   <!-- <div style="border: 1px solid #ccc; padding: 10px; background-color: #fff; border-radius: 10px; height: 80%; width: 400px; position: absolute; right: 40px; top: 20px; z-index: 1000; overflow: auto">
     {{ currentLogicIdx }}
@@ -131,8 +131,8 @@ const lines = ref([])
 const tempLine = ref(null)
 const draggingLine = ref(false)
 // const conditionModal = ref(false)
-const qItems = inject('qItems')
-const logics = computed(() => qItems.value.filter((item) => item.logic))
+const Q = inject('Q')
+const logics = computed(() => Q.data.filter((item) => item.logic))
 
 let dragInstance
 let isDragging = false
@@ -252,8 +252,8 @@ const isValidCondition = (fromPort, toPort) => {
     return line.from.id === outputPort.id && line.from.portId === outputPort.portId && line.to.id === inputPort.id && line.to.portId === inputPort.portId
   })
 
-  const fromIndex = qItems.value.findIndex((item) => item.id === fromPort.id)
-  const toIndex = qItems.value.findIndex((item) => item.id === toPort.id)
+  const fromIndex = Q.data.findIndex((item) => item.id === fromPort.id)
+  const toIndex = Q.data.findIndex((item) => item.id === toPort.id)
 
   // 如果是output到input的连接,检查索引关系
   if (fromPort.type === 'output' && toPort.type === 'input') {
@@ -478,7 +478,7 @@ const handleLogicDrag = (event) => {
     guideLines.value = newGuideLines
 
     // 更新节点位置
-    const logic = qItems.value.find((n) => n.id === id).logic
+    const logic = Q.data.find((n) => n.id === id).logic
     if (logic) {
       logic.x = newX
       logic.y = newY

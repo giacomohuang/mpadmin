@@ -1,13 +1,13 @@
 <template>
-  <VueDraggable v-model="qItems[qItemIndex].options" tag="ul" class="options" ghostClass="ghost-opt">
-    <li v-for="(item, index) in qItems[qItemIndex].options" :id="item.id" :key="item.id" class="item" @click.stop="clickOption($event, index)">
+  <VueDraggable v-model="Q.data[qItemIndex].options" tag="ul" class="options" ghostClass="ghost-opt">
+    <li v-for="(item, index) in Q.data[qItemIndex].options" :id="item.id" :key="item.id" class="item" @click.stop="clickOption($event, index)">
       <div class="image-container">
         <ImgUpload v-model="item.imageUrl" width="150px" height="180px" />
       </div>
       <XEditer class="text" :class="{ fillbox: item.fill?.show }" v-model="item.text"></XEditer>
       <icon name="del" class="remove" size="1.5em" title="删除" @click.stop="removeOption(index)" />
     </li>
-    <div v-if="qItems[qItemIndex].options.length < 10" @click.stop="addOption" class="add-option" disabled="false" :draggable="false">
+    <div v-if="Q.data[qItemIndex].options.length < 10" @click.stop="addOption" class="add-option" disabled="false" :draggable="false">
       <div class="btn"><icon name="plus" />添加选项</div>
     </div>
   </VueDraggable>
@@ -20,7 +20,7 @@
       <a-tab-pane key="item" tab="题目设置">
         <div class="prop-item">
           <h4>本题必答</h4>
-          <a-switch v-model:checked="qItems[qItemIndex].required" size="small" />
+          <a-switch v-model:checked="Q.data[qItemIndex].required" size="small" />
         </div>
       </a-tab-pane>
     </a-tabs>
@@ -41,7 +41,7 @@ import { cleanupOptions } from '../cleanup'
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6)
 const { qItemIndex } = defineProps(['qItemIndex'])
 
-const qItems = inject('qItems')
+const Q = inject('Q')
 const currentItemIndex = inject('currentItemIndex')
 const currentOptionIndex = ref(-1)
 // const hoveredOptionIndex = ref(-1)
@@ -53,22 +53,22 @@ watch(currentOptionIndex, () => {
 })
 
 function addOption() {
-  qItems.value[qItemIndex].options.push({
-    text: '选项' + (qItems.value[qItemIndex].options.length + 1),
+  Q.data[qItemIndex].options.push({
+    text: '选项' + (Q.data[qItemIndex].options.length + 1),
     id: nanoid()
   })
-  currentOptionIndex.value = qItems.value[qItemIndex].options.length - 1
+  currentOptionIndex.value = Q.data[qItemIndex].options.length - 1
 }
 
 function removeOption(index) {
-  if (qItems.value[qItemIndex].options.length <= 1) {
-    qItems.value[qItemIndex].options[0].text = ''
-    qItems.value[qItemIndex].options[0].imageUrl = ''
+  if (Q.data[qItemIndex].options.length <= 1) {
+    Q.data[qItemIndex].options[0].text = ''
+    Q.data[qItemIndex].options[0].imageUrl = ''
     return
   }
-  qItems.value[qItemIndex].options.splice(index, 1)
+  Q.data[qItemIndex].options.splice(index, 1)
   currentOptionIndex.value = -1
-  cleanupOptions(qItems.value)
+  cleanupOptions(Q.data)
 }
 
 function clickOption(ev, index) {
@@ -106,19 +106,19 @@ function setTab() {
 }
 
 onBeforeMount(() => {
-  if (!qItems.value[qItemIndex].options) {
-    qItems.value[qItemIndex].options = [
+  if (!Q.data[qItemIndex].options) {
+    Q.data[qItemIndex].options = [
       {
         text: '选项1',
         id: nanoid()
       }
     ]
   }
-  qItems.value[qItemIndex].options.forEach((option) => {
-    if (!option.id) {
-      option.id = nanoid()
-    }
-  })
+  // qItems.value[qItemIndex].options.forEach((option) => {
+  //   if (!option.id) {
+  //     option.id = nanoid()
+  //   }
+  // })
   setTab()
 })
 
@@ -226,6 +226,7 @@ h4 {
   cursor: pointer;
   color: var(--text-secondary);
   border-radius: 50%;
+  border: 1px solid var(--border-dark);
   background-color: var(--bg-primary);
   &:link,
   &:visited {
@@ -235,6 +236,7 @@ h4 {
   transition: opacity 0.15s ease-in-out;
   &:hover,
   &:active {
+    border-color: var(--c-red);
     color: var(--c-red);
   }
 }

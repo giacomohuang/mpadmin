@@ -11,10 +11,10 @@
 
   <a-drawer :title="orgForm.name" width="500px" :open="orgEditor" @close="orgEditor = false">
     <a-form ref="orgFormRef" :model="orgForm" :rules="formRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
-      <a-form-item :label="$t('sys.org.fullname')" name="fullname">
+      <a-form-item :label="t('sys.org.fullname')" name="fullname">
         <div>{{ orgForm.fullname }}</div>
       </a-form-item>
-      <a-form-item :label="$t('sys.org.leader')" name="leaderId">
+      <a-form-item :label="t('sys.org.leader')" name="leaderId">
         <a-select v-model:value="orgForm.leaderId" show-search :filter-option="false" @search="getUserList" optionLabelProp="realname" :options="userList.data" :fieldNames="{ label: 'realname', value: '_id' }">
           <template #option="{ realname, avatar, accountname }">
             <div class="user-option">
@@ -34,7 +34,7 @@
           </template>
         </a-select>
       </a-form-item>
-      <a-form-item :label="$t('sys.org.roles')" name="roles">
+      <a-form-item :label="t('sys.org.roles')" name="roles">
         <a-select v-model:value="orgForm.roles" mode="multiple">
           <a-select-option v-for="role in roleList" :value="role.id" :key="role.id">
             {{ role.name }}
@@ -42,8 +42,8 @@
         </a-select>
       </a-form-item>
       <a-form-item :wrapper-col="{ offset: 6, span: 18 }">
-        <a-button type="primary" @click="submitForm">{{ $t('common.save') }}</a-button>
-        <a-button style="margin-left: 10px" @click="orgEditor = false">{{ $t('common.cancel') }}</a-button>
+        <a-button type="primary" @click="submitForm">{{ t('common.save') }}</a-button>
+        <a-button style="margin-left: 10px" @click="orgEditor = false">{{ t('common.cancel') }}</a-button>
       </a-form-item>
     </a-form>
   </a-drawer>

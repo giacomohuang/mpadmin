@@ -5,7 +5,7 @@
       <div class="logo-container">
         <a href="/" class="logo-link">
           <img src="@/assets/logo.svg" />
-          <div class="app-name">{{ $t('common.appname') }}</div>
+          <div class="app-name">{{ t('common.appname') }}</div>
         </a>
       </div>
 
@@ -30,20 +30,20 @@
     </header>
     <section class="form-section" v-if="state.method === 'pwd'">
       <a-form :model="signinForm" @finish="handleSignin" autocomplete="off" :label-col="{ span: 6 }">
-        <h3 class="form-title">{{ $t('signin.title') }}</h3>
-        <a-form-item :label="$t('signin.accountname')" name="accountname" :rules="[{ required: true, message: $t('signin.peya') }]">
+        <h3 class="form-title">{{ t('signin.title') }}</h3>
+        <a-form-item :label="t('signin.accountname')" name="accountname" :rules="[{ required: true, message: t('signin.peya') }]">
           <a-input autocomplete="off" size="large" large v-model:value="signinForm.accountname" />
           <!-- placeholder="请填写用于登录的邮箱" -->
         </a-form-item>
-        <a-form-item :label="$t('signin.password')" name="password" :rules="[{ required: true, message: $t('signin.peypwd') }]">
+        <a-form-item :label="t('signin.password')" name="password" :rules="[{ required: true, message: t('signin.peypwd') }]">
           <a-input-password autocomplete="new-password" size="large" v-model:value="signinForm.password" />
           <!-- placeholder="密码" -->
         </a-form-item>
         <a-form-item class="form-buttons">
           <a-button type="primary" :loading="state.loading" html-type="submit" class="primary-btn">
-            {{ $t('signin.signin') }}
+            {{ t('signin.signin') }}
           </a-button>
-          <a href="####" @click="state.method = 'resetPwd'" class="link-btn">{{ $t('signin.forgotpwd') }}</a>
+          <a href="####" @click="state.method = 'resetPwd'" class="link-btn">{{ t('signin.forgotpwd') }}</a>
         </a-form-item>
       </a-form>
       <!-- <div style="margin: 0 0 0 90px; font-size: 12px">30天内没有访问将重新登录</div> -->
@@ -104,16 +104,16 @@
       <h3 class="section-title">需要更新密码</h3>
       <div class="m-3 text-sm/normal text-primary">首次登录或长时间没有修改密码，需要重新设置密码</div>
       <a-form ref="pwdFormRef" style="margin-top: 30px" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" @finish="handleInitPwd">
-        <a-form-item has-feedback :label="$t('signin.newpwd')" name="newPassword">
+        <a-form-item has-feedback :label="t('signin.newpwd')" name="newPassword">
           <PasswordStrength v-if="pwdForm.newPassword" v-model:value="state.strength" :password="pwdForm.newPassword" style="position: absolute; top: -20px"></PasswordStrength>
           <a-input-password autocomplete="new-password" size="large" v-model:value="pwdForm.newPassword" />
         </a-form-item>
-        <a-form-item has-feedback :label="$t('signin.cfpwd')" name="confirm">
+        <a-form-item has-feedback :label="t('signin.cfpwd')" name="confirm">
           <a-input-password autocomplete="new-password" size="large" v-model:value="pwdForm.confirm" />
         </a-form-item>
         <a-form-item :wrapper-col="{ offset: 6 }">
-          <a-button type="ghost" @click="handleResetPwdForm">{{ $t('common.reset') }}</a-button>
-          <a-button type="primary" html-type="submit" style="margin-left: 10px">{{ $t('common.submit') }}</a-button>
+          <a-button type="ghost" @click="handleResetPwdForm">{{ t('common.reset') }}</a-button>
+          <a-button type="primary" html-type="submit" style="margin-left: 10px">{{ t('common.submit') }}</a-button>
         </a-form-item>
       </a-form>
     </section>
@@ -123,8 +123,8 @@
       使用以下方式接收临时密码，使用临时密码登录后，再设置新的密码。
       <a-form-item>
         <a-radio-group v-model:value="state.resetPwdMethod">
-          <a-radio value="email">{{ $t('signin.email') }}</a-radio>
-          <a-radio value="phone">{{ $t('signin.phone') }}</a-radio>
+          <a-radio value="email">{{ t('signin.email') }}</a-radio>
+          <a-radio value="phone">{{ t('signin.phone') }}</a-radio>
         </a-radio-group>
       </a-form-item>
       <a-form-item v-if="state.resetPwdMethod">
@@ -132,7 +132,7 @@
         <a-input size="large" placeholder="请输入与账号绑定的手机号" v-if="state.resetPwdMethod === 'phone'"></a-input>
       </a-form-item>
       <a-form-item>
-        <a-button type="primary" @click="handleSendTempPwd">{{ $t('common.send') }}</a-button>
+        <a-button type="primary" @click="handleSendTempPwd">{{ t('common.send') }}</a-button>
       </a-form-item>
     </section>
   </div>
@@ -146,6 +146,7 @@ import { useStore } from '@/stores/stores'
 import { message } from 'ant-design-vue'
 import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 import helper from '../js/helper'
 import VerifyInput from '../components/VerifyInput.vue'
 import API from '../api/API'
@@ -214,7 +215,6 @@ const phoneState = reactive({
   countDownTime: 0
 })
 
-const { t } = useI18n()
 const signinForm = reactive({
   accountname: '',
   password: ''

@@ -2,17 +2,15 @@
   <div class="nps-inner">
     <div class="nps-score-container">
       <div class="nps-scores">
-        <div v-for="score in qItems[qItemIndex].maxScore - qItems[qItemIndex].minScore + 1" :key="score - 1"
-          class="score-item" :class="{ active: qItems[qItemIndex].value === score - 1 + qItems[qItemIndex].minScore }"
-          @click="qItems[qItemIndex].value = score - 1 + qItems[qItemIndex].minScore">
-          <a-tooltip :title="qItems[qItemIndex].tips[score - 1]?.text">
-            {{ score - 1 + qItems[qItemIndex].minScore }}
+        <div v-for="score in Q.data[qItemIndex].maxScore - Q.data[qItemIndex].minScore + 1" :key="score - 1" class="score-item" :class="{ active: Q.data[qItemIndex].value === score - 1 + Q.data[qItemIndex].minScore }" @click="Q.data[qItemIndex].value = score - 1 + Q.data[qItemIndex].minScore">
+          <a-tooltip :title="Q.data[qItemIndex].tips[score - 1]?.text">
+            {{ score - 1 + Q.data[qItemIndex].minScore }}
           </a-tooltip>
         </div>
       </div>
-      <div v-if="qItems[qItemIndex].showLabels" class="nps-labels">
-        <span class="min-label">{{ qItems[qItemIndex].minLabel }}</span>
-        <span class="max-label">{{ qItems[qItemIndex].maxLabel }}</span>
+      <div v-if="Q.data[qItemIndex].showLabels" class="nps-labels">
+        <span class="min-label">{{ Q.data[qItemIndex].minLabel }}</span>
+        <span class="max-label">{{ Q.data[qItemIndex].maxLabel }}</span>
       </div>
     </div>
   </div>
@@ -23,38 +21,36 @@
 
     <div class="prop-item">
       <h4>此题必答</h4>
-      <a-switch v-model:checked="qItems[qItemIndex].required" size="small" />
+      <a-switch v-model:checked="Q.data[qItemIndex].required" size="small" />
     </div>
 
     <div class="prop-item">
       <h4>最低分</h4>
-      <a-input-number v-model:value="qItems[qItemIndex].minScore" :min="0" :max="qItems[qItemIndex].maxScore"
-        size="small" style="width: 100px" @change="handleMinScoreChange">
+      <a-input-number v-model:value="Q.data[qItemIndex].minScore" :min="0" :max="Q.data[qItemIndex].maxScore" size="small" style="width: 100px" @change="handleMinScoreChange">
         <template #addonAfter>分</template>
       </a-input-number>
     </div>
 
     <div class="prop-item">
       <h4>最高分</h4>
-      <a-input-number v-model:value="qItems[qItemIndex].maxScore" :min="qItems[qItemIndex].minScore" :max="10"
-        size="small" style="width: 100px" @change="handleMaxScoreChange">
+      <a-input-number v-model:value="Q.data[qItemIndex].maxScore" :min="Q.data[qItemIndex].minScore" :max="10" size="small" style="width: 100px" @change="handleMaxScoreChange">
         <template #addonAfter>分</template>
       </a-input-number>
     </div>
 
     <div class="prop-item">
       <h4>极值标签</h4>
-      <a-switch v-model:checked="qItems[qItemIndex].showLabels" size="small" />
+      <a-switch v-model:checked="Q.data[qItemIndex].showLabels" size="small" />
     </div>
 
-    <template v-if="qItems[qItemIndex].showLabels">
+    <template v-if="Q.data[qItemIndex].showLabels">
       <div class="prop-item">
         <h4>最低分标签</h4>
-        <a-input v-model:value="qItems[qItemIndex].minLabel" size="small" placeholder="不可能" style="width: 120px" />
+        <a-input v-model:value="Q.data[qItemIndex].minLabel" size="small" placeholder="不可能" style="width: 120px" />
       </div>
       <div class="prop-item">
         <h4>最高分标签</h4>
-        <a-input v-model:value="qItems[qItemIndex].maxLabel" size="small" placeholder="一定会" style="width: 120px" />
+        <a-input v-model:value="Q.data[qItemIndex].maxLabel" size="small" placeholder="一定会" style="width: 120px" />
       </div>
     </template>
 
@@ -62,10 +58,8 @@
     <div class="prop-item column">
       <h4>评分提示</h4>
       <div class="tips-list">
-        <div v-for="(tip, index) in qItems[qItemIndex].tips" :key="index" class="tip-item">
-          <a-input-number v-model:value="tip.score" :min="qItems[qItemIndex].minScore"
-            :max="qItems[qItemIndex].maxScore" @change="(val) => handleTipScoreChange(val, index)" class="tip-score"
-            size="small">
+        <div v-for="(tip, index) in Q.data[qItemIndex].tips" :key="index" class="tip-item">
+          <a-input-number v-model:value="tip.score" :min="Q.data[qItemIndex].minScore" :max="Q.data[qItemIndex].maxScore" @change="(val) => handleTipScoreChange(val, index)" class="tip-score" size="small">
             <template #addonAfter>分</template>
           </a-input-number>
           <a-input v-model:value="tip.text" size="small" placeholder="请输入分数描述" />
@@ -77,9 +71,11 @@
   </Teleport>
 </template>
 
-<router lang="json">{
+<router lang="json">
+{
   "isRouter": false
-}</router>
+}
+</router>
 
 <script setup>
 import { inject, onBeforeMount, watch } from 'vue'
@@ -88,99 +84,99 @@ import { cleanupScoreRanges, cleanupConditions } from '../cleanup'
 
 const props = defineProps(['qItemIndex'])
 
-const qItems = inject('qItems')
+const Q = inject('Q')
 const currentItemIndex = inject('currentItemIndex')
 
 const cleanup = () => {
-  cleanupScoreRanges(qItems.value)
-  cleanupConditions(qItems.value)
+  cleanupScoreRanges(Q.data)
+  cleanupConditions(Q.data)
 }
 
 function handleTipScoreChange(newScore, currentIndex) {
   if (newScore === null || newScore === undefined) {
-    qItems.value[props.qItemIndex].tips[currentIndex].score = qItems.value[props.qItemIndex].minScore
+    Q.data[props.qItemIndex].tips[currentIndex].score = Q.data[props.qItemIndex].minScore
     return
   }
 
-  const tips = qItems.value[props.qItemIndex].tips
+  const tips = Q.data[props.qItemIndex].tips
   const duplicateIndex = tips.findIndex((tip, index) => tip.score === newScore && index !== currentIndex)
 
   if (duplicateIndex !== -1) {
-    const minScore = qItems.value[props.qItemIndex].minScore
-    const maxScore = qItems.value[props.qItemIndex].maxScore
+    const minScore = Q.data[props.qItemIndex].minScore
+    const maxScore = Q.data[props.qItemIndex].maxScore
     let availableScore = minScore
 
     while (availableScore <= maxScore) {
       if (!tips.some((tip) => tip.score === availableScore)) {
-        qItems.value[props.qItemIndex].tips[currentIndex].score = availableScore
+        Q.data[props.qItemIndex].tips[currentIndex].score = availableScore
         return
       }
       availableScore++
     }
-    qItems.value[props.qItemIndex].tips[currentIndex].score = tips[currentIndex].score
+    Q.data[props.qItemIndex].tips[currentIndex].score = tips[currentIndex].score
     message.warning('没有可用的分数')
     return
   }
 
-  qItems.value[props.qItemIndex].tips[currentIndex].score = newScore
+  Q.data[props.qItemIndex].tips[currentIndex].score = newScore
 }
 
 function addTip() {
-  const tips = qItems.value[props.qItemIndex].tips
-  const minScore = qItems.value[props.qItemIndex].minScore
+  const tips = Q.data[props.qItemIndex].tips
+  const minScore = Q.data[props.qItemIndex].minScore
   let score = minScore
 
   while (tips.some((tip) => tip.score === score)) {
     score++
-    if (score > qItems.value[props.qItemIndex].maxScore) {
+    if (score > Q.data[props.qItemIndex].maxScore) {
       message.warning('已经没有可用的分数')
       return
     }
   }
 
-  qItems.value[props.qItemIndex].tips.push({
+  Q.data[props.qItemIndex].tips.push({
     score,
     text: ''
   })
 }
 
 function removeTip(index) {
-  qItems.value[props.qItemIndex].tips.splice(index, 1)
+  Q.data[props.qItemIndex].tips.splice(index, 1)
 }
 
 function handleMinScoreChange(value) {
-  if (value > qItems.value[props.qItemIndex].maxScore) {
-    qItems.value[props.qItemIndex].minScore = qItems.value[props.qItemIndex].maxScore
+  if (value > Q.data[props.qItemIndex].maxScore) {
+    Q.data[props.qItemIndex].minScore = Q.data[props.qItemIndex].maxScore
   }
   cleanup()
 }
 
 function handleMaxScoreChange(value) {
-  if (value < qItems.value[props.qItemIndex].minScore) {
-    qItems.value[props.qItemIndex].maxScore = qItems.value[props.qItemIndex].minScore
+  if (value < Q.data[props.qItemIndex].minScore) {
+    Q.data[props.qItemIndex].maxScore = Q.data[props.qItemIndex].minScore
   }
   cleanup()
 }
 
 // 监听分数范围变化
 watch(
-  () => [qItems.value[props.qItemIndex].minScore, qItems.value[props.qItemIndex].maxScore],
+  () => [Q.data[props.qItemIndex].minScore, Q.data[props.qItemIndex].maxScore],
   ([newMin, newMax]) => {
     // 清理超出范围的提示
-    qItems.value[props.qItemIndex].tips = qItems.value[props.qItemIndex].tips.filter((tip) => tip.score >= newMin && tip.score <= newMax)
+    Q.data[props.qItemIndex].tips = Q.data[props.qItemIndex].tips.filter((tip) => tip.score >= newMin && tip.score <= newMax)
 
     // 调整当前值到合法范围
-    if (qItems.value[props.qItemIndex].value < newMin) {
-      qItems.value[props.qItemIndex].value = newMin
-    } else if (qItems.value[props.qItemIndex].value > newMax) {
-      qItems.value[props.qItemIndex].value = newMax
+    if (Q.data[props.qItemIndex].value < newMin) {
+      Q.data[props.qItemIndex].value = newMin
+    } else if (Q.data[props.qItemIndex].value > newMax) {
+      Q.data[props.qItemIndex].value = newMax
     }
   }
 )
 
 onBeforeMount(() => {
   // 初始化默认值
-  const item = qItems.value[props.qItemIndex]
+  const item = Q.data[props.qItemIndex]
   item.required ??= false
   item.value ??= null
   item.tips ??= []

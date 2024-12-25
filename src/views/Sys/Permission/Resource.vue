@@ -2,14 +2,14 @@
   <div class="container">
     <div class="header">
       <a-radio-group v-model:value="resourceType">
-        <a-radio-button value="0">{{ $t('sys.permission.resource.all') }}</a-radio-button>
-        <a-radio-button value="1">{{ $t('sys.permission.resource.pagesOnly') }}</a-radio-button>
-        <a-radio-button value="2">{{ $t('sys.permission.resource.pagesAndFunctions') }}</a-radio-button>
-        <a-radio-button value="3">{{ $t('sys.permission.resource.pagesAndData') }}</a-radio-button>
+        <a-radio-button value="0">{{ t('sys.permission.resource.all') }}</a-radio-button>
+        <a-radio-button value="1">{{ t('sys.permission.resource.pagesOnly') }}</a-radio-button>
+        <a-radio-button value="2">{{ t('sys.permission.resource.pagesAndFunctions') }}</a-radio-button>
+        <a-radio-button value="3">{{ t('sys.permission.resource.pagesAndData') }}</a-radio-button>
       </a-radio-group>
       <div class="search-wrapper">
         <icon name="search" class="search-icon"></icon>
-        <input class="search-input" :placeholder="$t('sys.permission.resource.searchPlaceholder')" v-model="keywords" />
+        <input class="search-input" :placeholder="t('sys.permission.resource.searchPlaceholder')" v-model="keywords" />
       </div>
     </div>
 
@@ -28,9 +28,9 @@
       </div>
       <div class="main-content hl-area">
         <div v-if="keywords && !resourceTree.children" class="empty-state">
-          {{ $t('sys.permission.resource.noMatchingData') }}
+          {{ t('sys.permission.resource.noMatchingData') }}
           <a href="####" @click="keywords = ''">
-            {{ $t('sys.permission.resource.clearSearchKeywords') }}
+            {{ t('sys.permission.resource.clearSearchKeywords') }}
           </a>
         </div>
         <div class="list" ref="listRef">
@@ -39,40 +39,40 @@
       </div>
     </div>
   </div>
-  <a-drawer :title="$t('sys.permission.resource.resourceEditor')" width="500px" :open="resourceEditor" @close="resourceEditor = false">
+  <a-drawer :title="t('sys.permission.resource.resourceEditor')" width="500px" :open="resourceEditor" @close="resourceEditor = false">
     <a-form ref="resourceFormRef" autocomplete="off" :model="resourceForm" :rules="vRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 20 }" @finish="submit">
-      <a-form-item :label="$t('sys.permission.resource.name')" :wrapper-col="{ span: 12 }" name="name">
+      <a-form-item :label="t('sys.permission.resource.name')" :wrapper-col="{ span: 12 }" name="name">
         <mpInputI18n v-model="resourceForm.name" />
       </a-form-item>
-      <a-form-item :label="$t('sys.permission.resource.code')" name="code" required>
+      <a-form-item :label="t('sys.permission.resource.code')" name="code" required>
         <div dir="ltr">
           <a-input v-if="editorMode === 1 ? currentResource.code : getCodePrefix(currentResource.code)" v-model:value="resourceForm.code" :addon-before="editorMode === 1 ? currentResource.code + '.' : getCodePrefix(currentResource.code) + '.'" />
           <a-input v-else v-model:value="resourceForm.code" />
         </div>
       </a-form-item>
-      <a-form-item :label="$t('sys.permission.resource.type')" name="type" :wrapper-col="{ span: 20 }">
+      <a-form-item :label="t('sys.permission.resource.type')" name="type" :wrapper-col="{ span: 20 }">
         <a-radio-group v-model:value="resourceForm.type">
-          <a-radio :value="1" :checked="resourceType <= 1">{{ $t('sys.permission.resource.page') }}</a-radio>
-          <a-radio :value="2" :checked="resourceType == 2">{{ $t('sys.permission.resource.function') }}</a-radio>
-          <a-radio :value="3" :checked="resourceType == 3">{{ $t('sys.permission.resource.data') }}</a-radio>
+          <a-radio :value="1" :checked="resourceType <= 1">{{ t('sys.permission.resource.page') }}</a-radio>
+          <a-radio :value="2" :checked="resourceType == 2">{{ t('sys.permission.resource.function') }}</a-radio>
+          <a-radio :value="3" :checked="resourceType == 3">{{ t('sys.permission.resource.data') }}</a-radio>
         </a-radio-group>
       </a-form-item>
-      <a-form-item :label="$t('sys.permission.resource.icon')" name="icon" v-if="resourceForm.type === 1">
+      <a-form-item :label="t('sys.permission.resource.icon')" name="icon" v-if="resourceForm.type === 1">
         <div class="flex items-center gap-2">
           <a-input v-model:value="resourceForm.icon" placeholder="icon" style="display: none" />
           <a-button @click="openIconSelect">
             <Icon v-if="resourceForm.iconType" :name="resourceForm.icon" :key="resourceForm.icon" />
-            <template v-else>{{ $t('sys.permission.resource.selectIcon') }}</template>
+            <template v-else>{{ t('sys.permission.resource.selectIcon') }}</template>
           </a-button>
         </div>
       </a-form-item>
-      <a-form-item :label="$t('sys.permission.resource.linkType')" name="linkType" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren">
+      <a-form-item :label="t('sys.permission.resource.linkType')" name="linkType" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren">
         <a-radio-group v-model:value="resourceForm.linkType">
-          <a-radio :value="1" :checked="resourceForm.linkType == 1">{{ $t('sys.permission.resource.router') }}</a-radio>
-          <a-radio :value="2" :checked="resourceForm.linkType == 2">{{ $t('sys.permission.resource.url') }}</a-radio>
+          <a-radio :value="1" :checked="resourceForm.linkType == 1">{{ t('sys.permission.resource.router') }}</a-radio>
+          <a-radio :value="2" :checked="resourceForm.linkType == 2">{{ t('sys.permission.resource.url') }}</a-radio>
         </a-radio-group>
       </a-form-item>
-      <a-form-item :label="$t('sys.permission.resource.router')" name="link" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren && resourceForm.linkType == 1">
+      <a-form-item :label="t('sys.permission.resource.router')" name="link" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren && resourceForm.linkType == 1">
         <a-select v-model:value="resourceForm.router" show-search :filter-option="false" optionLabelProp="name" :options="routerList.data" :fieldNames="{ label: 'name', value: 'path' }" @search="handleSearch">
           <template #option="{ name, path }">
             <div class="router-option">
@@ -91,25 +91,25 @@
           </template>
         </a-select>
       </a-form-item>
-      <a-form-item :label="$t('sys.permission.resource.link')" name="link" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren && resourceForm.linkType == 2">
+      <a-form-item :label="t('sys.permission.resource.link')" name="link" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren && resourceForm.linkType == 2">
         <a-input v-model:value="resourceForm.link" type="url" placeholder="https://" />
       </a-form-item>
-      <a-form-item :label="$t('sys.permission.resource.target')" name="target" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren">
+      <a-form-item :label="t('sys.permission.resource.target')" name="target" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren">
         <a-radio-group v-model:value="resourceForm.target">
-          <a-radio value="self">{{ $t('sys.permission.resource.currentPage') }}</a-radio>
-          <a-radio value="_blank">{{ $t('sys.permission.resource.newPage') }}</a-radio>
+          <a-radio value="self">{{ t('sys.permission.resource.currentPage') }}</a-radio>
+          <a-radio value="_blank">{{ t('sys.permission.resource.newPage') }}</a-radio>
         </a-radio-group>
       </a-form-item>
-      <a-form-item :label="$t('sys.permission.resource.isHidden')" name="isHidden" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren">
+      <a-form-item :label="t('sys.permission.resource.isHidden')" name="isHidden" v-if="resourceForm.type == 1 && !currentResource.hasPageChildren">
         <a-switch v-model:checked="resourceForm.isHidden" />
       </a-form-item>
       <a-form-item :wrapper-col="{ offset: 6 }">
-        <a-button type="primary" html-type="submit">{{ $t('common.save') }}</a-button>
-        <a-button type="link" @click="resourceEditor = false">{{ $t('common.cancel') }}</a-button>
+        <a-button type="primary" html-type="submit">{{ t('common.save') }}</a-button>
+        <a-button type="link" @click="resourceEditor = false">{{ t('common.cancel') }}</a-button>
       </a-form-item>
     </a-form>
   </a-drawer>
-  <a-modal :title="$t('sys.permission.resource.iconSelector')" v-model:open="iconSelectVisible" :footer="null" width="800px">
+  <a-modal :title="t('sys.permission.resource.iconSelector')" v-model:open="iconSelectVisible" :footer="null" width="800px">
     <IconSelect @iconSelect="handleIconSelect" />
   </a-modal>
 </template>

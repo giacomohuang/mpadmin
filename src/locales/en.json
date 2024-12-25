@@ -2,7 +2,9 @@
   "404": {
     "_title": "404 Not Found",
     "backhome": "Back to home",
-    "description": "Sorry, the page you visited does not exist."
+    "description": "Sorry, the page you visited does not exist.",
+    "wenjuan": "Questionnaire does not exist",
+    "backwenjuan": "Return to project list"
   },
   "common": {
     "appname": "MPAdmin",

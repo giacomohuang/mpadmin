@@ -3,42 +3,42 @@
   <div class="main" v-show="!globalLoading">
     <section>
       <div class="title">
-        <h2>{{ $t('my.authentication.pwd') }}</h2>
-        <a-button @click.stop="state.toggleChangePwd = !state.toggleChangePwd">{{ state.toggleChangePwd ? $t('my.authentication.hide') : $t('my.authentication.cpwd') }}</a-button>
+        <h2>{{ t('my.authentication.pwd') }}</h2>
+        <a-button @click.stop="state.toggleChangePwd = !state.toggleChangePwd">{{ state.toggleChangePwd ? t('my.authentication.hide') : t('my.authentication.cpwd') }}</a-button>
       </div>
-      <div class="tips">{{ $t('my.authentication.syaeyps') }}</div>
+      <div class="tips">{{ t('my.authentication.syaeyps') }}</div>
       <div v-if="state.toggleChangePwd" class="content">
         <a-form ref="pwdFormRef" :model="pwdForm" :rules="pwdRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 12 }" @validate="handlePwdValidate" @finish="handleUpdatePwd">
-          <a-form-item has-feedback :label="$t('my.authentication.oldpwd')" name="oldPassword">
+          <a-form-item has-feedback :label="t('my.authentication.oldpwd')" name="oldPassword">
             <a-input-password v-model:value="pwdForm.oldPassword" autocomplete="new-password" />
           </a-form-item>
-          <a-form-item has-feedback :label="$t('my.authentication.newpwd')" name="newPassword">
+          <a-form-item has-feedback :label="t('my.authentication.newpwd')" name="newPassword">
             <PasswordStrength v-show="pwdForm.newPassword" v-model:value="state.strength" :password="pwdForm.newPassword"></PasswordStrength>
             <a-input-password v-model:value="pwdForm.newPassword" autocomplete="new-password" />
           </a-form-item>
-          <a-form-item has-feedback :label="$t('my.authentication.cfpwd')" name="confirmPassword">
+          <a-form-item has-feedback :label="t('my.authentication.cfpwd')" name="confirmPassword">
             <a-input-password v-model:value="pwdForm.confirmPassword" autocomplete="new-password" />
           </a-form-item>
           <a-form-item :wrapper-col="{ offset: 6 }">
-            <a-button type="ghost" @click="handleResetPwdForm">{{ $t('common.reset') }}</a-button>
-            <a-button type="primary" html-type="submit" style="margin-left: 10px">{{ $t('common.submit') }}</a-button>
+            <a-button type="ghost" @click="handleResetPwdForm">{{ t('common.reset') }}</a-button>
+            <a-button type="primary" html-type="submit" style="margin-left: 10px">{{ t('common.submit') }}</a-button>
           </a-form-item>
         </a-form>
       </div>
     </section>
     <section>
       <div class="title">
-        <h2>{{ $t('my.authentication.mobi') }}</h2>
+        <h2>{{ t('my.authentication.mobi') }}</h2>
       </div>
-      <div class="tips">{{ $t('my.authentication.enhphone') }}</div>
+      <div class="tips">{{ t('my.authentication.enhphone') }}</div>
       <div class="item">
-        <label>{{ phoneForm.phone ? (phoneForm.areacode ? phoneForm.areacode + ' ' : '') + helper.obfuscate('phone', phoneForm.phone) : $t('my.authentication.notset') }}</label>
-        <a-button @click="state.setPhoneVisible = true">{{ phoneForm.phone ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
+        <label>{{ phoneForm.phone ? (phoneForm.areacode ? phoneForm.areacode + ' ' : '') + helper.obfuscate('phone', phoneForm.phone) : t('my.authentication.notset') }}</label>
+        <a-button @click="state.setPhoneVisible = true">{{ phoneForm.phone ? t('my.authentication.edit') : t('my.authentication.set') }}</a-button>
       </div>
-      <a-modal v-model:open="state.setPhoneVisible" :title="phoneForm.phone ? $t('my.authentication.editphone') : $t('my.authentication.setphone')" :footer="null" @cancel="handleCancelSet" width="530px">
+      <a-modal v-model:open="state.setPhoneVisible" :title="phoneForm.phone ? t('my.authentication.editphone') : t('my.authentication.setphone')" :footer="null" @cancel="handleCancelSet" width="530px">
         <a-form style="margin-top: 40px" ref="phoneFormRef" layout="inline" :model="phoneForm">
-          <a-form-item :label="$t('my.authentication.phonead')">
-            <a-select show-search v-model:value="phoneForm.areacodeNew" style="width: 100px" :placeholder="$t('my.authentication.areacode')" allowClear :dropdown-match-select-width="false">
+          <a-form-item :label="t('my.authentication.phonead')">
+            <a-select show-search v-model:value="phoneForm.areacodeNew" style="width: 100px" :placeholder="t('my.authentication.areacode')" allowClear :dropdown-match-select-width="false">
               <a-select-option v-for="(item, index) in areaCode" :key="index" :value="item.code">{{ item.code }}({{ item[locale] }})</a-select-option>
             </a-select>
           </a-form-item>
@@ -46,12 +46,12 @@
             <a-input v-model:value="phoneForm.phoneNew" style="width: 140px" type="tel" />
           </a-form-item>
           <a-form-item>
-            <a-button @click="handleSendSMS" v-if="!phoneState.isCountDown" :loading="state.loading" class="resend" type="link">{{ $t('my.authentication.svcode') }}</a-button>
-            <span class="resend resend-hint" v-if="phoneState.isCountDown">{{ $t('my.authentication.resendin', phoneState.countDownTime) }}</span>
+            <a-button @click="handleSendSMS" v-if="!phoneState.isCountDown" :loading="state.loading" class="resend" type="link">{{ t('my.authentication.svcode') }}</a-button>
+            <span class="resend resend-hint" v-if="phoneState.isCountDown">{{ t('my.authentication.resendin', phoneState.countDownTime) }}</span>
           </a-form-item>
         </a-form>
         <div class="flex-item-c verifycode flex-col" v-if="phoneState.isSend">
-          <div class="hint">{{ $t('my.authentication.rsvphone') }}</div>
+          <div class="hint">{{ t('my.authentication.rsvphone') }}</div>
           <VerifyInput v-model="phoneState.verifyCode" :autofocus="true" :digits="6" @finish="handleUpdatePhone"></VerifyInput>
         </div>
       </a-modal>
@@ -59,25 +59,25 @@
 
     <section>
       <div class="title">
-        <h2>{{ $t('my.authentication.email') }}</h2>
+        <h2>{{ t('my.authentication.email') }}</h2>
       </div>
-      <div class="tips">{{ $t('my.authentication.enhemail') }}</div>
+      <div class="tips">{{ t('my.authentication.enhemail') }}</div>
       <div class="item">
-        <label>{{ emailForm.email ? helper.obfuscate('email', emailForm.email) : $t('my.authentication.notset') }}</label>
-        <a-button @click="state.setEmailVisible = true">{{ emailForm.email ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
+        <label>{{ emailForm.email ? helper.obfuscate('email', emailForm.email) : t('my.authentication.notset') }}</label>
+        <a-button @click="state.setEmailVisible = true">{{ emailForm.email ? t('my.authentication.edit') : t('my.authentication.set') }}</a-button>
       </div>
-      <a-modal v-model:open="state.setEmailVisible" :title="emailForm.email ? $t('my.authentication.editemail') : $t('my.authentication.setemail')" :footer="null" @cancel="handleCancelSet">
+      <a-modal v-model:open="state.setEmailVisible" :title="emailForm.email ? t('my.authentication.editemail') : t('my.authentication.setemail')" :footer="null" @cancel="handleCancelSet">
         <a-form style="margin-top: 40px" ref="emailFormRef" :model="emailForm" layout="inline">
-          <a-form-item has-feedback :label="$t('my.authentication.emailad')" name="emailNew" :rules="emailRules">
+          <a-form-item has-feedback :label="t('my.authentication.emailad')" name="emailNew" :rules="emailRules">
             <a-input v-model:value="emailForm.emailNew" />
           </a-form-item>
           <a-form-item>
-            <a-button @click="handleSendEmail" v-if="!emailState.isCountDown" :loading="state.loading" type="link" class="resend">{{ $t('my.authentication.svcode') }}</a-button>
-            <span class="resend resend-hint" v-if="emailState.isCountDown">{{ $t('my.authentication.resendin', emailState.countDownTime) }}</span>
+            <a-button @click="handleSendEmail" v-if="!emailState.isCountDown" :loading="state.loading" type="link" class="resend">{{ t('my.authentication.svcode') }}</a-button>
+            <span class="resend resend-hint" v-if="emailState.isCountDown">{{ t('my.authentication.resendin', emailState.countDownTime) }}</span>
           </a-form-item>
         </a-form>
         <div class="verifycode" v-if="emailState.isSend">
-          <div class="hint">{{ $t('my.authentication.rsvemail') }}</div>
+          <div class="hint">{{ t('my.authentication.rsvemail') }}</div>
           <VerifyInput v-model="emailState.verifyCode" :autofocus="true" :digits="6" @finish="handleUpdateEmail"></VerifyInput>
         </div>
       </a-modal>
@@ -85,26 +85,26 @@
 
     <section>
       <div class="title">
-        <h2>{{ $t('my.authentication.totp') }}</h2>
+        <h2>{{ t('my.authentication.totp') }}</h2>
       </div>
-      <div class="tips">{{ $t('my.authentication.enhtotp') }}</div>
+      <div class="tips">{{ t('my.authentication.enhtotp') }}</div>
       <div class="item">
-        <label>{{ totpForm.totpSecret ? $t('my.authentication.havset') : $t('my.authentication.notset') }}</label>
-        <a-button @click="handleGenerateTotpSecret">{{ totpForm.totpSecret ? $t('my.authentication.edit') : $t('my.authentication.set') }}</a-button>
+        <label>{{ totpForm.totpSecret ? t('my.authentication.havset') : t('my.authentication.notset') }}</label>
+        <a-button @click="handleGenerateTotpSecret">{{ totpForm.totpSecret ? t('my.authentication.edit') : t('my.authentication.set') }}</a-button>
       </div>
-      <a-modal v-model:open="state.setTotpVisible" :title="$t('my.authentication.settotp')" :footer="null" @cancel="handleCancelSet" width="500px">
+      <a-modal v-model:open="state.setTotpVisible" :title="t('my.authentication.settotp')" :footer="null" @cancel="handleCancelSet" width="500px">
         <div class="step">
-          <div class="title"><span class="badage">1</span>{{ $t('my.authentication.scanQRCode') }}</div>
+          <div class="title"><span class="badage">1</span>{{ t('my.authentication.scanQRCode') }}</div>
           <div class="hint">
-            {{ $t('my.authentication.scanQRCodeHint') }} <a href="/downauthapp" target="_blank">{{ $t('my.authentication.downloadApp') }}</a>
+            {{ t('my.authentication.scanQRCodeHint') }} <a href="/downauthapp" target="_blank">{{ t('my.authentication.downloadApp') }}</a>
           </div>
           <div style="margin-top: 20px; display: flex; justify-content: center">
             <div style="border-radius: 8px; width: fit-content; height: fit-content"><a-qrcode v-if="totpState.activationUrl" :value="totpState.activationUrl" /></div>
           </div>
         </div>
         <div class="step">
-          <div class="title"><span class="badage">2</span>{{ $t('my.authentication.enterVerificationCode') }}</div>
-          <div class="hint">{{ $t('my.authentication.enterVerificationCodeHint') }}</div>
+          <div class="title"><span class="badage">2</span>{{ t('my.authentication.enterVerificationCode') }}</div>
+          <div class="hint">{{ t('my.authentication.enterVerificationCodeHint') }}</div>
           <VerifyInput style="margin: 10px 0 30px 30px" v-model:value="totpState.verifyCode" :autofocus="true" @finish="handleUpdateTotpSecret" :digits="6"></VerifyInput>
         </div>
       </a-modal>
@@ -112,15 +112,15 @@
 
     <section>
       <div class="title">
-        <h2>{{ $t('my.authentication.2fa') }}</h2>
+        <h2>{{ t('my.authentication.2fa') }}</h2>
       </div>
-      <div class="tips">{{ $t('my.authentication.enh2fa') }}</div>
+      <div class="tips">{{ t('my.authentication.enh2fa') }}</div>
       <div class="item">
-        <label>{{ state.enable2FA ? $t('common.enabled') : $t('common.disabled') }}</label>
+        <label>{{ state.enable2FA ? t('common.enabled') : t('common.disabled') }}</label>
         <a-switch v-model:checked="state.enable2FA" @change="handleToggle2FA" />
       </div>
       <div class="item">
-        <a-alert :message="$t('my.authentication.2faWarning')" type="warning" show-icon v-if="!(emailForm.email || phoneForm.phone || totpForm.totpSecret)" />
+        <a-alert :message="t('my.authentication.2faWarning')" type="warning" show-icon v-if="!(emailForm.email || phoneForm.phone || totpForm.totpSecret)" />
       </div>
     </section>
   </div>

@@ -1,6 +1,6 @@
 <template>
-  <VueDraggable v-model="qItems[qItemIndex].options" tag="ul" handle=".q-handle" class="options" ghostClass="ghost-opt">
-    <li v-for="(item, index) in qItems[qItemIndex].options" :id="item.id" :key="item.id" class="item" @click.stop="clickOption($event, index)">
+  <VueDraggable v-model="Q.data[qItemIndex].options" tag="ul" handle=".q-handle" class="options" ghostClass="ghost-opt">
+    <li v-for="(item, index) in Q.data[qItemIndex].options" :id="item.id" :key="item.id" class="item" @click.stop="clickOption($event, index)">
       <icon name="handle" class="q-handle" />
       <span class="checkbox"></span>
       <XEditer class="text" :class="{ fillbox: item.fill?.show }" v-model="item.text" :autofocus="index == autoFocusIndex ? true : false"></XEditer>
@@ -19,24 +19,24 @@
       <a-tab-pane key="item" tab="题目设置">
         <div class="prop-item">
           <h4>本题必答</h4>
-          <a-switch v-model:checked="qItems[qItemIndex].required" size="small" />
+          <a-switch v-model:checked="Q.data[qItemIndex].required" size="small" />
         </div>
       </a-tab-pane>
       <!-- Tabs:选项设置 -->
       <a-tab-pane v-if="currentOptionIndex >= 0" :key="'option'" :tab="'第' + (currentOptionIndex + 1) + '项设置'">
         <div class="prop-item">
           <h4>在选项后添加填空</h4>
-          <a-switch v-model:checked="qItems[qItemIndex].options[currentOptionIndex].fill.show" size="small" @change="handleFillChange" />
+          <a-switch v-model:checked="Q.data[qItemIndex].options[currentOptionIndex].fill.show" size="small" @change="handleFillChange" />
         </div>
-        <div class="prop-item" v-if="qItems[qItemIndex].options[currentOptionIndex].fill.show">
+        <div class="prop-item" v-if="Q.data[qItemIndex].options[currentOptionIndex].fill.show">
           <h4>填空必答</h4>
-          <a-switch v-model:checked="qItems[qItemIndex].options[currentOptionIndex].fill.required" size="small" />
+          <a-switch v-model:checked="Q.data[qItemIndex].options[currentOptionIndex].fill.required" size="small" />
         </div>
-        <div class="prop-item" v-if="qItems[qItemIndex].options[currentOptionIndex].fill.show">
+        <div class="prop-item" v-if="Q.data[qItemIndex].options[currentOptionIndex].fill.show">
           <h4>
             填空长度限制<a-tooltip title="为空或填0时，不限字数" placement="top"><icon name="help" class="help" /></a-tooltip>
           </h4>
-          <a-input-number v-model:value="qItems[qItemIndex].options[currentOptionIndex].fill.length" min="0" max="500" style="width: 100px" size="small">
+          <a-input-number v-model:value="Q.data[qItemIndex].options[currentOptionIndex].fill.length" min="0" max="500" style="width: 100px" size="small">
             <template #addonAfter>字符</template>
           </a-input-number>
         </div>
@@ -59,20 +59,15 @@ import { cleanupOptions } from '../cleanup'
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 6)
 const { qItemIndex } = defineProps(['qItemIndex'])
-const qItems = inject('qItems')
+const Q = inject('Q')
 const currentItemIndex = inject('currentItemIndex')
 const currentOptionIndex = ref(-1)
-// const hoveredOptionIndex = ref(-1)
 const autoFocusIndex = ref(-1)
 const tabName = ref('')
 
-watch(currentOptionIndex, () => {
-  setTab()
-})
-
 function addOption() {
-  qItems.value[qItemIndex].options.push({
-    text: '选项' + (qItems.value[qItemIndex].options.length + 1),
+  Q.data[qItemIndex].options.push({
+    text: '选项' + (Q.data[qItemIndex].options.length + 1),
     id: nanoid(),
     fill: {
       show: false,
@@ -81,18 +76,18 @@ function addOption() {
       required: false
     }
   })
-  currentOptionIndex.value = qItems.value[qItemIndex].options.length - 1
+  currentOptionIndex.value = Q.data[qItemIndex].options.length - 1
   autoFocusIndex.value = currentOptionIndex.value
 }
 
 function removeOption(index) {
-  if (qItems.value[qItemIndex].options.length <= 1) {
-    qItems.value[qItemIndex].options[0].text = ''
+  if (Q.data[qItemIndex].options.length <= 1) {
+    Q.data[qItemIndex].options[0].text = ''
     return
   }
-  qItems.value[qItemIndex].options.splice(index, 1)
+  Q.data[qItemIndex].options.splice(index, 1)
   currentOptionIndex.value = -1
-  cleanupOptions(qItems.value)
+  cleanupOptions(Q.data)
 }
 
 function clickOption(ev, index) {
@@ -130,8 +125,8 @@ function setTab() {
 }
 
 onBeforeMount(() => {
-  if (!qItems.value[qItemIndex].options) {
-    qItems.value[qItemIndex].options = [
+  if (!Q.data[qItemIndex].options) {
+    Q.data[qItemIndex].options = [
       {
         text: '选项1',
         id: nanoid(),
@@ -144,19 +139,6 @@ onBeforeMount(() => {
       }
     ]
   }
-  qItems.value[qItemIndex].options.forEach((option) => {
-    if (!option.id) {
-      option.id = nanoid()
-    }
-    if (!option.fill) {
-      option.fill = {
-        show: false,
-        length: null,
-        type: 'text',
-        required: false
-      }
-    }
-  })
   setTab()
 })
 
@@ -167,16 +149,16 @@ onMounted(() => {})
 
 // 可选范围-根据最小值的选择修正最大值
 function fixMaxRange() {
-  if (qItems.value[qItemIndex].maxRange < qItems.value[qItemIndex].minRange && qItems.value[qItemIndex].maxRange != 0) {
-    qItems.value[qItemIndex].maxRange = qItems.value[qItemIndex].minRange
+  if (Q.data[qItemIndex].maxRange < Q.data[qItemIndex].minRange && Q.data[qItemIndex].maxRange != 0) {
+    Q.data[qItemIndex].maxRange = Q.data[qItemIndex].minRange
   }
 }
 
 function handleFillChange(checked) {
   if (!checked) {
-    qItems.value[qItemIndex].options[currentOptionIndex.value].fill.length = null
-    qItems.value[qItemIndex].options[currentOptionIndex.value].fill.type = 'text'
-    qItems.value[qItemIndex].options[currentOptionIndex.value].fill.required = false
+    Q.data[qItemIndex].options[currentOptionIndex.value].fill.length = null
+    Q.data[qItemIndex].options[currentOptionIndex.value].fill.type = 'text'
+    Q.data[qItemIndex].options[currentOptionIndex.value].fill.required = false
   }
 }
 </script>

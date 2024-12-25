@@ -2,7 +2,9 @@
   "404": {
     "_title": "404 頁面不存在",
     "backhome": "返回首頁",
-    "description": "你訪問的頁面不存在"
+    "description": "你訪問的頁面不存在",
+    "wenjuan": "問卷不存在",
+    "backwenjuan": "返回項目清單頁面"
   },
   "common": {
     "appname": "管理運營平台",

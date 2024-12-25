@@ -7,12 +7,12 @@
           <icon :name="RESTYPE[resource.type].type" :class="RESTYPE[resource.type].style"></icon>
           <span class="resource-name">{{ resource.name }}</span>
           <mp-tag size="small" color="red">{{ resource.id }}</mp-tag>
-          <mp-tag size="small" color="gray" class="resource-code" :title="$t('sys.permission.resource.copyToClipboard')" @click="copyToClipBoard($event, resource.code)">{{ resource.code }}</mp-tag>
+          <mp-tag size="small" color="gray" class="resource-code" :title="t('sys.permission.resource.copyToClipboard')" @click="copyToClipBoard($event, resource.code)">{{ resource.code }}</mp-tag>
         </div>
         <div class="tools">
-          <icon name="edit" size="1.8em" class="edit" @click="openEditor(resource, EDITOR_MODE.EDIT)" :title="$t('common.edit')" />
-          <icon v-if="resource.type === 1" size="1.8em" name="add" class="add" @click="openEditor(resource, EDITOR_MODE.ADD)" :title="$t('sys.permission.resource.addSubResource')" />
-          <icon name="del" size="1.8em" class="del" @click="confirm(resource.path, resource.pid)" :title="$t('common.del')" />
+          <icon name="edit" size="1.8em" class="edit" @click="openEditor(resource, EDITOR_MODE.EDIT)" :title="t('common.edit')" />
+          <icon v-if="resource.type === 1" size="1.8em" name="add" class="add" @click="openEditor(resource, EDITOR_MODE.ADD)" :title="t('sys.permission.resource.addSubResource')" />
+          <icon name="del" size="1.8em" class="del" @click="confirm(resource.path, resource.pid)" :title="t('common.del')" />
         </div>
       </div>
       <ResourceList v-show="!collapseIds.has(resource.id)" :level="lv + 1" :data="resource.children" @open="openEditor" @remove="confirm" @toggleCollapse="toggleCollapse" />
@@ -28,6 +28,8 @@
 
 <script setup>
 import { inject } from 'vue'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 const { data, level } = defineProps(['data', 'level'])
 const EDITOR_MODE = { ADD: 1, EDIT: 2 }

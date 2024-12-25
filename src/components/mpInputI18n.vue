@@ -7,13 +7,13 @@
     </a-input>
 
     <!-- 编辑器模态框 -->
-    <a-modal v-model:open="editorVisible" :title="$t('comp.mpInputI18n.editorTitle')" @ok="handleOk" @cancel="handleCancel">
+    <a-modal v-model:open="editorVisible" :title="t('comp.mpInputI18n.editorTitle')" @ok="handleOk" @cancel="handleCancel">
       <div class="lang-container">
         <a-form-item-rest>
           <div v-for="lang in languages" :key="lang" class="lang-item">
             <div class="lang-label" :class="'font-' + lang">{{ getLangLabel(lang) }}</div>
             <a-input v-model:value="translationData[lang]" :dir="RTL_LANGS.includes(lang) ? 'rtl' : 'ltr'" :class="'font-' + lang" autocomplete="new-password" />
-            <a-button v-if="lang !== currentLang" type="link" size="small" @click="() => autoTranslate(lang)"> {{ $t('comp.mpInputI18n.translate') }} </a-button>
+            <a-button v-if="lang !== currentLang" type="link" size="small" @click="() => autoTranslate(lang)"> {{ t('comp.mpInputI18n.translate') }} </a-button>
           </div>
         </a-form-item-rest>
       </div>
@@ -26,6 +26,9 @@ import { ref, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import i18n, { LANGS, RTL_LANGS } from '@/js/i18n'
 import CryptoJS from 'crypto-js'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   modelValue: {

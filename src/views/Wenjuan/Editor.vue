@@ -1,21 +1,26 @@
 <template>
   <div class="header">
-    <div class="q-name-wrapper">
-      <div class="q-name">
-        <!-- <a-tag color="red">已结束</a-tag> -->
-        <span class="text" @click.stop="editQName">{{ Q.name }}</span>
-        <icon class="icon-edit" name="edit" />
-      </div>
-      <div class="q-status">
-        <div class="tag small gray">自动保存: {{ savedTime }}</div>
-        <div class="tag small blue" v-if="isDraft">草稿模式</div>
+    <div class="left">
+      <icon name="arrow-right" class="ico-back" size="2em" @click="router.push('/wenjuan/project')" />
+      <div class="q-name-wrapper">
+        <div class="q-name">
+          <!-- <a-tag color="red">已结束</a-tag> -->
+          <span class="text" @click.stop="editQName">{{ Q.name }}</span>
+          <icon class="icon-edit" name="edit" />
+        </div>
+        <div class="q-status">
+          <div class="tag small gray">自动保存: {{ savedTime }}</div>
+          <div class="tag small blue" :class="isDraft ? 'show' : 'hide'">草稿模式</div>
+        </div>
       </div>
     </div>
     <div class="actions">
       <a-button @click="preview">预览</a-button>
-      <a-button @click="publish">发布</a-button>
+      <a-button @click="deleteDraft" v-if="isDraft">删除草稿</a-button>
+      <a-button @click="publish" :disabled="isPublish && !isModified">{{ isDraft ? '重新发布' : '已发布' }}</a-button>
     </div>
   </div>
+
   <div class="main">
     <aside class="q-types" width="200">
       <VueDraggable v-model="QTYPES" tag="ul" animation="100" :group="{ name: 'group', pull: 'clone', put: false }" :clone="onClone" :sort="false">
@@ -23,16 +28,16 @@
       </VueDraggable>
     </aside>
     <main class="q-items" data-simplebar>
-      <div class="tips" v-if="!qItems || qItems.length == 0">请点击题型按钮或将题型拖动到这里</div>
-      <VueDraggable v-model="qItems" tag="ul" handle=".handle" animation="100" group="group" ghostClass="dragging" @end="onDropped" @add="onDropped">
-        <li v-for="(item, index) in qItems" class="q-item" :id="item.id" :key="item.id" :class="index == currentItemIndex ? 'selected' : ''" @mouseup="changeEditingItem(index)">
+      <div class="tips" v-if="!Q.data || Q.data.length == 0">请点击题型按钮或将题型拖动到这里</div>
+      <VueDraggable v-model="Q.data" tag="ul" handle=".handle" animation="100" group="group" ghostClass="dragging" @end.stop="onDropped">
+        <li v-for="(item, index) in Q.data" class="q-item" :id="item.id" :key="item.id" :class="index == currentItemIndex ? 'selected' : ''" @mouseup="changeEditingItem(index)">
           <div class="title">
             <div class="number">
               <icon name="handle" class="handle"></icon>
               <span class="required" :class="{ visible: item.required }">*</span>
               {{ index + 1 }}.&nbsp;&nbsp;
             </div>
-            <XEditer class="text" v-model="qItems[index].title"></XEditer>
+            <XEditer class="text" v-model="Q.data[index].title"></XEditer>
             <!-- <div class="text">sdfhsdfhskdfgdfghjdgfjhsdfgjksh ghjsdfg jhsdfgjhsd gfjhsg dfjhsgdfjdfhsjdf</div> -->
             <div class="opr">
               <a-tooltip title="复制" placement="top"><icon name="copy" class="items" @click="duplicateItem(index)" /></a-tooltip>
@@ -80,7 +85,7 @@
 </router>
 
 <script setup>
-import { provide, ref, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent, watch, onMounted } from 'vue'
+import { provide, ref, reactive, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent, watch, onMounted, inject } from 'vue'
 import XEditer from '@/components/XEditer.vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import 'simplebar'
@@ -93,9 +98,10 @@ import Preview from './Preview.vue'
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 12)
 import { debounce } from 'lodash-es'
 import { cleanupConditions } from './cleanup'
+import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 
-const QTYPES = ref([
+const QTYPES = reactive([
   { id: '0', title: '填空题', type: 'FillBlank' },
   { id: '1', title: '多选题', type: 'MultiChoice' },
   { id: '2', title: '单选题', type: 'SingleChoice' },
@@ -105,6 +111,7 @@ const QTYPES = ref([
 ])
 
 function onClone(data) {
+  console.log('onClone', data)
   const d = JSON.parse(JSON.stringify(data))
   const id = nanoid()
   d.id = id
@@ -118,14 +125,17 @@ const QtypeComponents = {
   Rate: defineAsyncComponent(() => import('./components/Rate.vue')),
   NPS: defineAsyncComponent(() => import('./components/NPS.vue'))
 }
-const Q = ref({})
+const Q = reactive({ data: [] })
 const currentItemIndex = ref(0)
-const qItems = ref([])
+// const qItems = reactive([])
 const qId = ref(null)
+const pageReload = inject('pageReload')
 // 是否是发布状态
 const isPublish = ref(false)
 // 是否是草稿
 const isDraft = ref(false)
+// 是否是修改状态
+const isModified = ref(false)
 const qSettings = ref(null)
 const logicDrawer = ref(false)
 
@@ -133,66 +143,59 @@ const editNameModal = ref(false)
 const savedTime = ref('')
 const qNameInput = ref('')
 const previewModal = ref(false)
-provide('qItems', qItems)
+provide('Q', Q)
 provide('currentItemIndex', currentItemIndex)
 
 async function updateQName() {
-  Q.value.name = qNameInput.value
+  Q.name = qNameInput.value
   editNameModal.value = false
-  // savedTime.value = dayjs().format('MM-DD HH:mm:ss')
 }
 
 function editQName() {
+  qNameInput.value = Q.name
   editNameModal.value = true
-  qNameInput.value = Q.value.name
 }
 
 // 数据初始化
 
 function addItem(payload) {
   const data = JSON.parse(JSON.stringify(payload))
-
   data.id = nanoid()
-  qItems.value.push(data)
-  currentItemIndex.value = qItems.value.length - 1
+  Q.data.push(data)
+  currentItemIndex.value = Q.data.length - 1
   nextTick(() => {
     const el = document.getElementById(data.id)
     el.scrollIntoView({ block: 'nearest' })
   })
-  cleanupConditions(qItems.value)
+  cleanupConditions(Q.data)
 }
 
 function removeItem(index) {
-  // // 如果item存在于其他logic的connection中，则需要删除这些connection
-  // logics.value.forEach((logic) => {
-  //   logic.conditions = logic.conditions.filter((conn) => {
-  //     return conn.toLogicId !== qItems.value[index].id
-  //   })
-  // })
-  qItems.value.splice(index, 1)
-  if (qItems.value.length == 1) {
+  Q.data.splice(index, 1)
+  if (Q.data.length == 1) {
     currentItemIndex.value = 0
   } else {
     currentItemIndex.value = index - 1
   }
-  cleanupConditions(qItems.value)
+  cleanupConditions(Q.data)
 }
 
 function duplicateItem(index) {
-  // console.log(index)
-  qItems.value.splice(index, 0, JSON.parse(JSON.stringify(qItems.value[index])))
-  qItems.value[index + 1].id = nanoid()
+  const item = JSON.parse(JSON.stringify(Q.data[index]))
+  item.id = nanoid()
+  Q.data.splice(index, 0, item)
   currentItemIndex.value = index + 1
   nextTick(() => {
-    const el = document.getElementById(qItems.value[index + 1].id)
+    const el = document.getElementById(Q.data[index + 1].id)
     el.scrollIntoView({ block: 'nearest' })
   })
-  cleanupConditions(qItems.value)
+  cleanupConditions(Q.data)
 }
 
 function onDropped(e) {
+  e.stopPropagation()
   currentItemIndex.value = e.newIndex
-  cleanupConditions(qItems.value)
+  cleanupConditions(Q.data)
 }
 
 function changeEditingItem(index) {
@@ -203,39 +206,50 @@ function preview() {
   previewModal.value = true
 }
 
-function saveDraft() {
-  console.log('saveDraft')
-}
-
 // 判断本题是否有关联逻辑
 function hasLogic(item) {
-  if (qItems.value) return false
+  if (!Q.data) return false
   if (item.logic?.conditions?.length > 0) {
     return true
   } else {
-    return qItems.value.some((itm) => itm.logic?.conditions?.some((cond) => cond.toLogicId === item.id))
+    return Q.data.some((itm) => itm.logic?.conditions?.some((cond) => cond.toLogicId === item.id))
   }
 }
 
 async function save(data) {
   // 保存前先清理失效的逻辑选项
-  console.log('trigger save')
-  if (isDraft.value) {
-    await API.wenjuan.update({ _id: qId.value, draft: data })
-  } else {
-    await API.wenjuan.update({ _id: qId.value, ...data })
-  }
+  await API.wenjuan.update({ _id: qId.value, ...data })
   savedTime.value = dayjs().format('MM-DD HH:mm:ss')
 }
 
 function publish() {
-  console.log('publish')
+  if (isModified.value) {
+    save({ isPublish: true, data: Q.data, name: Q.name, settings: Q.settings, draft: null })
+  } else {
+    save({ isPublish: true, draft: null })
+  }
+  isDraft.value = false
+  isPublish.value = true
+  isModified.value = false
+}
+
+function deleteDraft() {
+  save({ draft: null })
+  isDraft.value = false
+  isModified.value = false
+  pageReload()
 }
 
 const debouncedSave = debounce(async (data) => {
   if (!qId.value) return
-  save(data)
+  if (isDraft.value) {
+    save({ draft: data })
+  } else {
+    save(data)
+  }
 }, 1000)
+
+// let zzz = null
 
 onBeforeMount(async () => {
   const id = router.currentRoute.value.params.id
@@ -249,26 +263,40 @@ onBeforeMount(async () => {
   }
   qId.value = t._id
   if (t.draft == null) {
-    Q.value = { name: t.name, data: t.data, settings: t.settings }
+    Q.name = t.name
+    Q.data = t.data
+    Q.settings = t.settings
     isDraft.value = false
   } else {
-    Q.value = { name: t.draft.name, data: t.draft.data, settings: t.draft.settings }
+    Q.name = t.draft.name
+    Q.data = t.draft.data
+    Q.settings = t.draft.settings
     isDraft.value = true
   }
-  console.log('qValue', t, Q.value.data)
-  qItems.value = Q.value.data
+  Q.data = [...Q.data]
   isPublish.value = t.isPublish
-  qSettings.value = Q.value.settings
+  qSettings.value = Q.settings
   savedTime.value = dayjs(t.updatedAt).format('MM-DD HH:mm:ss')
+  // zzz = Q.data
 
   watch(
     Q,
     (newValue) => {
-      console.log('value changeed')
+      // console.log('oldValue', JSON.stringify(zzz))
+      // console.log('newValue', JSON.stringify(newValue))
+      // console.log('zzz', JSON.stringify(zzz) === JSON.stringify(newValue))
+      // zzz = newValue
+      console.log('NEW !!!! Q changeed')
+      if (!isModified.value && isPublish.value) {
+        message.info({ content: '切换为草稿模式，修改不会影响正在收集的数据。点击"重新发布"应用修改。', key: 'Q_CHANGED' })
+      }
       debouncedSave(newValue)
-      isDraft.value = true
+      isModified.value = true
+      if (isPublish.value) {
+        isDraft.value = true
+      }
     },
-    { deep: true }
+    { deep: true, immediate: false }
   )
 })
 
@@ -285,11 +313,31 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 8px;
   height: 54px;
   background: var(--bg-primary);
   max-width: 100%;
   border-bottom: 1px solid var(--border-medium);
+  .left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ico-back {
+    cursor: pointer;
+    color: var(--text-secondary);
+    transform: rotate(180deg);
+    transition:
+      color 0.15s ease,
+      background 0.15s ease;
+    border-radius: 5px;
+    padding: 4px;
+
+    &:hover {
+      background: var(--bg-tertiary);
+      color: var(--c-text-primary);
+    }
+  }
 
   .q-name-wrapper {
     display: flex;
@@ -333,6 +381,7 @@ onBeforeUnmount(() => {
   }
 
   .actions {
+    margin-right: 6px;
     display: flex;
     gap: 5px;
   }
@@ -680,6 +729,7 @@ onBeforeUnmount(() => {
 }
 .tag {
   border-radius: 3px;
+  transition: opacity 0.15s ease;
   &.small {
     font-size: 0.8em;
     padding: 2px 4px;

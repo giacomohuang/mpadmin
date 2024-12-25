@@ -1,13 +1,13 @@
 <template>
   <div class="icon-select">
     <div class="search-bar">
-      <a-input v-model:value="keyword" :placeholder="$t('sys.permission.resource.searchIcon')" class="!w-[200px]">
+      <a-input v-model:value="keyword" :placeholder="t('sys.permission.resource.searchIcon')" class="!w-[200px]">
         <template #prefix>
           <icon name="search" style="color: var(--text-tertiary)" />
         </template>
       </a-input>
     </div>
-    <div class="title">{{ $t('comp.iconSelect.systemIcons') }}</div>
+    <div class="title">{{ t('comp.iconSelect.systemIcons') }}</div>
     <div class="icon-grid">
       <div v-for="icon in filteredIcons" :key="icon" class="icon-item" @click="selectIcon(1, icon)">
         <Icon :name="icon" size="2em" />
@@ -16,14 +16,14 @@
     </div>
     <a-divider />
     <div class="title">
-      <div>{{ $t('comp.iconSelect.customIcons') }}</div>
+      <div>{{ t('comp.iconSelect.customIcons') }}</div>
       <a-upload accept=".svg" :show-upload-list="false" :before-upload="handleBeforeUpload" :custom-request="handleCustomUpload">
-        <a-button type="primary">{{ $t('common.upload') }}</a-button>
+        <a-button type="primary">{{ t('common.upload') }}</a-button>
       </a-upload>
       <a-tag v-if="uploadStatus.show" :color="uploadStatus.type">{{ uploadStatus.message }}</a-tag>
     </div>
     <div v-if="filteredCustomIcons.length == 0">
-      <div class="no-icon">{{ $t('comp.iconSelect.noIcons') }}</div>
+      <div class="no-icon">{{ t('comp.iconSelect.noIcons') }}</div>
     </div>
     <div v-else class="icon-grid">
       <div v-for="icon in filteredCustomIcons" :key="icon._id" class="icon-item" @click="selectIcon(2, icon.path)">
@@ -48,6 +48,7 @@ import API from '@/api/API'
 import debounceRef from '@/js/debounceRef'
 import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const emit = defineEmits(['iconSelect'])
 const keyword = debounceRef('', 300)
 const icons = ref([])
@@ -64,8 +65,6 @@ const pagination = reactive({
   total: 0,
   loading: false
 })
-
-const { t } = useI18n()
 
 // 处理上传前的验证
 const handleBeforeUpload = (file) => {

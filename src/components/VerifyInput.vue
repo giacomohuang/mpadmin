@@ -133,7 +133,7 @@ const onKeyUp = (e) => {
   opacity: 1;
   width: 20px;
   height: 20px;
-  border: 2px solid var(--c-brand100);
+  border: 2px solid var(--c-brand);
   border-top-color: rgba(0, 0, 0, 0.2);
   border-right-color: rgba(0, 0, 0, 0.2);
   border-bottom-color: rgba(0, 0, 0, 0.2);

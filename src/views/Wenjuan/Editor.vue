@@ -1,4 +1,4 @@
-<template>
+<template v-if="!isLoading">
   <div class="header">
     <div class="left">
       <icon name="arrow-right" class="ico-back" size="2em" @click="router.push('/wenjuan/project')" />
@@ -10,14 +10,15 @@
         </div>
         <div class="q-status">
           <div class="tag small gray">自动保存: {{ savedTime }}</div>
-          <div class="tag small blue" :class="isDraft ? 'show' : 'hide'">草稿模式</div>
+          <div class="tag small blue" v-if="isDraft">草稿模式</div>
+          <div class="loading" :class="isSaving ? 'show' : 'hide'" />
         </div>
       </div>
     </div>
     <div class="actions">
-      <a-button @click="preview">预览</a-button>
-      <a-button @click="deleteDraft" v-if="isDraft">删除草稿</a-button>
-      <a-button @click="publish" :disabled="isPublish && !isModified">{{ isDraft ? '重新发布' : '已发布' }}</a-button>
+      <a-button @click="preview" :disabled="isSaving">预览</a-button>
+      <a-button @click="deleteDraft" :disabled="isSaving" v-if="isDraft">删除草稿</a-button>
+      <a-button @click="publish" :disabled="isSaving || (isPublish && !isModified)">{{ publishText }}</a-button>
     </div>
   </div>
 
@@ -61,11 +62,11 @@
     <a-input v-model:value="qNameInput" size="large" placeholder="请输入问卷名称" style="margin: 40px 0" />
   </a-modal>
   <Teleport to="body">
-    <div class="drawer" v-if="logicDrawer">
-      <div class="close" @click="logicDrawer = false">
+    <div class="drawer" v-if="logicDrawer" @animationend="showLogicContent = true">
+      <div class="close" @click="closeLogicDrawer">
         <icon name="remove" />
       </div>
-      <Logic />
+      <Logic v-if="showLogicContent" />
     </div>
   </Teleport>
   <a-modal v-model:open="previewModal" :footer="null" width="500px" wrapClassName="preview-modal">
@@ -85,7 +86,7 @@
 </router>
 
 <script setup>
-import { provide, ref, reactive, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent, watch, onMounted, inject } from 'vue'
+import { provide, ref, reactive, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent, watch, onMounted, inject, computed } from 'vue'
 import XEditer from '@/components/XEditer.vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import 'simplebar'
@@ -132,12 +133,15 @@ const qId = ref(null)
 const pageReload = inject('pageReload')
 // 是否是发布状态
 const isPublish = ref(false)
+const isSaving = ref(false)
+const isLoading = ref(true)
 // 是否是草稿
 const isDraft = ref(false)
 // 是否是修改状态
 const isModified = ref(false)
 const qSettings = ref(null)
 const logicDrawer = ref(false)
+const showLogicContent = ref(false)
 
 const editNameModal = ref(false)
 const savedTime = ref('')
@@ -145,6 +149,14 @@ const qNameInput = ref('')
 const previewModal = ref(false)
 provide('Q', Q)
 provide('currentItemIndex', currentItemIndex)
+
+const publishText = computed(() => {
+  if (isDraft.value) {
+    return '重新发布'
+  } else {
+    return '已发布'
+  }
+})
 
 async function updateQName() {
   Q.name = qNameInput.value
@@ -218,8 +230,15 @@ function hasLogic(item) {
 
 async function save(data) {
   // 保存前先清理失效的逻辑选项
-  await API.wenjuan.update({ _id: qId.value, ...data })
-  savedTime.value = dayjs().format('MM-DD HH:mm:ss')
+  isSaving.value = true
+  try {
+    await API.wenjuan.update({ _id: qId.value, ...data })
+    savedTime.value = dayjs().format('MM-DD HH:mm:ss')
+  } catch (e) {
+    message.error('保存失败')
+  } finally {
+    isSaving.value = false
+  }
 }
 
 function publish() {
@@ -256,10 +275,24 @@ onBeforeMount(async () => {
   let t = {}
   if (!id) {
     t = { _id: null, isPublish: false, name: '未命名问卷', settings: {}, draft: null, data: [] }
-    let res = await API.wenjuan.update(t) // console.res
-    router.replace(`/wenjuan/editor/${res._id}`)
+    isLoading.value = true
+    try {
+      let res = await API.wenjuan.update(t) // console.res
+      router.replace(`/wenjuan/editor/${res._id}`)
+    } catch (e) {
+      router.replace('/404?type=wenjuan')
+    } finally {
+      isLoading.value = false
+    }
   } else {
-    t = await API.wenjuan.get(id)
+    isLoading.value = true
+    try {
+      t = await API.wenjuan.get(id)
+    } catch (e) {
+      router.replace('/404?type=wenjuan')
+    } finally {
+      isLoading.value = false
+    }
   }
   qId.value = t._id
   if (t.draft == null) {
@@ -305,6 +338,11 @@ onMounted(() => {})
 onBeforeUnmount(() => {
   // dndQItems.destroy()
 })
+
+function closeLogicDrawer() {
+  showLogicContent.value = false
+  logicDrawer.value = false
+}
 </script>
 
 <style scoped lang="scss">
@@ -377,6 +415,7 @@ onBeforeUnmount(() => {
   .q-status {
     display: flex;
     flex-direction: row;
+    align-items: center;
     gap: 5px;
   }
 
@@ -662,17 +701,36 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   bottom: 0;
-
   background: var(--bg-primary);
   z-index: 1000;
   overflow: hidden;
+  animation: drawer-open 0.3s ease-out;
+  transform-origin: center;
 
   .close {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 8px;
+    right: 8px;
+    padding: 4px;
+    border-radius: 4px;
     z-index: 1001;
     cursor: pointer;
+    color: var(--text-secondary);
+    &:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+  }
+}
+
+@keyframes drawer-open {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
@@ -743,6 +801,27 @@ onBeforeUnmount(() => {
     color: #1677ff;
     background: #e6f4ff;
     border-color: #91caff;
+  }
+}
+
+.loading {
+  // opacity: 1;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--c-brand);
+  border-top-color: var(--border-medium);
+  border-right-color: var(--border-medium);
+  border-bottom-color: var(--border-medium);
+  border-radius: 100%;
+  animation: circle 1s linear infinite;
+}
+
+@keyframes circle {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 </style>

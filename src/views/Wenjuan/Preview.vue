@@ -68,7 +68,7 @@
               <!-- 图片选择 -->
               <template v-if="item.type === 'ImageChoice'">
                 <div class="image-choice">
-                  <div v-for="opt in item.options" :key="opt.id" class="image-item" :class="{ active: answers[item.id] === opt.id }" @click="answers[item.id] = opt.id">
+                  <div v-for="opt in item.options" :key="opt.id" class="image-item" :class="{ active: answers[item.id] === opt.id }" @click="answers[item.id] = answers[item.id] === opt.id ? null : opt.id">
                     <img :src="OSS_PREFIX + opt.imageUrl" :alt="opt.text" />
                     <div class="image-text" v-html="opt.text"></div>
                   </div>
@@ -119,7 +119,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, h } from 'vue'
+import { ref, inject, onMounted, h, watch } from 'vue'
 import { message } from 'ant-design-vue'
 import Icon from '@/components/Icon.vue'
 import 'simplebar'
@@ -130,6 +130,15 @@ const answers = ref({})
 const submitting = ref(false)
 const currentTime = ref('')
 const OSS_PREFIX = import.meta.env.VITE_UPLOAD_URL_PREFIX
+
+// 监听答案变化
+watch(
+  answers,
+  (newVal) => {
+    console.log('答案已更新:', newVal)
+  },
+  { deep: true }
+)
 
 // 提交答案
 async function submit() {
@@ -154,6 +163,7 @@ function updateTime() {
 }
 
 onMounted(() => {
+  console.log(answers.value)
   updateTime()
   setInterval(updateTime, 1000)
 })

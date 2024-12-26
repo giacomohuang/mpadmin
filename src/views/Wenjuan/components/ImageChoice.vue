@@ -14,7 +14,7 @@
 
   <!-- 选项设置 -->
   <Teleport to="#__WENJUAN_SETTINGS_CONTENT" v-if="currentItemIndex === qItemIndex">
-    <div class="num">{{ qItemIndex + 1 }}. 单选题</div>
+    <div class="num">{{ qItemIndex + 1 }}. 图片选择题</div>
     <a-tabs v-model:activeKey="tabName" type="card" class="tabs">
       <!-- Tabs:题目设置 -->
       <a-tab-pane key="item" tab="题目设置">
@@ -226,6 +226,7 @@ h4 {
   cursor: pointer;
   color: var(--text-secondary);
   border-radius: 50%;
+  padding: 2px;
   border: 1px solid var(--border-dark);
   background-color: var(--bg-primary);
   &:link,

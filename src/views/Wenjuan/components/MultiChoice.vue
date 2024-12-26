@@ -77,7 +77,6 @@ const { qItemIndex } = defineProps(['qItemIndex'])
 const Q = inject('Q')
 const currentItemIndex = inject('currentItemIndex')
 const currentOptionIndex = ref(-1)
-// const hoveredOptionIndex = ref(-1)
 const autoFocusIndex = ref(-1)
 const tabName = ref('')
 
@@ -157,22 +156,9 @@ function setTab() {
 }
 
 onBeforeMount(() => {
-  // console.log('qItems', Q.data)
-  // Q.data[qItemIndex].minRange = Q.data[qItemIndex].minRange || 0
-  // Q.data[qItemIndex].maxRange = Q.data[qItemIndex].maxRange || 0
   if (!Q.data[qItemIndex].options) {
     Q.data[qItemIndex].options = [{ text: '选项1', id: nanoid(), fill: { show: false, length: null, type: 'text', required: false } }]
   }
-  // qItems[qItemIndex].options.forEach((option) => {
-  //   if (!option.fill) {
-  //     option.fill = {
-  //       show: false,
-  //       length: null,
-  //       type: 'text',
-  //       required: false
-  //     }
-  //   }
-  // })
   setTab()
 })
 
@@ -320,9 +306,13 @@ h4 {
 .remove {
   flex-shrink: 0;
   margin-left: 6px;
+  padding: 2px;
+  border: 1px solid var(--border-dark);
+  border-radius: 50%;
   &:hover,
   &:active {
     color: var(--c-red);
+    border-color: var(--c-red);
   }
 }
 

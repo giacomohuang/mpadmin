@@ -701,10 +701,10 @@ function closeLogicDrawer() {
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   z-index: 1000;
   overflow: hidden;
-  animation: drawer-open 0.3s ease-out;
+  animation: drawer-open 0.2s ease-out;
   transform-origin: center;
 
   .close {
@@ -726,11 +726,9 @@ function closeLogicDrawer() {
 @keyframes drawer-open {
   from {
     transform: scale(0);
-    opacity: 0;
   }
   to {
     transform: scale(1);
-    opacity: 1;
   }
 }
 

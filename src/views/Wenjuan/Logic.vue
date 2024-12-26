@@ -25,34 +25,34 @@
 
           <div class="body">
             <div class="item action">
-              <div class="name">跳转到本题</div>
+              <div class="name">跳转到本题，否则不跳转</div>
               <div class="port input" data-port-id="jump" @mousedown.stop="handlePortDragStart($event, item.id, 'jump', 'input')"></div>
             </div>
             <div class="item action">
-              <div class="name">显示本题</div>
+              <div class="name">显示本题，否则隐藏</div>
               <div class="port input" data-port-id="show" @mousedown.stop="handlePortDragStart($event, item.id, 'show', 'input')"></div>
             </div>
             <div class="item action">
-              <div class="name">隐藏本题</div>
+              <div class="name">隐藏本题，否则显示</div>
               <div class="port input" data-port-id="hide" @mousedown.stop="handlePortDragStart($event, item.id, 'hide', 'input')"></div>
             </div>
             <div class="split-line"></div>
 
             <!------output--------->
             <div class="item condition">
-              <div class="name">本题显示</div>
+              <div class="name">如果本题显示</div>
               <div class="port output" data-port-id="show" @mousedown.stop="handlePortDragStart($event, item.id, 'show', 'output')"></div>
             </div>
             <div class="item condition">
-              <div class="name">本题隐藏</div>
+              <div class="name">如果本题隐藏</div>
               <div class="port output" data-port-id="hide" @mousedown.stop="handlePortDragStart($event, item.id, 'hide', 'output')"></div>
             </div>
             <div class="item condition">
-              <div class="name">本题已答</div>
+              <div class="name">如果本题已答</div>
               <div class="port output" data-port-id="answered" @mousedown.stop="handlePortDragStart($event, item.id, 'answered', 'output')"></div>
             </div>
             <div class="item condition">
-              <div class="name">本题未答</div>
+              <div class="name">如果本题未答</div>
               <div class="port output" data-port-id="unanswered" @mousedown.stop="handlePortDragStart($event, item.id, 'unanswered', 'output')"></div>
             </div>
             <div class="split-line"></div>

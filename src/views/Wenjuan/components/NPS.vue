@@ -279,11 +279,15 @@ onBeforeMount(() => {
 
   .remove-tip {
     flex-shrink: 0;
-    cursor: pointer;
+    padding: 2px;
+    border: 1px solid var(--border-medium);
+    border-radius: 50%;
     color: var(--text-secondary);
-
-    &:hover {
+    cursor: pointer;
+    &:hover,
+    &:active {
       color: var(--c-red);
+      border-color: var(--c-red);
     }
   }
 }

@@ -144,16 +144,6 @@ onBeforeMount(() => {
 
 onMounted(() => {})
 
-// // init
-// // 赋予默认值
-
-// 可选范围-根据最小值的选择修正最大值
-function fixMaxRange() {
-  if (Q.data[qItemIndex].maxRange < Q.data[qItemIndex].minRange && Q.data[qItemIndex].maxRange != 0) {
-    Q.data[qItemIndex].maxRange = Q.data[qItemIndex].minRange
-  }
-}
-
 function handleFillChange(checked) {
   if (!checked) {
     Q.data[qItemIndex].options[currentOptionIndex.value].fill.length = null

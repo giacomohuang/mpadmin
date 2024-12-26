@@ -10,9 +10,9 @@
           <mp-tag size="small" color="gray" class="resource-code" :title="t('sys.permission.resource.copyToClipboard')" @click="copyToClipBoard($event, resource.code)">{{ resource.code }}</mp-tag>
         </div>
         <div class="tools">
-          <icon name="edit" size="1.8em" class="edit" @click="openEditor(resource, EDITOR_MODE.EDIT)" :title="t('common.edit')" />
-          <icon v-if="resource.type === 1" size="1.8em" name="add" class="add" @click="openEditor(resource, EDITOR_MODE.ADD)" :title="t('sys.permission.resource.addSubResource')" />
-          <icon name="del" size="1.8em" class="del" @click="confirm(resource.path, resource.pid)" :title="t('common.del')" />
+          <icon name="edit" class="opr edit" @click="openEditor(resource, EDITOR_MODE.EDIT)" :title="t('common.edit')" />
+          <icon v-if="resource.type === 1" name="add" class="opr add" @click="openEditor(resource, EDITOR_MODE.ADD)" :title="t('sys.permission.resource.addSubResource')" />
+          <icon name="del" class="opr del" @click="confirm(resource.path, resource.pid)" :title="t('common.del')" />
         </div>
       </div>
       <ResourceList v-show="!collapseIds.has(resource.id)" :level="lv + 1" :data="resource.children" @open="openEditor" @remove="confirm" @toggleCollapse="toggleCollapse" />
@@ -119,25 +119,36 @@ function copyToClipBoard(ev, text) {
 
 .tools {
   opacity: 0;
-  transition: opacity 150ms ease-in-out;
-}
+  transition: opacity 0.15s ease-in-out;
 
-.del {
-  margin-right: 12px;
-  cursor: pointer;
-  color: var(--c-red-600);
-}
+  .opr {
+    cursor: pointer;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 50%;
+    padding: 2px;
+  }
 
-.add {
-  margin: 0 8px;
-  cursor: pointer;
-  color: var(--c-brand-600);
-}
+  .del {
+    margin-right: 12px;
+    cursor: pointer;
+    color: var(--c-red-600);
+    border-color: var(--c-red-600);
+  }
 
-.edit {
-  margin: 0 8px;
-  cursor: pointer;
-  color: var(--c-green-600);
+  .add {
+    margin: 0 8px;
+    cursor: pointer;
+    color: var(--c-brand-600);
+    border-color: var(--c-brand-600);
+  }
+
+  .edit {
+    margin: 0 8px;
+    cursor: pointer;
+    color: var(--c-green-600);
+    border-color: var(--c-green-600);
+  }
 }
 
 .resource-content {

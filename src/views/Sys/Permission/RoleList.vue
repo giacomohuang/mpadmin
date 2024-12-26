@@ -13,9 +13,9 @@
           </div>
         </div>
         <div class="tools">
-          <icon name="edit" size="1.8em" class="edit" @click.stop="openEditor(role, EDITOR_MODE.EDIT)" />
-          <icon name="add" size="1.8em" class="add" @click.stop="openEditor(role, EDITOR_MODE.ADD)" />
-          <icon name="del" size="1.8em" class="del" @click.stop="confirm(role.path)" />
+          <icon name="edit" class="opr edit" @click.stop="openEditor(role, EDITOR_MODE.EDIT)" />
+          <icon name="add" class="opr add" @click.stop="openEditor(role, EDITOR_MODE.ADD)" />
+          <icon name="del" class="opr del" @click.stop="confirm(role.path)" />
         </div>
       </div>
       <RoleList v-show="!collapseRoleIds.has(role.id)" :level="lv + 1" :data="role.children" @open="openEditor" @remove="confirm" @toggleCollapse="toggleCollapse" />
@@ -87,41 +87,40 @@ function openEditor(parent, mode) {
 
 .tools {
   opacity: 0;
-  transition: opacity 150ms ease-in-out;
+  transition: opacity 0.15s ease-in-out;
+
+  .opr {
+    cursor: pointer;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 50%;
+    padding: 2px;
+  }
+
+  .del {
+    margin-right: 12px;
+    cursor: pointer;
+    color: var(--c-red-600);
+    border-color: var(--c-red-600);
+  }
+
+  .add {
+    margin: 0 8px;
+    cursor: pointer;
+    color: var(--c-brand-600);
+    border-color: var(--c-brand-600);
+  }
+
+  .edit {
+    margin: 0 8px;
+    cursor: pointer;
+    color: var(--c-green-600);
+    border-color: var(--c-green-600);
+  }
 }
 
 .item:hover .tools {
   opacity: 1;
-}
-
-.del {
-  margin-right: 12px;
-  cursor: pointer;
-  color: var(--c-red-600);
-
-  &:hover {
-    color: var(--c-red-400);
-  }
-}
-
-.add {
-  margin: 0 8px;
-  cursor: pointer;
-  color: var(--c-brand-600);
-
-  &:hover {
-    color: var(--c-brand-400);
-  }
-}
-
-.edit {
-  margin: 0 8px;
-  cursor: pointer;
-  color: var(--c-green-600);
-
-  &:hover {
-    color: var(--c-green-400);
-  }
 }
 
 .role-content {

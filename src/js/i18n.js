@@ -1,6 +1,12 @@
 import { nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { router } from '../router/router'
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
+import 'dayjs/locale/zh-hk'
+import 'dayjs/locale/ja'
+import 'dayjs/locale/ko'
+import 'dayjs/locale/ar'
 
 // 支持的语言
 const LANGS = [
@@ -14,7 +20,7 @@ const LANGS = [
 // 默认语言
 const DEFAULT_LANG = 'zh-CN'
 // 从右到左的语言：阿拉伯语、希伯来语、波斯语、乌尔都语
-const RTL_LANGS = ['ar']
+const RTL_LANGS = ['ar', 'he', 'fa', 'ur']
 
 const sysLocale = navigator.language
 // const localeFiles = import.meta.glob('../locales/**/*.json')
@@ -36,11 +42,7 @@ export async function changeLocale(locale) {
   // await loadLocaleData(locale, router.currentRoute.value.path)
   if (!locale) locale = getLocale()
   await loadLocaleData(locale)
-  if (i18n.mode === 'legacy') {
-    i18n.global.locale = locale
-  } else {
-    i18n.global.locale.value = locale
-  }
+  i18n.global.locale.value = locale
   localStorage.setItem('locale', locale)
   document.querySelector('html').setAttribute('lang', locale)
 
@@ -65,6 +67,7 @@ export async function loadLocaleData(locale) {
   // const p = `../locales/${locale}${path}.json`
   try {
     const lang = await import(`../locales/${locale}.json`)
+    dayjs.locale(locale.toLowerCase())
     // console.log(lang)
     i18n.global.setLocaleMessage(locale, lang.default)
     // const common = await import(`../locales/${locale}/common.json`)

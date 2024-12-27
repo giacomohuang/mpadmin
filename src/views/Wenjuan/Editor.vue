@@ -15,8 +15,17 @@
         </div>
       </div>
     </div>
+    <div class="mid">
+      <a-space>
+        <template #split>
+          <a-divider type="vertical" style="border-color: var(--border-dark)" />
+        </template>
+        <a-button type="text" size="large" :disabled="isSaving" @click="settingsModal = true"><icon name="settings" />设置</a-button>
+        <a-button type="text" size="large" :disabled="isSaving" @click="logicDrawer = true"><icon name="logic" />逻辑</a-button>
+        <a-button type="text" size="large" :disabled="isSaving" @click="preview"><icon name="preview" />预览</a-button>
+      </a-space>
+    </div>
     <div class="actions">
-      <a-button @click="preview" :disabled="isSaving">预览</a-button>
       <a-button @click="deleteDraft" :disabled="isSaving" v-if="isDraft">删除草稿</a-button>
       <a-button @click="publish" :disabled="isSaving || (isPublish && !isModified)">{{ publishText }}</a-button>
     </div>
@@ -46,7 +55,7 @@
             </div>
           </div>
           <div class="content"><component :is="QtypeComponents[item.type]" :qItemIndex="index" :key="item.id"></component></div>
-          <div class="logic-tag" @click="logicDrawer = true" :class="hasLogic(item) ? 'enabled' : ''">逻辑</div>
+          <div class="logic-tag" @click="logicDrawer = true" :class="hasLogic(item) ? 'enabled' : ''"><icon name="logic" /></div>
         </li>
       </VueDraggable>
     </main>
@@ -77,6 +86,10 @@
     </template>
     <Preview v-if="previewModal" />
   </a-modal>
+
+  <a-modal v-model:open="settingsModal" :footer="null" style="width: 800px" title="设置">
+    <Settings v-if="settingsModal" />
+  </a-modal>
 </template>
 
 <router lang="json">
@@ -94,6 +107,7 @@ import '@/assets/simplebar.css'
 import API from '@/api/API'
 import { customAlphabet } from 'nanoid'
 import Logic from './Logic.vue'
+import Settings from './Settings.vue'
 import { router } from '@/router/router'
 import Preview from './Preview.vue'
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 12)
@@ -147,8 +161,10 @@ const editNameModal = ref(false)
 const savedTime = ref('')
 const qNameInput = ref('')
 const previewModal = ref(false)
+const settingsModal = ref(false)
 provide('Q', Q)
 provide('currentItemIndex', currentItemIndex)
+provide('settingsModal', settingsModal)
 
 const publishText = computed(() => {
   if (isDraft.value) {
@@ -243,9 +259,9 @@ async function save(data) {
 
 function publish() {
   if (isModified.value) {
-    save({ isPublish: true, data: Q.data, name: Q.name, settings: Q.settings, draft: null })
+    save({ isPublish: true, data: Q.data, name: Q.name, settings: Q.settings, draft: null, isDraft: false })
   } else {
-    save({ isPublish: true, draft: null })
+    save({ isPublish: true, draft: null, isDraft: false })
   }
   isDraft.value = false
   isPublish.value = true
@@ -253,7 +269,7 @@ function publish() {
 }
 
 function deleteDraft() {
-  save({ draft: null })
+  save({ draft: null, isDraft: false })
   isDraft.value = false
   isModified.value = false
   pageReload()
@@ -262,9 +278,9 @@ function deleteDraft() {
 const debouncedSave = debounce(async (data) => {
   if (!qId.value) return
   if (isDraft.value) {
-    save({ draft: data })
+    save({ draft: data, isDraft: true })
   } else {
-    save(data)
+    save({ ...data, isDraft: false })
   }
 }, 1000)
 
@@ -274,7 +290,7 @@ onBeforeMount(async () => {
   const id = router.currentRoute.value.params.id
   let t = {}
   if (!id) {
-    t = { _id: null, isPublish: false, name: '未命名问卷', settings: {}, draft: null, data: [] }
+    t = { _id: null, isPublish: false, name: '未命名问卷', settings: {}, draft: null, data: [], isDraft: false }
     isLoading.value = true
     try {
       let res = await API.wenjuan.update(t) // console.res
@@ -352,7 +368,7 @@ function closeLogicDrawer() {
   align-items: center;
   justify-content: space-between;
   padding: 0 8px;
-  height: 54px;
+  height: 60px;
   background: var(--bg-primary);
   max-width: 100%;
   border-bottom: 1px solid var(--border-medium);
@@ -396,7 +412,7 @@ function closeLogicDrawer() {
 
     .text {
       cursor: pointer;
-      font-size: 1em;
+      font-size: 1.2em;
       font-weight: 500;
       max-width: 400px;
       overflow: hidden;
@@ -433,27 +449,8 @@ function closeLogicDrawer() {
   grid-template-columns: 200px 1fr 300px;
   background: var(--bg-primary);
   //撑满高度
-  height: calc(100vh - 142px);
+  height: calc(100vh - 124px);
   overflow: hidden;
-}
-
-.footer {
-  height: 24px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  background: var(--bg-primary);
-  border-top: 1px solid var(--border-medium);
-  gap: 12px;
-
-  .saved-time {
-    color: var(--text-secondary);
-
-    &.blink {
-      animation: blink 0.15s 6;
-    }
-  }
 }
 
 @keyframes blink {
@@ -523,8 +520,9 @@ function closeLogicDrawer() {
   position: relative;
   // min-width: 400px;
   grid-area: q-items;
-  overflow-x: hidden;
-  max-height: calc(100vh - 142px);
+  overflow: auto;
+  max-height: calc(100vh - 124px);
+  min-width: 600px;
   background: var(--bg-secondary);
 
   .selected {
@@ -545,7 +543,6 @@ function closeLogicDrawer() {
   }
 
   ul {
-    min-width: 400px;
     position: relative;
     z-index: 2;
     min-height: 80px;
@@ -786,6 +783,7 @@ function closeLogicDrawer() {
 .tag {
   border-radius: 3px;
   transition: opacity 0.15s ease;
+  text-wrap: nowrap;
   &.small {
     font-size: 0.8em;
     padding: 2px 4px;

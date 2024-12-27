@@ -8,15 +8,21 @@
     <ul class="list">
       <li class="item" v-for="item in wenjuan" :key="item._id" @click="handleEdit(item._id)">
         <icon name="remove" class="ico-remove" @click.stop="handleRemove(item._id)" />
-        <div class="title">{{ item.name }}</div>
-        <div class="time">{{ formatDate(item.updatedAt) }}</div>
+        <div class="title">{{ item.isDraft ? item.draft.name : item.name }}</div>
+        <div class="time">{{ dayjs(item.updatedAt).fromNow() }}更新</div>
+        <div class="footer">
+          <div class="status">
+            <mp-tag size="small" :color="item.isPublish ? (dayjs(item.endTime).isAfter(dayjs()) ? 'gray' : 'green') : 'gray'">{{ item.isPublish ? (dayjs(item.endTime).isAfter(dayjs()) ? '已结束' : '收集中') : '未发布' }}</mp-tag>
+            <mp-tag size="small" color="blue" v-if="item.isDraft">草稿模式</mp-tag>
+          </div>
+        </div>
       </li>
       <li class="item add" @click="handleAdd">
-        <icon name="plus" />
+        <icon name="plus" size="2em" />
       </li>
     </ul>
     <div class="pagination">
-      <a-pagination v-model:current="current" :total="total" :pageSize="pageSize" @change="handlePageChange" />
+      <a-pagination v-model:current="current" :total="total" :pageSize="pageSize" @change="handlePageChange" hideOnSinglePage />
     </div>
   </div>
 </template>
@@ -26,16 +32,15 @@ import { ref, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import API from '@/api/API'
 import { useRouter } from 'vue-router'
+import relativeTime from 'dayjs/plugin/relativeTime'
+
+dayjs.extend(relativeTime)
 
 const router = useRouter()
 const wenjuan = ref([])
 const current = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
-
-const formatDate = (date) => {
-  return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
-}
 
 const handleEdit = (id) => {
   router.push(`/wenjuan/editor/${id}`)
@@ -77,80 +82,126 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .project {
-  padding: 20px;
+  padding: 30px;
+  margin: 0 auto;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-}
-.title {
-  font-size: 1.5em;
-  font-weight: bold;
+  margin-bottom: 30px;
+  .title {
+    margin-left: 16px;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+    position: relative;
+  }
 }
 
 .list {
   position: relative;
   display: flex;
   flex-wrap: wrap;
-  gap: 40px 20px;
+  gap: 40px 30px;
   .item {
     position: relative;
     cursor: pointer;
-    border: 1px solid var(--c-gray-300);
+    border: 1px solid var(--border-medium);
     background: var(--bg-primary);
-    width: 200px;
-    height: 150px;
-    padding: 10px;
-    border-radius: 5px;
-    // margin-bottom: 10px;
+    width: 260px;
+    height: 180px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+
     .title {
-      font-size: 1em;
+      font-size: 16px;
+      margin: 16px 0 8px 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+
     .time {
-      font-size: 0.8em;
+      padding-left: 16px;
+      font-size: 13px;
       color: var(--c-gray-500);
     }
+
     &:hover {
-      border: 1px solid var(--c-brand);
+      transform: translateY(-2px);
+
+      border-color: var(--c-brand);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
       .ico-remove {
         opacity: 1;
+        transform: scale(1);
       }
+
       &.add {
         color: var(--c-brand);
+        border-color: var(--c-brand);
+        // background: color-mix(in srgb, var(--c-brand) 2%, transparent);
       }
     }
+
     &.add {
-      border-style: dashed;
+      // border: 2px dashed var(--c-gray);
       display: flex;
       justify-content: center;
       align-items: center;
       background: var(--bg-primary);
+      color: var(--text-secondary);
+      transition: all 0.3s ease;
     }
   }
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    bottom: 0px;
+    position: absolute;
+    width: 100%;
+    padding: 16px;
+    // background: linear-gradient(to bottom, transparent, var(--bg-primary) 20%);
+  }
+
+  .status {
+    display: flex;
+    gap: 6px;
+  }
 }
+
 .ico-remove {
   opacity: 0;
   position: absolute;
-  top: -10px;
-  right: -10px;
+  top: -12px;
+  right: -12px;
   background: var(--bg-primary);
   border: 1px solid var(--c-brand);
   border-radius: 50%;
-  padding: 3px;
+  padding: 4px;
   cursor: pointer;
   color: var(--c-brand);
+  transform: scale(0.8);
+  transition: all 0.3s ease;
+  z-index: 2;
+
   &:hover {
     border-color: var(--c-red);
     color: var(--c-red);
+    transform: scale(1.1) !important;
   }
-  transition: opacity 0.15s;
 }
 
 .pagination {
-  margin-top: 20px;
+  margin-top: 40px;
   display: flex;
   justify-content: center;
 }

@@ -276,9 +276,13 @@ h4 {
 .remove {
   flex-shrink: 0;
   margin-left: 6px;
+  padding: 2px;
+  border: 1px solid var(--border-dark);
+  border-radius: 50%;
   &:hover,
   &:active {
     color: var(--c-red);
+    border-color: var(--c-red);
   }
 }
 

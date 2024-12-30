@@ -12,7 +12,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@mcistudio/vue-colorpicker": "^2.2.13",
+    "@mcistudio/vue-colorpicker": "^2.3.2",
     "@tiptap/extension-bubble-menu": "^2.10.4",
     "@tiptap/extension-dropcursor": "^2.10.4",
     "@tiptap/extension-image": "^2.10.4",
@@ -41,7 +41,7 @@
     "tiptap-extension-resize-image": "^1.2.1",
     "vue": "^3.5.13",
     "vue-draggable-plus": "^0.6.0",
-    "vue-i18n": "^11.0.0",
+    "vue-i18n": "^11.0.1",
     "vue-router": "^4.5.0",
     "zxcvbn": "^4.4.2"
   },
@@ -62,7 +62,7 @@
     "javascript-obfuscator": "^4.1.1",
     "jsdom": "^25.0.1",
     "json5": "^2.2.3",
-    "node-html-parser": "^6.1.13",
+    "node-html-parser": "^7.0.1",
     "postcss-rtlcss": "^5.6.0",
     "prettier": "^3.4.2",
     "rollup": "^4.29.1",

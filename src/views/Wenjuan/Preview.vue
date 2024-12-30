@@ -1,130 +1,98 @@
 <template>
   <div class="mobile-container">
-    <div class="mobile-frame">
+    <div class="mobile-frame" :style="Q.settings?.backgroundImage ? { backgroundImage: `url(${OSS_PREFIX}${Q.settings.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}">
       <!-- 手机状态栏 -->
       <div class="status-bar">
         <span class="time">{{ currentTime }}</span>
-        <div class="right-icons"></div>
+        <div class="right-icons">
+          <span v-if="timeLeft" class="time-left">{{ formatTimeLeft }}</span>
+        </div>
       </div>
 
       <!-- Dynamic Island -->
       <div class="dynamic-island"></div>
 
-      <div class="preview-container" data-simplebar>
-        <!-- 问卷标题 -->
-        <div class="header">
-          <div class="title">{{ Q.name }}</div>
-        </div>
+      <!-- 添加进度条到顶部 -->
+      <div class="top-progress-bar" v-if="Q.settings?.showProgress">
+        <div class="progress-text">答题进度</div>
+        <a-progress :percent="answeredProgress" size="small" />
+      </div>
 
-        <!-- 问卷题目列表 -->
-        <div class="main">
-          <div v-for="(item, index) in Q.data" :key="item.id" class="q-item" v-show="!isHidden(item.id)">
-            <!-- 题目标题 -->
-            <div class="title">
-              <span class="required" v-if="item.required">*</span>
-              <span class="number">{{ index + 1 }}. </span>
-              <span class="text" v-html="item.title"></span>
+      <div class="preview-container" @touchstart="handleTouchStart" @touchend="handleTouchEnd" @mousedown="handleMouseDown" @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseLeave" :class="{ dragging: isDragging }">
+        <!-- 单页模式：问卷标题和封面 -->
+        <template v-if="Q.settings?.showOnePerPage">
+          <!-- 封面页 -->
+          <div v-if="isOnCoverPage" class="cover-page">
+            <div class="header">
+              <div class="cover-image" v-if="Q.settings?.coverImage">
+                <img :src="OSS_PREFIX + Q.settings.coverImage" alt="封面图片" />
+              </div>
+              <div class="title">{{ Q.name }}</div>
             </div>
-
-            <!-- 根据题目类型渲染不同组件 -->
-            <div class="content">
-              <!-- 填空题 -->
-              <template v-if="item.type === 'FillBlank'">
-                <div v-if="!item.multiMode" class="fill-blank">
-                  <a-input v-model:value="answers[item.id]" :placeholder="item.options[0]?.placeholder || '请填写'" :maxLength="item.options[0]?.maxLength || undefined" />
-                </div>
-                <div v-else class="multi-blank">
-                  <div v-for="(opt, idx) in item.options" :key="opt.id" class="blank-item">
-                    <div class="blank-title" v-html="opt.text"></div>
-                    <a-input v-model:value="answers[item.id + '_' + opt.id]" :placeholder="opt.placeholder || '请填写'" :maxLength="opt.maxLength || undefined" />
-                  </div>
-                </div>
-              </template>
-
-              <!-- 单选题 -->
-              <template v-if="item.type === 'SingleChoice'">
-                <a-radio-group v-model:value="answers[item.id]">
-                  <div v-for="opt in item.options" :key="opt.id" class="radio-item">
-                    <a-radio :value="opt.id">
-                      <span v-html="opt.text"></span>
-                    </a-radio>
-                    <a-input v-if="opt.fill?.show && answers[item.id] === opt.id" v-model:value="answers[item.id + '_fill']" :placeholder="opt.fill.placeholder || '请填写'" :maxLength="opt.fill.length || undefined" />
-                  </div>
-                </a-radio-group>
-              </template>
-
-              <!-- 多选题 -->
-              <template v-if="item.type === 'MultiChoice'">
-                <a-checkbox-group v-model:value="answers[item.id]" :min="item.minRange || 0" :max="item.maxRange || item.options.length">
-                  <div v-for="opt in item.options" :key="opt.id" class="checkbox-item">
-                    <a-checkbox :value="opt.id">
-                      <span v-html="opt.text"></span>
-                    </a-checkbox>
-                    <a-input v-if="opt.fill?.show && answers[item.id]?.includes(opt.id)" v-model:value="answers[item.id + '_' + opt.id]" :placeholder="opt.fill.placeholder || '请填写'" :maxLength="opt.fill.length || undefined" />
-                  </div>
-                </a-checkbox-group>
-              </template>
-
-              <!-- 图片选择 -->
-              <template v-if="item.type === 'ImageChoice'">
-                <div class="image-choice">
-                  <a-radio-group v-model:value="answers[item.id]">
-                    <div v-for="opt in item.options" :key="opt.id" class="image-item">
-                      <div class="image-preview">
-                        <a-image
-                          :src="OSS_PREFIX + opt.imageUrl"
-                          :alt="opt.text"
-                          :preview="{
-                            src: OSS_PREFIX + opt.imageUrl,
-                            mask: false
-                          }"
-                        />
-                      </div>
-                      <div class="image-text">
-                        <a-radio :value="opt.id"><span v-html="opt.text"></span></a-radio>
-                      </div>
-                    </div>
-                  </a-radio-group>
-                </div>
-              </template>
-
-              <!-- 评分题 -->
-              <template v-if="item.type === 'Rate'">
-                <div class="rate-wrap">
-                  <template v-if="item.maxScore <= 10">
-                    <a-rate v-model:value="answers[item.id]" :count="item.maxScore" :allow-half="item.step === 0.5" :character="item.customIcon ? () => h(Icon, { name: item.customIcon.icon }) : undefined" />
-                  </template>
-                  <template v-else>
-                    <a-slider v-model:value="answers[item.id]" :min="item.minScore" :max="item.maxScore" :step="item.step" />
-                  </template>
-                  <div v-if="item.showLabels" class="rate-labels">
-                    <span>{{ item.minLabel }}</span>
-                    <span>{{ item.maxLabel }}</span>
-                  </div>
-                </div>
-              </template>
-
-              <!-- NPS -->
-              <template v-if="item.type === 'NPS'">
-                <div class="nps-wrap">
-                  <div class="nps-scores">
-                    <div v-for="score in 11" :key="score - 1" class="score-item" :class="{ active: answers[item.id] === score - 1 }" @click="answers[item.id] = score - 1">
-                      {{ score - 1 }}
-                    </div>
-                  </div>
-                  <div v-if="item.showLabels" class="nps-labels">
-                    <span>{{ item.minLabel }}</span>
-                    <span>{{ item.maxLabel }}</span>
-                  </div>
-                </div>
-              </template>
+            <div class="start-button">
+              <a-button type="primary" size="large" @click="startAnswering">
+                滑动屏幕开始
+                <template #icon><RightOutlined /></template>
+              </a-button>
             </div>
           </div>
-        </div>
 
-        <!-- 提交按钮 -->
-        <div class="footer">
-          <a-button type="primary" @click="submit" :loading="submitting">提交</a-button>
+          <!-- 题目页 -->
+          <template v-else>
+            <div v-if="currentQuestion" class="q-item single-page" :key="currentQuestion.id">
+              <!-- 题目标题 -->
+              <div class="title">
+                <span class="required" v-if="currentQuestion.required">*</span>
+                <span class="number" v-if="Q.settings?.showQuestionNumber">{{ getQuestionDisplayIndex(currentQuestion.id) }}. </span>
+                <span class="text" v-html="currentQuestion.title"></span>
+              </div>
+
+              <!-- 题目内容 -->
+              <div class="content">
+                <QuestionContent :item="currentQuestion" />
+              </div>
+            </div>
+          </template>
+        </template>
+
+        <!-- 普通模式 -->
+        <template v-else>
+          <div class="header">
+            <div class="cover-image" v-if="Q.settings?.coverImage">
+              <img :src="OSS_PREFIX + Q.settings.coverImage" alt="封面图片" />
+            </div>
+            <div class="title">{{ Q.name }}</div>
+          </div>
+
+          <div class="main">
+            <div v-for="(item, index) in Q.data" :key="item.id" class="q-item" v-show="!isHidden(item.id)">
+              <!-- 题目标题 -->
+              <div class="title">
+                <span class="required" v-if="item.required">*</span>
+                <span class="number" v-if="Q.settings?.showQuestionNumber">{{ getQuestionDisplayIndex(item.id) }}. </span>
+                <span class="text" v-html="item.title"></span>
+              </div>
+
+              <!-- 题目内容 -->
+              <div class="content">
+                <QuestionContent :item="item" />
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- 分页导航和提交按钮 -->
+        <div class="footer" v-if="!isOnCoverPage">
+          <!-- 分页导航按钮 -->
+          <div v-if="Q.settings?.showOnePerPage" class="page-navigation">
+            <a-button v-if="showPrevButton" @click="prevQuestion" class="nav-button prev"> 上一题 </a-button>
+            <span class="page-indicator">{{ currentPage + 1 }} / {{ visibleQuestions.length }}</span>
+            <a-button v-if="showNextButton" @click="nextQuestion" class="nav-button next" type="primary"> 下一题 </a-button>
+            <a-button v-if="!showNextButton" type="primary" @click="submit" :loading="submitting" :disabled="!isInCollectTime || submitting"> 提交 </a-button>
+          </div>
+
+          <!-- 普通模式下的提交按钮 -->
+          <a-button v-if="!Q.settings?.showOnePerPage" type="primary" @click="submit" :loading="submitting" :disabled="!isInCollectTime || submitting"> 提交 </a-button>
         </div>
       </div>
     </div>
@@ -132,17 +100,211 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, h, watch, computed } from 'vue'
+import { ref, inject, onMounted, watch, computed, onUnmounted, provide } from 'vue'
 import { message, Image } from 'ant-design-vue'
-import Icon from '@/components/Icon.vue'
+import { RightOutlined } from '@ant-design/icons-vue'
+import QuestionContent from './components/QuestionContent.vue'
 import 'simplebar'
 import '@/assets/simplebar.css'
 
 const Q = inject('Q')
 const answers = ref({})
+provide('answers', answers) // 提供 answers 给子组件使用
 const submitting = ref(false)
 const currentTime = ref('')
 const OSS_PREFIX = import.meta.env.VITE_UPLOAD_URL_PREFIX
+
+// 分页相关
+const currentPage = ref(-1) // 改为 -1，表示封面页
+const touchStartX = ref(0)
+const touchEndX = ref(0)
+const isDragging = ref(false)
+const SWIPE_THRESHOLD = 50 // 滑动阈值
+
+// 获取可见的题目列表
+const visibleQuestions = computed(() => {
+  return Q.data.filter((q) => !isHidden(q.id))
+})
+
+// 获取题目的显示序号（1-based）
+const getQuestionDisplayIndex = (questionId) => {
+  return visibleQuestions.value.findIndex((q) => q.id === questionId) + 1
+}
+
+// 当前显示的题目
+const currentQuestion = computed(() => {
+  if (!Q.settings?.showOnePerPage) return null
+  if (currentPage.value === -1) return null // 封面页
+  return visibleQuestions.value[currentPage.value]
+})
+
+// 是否显示上一页按钮
+const showPrevButton = computed(() => {
+  return Q.settings?.showOnePerPage && currentPage.value > -1
+})
+
+// 是否显示下一页按钮
+const showNextButton = computed(() => {
+  return Q.settings?.showOnePerPage && currentPage.value < visibleQuestions.value.length - 1
+})
+
+// 是否在封面页
+const isOnCoverPage = computed(() => {
+  return Q.settings?.showOnePerPage && currentPage.value === -1
+})
+
+// 开始答题
+const startAnswering = () => {
+  currentPage.value = 0
+  // 如果是每页一题模式，在这里初始化计时器
+  if (Q.settings?.showOnePerPage) {
+    initTimer()
+  }
+}
+
+// 处理触摸开始
+const handleTouchStart = (e) => {
+  if (!Q.settings?.showOnePerPage) return
+  touchStartX.value = e.touches[0].clientX
+}
+
+// 处理触摸结束
+const handleTouchEnd = (e) => {
+  if (!Q.settings?.showOnePerPage) return
+  touchEndX.value = e.changedTouches[0].clientX
+  handleSwipe(touchEndX.value - touchStartX.value)
+}
+
+// 处理鼠标按下
+const handleMouseDown = (e) => {
+  if (!Q.settings?.showOnePerPage) return
+  isDragging.value = true
+  touchStartX.value = e.clientX
+}
+
+// 处理鼠标移动
+const handleMouseMove = (e) => {
+  if (!isDragging.value) return
+  e.preventDefault() // 防止拖动时选中文本
+}
+
+// 处理鼠标松开
+const handleMouseUp = (e) => {
+  if (!isDragging.value) return
+  isDragging.value = false
+  touchEndX.value = e.clientX
+  handleSwipe(touchEndX.value - touchStartX.value)
+}
+
+// 处理鼠标离开容器
+const handleMouseLeave = (e) => {
+  if (isDragging.value) {
+    isDragging.value = false
+    touchEndX.value = e.clientX
+    handleSwipe(touchEndX.value - touchStartX.value)
+  }
+}
+
+// 统一处理滑动逻辑
+const handleSwipe = (swipeDistance) => {
+  if (Math.abs(swipeDistance) > SWIPE_THRESHOLD) {
+    if (swipeDistance > 0 && showPrevButton.value) {
+      // 向右滑动，显示上一题
+      prevQuestion()
+    } else if (swipeDistance < 0) {
+      if (isOnCoverPage.value) {
+        // 在封面页向左滑动，开始答题
+        startAnswering()
+      } else if (showNextButton.value) {
+        // 向左滑动，显示下一题
+        nextQuestion()
+      }
+    }
+  }
+}
+
+// 上一题
+const prevQuestion = () => {
+  if (currentPage.value > 0) {
+    currentPage.value--
+  }
+}
+
+// 下一题
+const nextQuestion = () => {
+  if (currentPage.value < visibleQuestions.value.length - 1) {
+    currentPage.value++
+  }
+}
+
+// 时间限制相关
+const timeLeft = ref(null)
+const timer = ref(null)
+
+// 检查问卷是否在收集时间范围内
+const isInCollectTime = computed(() => {
+  if (!Q.settings?.collectTime?.[0] || !Q.settings?.collectTime?.[1]) return true
+  const now = new Date().getTime()
+  const start = new Date(Q.settings.collectTime[0]).getTime()
+  const end = new Date(Q.settings.collectTime[1]).getTime()
+  return now >= start && now <= end
+})
+
+// 检查提交次数限制
+const checkSubmitLimit = () => {
+  const { submitLimitType, submitLimitCount } = Q.settings
+  if (submitLimitType === 'none') return true
+
+  // TODO: 这里需要从后端获取用户的提交次数
+  const userSubmitCount = 0
+
+  switch (submitLimitType) {
+    case 'once':
+      return userSubmitCount === 0
+    case 'daily':
+    case 'weekly':
+    case 'monthly':
+      return userSubmitCount < submitLimitCount
+    default:
+      return true
+  }
+}
+
+// 初始化答题计时器
+const initTimer = () => {
+  if (!Q.settings?.timeLimit) return
+
+  timeLeft.value = Q.settings.timeLimit * 60 // 转换为秒
+  timer.value = setInterval(() => {
+    if (timeLeft.value > 0) {
+      timeLeft.value--
+    } else {
+      clearInterval(timer.value)
+      message.warning('答题时间已到，系统将自动提交')
+      submit()
+    }
+  }, 1000)
+}
+
+// 格式化剩余时间
+const formatTimeLeft = computed(() => {
+  if (!timeLeft.value) return ''
+  const minutes = Math.floor(timeLeft.value / 60)
+  const seconds = timeLeft.value % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+})
+
+// 更新当前时间
+const updateCurrentTime = () => {
+  const now = new Date()
+  currentTime.value = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+}
+
+// 应用主题色
+const applyThemeColor = () => {
+  if (!Q.settings?.themeColor) return
+  // document.documentElement.style.setProperty('--c-brand', Q.settings.themeColor)
+}
 
 // 添加逻辑状态管理
 const logicStates = ref({})
@@ -336,18 +498,68 @@ const previewImage = (url) => {
 
 // 提交答案
 async function submit() {
+  // 检查收集时间
+  if (!isInCollectTime.value) {
+    message.error('当前不在问卷收集时间范围内')
+    return
+  }
+
+  // 检查提交次数限制
+  if (!checkSubmitLimit()) {
+    message.error('已超出允许的提交次数限制')
+    return
+  }
+
   // 验证必答题是否已答
-  for (const item of Q.data) {
-    if (item.required && !answers.value[item.id]) {
-      console.log('第', item.index + 1, '题为必答题')
-      message.warning(`第${item.index + 1}题为必答题`)
+  const visibleQuestions = Q.data.filter((q) => !isHidden(q.id))
+  for (let i = 0; i < visibleQuestions.length; i++) {
+    const item = visibleQuestions[i]
+    if (item.required && !isQuestionAnswered(item.id)) {
+      message.warning(`第${i + 1}题为必答题`)
       return
     }
+  }
+
+  try {
+    submitting.value = true
+    // TODO: 实际的提交逻辑
+
+    // 显示成功提示语
+    const successMessage = Q.settings?.submitSuccessMessage || '感谢您的参与！'
+    message.success(successMessage)
+
+    // 如果不允许重复提交，禁用提交按钮
+    if (!Q.settings?.allowMultiSubmit) {
+      submitting.value = true
+    }
+  } catch (error) {
+    message.error('提交失败，请重试')
+  } finally {
+    submitting.value = false
   }
 }
 
 onMounted(() => {
-  console.log(answers.value)
+  updateCurrentTime()
+  setInterval(updateCurrentTime, 60000) // 每分钟更新一次时间
+
+  // 只在非每页一题模式下初始化计时器
+  if (!Q.settings?.showOnePerPage) {
+    initTimer()
+  }
+
+  applyThemeColor() // 应用主题色
+
+  // 检查收集时间
+  if (!isInCollectTime.value) {
+    message.warning('当前不在问卷收集时间范围内')
+  }
+})
+
+onUnmounted(() => {
+  if (timer.value) {
+    clearInterval(timer.value)
+  }
 })
 
 watch(
@@ -357,6 +569,15 @@ watch(
   },
   { deep: true }
 )
+
+// 计算答题进度
+const answeredProgress = computed(() => {
+  const totalQuestions = Q.data.filter((q) => !isHidden(q.id)).length
+  if (totalQuestions === 0) return 0
+
+  const answeredQuestions = Q.data.filter((q) => !isHidden(q.id) && isQuestionAnswered(q.id)).length
+  return Math.round((answeredQuestions / totalQuestions) * 100)
+})
 </script>
 
 <style scoped lang="scss">
@@ -425,12 +646,20 @@ watch(
 }
 
 .preview-container {
-  height: calc(100% - 44px);
-  padding-top: 20px;
+  height: calc(100% - 84px); // 调整高度以适应顶部进度条
+  padding-top: 0; // 移除顶部padding
   overflow-y: auto;
   max-width: 100%;
   margin: 0;
   background: var(--bg-primary);
+  user-select: none; // 防止拖动时选中文本
+
+  &.dragging {
+    cursor: grabbing;
+    * {
+      cursor: grabbing;
+    }
+  }
 
   .main {
     padding: 16px;
@@ -440,12 +669,10 @@ watch(
     margin-bottom: 24px;
     padding: 16px;
     background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    transition: all 0.3s ease;
+    // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 
-    &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    &.single-page {
+      margin-bottom: 180px;
     }
 
     .title {
@@ -474,8 +701,10 @@ watch(
   }
 
   .footer {
-    position: sticky;
+    position: absolute;
     bottom: 0;
+    left: 0;
+    right: 0;
     background: white;
     padding: 16px;
     box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
@@ -497,6 +726,15 @@ watch(
   background: #fff;
   margin-bottom: 16px;
 
+  .cover-image {
+    margin-bottom: 16px;
+
+    img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+  }
+
   .title {
     font-size: 20px;
     font-weight: 600;
@@ -504,157 +742,100 @@ watch(
   }
 }
 
-.fill-blank {
-  .ant-input {
-    border-radius: 8px;
-    padding: 8px 12px;
-
-    &:hover,
-    &:focus {
-      border-color: var(--c-brand);
-    }
-  }
-
-  .blank-item {
-    margin-bottom: 16px;
-
-    .blank-title {
-      margin-bottom: 8px;
-      color: var(--text-secondary);
-    }
+.status-bar {
+  .time-left {
+    font-size: 12px;
+    color: var(--c-brand);
+    background: rgba(0, 0, 0, 0.1);
+    padding: 2px 6px;
+    border-radius: 10px;
   }
 }
 
-.radio-item,
-.checkbox-item {
-  margin-bottom: 16px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.02);
-  }
-
-  :deep(.ant-radio-wrapper),
-  :deep(.ant-checkbox-wrapper) {
-    font-size: 15px;
-  }
-
-  :deep(.ant-input) {
-    margin-top: 8px;
-    margin-left: 24px;
-    border-radius: 6px;
+.footer {
+  .progress-bar {
+    display: none;
   }
 }
 
-.image-choice {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+.page-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 16px;
 
-  :deep(.ant-radio-group) {
-    display: contents;
+  .nav-button {
+    min-width: 100px;
   }
 
-  .image-item {
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-
-    &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .image-preview {
-      width: 100%;
-      height: 160px;
-      position: relative;
-      overflow: hidden;
-
-      :deep(.ant-image) {
-        width: 100%;
-        height: 100%;
-
-        img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.3s ease;
-          cursor: zoom-in;
-        }
-
-        &:hover img {
-          transform: scale(1.05);
-        }
-      }
-    }
-
-    .image-text {
-      padding: 12px;
-      background: #fff;
-      border-top: 1px solid var(--border-light);
-
-      :deep(.ant-radio-wrapper) {
-        width: 100%;
-        font-size: 14px;
-        color: var(--text-primary);
-      }
-    }
-  }
-}
-
-.rate-wrap,
-.nps-wrap {
-  padding: 8px 0;
-
-  :deep(.ant-rate) {
-    font-size: 24px;
-  }
-
-  :deep(.ant-slider) {
-    margin: 16px 8px;
-  }
-
-  .rate-labels,
-  .nps-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 12px;
+  .page-indicator {
+    font-size: 14px;
     color: var(--text-secondary);
-    font-size: 13px;
   }
 }
 
-.nps-scores {
+.cover-page {
+  min-height: calc(100vh - 200px);
   display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
+  flex-direction: column;
 
-  .score-item {
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
+  .header {
+    flex: 1;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
-    border: 1.5px solid var(--border-medium);
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 15px;
-    transition: all 0.2s ease;
+    padding: 40px 16px;
+    text-align: center;
+    background: #fff;
 
-    &:hover {
-      border-color: var(--c-brand);
-      color: var(--c-brand);
+    .cover-image {
+      margin-bottom: 24px;
+
+      img {
+        max-width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
     }
 
-    &.active {
-      background: var(--c-brand);
-      color: white;
-      border-color: var(--c-brand);
+    .title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.4;
     }
+  }
+
+  .start-button {
+    padding: 24px;
+    text-align: center;
+    background: #fff;
+    border-top: 1px solid var(--border-light);
+
+    .ant-btn {
+      height: 48px;
+      padding: 0 32px;
+      font-size: 16px;
+      border-radius: 24px;
+
+      .anticon {
+        font-size: 18px;
+        margin-left: 8px;
+      }
+    }
+  }
+}
+
+// 添加顶部进度条样式
+.top-progress-bar {
+  padding: 12px 16px;
+  background: white;
+  border-bottom: 1px solid var(--border-light);
+
+  .progress-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
   }
 }
 </style>

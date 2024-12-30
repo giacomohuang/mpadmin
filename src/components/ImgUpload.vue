@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive } from 'vue'
 import CryptoJS from 'crypto-js'
 import API from '../api/API'
 import pLimit from 'p-limit'

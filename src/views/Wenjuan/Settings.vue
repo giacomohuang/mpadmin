@@ -3,6 +3,16 @@
     <a-form :model="formState" layout="vertical">
       <!-- 基础设置 -->
       <a-card title="基础设置" class="setting-card">
+        <a-form-item label="问卷收集起止时间" name="collectTime">
+          <a-range-picker
+            v-model:value="formState.collectTime"
+            style="width: 400px"
+            :show-time="{
+              defaultValue: [dayjs('00:00:00', 'HH:mm:ss'), dayjs('11:59:59', 'HH:mm:ss')]
+            }"
+            format="YYYY-MM-DD HH:mm:ss"
+          />
+        </a-form-item>
         <a-form-item label="答题时限（0表示不限时）" name="timeLimit">
           <a-input-number v-model:value="formState.timeLimit" :min="0" :max="999" style="width: 120px" addon-after="分钟" placeholder="请输入" />
         </a-form-item>
@@ -22,9 +32,6 @@
             </a-space>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item label="问卷收集起止时间" name="collectTime">
-          <a-range-picker v-model:value="collectTime" show-time value-format="YYYY-MM-DD HH:mm:ss" :placeholder="['开始时间', '结束时间']" />
-        </a-form-item>
         <a-form-item label="问卷标签" name="tags">
           <a-select v-model:value="formState.tags" mode="tags" placeholder="请输入标签，多个标签用逗号或空格分隔" :token-separators="[',', '，', ' ']" />
         </a-form-item>
@@ -33,38 +40,25 @@
       <!-- 外观和封面设置 -->
       <a-card title="外观和封面设置" class="setting-card">
         <a-form-item label="封面图片" name="coverImage">
-          <a-upload v-model:file-list="fileList" list-type="picture-card" :show-upload-list="false" :before-upload="beforeUpload" @change="handleCoverChange">
-            <img v-if="formState.coverImage" :src="formState.coverImage" alt="封面" style="width: 100%" />
-            <div v-else>
-              <icon name="plus" />
-              <div style="margin-top: 8px">上传封面</div>
-            </div>
-          </a-upload>
+          <div class="img-upload"><ImageUpload v-model="formState.coverImage" width="150px" height="150px" /></div>
         </a-form-item>
         <a-form-item label="背景图片" name="backgroundImage">
-          <a-upload v-model:file-list="bgFileList" list-type="picture-card" :show-upload-list="false" :before-upload="beforeUpload" @change="handleBgChange">
-            <img v-if="formState.backgroundImage" :src="formState.backgroundImage" alt="背景" style="width: 100%" />
-            <div v-else>
-              <icon name="plus" />
-              <div style="margin-top: 8px">上传背景</div>
-            </div>
-          </a-upload>
-        </a-form-item>
-        <a-form-item label="字体设置" name="fontFamily">
-          <a-select v-model:value="formState.fontFamily">
-            <a-select-option value="default">默认字体</a-select-option>
-            <a-select-option value="serif">宋体</a-select-option>
-            <a-select-option value="sans-serif">黑体</a-select-option>
-            <a-select-option value="cursive">楷体</a-select-option>
-          </a-select>
+          <div class="img-upload"><ImageUpload v-model="formState.backgroundImage" width="150px" height="150px" /></div>
         </a-form-item>
         <a-form-item label="主题色" name="themeColor">
+          <a-radio-group v-model:value="formState.themeColorMode" style="margin-bottom: 16px">
+            <a-radio-button value="custom">自定义</a-radio-button>
+            <a-radio-button value="system">系统预置</a-radio-button>
+          </a-radio-group>
           <div class="theme-color-container">
-            <div class="color-presets">
-              <div v-for="(color, name) in colorSchemes" :key="name" class="color-block" :style="{ backgroundColor: color }" @click="handleColorSchemeSelect(color)" :class="{ active: formState.themeColor === color }"></div>
+            <div class="color-block custom" v-if="formState.themeColorMode === 'custom'">
+              <input type="color" v-model="formState.themeColor" class="color-input" />
             </div>
-            <div class="custom-color">
-              <input type="color" class="color-input" :value="formState.themeColor" @input="handleCustomColorChange" title="自定义颜色" />
+            <!-- <ColorPicker v-model="formState.themeColor" v-if="formState.themeColorMode === 'custom'" /> -->
+            <div class="color-presets" v-if="formState.themeColorMode === 'system'">
+              <div v-for="(color, name) in colorSchemes" :key="name" class="color-block" :class="{ active: formState.themeColor === color }" @click="handleColorSchemeSelect(color, name)">
+                <div class="inner" :style="{ backgroundColor: color }"></div>
+              </div>
             </div>
           </div>
         </a-form-item>
@@ -100,75 +94,45 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, computed, reactive } from 'vue'
+import { ref, inject, onMounted, reactive } from 'vue'
 import 'simplebar'
 import 'simplebar/dist/simplebar.css'
+import ImageUpload from '@/components/ImgUpload.vue'
 
 import dayjs from 'dayjs'
-import { message } from 'ant-design-vue'
 
 const Q = inject('Q')
 const settingsModal = inject('settingsModal')
 
-const disabledDate = (current) => {
-  return current && current < dayjs().startOf('day')
-}
-
 // 表单数据
 const formState = reactive({
   // 基础设置
-  title: '',
-  description: '',
-  status: true,
-  tags: [],
-  timeLimit: 0,
-  submitLimitType: 'none',
-  submitLimitCount: 1,
-
+  title: Q.settings.title || '',
+  description: Q.settings.description || '',
+  status: Q.settings.status || true,
+  tags: Q.settings.tags || [],
+  timeLimit: Q.settings.timeLimit || 0,
+  submitLimitType: Q.settings.submitLimitType || 'none',
+  submitLimitCount: Q.settings.submitLimitCount || 1,
+  collectTime: [dayjs(Q.settings?.collectTime?.[0]), dayjs(Q.settings?.collectTime?.[1])] || [],
   // 外观和封面设置
-  coverImage: '',
-  backgroundImage: '',
-  fontFamily: 'default',
-  themeColor: '#1890ff',
-
+  coverImage: Q.settings.coverImage || '',
+  backgroundImage: Q.settings.backgroundImage || '',
+  themeColorMode: Q.settings.themeColorMode || 'custom',
+  themeColor: Q.settings.themeColor || { mode: 'solid', color: { r: 24, g: 144, b: 255, a: 1 } },
   // 显示设置
-  showProgress: true,
-  showQuestionNumber: true,
-  showOnePerPage: false,
-  questionsPerPage: 5,
+  showProgress: Q.settings.showProgress || true,
+  showQuestionNumber: Q.settings.showQuestionNumber || true,
+  showOnePerPage: Q.settings.showOnePerPage || false,
+  questionsPerPage: Q.settings.questionsPerPage || 5,
 
   // 提交设置
-  allowMultiSubmit: false,
-  submitSuccessMessage: '感谢您的参与！'
-})
-
-const collectTime = computed({
-  get() {
-    if (!formState.collectTime) {
-      formState.collectTime = []
-    }
-    if (!formState.collectTime[0] || !formState.collectTime[1]) {
-      return []
-    }
-    return [dayjs(formState.collectTime[0]), dayjs(formState.collectTime[1])]
-  },
-  set(value) {
-    if (!value) {
-      formState.collectTime = []
-      return
-    }
-    formState.collectTime = [dayjs(value[0]).format('YYYY-MM-DD HH:mm:ss'), dayjs(value[1]).format('YYYY-MM-DD HH:mm:ss')]
-  }
+  allowMultiSubmit: Q.settings.allowMultiSubmit || false,
+  submitSuccessMessage: Q.settings.submitSuccessMessage || '感谢您的参与！'
 })
 
 // 初始化数据
-onMounted(() => {
-  if (Q.settings) {
-    Object.keys(Q.settings).forEach((key) => {
-      formState[key] = Q.settings[key]
-    })
-  }
-})
+onMounted(() => {})
 
 // 保存设置
 const saveSettings = () => {
@@ -176,50 +140,17 @@ const saveSettings = () => {
   settingsModal.value = false
 }
 
-const fileList = ref([])
-const bgFileList = ref([])
-
-const beforeUpload = (file) => {
-  const isImage = file.type.startsWith('image/')
-  if (!isImage) {
-    message.error('只能上传图片文件！')
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2
-  if (!isLt2M) {
-    message.error('图片必须小于 2MB!')
-  }
-  return isImage && isLt2M
-}
-
-const handleCoverChange = (info) => {
-  if (info.file.status === 'done') {
-    // 这里应该是你的实际上传接口返回的图片URL
-    formState.coverImage = info.file.response.url
-  }
-}
-
-const handleBgChange = (info) => {
-  if (info.file.status === 'done') {
-    // 这里应该是你的际上传接口返回的图片URL
-    formState.backgroundImage = info.file.response.url
-  }
-}
-
 const colorSchemes = {
-  blue: '#1890ff', // 默认蓝
+  blue: '#0090ff', // 默认蓝
   green: '#52c41a', // 清新绿
-  purple: '#722ed1', // 典雅紫
-  orange: '#fa8c16', // 活力橙
+  purple: '#6857e8', // 典雅紫
+  orange: '#ff8a18', // 活力橙
   red: '#f5222d', // 热情红
   cyan: '#13c2c2' // 清爽青
 }
 
-const handleColorSchemeSelect = (color) => {
+const handleColorSchemeSelect = (color, name) => {
   formState.themeColor = color
-}
-
-const handleCustomColorChange = (e) => {
-  formState.themeColor = e.target.value
 }
 </script>
 
@@ -233,37 +164,6 @@ const handleCustomColorChange = (e) => {
   .setting-card {
     margin-bottom: 24px;
   }
-
-  .color-picker {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    .color-block {
-      width: 16px;
-      height: 16px;
-      border-radius: 2px;
-      border: 1px solid #d9d9d9;
-    }
-
-    .color-input {
-      width: 32px;
-      height: 32px;
-      padding: 4px;
-      border: 1px solid var(--border-medium);
-      background-color: var(--bg-primary);
-      border-radius: 3px;
-      cursor: pointer;
-
-      &::-webkit-color-swatch-wrapper {
-        padding: 0;
-      }
-      // &::-webkit-color-swatch {
-      //   border: none;
-      border-radius: 3px;
-      // }
-    }
-  }
 }
 
 .form-actions {
@@ -273,6 +173,17 @@ const handleCustomColorChange = (e) => {
   align-items: center;
 }
 
+.img-upload {
+  width: 150px;
+  height: 150px;
+  outline: 1px solid var(--border-medium);
+  cursor: pointer;
+  border-radius: 4px;
+  &:hover {
+    outline: 1px solid var(--c-brand);
+  }
+}
+
 .theme-color-container {
   display: flex;
   align-items: center;
@@ -280,46 +191,46 @@ const handleCustomColorChange = (e) => {
 
   .color-presets {
     display: flex;
-    gap: 8px;
+    gap: 6px;
   }
 
   .color-block {
-    width: 24px;
-    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 4px;
     cursor: pointer;
-    border: 2px solid transparent;
-    transition: all 0.3s;
-
-    &:hover {
-      transform: scale(1.1);
+    padding: 4px;
+    border: 1px solid transparent;
+    &.custom {
+      border: 1px solid var(--border-medium);
     }
-
+    &:hover {
+      border: 1px solid var(--border-dark);
+    }
     &.active {
-      border-color: #1890ff;
+      border: 1px solid var(--border-dark);
+    }
+    .inner {
+      border-radius: 2px;
+      width: 22px;
+      height: 22px;
     }
   }
 
-  .custom-color {
-    width: 24px;
-    height: 24px;
-    .color-input {
-      width: 24px;
-      height: 24px;
+  .color-input {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    &::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    &::-webkit-color-swatch {
       border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      background: none;
-
-      &::-webkit-color-swatch-wrapper {
-        padding: 0;
-        margin: 0;
-      }
-      &::-webkit-color-swatch {
-        border: 0;
-        // border: 2px solid #d9d9d9;
-        border-radius: 4px;
-      }
+      border-radius: 2px;
     }
   }
 }

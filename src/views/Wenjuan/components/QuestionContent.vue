@@ -136,10 +136,12 @@ const OSS_PREFIX = import.meta.env.VITE_UPLOAD_URL_PREFIX
 
 .radio-item,
 .checkbox-item {
-  margin-bottom: 16px;
+  text-wrap: wrap;
   padding: 8px 12px;
   border-radius: 8px;
   transition: all 0.3s ease;
+  display: flex;
+  width: 100%;
 
   &:hover {
     background: rgba(0, 0, 0, 0.02);

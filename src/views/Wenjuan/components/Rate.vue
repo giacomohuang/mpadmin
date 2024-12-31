@@ -121,6 +121,12 @@ const Q = inject('Q')
 const currentItemIndex = inject('currentItemIndex')
 const showIconSelect = ref(false)
 
+// 添加清除图标函数
+const clearIcon = (e) => {
+  e.stopPropagation() // 阻止事件冒泡
+  Q.data[props.qItemIndex].customIcon = null
+}
+
 // 计算rate组件的props
 const rateProps = computed(() => {
   const item = Q.data[props.qItemIndex]

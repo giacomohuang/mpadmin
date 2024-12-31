@@ -27,7 +27,7 @@
     </div>
     <div class="actions">
       <a-button @click="deleteDraft" :disabled="isSaving" v-if="isDraft">删除草稿</a-button>
-      <a-button @click="publish" :disabled="isSaving || (isPublish && !isModified)">{{ publishText }}</a-button>
+      <a-button @click="publish" :disabled="isSaving || (isPublish && !isModified)">发布</a-button>
     </div>
   </div>
 
@@ -166,14 +166,6 @@ provide('Q', Q)
 provide('currentItemIndex', currentItemIndex)
 provide('settingsModal', settingsModal)
 
-const publishText = computed(() => {
-  if (isDraft.value) {
-    return '重新发布'
-  } else {
-    return '已发布'
-  }
-})
-
 async function updateQName() {
   Q.name = qNameInput.value
   editNameModal.value = false
@@ -276,6 +268,7 @@ function deleteDraft() {
 }
 
 const debouncedSave = debounce(async (data) => {
+  console.log('debouncedSave', qId.value)
   if (!qId.value) return
   if (isDraft.value) {
     save({ draft: data, isDraft: true })
@@ -289,11 +282,12 @@ const debouncedSave = debounce(async (data) => {
 onBeforeMount(async () => {
   const id = router.currentRoute.value.params.id
   let t = {}
+  let res = {}
   if (!id) {
     t = { _id: null, isPublish: false, name: '未命名问卷', settings: {}, draft: null, data: [], isDraft: false }
     isLoading.value = true
     try {
-      let res = await API.wenjuan.update(t) // console.res
+      res = await API.wenjuan.update(t) // console.res
       router.replace(`/wenjuan/editor/${res._id}`)
     } catch (e) {
       router.replace('/404?type=wenjuan')
@@ -303,29 +297,30 @@ onBeforeMount(async () => {
   } else {
     isLoading.value = true
     try {
-      t = await API.wenjuan.get(id)
+      res = await API.wenjuan.get(id)
     } catch (e) {
       router.replace('/404?type=wenjuan')
     } finally {
       isLoading.value = false
     }
   }
-  qId.value = t._id
-  if (t.draft == null) {
-    Q.name = t.name
-    Q.data = t.data
-    Q.settings = t.settings
+  qId.value = res._id
+  console.log('qId', qId.value)
+  if (res.draft == null) {
+    Q.name = res.name
+    Q.data = res.data
+    Q.settings = res.settings
     isDraft.value = false
   } else {
-    Q.name = t.draft.name
-    Q.data = t.draft.data
-    Q.settings = t.draft.settings
+    Q.name = res.draft.name
+    Q.data = res.draft.data
+    Q.settings = res.draft.settings
     isDraft.value = true
   }
   Q.data = [...Q.data]
-  isPublish.value = t.isPublish
+  isPublish.value = res.isPublish
   qSettings.value = Q.settings
-  savedTime.value = dayjs(t.updatedAt).format('MM-DD HH:mm:ss')
+  savedTime.value = dayjs(res.updatedAt).format('MM-DD HH:mm:ss')
   // zzz = Q.data
 
   watch(
@@ -341,9 +336,7 @@ onBeforeMount(async () => {
       }
       debouncedSave(newValue)
       isModified.value = true
-      if (isPublish.value) {
-        isDraft.value = true
-      }
+      isDraft.value = true
     },
     { deep: true, immediate: false }
   )

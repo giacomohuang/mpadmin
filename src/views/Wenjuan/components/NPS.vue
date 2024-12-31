@@ -20,7 +20,7 @@
     <div class="num">{{ qItemIndex + 1 }}. NPS题</div>
 
     <div class="prop-item">
-      <h4>此题必答</h4>
+      <h4>本题必答</h4>
       <a-switch v-model:checked="Q.data[qItemIndex].required" size="small" />
     </div>
 

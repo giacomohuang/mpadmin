@@ -11,6 +11,7 @@
     <VueDraggable v-else v-model="Q.data[qItemIndex].options" tag="ul" handle=".q-handle" class="options" ghostClass="ghost-blank">
       <li v-for="(item, index) in Q.data[qItemIndex].options" :key="item.id" class="item" @click.stop="clickBlank($event, index)">
         <icon name="handle" class="q-handle" />
+        <div class="required" v-if="item.required">*</div>
         <div class="content">
           <XEditer class="text" v-model="item.text" :autofocus="index == autoFocusIndex ? true : false"></XEditer>
           <div class="user-blank">
@@ -199,6 +200,14 @@ onBeforeMount(() => {
     addBlank()
   }
   setTab()
+  watch(Q.data[qItemIndex].options, () => {
+    console.log('changed')
+    if (Q.data[qItemIndex].options.some((item) => item.required)) {
+      Q.data[qItemIndex].required = true
+    } else {
+      Q.data[qItemIndex].required = false
+    }
+  })
 })
 </script>
 
@@ -258,6 +267,13 @@ onBeforeMount(() => {
     display: flex;
     flex-direction: column;
     gap: 6px;
+  }
+  .required {
+    display: flex;
+    color: red;
+    margin-right: 4px;
+    margin-top: 7px;
+    // visibility: hidden;
   }
 }
 

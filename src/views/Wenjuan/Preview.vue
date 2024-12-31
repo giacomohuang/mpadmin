@@ -1,71 +1,49 @@
 <template>
   <div class="mobile-container">
-    <div class="mobile-frame" :style="Q.settings?.backgroundImage ? { backgroundImage: `url(${OSS_PREFIX}${Q.settings.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}">
+    <div class="mobile-frame" :style="Q.settings?.backgroundImage ? { backgroundImage: `url(${OSS_PREFIX}${Q.settings.backgroundImage})` } : {}">
       <!-- 手机状态栏 -->
       <div class="status-bar">
         <span class="time">{{ currentTime }}</span>
         <div class="right-icons">
-          <span v-if="timeLeft" class="time-left">{{ formatTimeLeft }}</span>
+          <span v-if="timeLeft && !isOnCoverPage" class="time-left">{{ formatTimeLeft }}</span>
         </div>
       </div>
-
       <!-- Dynamic Island -->
       <div class="dynamic-island"></div>
-
-      <!-- 添加进度条到顶部 -->
-      <div class="top-progress-bar" v-if="Q.settings?.showProgress">
-        <div class="progress-text">答题进度</div>
-        <a-progress :percent="answeredProgress" size="small" />
-      </div>
-
       <div class="preview-container" @touchstart="handleTouchStart" @touchend="handleTouchEnd" @mousedown="handleMouseDown" @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseLeave" :class="{ dragging: isDragging }">
-        <!-- 单页模式：问卷标题和封面 -->
-        <template v-if="Q.settings?.showOnePerPage">
-          <!-- 封面页 -->
-          <div v-if="isOnCoverPage" class="cover-page">
-            <div class="header">
-              <div class="cover-image" v-if="Q.settings?.coverImage">
-                <img :src="OSS_PREFIX + Q.settings.coverImage" alt="封面图片" />
-              </div>
-              <div class="title">{{ Q.name }}</div>
-            </div>
-            <div class="start-button">
-              <a-button type="primary" size="large" @click="startAnswering">
-                滑动屏幕开始
-                <template #icon><RightOutlined /></template>
-              </a-button>
-            </div>
+        <!-- 封面页 -->
+        <div v-if="isOnCoverPage" class="cover-page">
+          <img :src="OSS_PREFIX + Q.settings.coverImage" alt="封面图片" class="cover-image" v-if="Q.settings?.coverImage" />
+
+          <div class="title">{{ Q.name }}</div>
+          <div class="start-button">
+            <a-button type="primary" size="large" @click="startAnswering">
+              滑动屏幕开始
+              <template #icon><RightOutlined /></template>
+            </a-button>
           </div>
+        </div>
 
-          <!-- 题目页 -->
-          <template v-else>
-            <div v-if="currentQuestion" class="q-item single-page" :key="currentQuestion.id">
-              <!-- 题目标题 -->
-              <div class="title">
-                <span class="required" v-if="currentQuestion.required">*</span>
-                <span class="number" v-if="Q.settings?.showQuestionNumber">{{ getQuestionDisplayIndex(currentQuestion.id) }}. </span>
-                <span class="text" v-html="currentQuestion.title"></span>
-              </div>
-
-              <!-- 题目内容 -->
-              <div class="content">
-                <QuestionContent :item="currentQuestion" />
-              </div>
+        <!-- 每页一题模式 -->
+        <template v-else-if="Q.settings?.showOnePerPage">
+          <div v-if="currentQuestion" class="main" :key="currentQuestion.id" data-simplebar>
+            <!-- 题目标题 -->
+            <div class="title">
+              <span class="required" v-if="currentQuestion.required">*</span>
+              <span class="number" v-if="Q.settings?.showQuestionNumber">{{ getQuestionDisplayIndex(currentQuestion.id) }}. </span>
+              <span class="text" v-html="currentQuestion.title"></span>
             </div>
-          </template>
+
+            <!-- 题目内容 -->
+
+            <QuestionContent :item="currentQuestion" />
+          </div>
         </template>
 
         <!-- 普通模式 -->
         <template v-else>
-          <div class="header">
-            <div class="cover-image" v-if="Q.settings?.coverImage">
-              <img :src="OSS_PREFIX + Q.settings.coverImage" alt="封面图片" />
-            </div>
-            <div class="title">{{ Q.name }}</div>
-          </div>
-
-          <div class="main">
-            <div v-for="(item, index) in Q.data" :key="item.id" class="q-item" v-show="!isHidden(item.id)">
+          <div class="main" data-simplebar>
+            <div v-for="item in Q.data" :key="item.id" v-show="!isHidden(item.id)" class="q-item">
               <!-- 题目标题 -->
               <div class="title">
                 <span class="required" v-if="item.required">*</span>
@@ -74,25 +52,28 @@
               </div>
 
               <!-- 题目内容 -->
-              <div class="content">
-                <QuestionContent :item="item" />
-              </div>
+
+              <QuestionContent :item="item" />
             </div>
           </div>
         </template>
 
         <!-- 分页导航和提交按钮 -->
-        <div class="footer" v-if="!isOnCoverPage">
-          <!-- 分页导航按钮 -->
+        <div class="footer" :class="{ 'one-per-page': Q.settings?.showOnePerPage }" v-if="!isOnCoverPage">
+          <div class="progress-bar" v-if="Q.settings?.showProgress">
+            <div class="progress-text">答题进度</div>
+            <a-progress :percent="answeredProgress" size="small" />
+          </div>
+
           <div v-if="Q.settings?.showOnePerPage" class="page-navigation">
-            <a-button v-if="showPrevButton" @click="prevQuestion" class="nav-button prev"> 上一题 </a-button>
+            <a-button v-if="showPrevButton" @click="prevQuestion" class="nav-button prev" :disabled="currentPage === 0"> 上一题 </a-button>
             <span class="page-indicator">{{ currentPage + 1 }} / {{ visibleQuestions.length }}</span>
             <a-button v-if="showNextButton" @click="nextQuestion" class="nav-button next" type="primary"> 下一题 </a-button>
-            <a-button v-if="!showNextButton" type="primary" @click="submit" :loading="submitting" :disabled="!isInCollectTime || submitting"> 提交 </a-button>
+            <a-button v-if="!showNextButton" type="primary" @click="submit" :loading="submitting" :disabled="submitting"> 提交 </a-button>
           </div>
 
           <!-- 普通模式下的提交按钮 -->
-          <a-button v-if="!Q.settings?.showOnePerPage" type="primary" @click="submit" :loading="submitting" :disabled="!isInCollectTime || submitting"> 提交 </a-button>
+          <a-button v-else type="primary" @click="submit" :loading="submitting" :disabled="submitting"> 提交 </a-button>
         </div>
       </div>
     </div>
@@ -150,16 +131,14 @@ const showNextButton = computed(() => {
 
 // 是否在封面页
 const isOnCoverPage = computed(() => {
-  return Q.settings?.showOnePerPage && currentPage.value === -1
+  return currentPage.value === -1
 })
 
 // 开始答题
 const startAnswering = () => {
   currentPage.value = 0
-  // 如果是每页一题模式，在这里初始化计时器
-  if (Q.settings?.showOnePerPage) {
-    initTimer()
-  }
+  // 离开封面页时初始化计时器
+  initTimer()
 }
 
 // 处理触摸开始
@@ -272,7 +251,8 @@ const checkSubmitLimit = () => {
 
 // 初始化答题计时器
 const initTimer = () => {
-  if (!Q.settings?.timeLimit) return
+  // 如果在封面页或没有时间限制，则不启动计时器
+  if (isOnCoverPage.value || !Q.settings?.timeLimit) return
 
   timeLeft.value = Q.settings.timeLimit * 60 // 转换为秒
   timer.value = setInterval(() => {
@@ -543,8 +523,8 @@ onMounted(() => {
   updateCurrentTime()
   setInterval(updateCurrentTime, 60000) // 每分钟更新一次时间
 
-  // 只在非每页一题模式下初始化计时器
-  if (!Q.settings?.showOnePerPage) {
+  // 只在非封面页且非每页一题模式下初始化计时器
+  if (!isOnCoverPage.value && !Q.settings?.showOnePerPage) {
     initTimer()
   }
 
@@ -599,6 +579,8 @@ const answeredProgress = computed(() => {
   overflow: hidden;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
   border: 8px solid #1a1a1a;
+  background-size: cover;
+  background-position: center;
 
   // 移除原有的 before 伪元素
   &::after {
@@ -646,12 +628,14 @@ const answeredProgress = computed(() => {
 }
 
 .preview-container {
-  height: calc(100% - 84px); // 调整高度以适应顶部进度条
-  padding-top: 0; // 移除顶部padding
-  overflow-y: auto;
-  max-width: 100%;
-  margin: 0;
-  background: var(--bg-primary);
+  position: absolute;
+  padding: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   user-select: none; // 防止拖动时选中文本
 
   &.dragging {
@@ -660,101 +644,74 @@ const answeredProgress = computed(() => {
       cursor: grabbing;
     }
   }
-
-  .main {
-    padding: 16px;
-  }
-
-  .q-item {
-    margin-bottom: 24px;
-    padding: 16px;
-    background: #fff;
-    // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-
-    &.single-page {
-      margin-bottom: 180px;
-    }
-
-    .title {
-      margin-bottom: 16px;
-      font-size: 16px;
-      line-height: 1.5;
-      color: var(--text-primary);
-      display: flex;
-
-      // align-items: center;
-
-      .required {
-        color: #ff4d4f;
-        margin-right: 4px;
-      }
-
-      .number {
-        color: var(--text-secondary);
-        margin-right: 4px;
-      }
-    }
-
-    .content {
-      padding: 0 4px;
-    }
-  }
-
-  .footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    padding: 16px;
-    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
-    text-align: center;
-
-    .ant-btn {
-      min-width: 120px;
-      height: 40px;
-      font-size: 16px;
-      border-radius: 20px;
-    }
-  }
 }
 
-.header {
-  padding: 24px 16px;
-  text-align: center;
-  border-bottom: 1px solid var(--border-light);
-  background: #fff;
+.main {
+  flex-grow: 1;
+  grid-area: main;
+  margin-top: 50px;
+  padding: 40px 24px;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+}
+.q-item {
+  margin-bottom: 50px;
+}
+
+.title {
   margin-bottom: 16px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  display: flex;
+  // align-items: center;
+}
+.required {
+  color: #ff4d4f;
+  margin-right: 4px;
+}
 
-  .cover-image {
-    margin-bottom: 16px;
+.number {
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
 
-    img {
-      max-width: 100%;
-      border-radius: 8px;
-    }
-  }
-
-  .title {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
+.footer {
+  flex-grow: 0;
+  grid-area: footer;
+  width: 100%;
+  background: white;
+  padding: 20px 40px 40px 40px;
+  // margin-bottom: 20px;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+  text-align: center;
 }
 
 .status-bar {
   .time-left {
     font-size: 12px;
-    color: var(--c-brand);
-    background: rgba(0, 0, 0, 0.1);
+    color: var(--c-white);
+    background: var(--c-brand);
     padding: 2px 6px;
     border-radius: 10px;
   }
 }
 
-.footer {
-  .progress-bar {
-    display: none;
+// 添加顶部进度条样式
+.progress-bar {
+  background: white;
+  display: flex;
+  flex-direction: row;
+  // align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+
+  .progress-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-wrap: nowrap;
   }
 }
 
@@ -762,8 +719,6 @@ const answeredProgress = computed(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-
   .nav-button {
     min-width: 100px;
   }
@@ -775,67 +730,55 @@ const answeredProgress = computed(() => {
 }
 
 .cover-page {
-  min-height: calc(100vh - 200px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  padding: 0;
+  margin: 0;
 
-  .header {
-    flex: 1;
+  .cover-image {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: fill;
+    font-size: 0;
+    display: block;
+  }
+
+  .title {
+    position: absolute;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
-    padding: 40px 16px;
-    text-align: center;
-    background: #fff;
+    font-size: 20px;
+    font-weight: 600;
+    // 根据背景图片颜色，设置文字颜色
+    color: #fff;
 
-    .cover-image {
-      margin-bottom: 24px;
-
-      img {
-        max-width: 100%;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      }
+    &.top {
+      top: 10%;
     }
-
-    .title {
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--text-primary);
-      line-height: 1.4;
+    &.bottom {
+      bottom: 10%;
     }
   }
 
   .start-button {
+    position: absolute;
     padding: 24px;
     text-align: center;
-    background: #fff;
-    border-top: 1px solid var(--border-light);
-
-    .ant-btn {
-      height: 48px;
-      padding: 0 32px;
-      font-size: 16px;
-      border-radius: 24px;
-
-      .anticon {
-        font-size: 18px;
-        margin-left: 8px;
-      }
-    }
-  }
-}
-
-// 添加顶部进度条样式
-.top-progress-bar {
-  padding: 12px 16px;
-  background: white;
-  border-bottom: 1px solid var(--border-light);
-
-  .progress-text {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-bottom: 4px;
+    width: 100%;
+    // background: #fff;
+    bottom: 20%;
+    // border-top: 1px solid var(--border-light);
   }
 }
 </style>

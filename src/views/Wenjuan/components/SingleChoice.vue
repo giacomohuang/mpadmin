@@ -91,6 +91,7 @@ function removeOption(index) {
 }
 
 function clickOption(ev, index) {
+  console.log('clickOption', ev, index)
   currentOptionIndex.value = index
   const el = ev.currentTarget
   el.classList.add('focus')
@@ -116,13 +117,13 @@ function clickOption(ev, index) {
   // ev.stopPropagation()
 }
 
-function setTab() {
+watch(currentOptionIndex, () => {
   if (currentOptionIndex.value == -1) {
     tabName.value = 'item'
   } else {
     tabName.value = 'option'
   }
-}
+})
 
 onBeforeMount(() => {
   if (!Q.data[qItemIndex].options) {
@@ -139,7 +140,6 @@ onBeforeMount(() => {
       }
     ]
   }
-  setTab()
 })
 
 onMounted(() => {})

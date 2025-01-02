@@ -5,7 +5,7 @@
       <div class="q-name-wrapper">
         <div class="q-name">
           <!-- <a-tag color="red">已结束</a-tag> -->
-          <span class="text" @click.stop="editQName">{{ Q.name }}</span>
+          <span class="text" @click.stop="editQName">{{ Q.name }}{{ currentVersion }}</span>
           <icon class="icon-edit" name="edit" />
         </div>
         <div class="q-status">
@@ -28,6 +28,17 @@
     <div class="actions">
       <a-button @click="deleteDraft" :disabled="isSaving" v-if="isDraft">删除草稿</a-button>
       <a-button @click="publish" :disabled="isSaving || (isPublish && !isModified)">发布</a-button>
+      <a-dropdown-button v-if="versionList.length > 0">
+        历史版本
+        <template #overlay>
+          <a-menu>
+            <a-menu-item v-for="v in versionList" :key="v.version" @click="getVersion(v.version)">
+              <div v-if="v.version == currentVersion"><mp-tag color="red">当前版本</mp-tag> v{{ v.version }}</div>
+              <div v-else><mp-tag color="gray">历史版本</mp-tag> v{{ v.version }}</div>
+            </a-menu-item>
+          </a-menu>
+        </template>
+      </a-dropdown-button>
     </div>
   </div>
 
@@ -48,7 +59,7 @@
               {{ index + 1 }}.&nbsp;&nbsp;
             </div>
             <XEditer class="text" v-model="Q.data[index].title"></XEditer>
-            <!-- <div class="text">sdfhsdfhskdfgdfghjdgfjhsdfgjksh ghjsdfg jhsdfgjhsd gfjhsg dfjhsgdfjdfhsjdf</div> -->
+            <!-- <div class="text">sdfhsdfhskdfgdfghjdgfjhsdfgjksh ghjsdfg jhsdfgjhsd gfjhsg dfjhsgdfjdfhsjsdf</div> -->
             <div class="opr">
               <a-tooltip title="复制" placement="top"><icon name="copy" class="items" @click="duplicateItem(index)" /></a-tooltip>
               <a-tooltip title="删除" placement="top"><icon name="remove" class="items" @click="removeItem(index)" /></a-tooltip>
@@ -113,7 +124,7 @@ import Preview from './Preview.vue'
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 12)
 import { debounce } from 'lodash-es'
 import { cleanupConditions } from './cleanup'
-import { message } from 'ant-design-vue'
+import { message, Modal } from 'ant-design-vue'
 import dayjs from 'dayjs'
 
 const QTYPES = reactive([
@@ -162,6 +173,9 @@ const savedTime = ref('')
 const qNameInput = ref('')
 const previewModal = ref(false)
 const settingsModal = ref(false)
+const versionList = ref([])
+const currentVersion = ref(null)
+
 provide('Q', Q)
 provide('currentItemIndex', currentItemIndex)
 provide('settingsModal', settingsModal)
@@ -236,12 +250,14 @@ function hasLogic(item) {
   }
 }
 
-async function save(data) {
+async function save(params) {
   // 保存前先清理失效的逻辑选项
   isSaving.value = true
   try {
-    await API.wenjuan.update({ _id: qId.value, ...data })
+    const res = await API.wenjuan.update({ _id: qId.value, ...params })
+    console.log('save', res)
     savedTime.value = dayjs().format('MM-DD HH:mm:ss')
+    return res
   } catch (e) {
     message.error('保存失败')
   } finally {
@@ -249,12 +265,10 @@ async function save(data) {
   }
 }
 
-function publish() {
-  if (isModified.value) {
-    save({ isPublish: true, data: Q.data, name: Q.name, settings: Q.settings, draft: null, isDraft: false })
-  } else {
-    save({ isPublish: true, draft: null, isDraft: false })
-  }
+async function publish() {
+  const res = await save({ isPublish: true, data: Q.data, name: Q.name, version: Q.version, settings: Q.settings, draft: null, isDraft: false })
+  versionList.value = await API.wenjuan.getVersionList(qId.value)
+  currentVersion.value = res.version
   isDraft.value = false
   isPublish.value = true
   isModified.value = false
@@ -267,7 +281,21 @@ function deleteDraft() {
   pageReload()
 }
 
+async function getVersion(version) {
+  Modal.confirm({
+    title: '确定要载入版本' + version + '吗？',
+    onOk: async () => {
+      const res = await API.wenjuan.getVersion(qId.value, version)
+      console.log('getVersion', res)
+      Q.name = res.name
+      Q.data = res.data
+      Q.settings = res.settings
+    }
+  })
+}
+
 const debouncedSave = debounce(async (data) => {
+  delete data.version
   console.log('debouncedSave', qId.value)
   if (!qId.value) return
   if (isDraft.value) {
@@ -298,6 +326,7 @@ onBeforeMount(async () => {
     isLoading.value = true
     try {
       res = await API.wenjuan.get(id)
+      versionList.value = await API.wenjuan.getVersionList(id)
     } catch (e) {
       router.replace('/404?type=wenjuan')
     } finally {
@@ -305,7 +334,6 @@ onBeforeMount(async () => {
     }
   }
   qId.value = res._id
-  console.log('qId', qId.value)
   if (res.draft == null) {
     Q.name = res.name
     Q.data = res.data
@@ -317,6 +345,8 @@ onBeforeMount(async () => {
     Q.settings = res.draft.settings
     isDraft.value = true
   }
+  Q.version = res.version
+  currentVersion.value = res.version
   Q.data = [...Q.data]
   isPublish.value = res.isPublish
   qSettings.value = Q.settings

@@ -4,16 +4,30 @@
       <!-- 手机状态栏 -->
       <div class="status-bar">
         <span class="time">{{ currentTime }}</span>
-        <div class="right-icons">
-          <span v-if="timeLeft && !isOnCoverPage" class="time-left">{{ formatTimeLeft }}</span>
+        <div class="icons">
+          <icon name="cellular" width="19px" />
+          <icon name="wifi" width="17px" />
+          <icon name="battery" width="27px" />
         </div>
       </div>
       <!-- Dynamic Island -->
       <div class="dynamic-island"></div>
       <div class="preview-container" @touchstart="handleTouchStart" @touchend="handleTouchEnd" @mousedown="handleMouseDown" @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseLeave" :class="{ dragging: isDragging }">
+        <span v-if="timeLeft && !isOnCoverPage && !isSubmitted" class="time-left">{{ formatTimeLeft }}</span>
+        <!-- 完成页面 -->
+        <div v-if="isSubmitted" class="complete-page">
+          <div class="complete-content">
+            <div class="complete-icon">
+              <CheckCircleFilled style="font-size: 48px; color: #52c41a" />
+            </div>
+            <div class="complete-message">
+              {{ Q.settings?.submitSuccessMessage || '感谢您的参与！' }}
+            </div>
+          </div>
+        </div>
         <!-- 封面页 -->
-        <div v-if="isOnCoverPage" class="cover-page">
-          <img :src="OSS_PREFIX + Q.settings.coverImage" alt="封面图片" class="cover-image" v-if="Q.settings?.coverImage" />
+        <div v-else-if="isOnCoverPage" class="cover-page">
+          <div style="height: 100%; width: 100%; background-size: cover; background-position: center" :style="{ backgroundImage: `url(${OSS_PREFIX}${Q.settings.coverImage})` }" alt="封面图片" class="cover-image" v-if="Q.settings?.coverImage" />
 
           <div class="title">{{ Q.name }}</div>
           <div class="start-button">
@@ -27,16 +41,16 @@
         <!-- 每页一题模式 -->
         <template v-else-if="Q.settings?.showOnePerPage">
           <div v-if="currentQuestion" class="main" :key="currentQuestion.id" data-simplebar>
-            <!-- 题目标题 -->
-            <div class="title">
-              <span class="required" v-if="currentQuestion.required">*</span>
-              <span class="number" v-if="Q.settings?.showQuestionNumber">{{ getQuestionDisplayIndex(currentQuestion.id) }}. </span>
-              <span class="text" v-html="currentQuestion.title"></span>
+            <div class="q-item">
+              <!-- 题目标题 -->
+              <div class="title">
+                <span class="required" v-if="currentQuestion.required">*</span>
+                <span class="number" v-if="Q.settings?.showQuestionNumber">{{ getQuestionDisplayIndex(currentQuestion.id) }}. </span>
+                <span class="text" v-html="currentQuestion.title"></span>
+              </div>
+              <!-- 题目内容 -->
+              <QuestionContent :item="currentQuestion" />
             </div>
-
-            <!-- 题目内容 -->
-
-            <QuestionContent :item="currentQuestion" />
           </div>
         </template>
 
@@ -59,7 +73,7 @@
         </template>
 
         <!-- 分页导航和提交按钮 -->
-        <div class="footer" :class="{ 'one-per-page': Q.settings?.showOnePerPage }" v-if="!isOnCoverPage">
+        <div class="footer" :class="{ 'one-per-page': Q.settings?.showOnePerPage }" v-if="!isOnCoverPage && !isSubmitted">
           <div class="progress-bar" v-if="Q.settings?.showProgress">
             <div class="progress-text">答题进度</div>
             <a-progress :percent="answeredProgress" size="small" />
@@ -83,7 +97,7 @@
 <script setup>
 import { ref, inject, onMounted, watch, computed, onUnmounted, provide } from 'vue'
 import { message, Image } from 'ant-design-vue'
-import { RightOutlined } from '@ant-design/icons-vue'
+import { RightOutlined, CheckCircleFilled } from '@ant-design/icons-vue'
 import QuestionContent from './components/QuestionContent.vue'
 import 'simplebar'
 import '@/assets/simplebar.css'
@@ -94,6 +108,7 @@ provide('answers', answers) // 提供 answers 给子组件使用
 const submitting = ref(false)
 const currentTime = ref('')
 const OSS_PREFIX = import.meta.env.VITE_UPLOAD_URL_PREFIX
+const isSubmitted = ref(false) // 新增：控制是否显示完成页面
 
 // 分页相关
 const currentPage = ref(-1) // 改为 -1，表示封面页
@@ -468,33 +483,33 @@ onMounted(() => {
   calculateLogic()
 })
 
-// 添加图片预览方法
-const previewImage = (url) => {
-  Image.preview({
-    src: url,
-    maskClosable: true
-  })
-}
-
 // 提交答案
 async function submit() {
   // 检查收集时间
   if (!isInCollectTime.value) {
     message.error('当前不在问卷收集时间范围内')
-    return
+    // return
   }
 
   // 检查提交次数限制
   if (!checkSubmitLimit()) {
     message.error('已超出允许的提交次数限制')
-    return
+    // return
   }
 
   // 验证必答题是否已答
   const visibleQuestions = Q.data.filter((q) => !isHidden(q.id))
   for (let i = 0; i < visibleQuestions.length; i++) {
     const item = visibleQuestions[i]
-    if (item.required && !isQuestionAnswered(item.id)) {
+    if (item.type === 'FillBlank' && item.multiMode) {
+      const blankItems = item.options.filter((opt) => opt.required)
+      for (const blankItem of blankItems) {
+        if (!answers.value[`${item.id}_${blankItem.id}`]) {
+          message.warning(`第${i + 1}题为必答题`)
+          return
+        }
+      }
+    } else if (item.required && !isQuestionAnswered(item.id)) {
       message.warning(`第${i + 1}题为必答题`)
       return
     }
@@ -502,11 +517,9 @@ async function submit() {
 
   try {
     submitting.value = true
-    // TODO: 实际的提交逻辑
-
-    // 显示成功提示语
-    const successMessage = Q.settings?.submitSuccessMessage || '感谢您的参与！'
-    message.success(successMessage)
+    //
+    // 切换到完成页面
+    isSubmitted.value = true
 
     // 如果不允许重复提交，禁用提交按钮
     if (!Q.settings?.allowMultiSubmit) {
@@ -613,17 +626,29 @@ const answeredProgress = computed(() => {
   height: 44px; // 更高的状态栏
   background: transparent;
   display: flex;
+  padding: 15px 26px 0 26px;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
   font-size: 14px;
   color: #000;
   position: relative;
   z-index: 101;
 
-  .right-icons {
+  .time {
+    font-size: 17px;
+    color: black;
+    text-align: center;
+    line-height: 22px;
+    mix-blend-mode: difference;
+  }
+
+  .icons {
+    color: black;
     display: flex;
-    gap: 6px;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    mix-blend-mode: difference;
   }
 }
 
@@ -646,17 +671,37 @@ const answeredProgress = computed(() => {
   }
 }
 
+.time-left {
+  position: absolute;
+  top: 60px;
+  right: 0px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--c-white);
+  background: var(--c-brand);
+  padding: 2px 6px;
+  border-radius: 10px;
+  z-index: 101;
+}
+
 .main {
   flex-grow: 1;
   grid-area: main;
-  margin-top: 50px;
-  padding: 40px 24px;
+  margin-top: 70px;
+  padding: 40px 20px;
   height: 100%;
   width: 100%;
   overflow: auto;
+  // margin-bottom: 50px;
 }
 .q-item {
-  margin-bottom: 50px;
+  // margin: 6px;
+  padding: 20px;
+  border-radius: 10px;
+  background: #ffffff;
+  // box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid #ffffff23;
 }
 
 .title {
@@ -686,16 +731,6 @@ const answeredProgress = computed(() => {
   // margin-bottom: 20px;
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
   text-align: center;
-}
-
-.status-bar {
-  .time-left {
-    font-size: 12px;
-    color: var(--c-white);
-    background: var(--c-brand);
-    padding: 2px 6px;
-    border-radius: 10px;
-  }
 }
 
 // 添加顶部进度条样式
@@ -779,6 +814,35 @@ const answeredProgress = computed(() => {
     // background: #fff;
     bottom: 20%;
     // border-top: 1px solid var(--border-light);
+  }
+}
+
+.complete-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  padding: 20px;
+}
+
+.complete-content {
+  text-align: center;
+
+  .complete-icon {
+    margin-bottom: 24px;
+  }
+
+  .complete-message {
+    font-size: 18px;
+    color: var(--text-primary);
+    line-height: 1.6;
+    max-width: 80%;
+    margin: 0 auto;
   }
 }
 </style>

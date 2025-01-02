@@ -4,9 +4,12 @@
     <div v-if="!item.multiMode" class="fill-blank">
       <a-input v-model:value="answers[item.id]" :placeholder="item.options[0]?.placeholder || '请填写'" :maxLength="item.options[0]?.maxLength || undefined" />
     </div>
-    <div v-else class="multi-blank">
-      <div v-for="(opt, idx) in item.options" :key="opt.id" class="blank-item">
-        <div class="blank-title" v-html="opt.text"></div>
+    <div v-else class="fill-blank">
+      <div v-for="opt in item.options" :key="opt.id" class="blank-item">
+        <div class="blank-title">
+          <span class="required" v-if="opt.required">*</span>
+          <div v-html="opt.text"></div>
+        </div>
         <a-input v-model:value="answers[item.id + '_' + opt.id]" :placeholder="opt.placeholder || '请填写'" :maxLength="opt.maxLength || undefined" />
       </div>
     </div>
@@ -114,23 +117,24 @@ const OSS_PREFIX = import.meta.env.VITE_UPLOAD_URL_PREFIX
 
 <style scoped lang="scss">
 .fill-blank {
-  .ant-input {
-    border-radius: 8px;
-    padding: 8px 12px;
-
-    &:hover,
-    &:focus {
-      border-color: var(--c-brand);
-    }
+  .required {
+    display: flex;
+    color: red;
+    margin-right: 4px;
   }
 
   .blank-item {
     margin-bottom: 16px;
 
     .blank-title {
+      display: flex;
+      flex-direction: row;
       margin-bottom: 8px;
       color: var(--text-secondary);
     }
+  }
+  .blank-input {
+    flex-grow: 1;
   }
 }
 
@@ -150,12 +154,6 @@ const OSS_PREFIX = import.meta.env.VITE_UPLOAD_URL_PREFIX
   :deep(.ant-radio-wrapper),
   :deep(.ant-checkbox-wrapper) {
     font-size: 15px;
-  }
-
-  :deep(.ant-input) {
-    margin-top: 8px;
-    margin-left: 24px;
-    border-radius: 6px;
   }
 }
 

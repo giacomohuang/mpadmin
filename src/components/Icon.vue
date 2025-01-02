@@ -1,5 +1,5 @@
 <template>
-  <svg class="iconfont" :style="{ height: size, width: size }">
+  <svg class="iconfont" :style="[size ? { height: size, width: size } : {}, height ? { height: height } : {}, width ? { width: width } : {}]">
     <use :href="symbolId" />
   </svg>
 </template>
@@ -21,6 +21,14 @@ export default defineComponent({
     size: {
       type: String,
       default: '1.5em'
+    },
+    height: {
+      type: String,
+      default: ''
+    },
+    width: {
+      type: String,
+      default: ''
     }
   },
   setup(props) {

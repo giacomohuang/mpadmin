@@ -1,6 +1,6 @@
 <template>
   <VueDraggable v-model="Q.data[qItemIndex].options" tag="ul" handle=".q-handle" class="options" ghostClass="ghost-opt">
-    <li v-for="(item, index) in Q.data[qItemIndex].options" :id="item.id" :key="item.id" class="item" @click="clickOption($event, index)">
+    <li v-for="(item, index) in Q.data[qItemIndex].options" :id="item.id" :key="item.id" class="item" @click.stop="clickOption($event, index)">
       <icon name="handle" class="q-handle" />
       <span class="checkbox"></span>
       <XEditer class="text" :class="{ fillbox: item.fill?.show }" v-model="item.text" :autofocus="index == autoFocusIndex ? true : false"></XEditer>
@@ -88,11 +88,6 @@ const maxRangeArray = computed(() => {
   return arr
 })
 
-watch(currentOptionIndex, () => {
-  // console.log('currentOptionIndex', currentOptionIndex.value)
-  setTab()
-})
-
 function addOption() {
   Q.data[qItemIndex].options.push({
     text: '选项' + (Q.data[qItemIndex].options.length + 1),
@@ -120,18 +115,18 @@ function removeOption(index) {
 }
 
 function clickOption(ev, index) {
+  console.log('clickOption', ev, index)
   currentOptionIndex.value = index
   const el = ev.currentTarget
   el.classList.add('focus')
   document.addEventListener('mouseup', clickOutSide)
 
   function clickOutSide(event) {
+    event.stopPropagation()
     const targetEl = event.target
     const settingsWrapBox = document.getElementById('__WENJUAN_SETTINGS').getBoundingClientRect()
     const inside = event.clientX > settingsWrapBox.left && event.clientX < settingsWrapBox.right && event.clientY > settingsWrapBox.top && event.clientY < settingsWrapBox.bottom
-
     if (inside || el.contains(targetEl)) {
-      console.log('inside', inside)
       return
     } else {
       callback(el)
@@ -139,7 +134,6 @@ function clickOption(ev, index) {
   }
 
   function callback(element) {
-    console.log('callback', element)
     element.classList.remove('focus')
     document.removeEventListener('mouseup', clickOutSide)
     currentOptionIndex.value = -1
@@ -147,19 +141,29 @@ function clickOption(ev, index) {
   // ev.stopPropagation()
 }
 
-function setTab() {
+watch(currentOptionIndex, () => {
   if (currentOptionIndex.value == -1) {
     tabName.value = 'item'
   } else {
     tabName.value = 'option'
   }
-}
+})
 
 onBeforeMount(() => {
   if (!Q.data[qItemIndex].options) {
-    Q.data[qItemIndex].options = [{ text: '选项1', id: nanoid(), fill: { show: false, length: null, type: 'text', required: false } }]
+    Q.data[qItemIndex].options = [
+      {
+        text: '选项1',
+        id: nanoid(),
+        fill: {
+          show: false,
+          length: null,
+          type: 'text',
+          required: false
+        }
+      }
+    ]
   }
-  setTab()
 })
 
 onMounted(() => {})

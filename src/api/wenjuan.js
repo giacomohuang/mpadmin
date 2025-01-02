@@ -36,6 +36,22 @@ const wenjuan = {
       data: JSON.stringify(ids),
       url: '/wenjuan/remove'
     })
+  },
+  getVersion(id, version) {
+    return fetch({
+      baseURL: baseUrl.wenjuan,
+      method: 'post',
+      data: { id: id, version: version },
+      url: '/wenjuan/getVersion'
+    })
+  },
+  getVersionList(id) {
+    return fetch({
+      baseURL: baseUrl.wenjuan,
+      method: 'post',
+      data: { id: id },
+      url: '/wenjuan/getVersionList'
+    })
   }
 }
 export default wenjuan

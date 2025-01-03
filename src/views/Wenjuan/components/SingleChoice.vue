@@ -140,6 +140,7 @@ onBeforeMount(() => {
       }
     ]
   }
+  tabName.value = 'item'
 })
 
 onMounted(() => {})

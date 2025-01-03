@@ -10,7 +10,7 @@
         </div>
         <div class="q-status">
           <div class="tag small gray">自动保存: {{ savedTime }}</div>
-          <div class="tag small blue" v-if="isDraft">草稿模式</div>
+          <div class="tag small blue" v-if="isDraft">草稿</div>
           <div class="loading" :class="isSaving ? 'show' : 'hide'" />
         </div>
       </div>
@@ -27,18 +27,19 @@
     </div>
     <div class="actions">
       <a-button @click="deleteDraft" :disabled="isSaving" v-if="isDraft">删除草稿</a-button>
-      <a-button @click="publish" :disabled="isSaving || (isPublish && !isModified)">发布</a-button>
-      <a-dropdown-button v-if="versionList.length > 0">
-        历史版本
-        <template #overlay>
-          <a-menu>
-            <a-menu-item v-for="v in versionList" :key="v.version" @click="getVersion(v.version)">
-              <div v-if="v.version == currentVersion"><mp-tag color="red">当前版本</mp-tag> v{{ v.version }}</div>
-              <div v-else><mp-tag color="gray">历史版本</mp-tag> v{{ v.version }}</div>
-            </a-menu-item>
-          </a-menu>
+      <a-button @click="publish" :disabled="isSaving || (isPublish && !isDraft)">发布</a-button>
+      <a-select :dropdown-match-select-width="false" v-if="versionList.list.length > 0" v-model:value="versionList.selectedVersion" placement="bottomRight" :fieldNames="{ label: 'name', value: 'version' }" :disabled="isSaving" :options="versionList.list" @change="getVersion(versionList.selectedVersion)">
+        <template #option="{ version, name }">
+          <div class="version-name" :class="version == currentVersion ? 'current' : ''">
+            {{ name }}
+          </div>
         </template>
-      </a-dropdown-button>
+        <template #dropdownRender="{ menuNode: menu }">
+          <v-nodes :vnodes="menu" />
+          <a-pagination style="margin: 10px 0" hideOnSinglePage v-model:current="versionList.page" :total="versionList.total" :page-size="versionList.limit" @change="getVersionList" size="small" />
+        </template>
+        <template #tagRender="{ value }"> 版本: {{ value }} </template>
+      </a-select>
     </div>
   </div>
 
@@ -110,7 +111,7 @@
 </router>
 
 <script setup>
-import { provide, ref, reactive, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent, watch, onMounted, inject, computed } from 'vue'
+import { provide, ref, reactive, nextTick, onBeforeMount, onBeforeUnmount, defineAsyncComponent, watch, onMounted, inject, defineComponent } from 'vue'
 import XEditer from '@/components/XEditer.vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import 'simplebar'
@@ -126,6 +127,18 @@ import { debounce } from 'lodash-es'
 import { cleanupConditions } from './cleanup'
 import { message, Modal } from 'ant-design-vue'
 import dayjs from 'dayjs'
+
+const VNodes = defineComponent({
+  props: {
+    vnodes: {
+      type: Object,
+      required: true
+    }
+  },
+  render() {
+    return this.vnodes
+  }
+})
 
 const QTYPES = reactive([
   { id: '0', title: '填空题', type: 'FillBlank' },
@@ -160,10 +173,8 @@ const pageReload = inject('pageReload')
 const isPublish = ref(false)
 const isSaving = ref(false)
 const isLoading = ref(true)
-// 是否是草稿
-const isDraft = ref(false)
 // 是否是修改状态
-const isModified = ref(false)
+const isDraft = ref(false)
 const qSettings = ref(null)
 const logicDrawer = ref(false)
 const showLogicContent = ref(false)
@@ -173,8 +184,16 @@ const savedTime = ref('')
 const qNameInput = ref('')
 const previewModal = ref(false)
 const settingsModal = ref(false)
-const versionList = ref([])
 const currentVersion = ref(null)
+
+const versionList = reactive({
+  list: [],
+  total: 0,
+  pages: 0,
+  page: 1,
+  limit: 10,
+  selectedVersion: null
+})
 
 provide('Q', Q)
 provide('currentItemIndex', currentItemIndex)
@@ -265,19 +284,31 @@ async function save(params) {
   }
 }
 
+async function getVersionList() {
+  const vList = await API.wenjuan.getVersionList(qId.value, versionList.page, versionList.limit)
+  versionList.list = vList.list
+  versionList.total = vList.total
+  versionList.pages = vList.pages
+  versionList.page = vList.page
+  versionList.list = versionList.list.map((item) => {
+    item.name = '版本' + item.version
+    return item
+  })
+  console.log('getVersionList', versionList)
+}
+
 async function publish() {
-  const res = await save({ isPublish: true, data: Q.data, name: Q.name, version: Q.version, settings: Q.settings, draft: null, isDraft: false })
-  versionList.value = await API.wenjuan.getVersionList(qId.value)
+  const res = await save({ isPublish: true, data: Q.data, name: Q.name, settings: Q.settings, draft: null })
+  await getVersionList()
   currentVersion.value = res.version
-  isDraft.value = false
+  versionList.selectedVersion = res.version
   isPublish.value = true
-  isModified.value = false
+  isDraft.value = false
 }
 
 function deleteDraft() {
-  save({ draft: null, isDraft: false })
+  save({ draft: null })
   isDraft.value = false
-  isModified.value = false
   pageReload()
 }
 
@@ -294,25 +325,20 @@ async function getVersion(version) {
   })
 }
 
-const debouncedSave = debounce(async (data) => {
-  delete data.version
-  console.log('debouncedSave', qId.value)
+// 自动保存草稿
+const saveDraft = debounce(async (data) => {
+  // delete data.version
+  console.log('saveDraft', qId.value)
   if (!qId.value) return
-  if (isDraft.value) {
-    save({ draft: data, isDraft: true })
-  } else {
-    save({ ...data, isDraft: false })
-  }
+  save({ draft: { name: data.name, data: data.data, settings: data.settings } })
 }, 1000)
-
-// let zzz = null
 
 onBeforeMount(async () => {
   const id = router.currentRoute.value.params.id
   let t = {}
   let res = {}
   if (!id) {
-    t = { _id: null, isPublish: false, name: '未命名问卷', settings: {}, draft: null, data: [], isDraft: false }
+    t = { _id: null, isPublish: false, name: '未命名问卷', settings: {}, draft: null, data: [] }
     isLoading.value = true
     try {
       res = await API.wenjuan.update(t) // console.res
@@ -326,7 +352,6 @@ onBeforeMount(async () => {
     isLoading.value = true
     try {
       res = await API.wenjuan.get(id)
-      versionList.value = await API.wenjuan.getVersionList(id)
     } catch (e) {
       router.replace('/404?type=wenjuan')
     } finally {
@@ -334,19 +359,21 @@ onBeforeMount(async () => {
     }
   }
   qId.value = res._id
-  if (res.draft == null) {
-    Q.name = res.name
-    Q.data = res.data
-    Q.settings = res.settings
-    isDraft.value = false
-  } else {
+  if (res.draft) {
     Q.name = res.draft.name
     Q.data = res.draft.data
     Q.settings = res.draft.settings
     isDraft.value = true
+  } else {
+    Q.name = res.name
+    Q.data = res.data
+    Q.settings = res.settings
+    isDraft.value = false
   }
   Q.version = res.version
   currentVersion.value = res.version
+  versionList.selectedVersion = res.version
+  await getVersionList()
   Q.data = [...Q.data]
   isPublish.value = res.isPublish
   qSettings.value = Q.settings
@@ -361,11 +388,10 @@ onBeforeMount(async () => {
       // console.log('zzz', JSON.stringify(zzz) === JSON.stringify(newValue))
       // zzz = newValue
       console.log('NEW !!!! Q changeed')
-      if (!isModified.value && isPublish.value) {
+      if (!isDraft.value && isPublish.value) {
         message.info({ content: '切换为草稿模式，修改不会影响正在收集的数据。点击"重新发布"应用修改。', key: 'Q_CHANGED' })
       }
-      debouncedSave(newValue)
-      isModified.value = true
+      saveDraft(newValue)
       isDraft.value = true
     },
     { deep: true, immediate: false }
@@ -461,7 +487,28 @@ function closeLogicDrawer() {
   .actions {
     margin-right: 6px;
     display: flex;
+    align-items: center;
     gap: 5px;
+  }
+}
+.version-name {
+  display: flex;
+  align-items: center;
+  // justify-content: flex-;
+  // justify-content: flex-end;
+  &::before {
+    display: inline-block;
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c-gray-200);
+    margin-right: 8px;
+  }
+  &.current {
+    &::before {
+      background: var(--c-green);
+    }
   }
 }
 

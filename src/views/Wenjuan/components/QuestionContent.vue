@@ -117,6 +117,8 @@ const OSS_PREFIX = import.meta.env.VITE_UPLOAD_URL_PREFIX
 
 <style scoped lang="scss">
 .fill-blank {
+  text-wrap: wrap;
+  word-break: break-all;
   .required {
     display: flex;
     color: red;
@@ -141,6 +143,7 @@ const OSS_PREFIX = import.meta.env.VITE_UPLOAD_URL_PREFIX
 .radio-item,
 .checkbox-item {
   text-wrap: wrap;
+  word-break: break-all;
   padding: 8px 12px;
   border-radius: 8px;
   transition: all 0.3s ease;
@@ -161,6 +164,8 @@ const OSS_PREFIX = import.meta.env.VITE_UPLOAD_URL_PREFIX
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 16px;
+  text-wrap: wrap;
+  word-break: break-all;
 
   :deep(.ant-radio-group) {
     display: contents;

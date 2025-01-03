@@ -45,11 +45,11 @@ const wenjuan = {
       url: '/wenjuan/getVersion'
     })
   },
-  getVersionList(id) {
+  getVersionList(id, page, limit) {
     return fetch({
       baseURL: baseUrl.wenjuan,
       method: 'post',
-      data: { id: id },
+      data: { id: id, page: page, limit: limit },
       url: '/wenjuan/getVersionList'
     })
   }

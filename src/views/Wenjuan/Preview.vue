@@ -57,7 +57,7 @@
         <!-- 普通模式 -->
         <template v-else>
           <div class="main" data-simplebar>
-            <div v-for="item in Q.data" :key="item.id" v-show="!isHidden(item.id)" class="q-item">
+            <div v-for="item in Q.data" :key="item.id" v-show="!isHidden(item.id)" class="q-item gap">
               <!-- 题目标题 -->
               <div class="title">
                 <span class="required" v-if="item.required">*</span>
@@ -698,13 +698,18 @@ const answeredProgress = computed(() => {
   // margin: 6px;
   padding: 20px;
   border-radius: 10px;
-  background: #ffffff;
+  background: #00000050;
   // box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
-  border: 1px solid #ffffff23;
+  // border: 1px solid #ffffff70;
+  &.gap {
+    margin-bottom: 20px;
+  }
 }
 
 .title {
+  text-wrap: wrap;
+  word-break: break-all;
   margin-bottom: 16px;
   font-size: 16px;
   line-height: 1.5;

@@ -13,7 +13,7 @@
         <icon name="handle" class="q-handle" />
         <div class="required" v-if="item.required">*</div>
         <div class="content">
-          <XEditer class="text" v-model="item.title" :autofocus="index == autoFocusIndex ? true : false"></XEditer>
+          <XEditer class="text" v-model="item.text" :autofocus="index == autoFocusIndex ? true : false"></XEditer>
           <div class="user-blank">
             {{ item.placeholder || '用户填写内容' }}
           </div>
@@ -146,6 +146,7 @@ function removeBlank(index) {
 }
 
 watch(currentBlankIndex, () => {
+  console.log('watch', currentBlankIndex.value)
   setTab()
 })
 
@@ -155,6 +156,7 @@ function setTab() {
   } else {
     tabName.value = 'blank'
   }
+  console.log('setTab', currentBlankIndex.value, tabName.value)
 }
 
 function clickBlank(ev, index) {

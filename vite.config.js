@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
-import { obfuscator } from './plugins/obfuscator/index'
+import obfuscatorPlugin from 'vite-plugin-javascript-obfuscator'
 import Components from 'unplugin-vue-components/vite'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
 import routesGeneratorPlugin from './plugins/routes-generator'
@@ -10,6 +10,7 @@ import svgSpritePlugin from './plugins/svg-sprite'
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/',
+  sourceMap: true,
   build: {
     rollupOptions: {
       output: {
@@ -36,7 +37,7 @@ export default defineConfig({
   },
   plugins: [
     vue(),
-    routesGeneratorPlugin({ layoutDir: path.resolve(process.cwd(), '/src/views/Layout.vue') }),
+    routesGeneratorPlugin({ layoutDir: path.resolve(process.cwd(), './src/views/Layout.vue') }),
     svgSpritePlugin(),
     Components({
       resolvers: [
@@ -44,31 +45,35 @@ export default defineConfig({
           importStyle: false // css in js
         })
       ]
-    }),
-    obfuscator({
-      compact: true,
-      controlFlowFlattening: true,
-      controlFlowFlatteningThreshold: 0.75,
-      deadCodeInjection: true,
-      deadCodeInjectionThreshold: 0.4,
-      debugProtection: false,
-      debugProtectionInterval: 0,
-      disableConsoleOutput: true,
-      identifierNamesGenerator: 'hexadecimal',
-      log: false,
-      renameGlobals: false,
-      rotateStringArray: true,
-      selfDefending: true,
-      shuffleStringArray: true,
-      splitStrings: true,
-      splitStringsChunkLength: 10,
-      stringArray: true,
-      stringArrayEncoding: ['rc4'],
-      stringArrayThreshold: 1,
-      transformObjectKeys: true,
-      unicodeEscapeSequence: false,
-      ignoreImports: true
     })
+    // obfuscatorPlugin({
+    //   enable: true,
+    //   options: {
+    //     compact: true,
+    //     controlFlowFlattening: true,
+    //     controlFlowFlatteningThreshold: 0.75,
+    //     deadCodeInjection: true,
+    //     deadCodeInjectionThreshold: 0.4,
+    //     debugProtection: false,
+    //     debugProtectionInterval: 0,
+    //     disableConsoleOutput: true,
+    //     identifierNamesGenerator: 'hexadecimal',
+    //     log: false,
+    //     renameGlobals: false,
+    //     rotateStringArray: true,
+    //     selfDefending: true,
+    //     shuffleStringArray: true,
+    //     splitStrings: true,
+    //     splitStringsChunkLength: 10,
+    //     stringArray: true,
+    //     stringArrayEncoding: ['rc4'],
+    //     stringArrayThreshold: 1,
+    //     sourceMap: false,
+    //     transformObjectKeys: true,
+    //     unicodeEscapeSequence: false,
+    //     ignoreImports: true
+    //   }
+    // })
   ],
   resolve: {
     alias: {

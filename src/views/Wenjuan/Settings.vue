@@ -107,29 +107,29 @@ const settingsModal = inject('settingsModal')
 // 表单数据
 const formState = reactive({
   // 基础设置
-  title: Q.settings.title || '',
-  description: Q.settings.description || '',
-  status: Q.settings.status || true,
-  tags: Q.settings.tags || [],
-  timeLimit: Q.settings.timeLimit || 0,
-  submitLimitType: Q.settings.submitLimitType || 'none',
-  submitLimitCount: Q.settings.submitLimitCount || 1,
-  collectTime: [dayjs(Q.settings?.collectTime?.[0]), dayjs(Q.settings?.collectTime?.[1])] || [],
+  description: Q.settings?.description ?? '',
+  status: Q.settings?.status ?? true,
+  tags: Q.settings?.tags ?? [],
+  timeLimit: Q.settings?.timeLimit ?? 0,
+  submitLimitType: Q.settings?.submitLimitType ?? 'none',
+  submitLimitCount: Q.settings?.submitLimitCount ?? 1,
+  collectTime: Q.settings?.collectTime ? [dayjs(Q.settings?.collectTime?.[0]), dayjs(Q.settings?.collectTime?.[1])] : [],
   // 外观和封面设置
-  coverImage: Q.settings.coverImage || '',
-  backgroundImage: Q.settings.backgroundImage || '',
-  themeColorMode: Q.settings.themeColorMode || 'custom',
-  themeColor: Q.settings.themeColor || { mode: 'solid', color: { r: 24, g: 144, b: 255, a: 1 } },
+  coverImage: Q.settings?.coverImage ?? '',
+  backgroundImage: Q.settings?.backgroundImage ?? '',
+  themeColorMode: Q.settings?.themeColorMode ?? 'custom',
+  themeColor: Q.settings?.themeColor ?? '#0090ff',
   // 显示设置
-  showProgress: Q.settings.showProgress || true,
-  showQuestionNumber: Q.settings.showQuestionNumber || true,
-  showOnePerPage: Q.settings.showOnePerPage || false,
-  questionsPerPage: Q.settings.questionsPerPage || 5,
+  showProgress: Q.settings?.showProgress ?? true,
+  showQuestionNumber: Q.settings?.showQuestionNumber ?? true,
+  showOnePerPage: Q.settings?.showOnePerPage ?? false,
+  questionsPerPage: Q.settings?.questionsPerPage ?? 5,
 
   // 提交设置
-  allowMultiSubmit: Q.settings.allowMultiSubmit || false,
-  submitSuccessMessage: Q.settings.submitSuccessMessage || '感谢您的参与！'
+  allowMultiSubmit: Q.settings?.allowMultiSubmit ?? false,
+  submitSuccessMessage: Q.settings?.submitSuccessMessage ?? '感谢您的参与！'
 })
+console.log(formState.collectTime)
 
 // 初始化数据
 onMounted(() => {})
